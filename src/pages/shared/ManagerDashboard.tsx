@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react"
+import { apiLaporan, getToken, LaporanKeuangan } from "../../api"
+import { BarChart } from "../../components/common/BarChart"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, PageTitle } from "../../components/common/UI"
+import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
 
 export function ManagerDashboard({
@@ -13,12 +17,52 @@ export function ManagerDashboard({
 } = {}) {
   const nav = onNavigate ?? navigate ?? (() => {})
   const firstName = user?.name ? user.name.split(" ")[0] : "Dian"
+  const [hari, setHari] = useState<LaporanKeuangan | null>(null)
+  const [minggu, setMinggu] = useState<LaporanKeuangan | null>(null)
+  const [liveError, setLiveError] = useState("")
+  const [today] = useState(() => {
+    const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    const now = new Date()
+    const awal = new Date(now)
+    awal.setDate(now.getDate() - 6)
+    return { hariIni: iso(now), awalMinggu: iso(awal), label: now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) }
+  })
+
+  useEffect(() => {
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    Promise.all([
+      apiLaporan.keuangan({ dari: today.hariIni, sampai: today.hariIni }),
+      apiLaporan.keuangan({ dari: today.awalMinggu, sampai: today.hariIni }),
+    ])
+      .then(([a, b]) => {
+        setHari(a)
+        setMinggu(b)
+      })
+      .catch((e) => {
+        console.error("Gagal memuat beranda:", e)
+        setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+      })
+  }, [])
+
+  if (Boolean(getToken()) && !hari && !liveError) {
+    return (
+      <div className="content">
+        <p>Memuat beranda...</p>
+      </div>
+    )
+  }
+  const d = hari
+  const kapsterAktif = d?.perKapster.length ?? 0
 
   return (
     <div className="content">
+      <DemoNotice live={Boolean(hari)} error={liveError} />
       <PageTitle
-        eyebrow="Rabu, 29 Oktober 2026 · Operasional"
-        title={`Selamat pagi, ${firstName}.`}
+        eyebrow={`${today.label} · Operasional`}
+        title={`Selamat datang, ${firstName}.`}
         action={
           <div className="page-actions">
             <Button
@@ -41,22 +85,22 @@ export function ManagerDashboard({
           icon="cash"
           label="Pemasukan"
           tone="sage"
-          value="Rp 2.450.000"
-          detail="Tunai Rp 1.150.000 · QRIS Rp 1.300.000"
+          value={d ? rupiah(d.pemasukan) : "Rp 2.450.000"}
+          detail={d ? `Tunai ${rupiah(d.tunai)} · QRIS ${rupiah(d.qris)}` : "Data demo"}
         />
         <Kpi
           icon="expense"
           label="Pengeluaran"
           tone="amber"
-          value="Rp 320.000"
+          value={d ? rupiah(d.pengeluaran) : "Rp 320.000"}
           detail="Operasional harian"
         />
         <Kpi
           icon="people"
           label="Komisi Kapster"
           tone="brass"
-          value="Rp 980.000"
-          detail="3 kapster bertugas hari ini"
+          value={d ? rupiah(d.komisi) : "Rp 980.000"}
+          detail={d ? `${kapsterAktif} kapster melayani hari ini` : "Data demo"}
         />
         <Kpi
           icon="check"
@@ -74,26 +118,22 @@ export function ManagerDashboard({
             <div>
               <i className="dot sage-dot" />
               <span>
-                Tunai: <strong>Rp 1.150.000</strong>
+                Tunai: <strong>{d ? rupiah(d.tunai) : "Rp 1.150.000"}</strong>
               </span>
             </div>
             <div>
               <i className="dot amber-dot" />
               <span>
-                QRIS: <strong>Rp 1.300.000</strong>
+                QRIS: <strong>{d ? rupiah(d.qris) : "Rp 1.300.000"}</strong>
               </span>
             </div>
           </div>
-          <div className="bar-chart">
-            {[45, 60, 52, 70, 85, 65, 78].map((h, i) => (
-              <div key={i} className="bar-col">
-                <div className="bar-fill" style={{ height: `${h}%` }} />
-                <small>
-                  {["Kam", "Jum", "Sab", "Min", "Sen", "Sel", "Rab"][i]}
-                </small>
-              </div>
-            ))}
-          </div>
+          <BarChart
+            data={(minggu?.perHari ?? []).map((h) => ({
+              label: new Date(h.tanggal + "T12:00:00").toLocaleDateString("id-ID", { weekday: "short" }),
+              value: h.total,
+            }))}
+          />
         </section>
 
         <section className="panel staff-duty-panel">

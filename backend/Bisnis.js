@@ -81,7 +81,9 @@ var AKSES = {
   "simpan-layanan":      ["Owner", "Manajer"],
   "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
   "laporan-keuangan":    ["Owner", "Manajer"],
-  "laporan-produk":      ["Owner", "Manajer"]
+  "laporan-produk":      ["Owner", "Manajer"],
+  "backup-buat":         ["Owner"],
+  "backup-list":         ["Owner"]
 };
 
 
@@ -164,6 +166,8 @@ function routeBisnis(action, body) {
       case "simpan-layanan":       return simpanLayanan_(body, user);
       case "laporan-keuangan":     return laporanKeuangan_(body);
       case "laporan-produk":       return laporanProduk_(body);
+      case "backup-buat":          return backupBuat_(user);
+      case "backup-list":          return ok_(backupList_());
     }
   } finally {
     lock.releaseLock();
@@ -732,6 +736,63 @@ function laporanProduk_(body) {
   });
   rows.sort(function (a, b) { return b.waktu - a.waktu; });
   return ok_(rows);
+}
+
+// ============================================================
+// BACKUP - salinan sheet bisnis di dalam spreadsheet yang sama (sheet tersembunyi "BAK_...").
+// Sengaja tanpa DriveApp: scope Drive baru memaksa otorisasi ulang dan bisa membuat seluruh web app gagal.
+// Melindungi dari salah edit/hapus lewat aplikasi; BUKAN pengganti salinan file di Drive.
+// Pemulihan dilakukan manual (salin isi sheet BAK_ kembali) agar tidak menimpa data tanpa pengawasan.
+// ============================================================
+var BACKUP_SHEETS = ["Layanan", "Produk", "Transaksi", "TransaksiItem", "Pengeluaran", "StokMutasi", "ProdukLog", "Pengaturan", "KomisiKapster"];
+var BACKUP_SIMPAN = 5; // jumlah backup terakhir yang dipertahankan
+
+function backupBuat_(user) {
+  var ss = getSpreadsheet();
+  var stamp = fmtTanggal_(new Date(), "yyyyMMdd_HHmm");
+  var baris = 0;
+  BACKUP_SHEETS.forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (!sh) return;
+    baris += Math.max(sh.getLastRow() - 1, 0);
+    var salinan = sh.copyTo(ss).setName("BAK_" + stamp + "_" + name);
+    salinan.hideSheet();
+  });
+  // Hapus backup lama di luar batas simpan
+  var stamps = backupStamps_();
+  stamps.slice(BACKUP_SIMPAN).forEach(function (st) {
+    ss.getSheets().forEach(function (sh) {
+      if (sh.getName().indexOf("BAK_" + st + "_") === 0) ss.deleteSheet(sh);
+    });
+  });
+  writeAuditLog(user.id, user.nama, "BACKUP", "BAK_" + stamp + " · " + baris + " baris");
+  return ok_({ nama: "BAK_" + stamp });
+}
+
+/** Stempel waktu backup yang ada, terbaru dulu. */
+function backupStamps_() {
+  var set = {};
+  getSpreadsheet().getSheets().forEach(function (sh) {
+    var m = /^BAK_(\d{8}_\d{4})_/.exec(sh.getName());
+    if (m) set[m[1]] = true;
+  });
+  return Object.keys(set).sort().reverse();
+}
+
+function backupList_() {
+  var ss = getSpreadsheet();
+  return backupStamps_().map(function (st) {
+    var baris = 0, sheets = 0;
+    ss.getSheets().forEach(function (sh) {
+      if (sh.getName().indexOf("BAK_" + st + "_") === 0) { sheets++; baris += Math.max(sh.getLastRow() - 1, 0); }
+    });
+    var p = /^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})$/.exec(st);
+    return {
+      nama: "BAK_" + st,
+      dibuat: p[3] + "/" + p[2] + "/" + p[1] + " · " + p[4] + "." + p[5],
+      sheet: sheets, baris: baris
+    };
+  });
 }
 
 function cariTransaksi_(id) {

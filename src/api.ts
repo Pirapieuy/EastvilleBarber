@@ -238,3 +238,8 @@ export const apiLaporan = {
   produk: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("laporan-produk", range),
 }
+
+export const apiBackup = {
+  list: () => api<{ nama: string; dibuat: string; sheet: number; baris: number }[]>("backup-list"),
+  buat: () => api<{ nama: string }>("backup-buat"),
+}

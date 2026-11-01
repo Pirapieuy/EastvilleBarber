@@ -1,18 +1,72 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { apiBackup, getToken } from "../../api"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle } from "../../components/common/UI"
 
-export function BackupPage() {
-  const [backingUp, setBackingUp] = useState(false)
-  const [restore, setRestore] = useState<0 | 1 | 2>(0)
+interface BackupRow {
+  nama: string
+  dibuat: string
+  sheet: number
+  baris: number
+}
 
-  function startBackup() {
-    setBackingUp(true)
-    window.setTimeout(() => setBackingUp(false), 1600)
+const demoBackups: BackupRow[] = [
+  { nama: "BAK_20261029_0200", dibuat: "29/10/2026 · 02.00", sheet: 9, baris: 480 },
+]
+
+export function BackupPage() {
+  const [backups, setBackups] = useState<BackupRow[]>(demoBackups)
+  const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
+  const [backingUp, setBackingUp] = useState(false)
+  const [message, setMessage] = useState("")
+
+  function loadLive() {
+    return apiBackup.list().then((rows) => {
+      setBackups(rows)
+      setLive(true)
+    })
   }
+  useEffect(() => {
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    loadLive().catch((e) => {
+      console.error("Gagal memuat daftar backup:", e)
+      setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+    })
+  }, [])
+
+  async function startBackup() {
+    setMessage("")
+    if (!live) return setMessage("Mode demo: backup tidak dibuat.")
+    setBackingUp(true)
+    try {
+      const res = await apiBackup.buat()
+      await loadLive()
+      setMessage(`Backup ${res.nama} berhasil dibuat.`)
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Backup gagal.")
+    } finally {
+      setBackingUp(false)
+    }
+  }
+
+  if (Boolean(getToken()) && !live && !liveError) {
+    return (
+      <div className="content">
+        <p>Memuat backup...</p>
+      </div>
+    )
+  }
+
+  const terakhir = backups[0]
 
   return (
     <div className="content">
+      <DemoNotice live={live} error={liveError} />
       <PageTitle eyebrow="Keamanan data" title="Backup" />
       <section className="backup-status-grid">
         <article className="backup-hero">
@@ -20,31 +74,32 @@ export function BackupPage() {
             <Icon name="restore" />
           </span>
           <div>
-            <small>Status backup otomatis</small>
-            <h2>Aktif · tiap 2 minggu</h2>
-            <p>Backup berikutnya dijadwalkan 12 Nov 2026.</p>
+            <small>Cara kerja</small>
+            <h2>Backup manual</h2>
+            <p>Disimpan sebagai sheet tersembunyi di spreadsheet yang sama; 5 backup terakhir dipertahankan.</p>
           </div>
-          <i className="chip lunas">Terjadwal</i>
         </article>
         <article className="panel last-backup">
           <small>Backup terakhir</small>
-          <strong>29 Okt 2026 · 02.00</strong>
-          <span>
-            <Icon name="check" /> Berhasil diverifikasi
-          </span>
+          <strong>{terakhir ? terakhir.dibuat : "Belum ada"}</strong>
+          {terakhir && (
+            <span>
+              <Icon name="check" /> {terakhir.sheet} sheet · {terakhir.baris} baris
+            </span>
+          )}
         </article>
       </section>
       <section className="panel backup-actions-card">
         <div>
           <p className="eyebrow">Backup manual</p>
           <h2>Buat salinan terbaru</h2>
-          <p>Simpan salinan seluruh Sheet dan pengaturan aplikasi sekarang.</p>
+          <p>
+            Menyalin data layanan, produk, transaksi, pengeluaran, stok, dan pengaturan komisi. Data akun
+            tidak ikut.
+          </p>
+          {message && <small>{message}</small>}
         </div>
-        <Button
-          className="primary-button"
-          onClick={startBackup}
-          disabled={backingUp}
-        >
+        <Button className="primary-button" onClick={startBackup} disabled={backingUp}>
           <Icon name={backingUp ? "clock" : "plus"} />
           {backingUp ? "Membuat backup..." : "Backup sekarang"}
         </Button>
@@ -54,70 +109,33 @@ export function BackupPage() {
         <div className="backup-head">
           <span>Nama backup</span>
           <span>Dibuat</span>
-          <span>Ukuran</span>
+          <span>Isi</span>
           <span>Status</span>
-          <span>Aksi</span>
+          <span />
         </div>
-        {[
-          ["BarberBoss_2026-10-29", "29 Okt 2026 · 02.00", "4,8 MB"],
-          ["BarberBoss_2026-10-15", "15 Okt 2026 · 02.00", "4,5 MB"],
-          ["BarberBoss_2026-10-01", "1 Okt 2026 · 02.00", "4,2 MB"],
-        ].map((row) => (
-          <article className="backup-row" key={row[0]}>
+        {backups.map((row) => (
+          <article className="backup-row" key={row.nama}>
             <span>
               <Icon name="file" />
-              <strong>{row[0]}</strong>
+              <strong>{row.nama}</strong>
             </span>
-            <span>{row[1]}</span>
-            <span>{row[2]}</span>
+            <span>{row.dibuat}</span>
+            <span>{row.baris} baris</span>
             <i className="chip lunas">Siap</i>
-            <Button
-              className="restore-danger-button"
-              onClick={() => setRestore(1)}
-            >
-              <Icon name="restore" /> Pulihkan
-            </Button>
+            <span />
           </article>
         ))}
+        {backups.length === 0 && (
+          <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
+            Belum ada backup.
+          </div>
+        )}
       </section>
-      {restore > 0 && (
-        <div className="modal-overlay">
-          <section className="restore-confirm">
-            <span className="restore-danger-icon">
-              <Icon name="alert" />
-            </span>
-            <p className="eyebrow">Konfirmasi {restore} dari 2</p>
-            <h2>
-              {restore === 1 ? "Pulihkan dari backup?" : "Konfirmasi terakhir"}
-            </h2>
-            <p>
-              {restore === 1
-                ? "Data saat ini akan diganti dengan isi backup terpilih."
-                : "Tindakan ini berisiko dan tidak dapat dibatalkan secara otomatis."}
-            </p>
-            {restore === 2 && (
-              <label>
-                <span>Ketik PULIHKAN untuk melanjutkan</span>
-                <input placeholder="PULIHKAN" />
-              </label>
-            )}
-            <div>
-              <Button
-                className="secondary-button"
-                onClick={() => setRestore(0)}
-              >
-                Batal
-              </Button>
-              <Button
-                className="restore-danger-button"
-                onClick={() => setRestore(restore === 1 ? 2 : 0)}
-              >
-                {restore === 1 ? "Lanjutkan" : "Pulihkan sekarang"}
-              </Button>
-            </div>
-          </section>
-        </div>
-      )}
+      <div className="info-banner">
+        <Icon name="alert" /> Pemulihan dilakukan manual: buka sheet tersembunyi BAK_... di Google Sheets
+        (klik kanan tab sheet &gt; Tampilkan), lalu salin isinya ke sheet aslinya. Pemulihan otomatis sengaja tidak
+        disediakan supaya data tidak tertimpa tanpa pengawasan.
+      </div>
     </div>
   )
 }
