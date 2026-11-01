@@ -1,0 +1,10 @@
+{
+  "description": "Helps users clarify their needs by first listening and understanding their request.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
