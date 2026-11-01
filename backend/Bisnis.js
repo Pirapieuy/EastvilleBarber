@@ -74,7 +74,8 @@ var AKSES = {
   "log-produk":          ["Owner", "Manajer"],
   "get-pengaturan":      ["Owner", "Manajer"],
   "simpan-pengaturan":   ["Owner", "Manajer"],
-  "set-komisi-kapster":  ["Owner", "Manajer"]
+  "set-komisi-kapster":  ["Owner", "Manajer"],
+  "list-komisi":         ["Owner", "Manajer", "Kapster"]
 };
 
 
@@ -152,6 +153,7 @@ function routeBisnis(action, body) {
       case "get-pengaturan":       return ok_(bentukPengaturan_());
       case "simpan-pengaturan":    return simpanPengaturan_(body, user);
       case "set-komisi-kapster":   return setKomisiKapster_(body, user);
+      case "list-komisi":          return listKomisi_(body, user);
     }
   } finally {
     lock.releaseLock();
@@ -535,6 +537,55 @@ function listTransaksi_(body, user) {
   });
   rows.sort(function (a, b) { return new Date(b.waktu) - new Date(a.waktu); });
   return ok_(rows.map(function (t) { return bentukTransaksi_(t, itemsByTrx); }));
+}
+
+/**
+ * Komisi per kapster untuk satu periode (bahan halaman Gaji).
+ * Body: { dari: "yyyy-MM-dd", sampai: "yyyy-MM-dd", kapsterId? }. Hanya transaksi Lunas;
+ * yang dibatalkan tidak dihitung. Kapster hanya boleh melihat komisinya sendiri.
+ * Hasil: [{ kapsterId, kapster, jumlahTransaksi, komisiLayanan, komisiLembur, komisiProduk,
+ *           totalKomisi, penjualanLayanan, penjualanProduk }]
+ */
+function listKomisi_(body, user) {
+  var kapsterId = user.role === "Kapster" ? user.id : (body.kapsterId || "");
+  var trxOk = {}, lemburTrx = {};
+  readTable_(SHEET_TRANSAKSI).forEach(function (t) {
+    if (t.status !== "Lunas") return;
+    var tgl = fmtTanggal_(new Date(t.waktu), "yyyy-MM-dd");
+    if (body.dari && tgl < body.dari) return;
+    if (body.sampai && tgl > body.sampai) return;
+    trxOk[t.id] = true;
+    if (t.lembur === "Ya") lemburTrx[t.id] = true;
+  });
+
+  var per = {};
+  readTable_(SHEET_TRX_ITEM).forEach(function (i) {
+    if (!trxOk[i.trx_id]) return;
+    if (kapsterId && i.kapster_id !== kapsterId) return;
+    var r = per[i.kapster_id] = per[i.kapster_id] || {
+      kapsterId: i.kapster_id, kapster: i.kapster, jumlahTransaksi: 0, trx: {},
+      komisiLayanan: 0, komisiLembur: 0, komisiProduk: 0, totalKomisi: 0,
+      penjualanLayanan: 0, penjualanProduk: 0
+    };
+    var kom = Number(i.komisi) || 0, nilai = Number(i.harga) * Number(i.qty);
+    r.trx[i.trx_id] = true;
+    if (i.tipe === "Produk") {
+      r.komisiProduk += kom; r.penjualanProduk += nilai;
+    } else {
+      if (lemburTrx[i.trx_id]) r.komisiLembur += kom; else r.komisiLayanan += kom;
+      r.penjualanLayanan += nilai;
+    }
+    r.totalKomisi += kom;
+  });
+
+  var hasil = Object.keys(per).map(function (k) {
+    var r = per[k];
+    r.jumlahTransaksi = Object.keys(r.trx).length;
+    delete r.trx;
+    return r;
+  });
+  hasil.sort(function (a, b) { return b.totalKomisi - a.totalKomisi; });
+  return ok_(hasil);
 }
 
 function cariTransaksi_(id) {

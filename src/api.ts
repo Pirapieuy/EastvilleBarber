@@ -190,3 +190,21 @@ export const apiPengaturan = {
   setKomisiKapster: (userId: string, persen: number | null, alasan: string) =>
     api<PengaturanKomisi>("set-komisi-kapster", { userId, persen, alasan }),
 }
+
+export interface KomisiKapsterRow {
+  kapsterId: string
+  kapster: string
+  jumlahTransaksi: number
+  komisiLayanan: number
+  komisiLembur: number
+  komisiProduk: number
+  totalKomisi: number
+  penjualanLayanan: number
+  penjualanProduk: number
+}
+
+export const apiKomisi = {
+  /** Komisi per kapster untuk satu periode (yyyy-MM-dd). Kapster hanya mendapat dirinya sendiri. */
+  list: (range: { dari?: string; sampai?: string; kapsterId?: string } = {}) =>
+    api<KomisiKapsterRow[]>("list-komisi", range),
+}
