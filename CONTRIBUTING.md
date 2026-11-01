@@ -18,11 +18,18 @@ git merge origin/rania        # ambil susunan folder & backend terbaru dulu
 pnpm install                  # project ini memakai pnpm, jangan npm install
 ```
 
-Buat file `.env` di root (tidak ikut git, minta URL ke Rania):
+Buat file `.env` di **root** (tidak ikut git). **Semua anggota tim memakai URL yang sama** — jangan buat
+deployment sendiri. Deployment lain tidak punya kode kasir (`Bisnis.js`) atau minta login Google:
 
 ```
-VITE_API_URL=https://script.google.com/macros/s/XXXX/exec
+VITE_API_URL=https://script.google.com/macros/s/AKfycbz-yQm8hz6o4f8bBZfYOCGHEh32DX4XRIxPZSUlpT_UiQ7MUnQlG_CFZ7i3A8exbDGizw/exec
 ```
+
+Vite hanya membaca `.env` saat start: **setiap kali `.env` diubah, matikan lalu jalankan ulang dev server.**
+
+Kalau halaman menampilkan banner kuning **"Mode demo"**, penyebabnya tertulis di banner itu:
+`Aksi tidak dikenal: ...` berarti `VITE_API_URL` menunjuk deployment lama; `VITE_API_URL belum diisi`
+berarti `.env` belum ada atau dev server belum di-restart; `belum login ke server` berarti logout lalu login lagi.
 
 Jalankan frontend: `pnpm dev`. Port 8443 sering sudah dipakai dev server Figma Make yang berjalan
 otomatis. Kalau begitu, buka saja `http://localhost:8443` (restart kalau `.env` baru dibuat),
