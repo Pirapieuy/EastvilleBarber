@@ -333,7 +333,6 @@ export function ServicesPage() {
               </span>
               <Button
                 aria-label={aktif ? "Nonaktifkan layanan" : "Aktifkan layanan"}
-                aria-pressed={aktif}
                 onClick={() => setAktif(!aktif)}
                 type="button"
               >

@@ -27,7 +27,7 @@ var PENGATURAN_DEFAULT = {
   komisi_default: 40,   // % layanan untuk kapster di jam kerja
   komisi_lembur: 50     // % layanan untuk kapster di luar jam kerja
 };
-var SCHEMA_VERSION = "2";
+var SCHEMA_VERSION = "3";
 
 var HEADERS = {
   Layanan: ["id", "nama", "harga", "status"],
@@ -39,7 +39,8 @@ var HEADERS = {
   Transaksi: [
     "id", "waktu", "tanggal", "jam", "metode", "subtotal", "diskon", "total",
     "bayar_tunai", "bayar_qris", "komisi_total", "status",
-    "dibuat_oleh_id", "dibuat_oleh", "void_alasan", "void_oleh", "void_waktu", "lembur"
+    "dibuat_oleh_id", "dibuat_oleh", "void_alasan", "void_oleh", "void_waktu", "lembur",
+    "manual", "nota_buku"
   ],
   TransaksiItem: [
     "trx_id", "tipe", "ref_id", "nama", "qty", "harga", "kapster_id", "kapster", "komisi", "komisi_persen"
@@ -76,7 +77,8 @@ var AKSES = {
   "simpan-pengaturan":   ["Owner", "Manajer"],
   "set-komisi-kapster":  ["Owner", "Manajer"],
   "list-komisi":         ["Owner", "Manajer", "Kapster"],
-  "simpan-layanan":      ["Owner", "Manajer"]
+  "simpan-layanan":      ["Owner", "Manajer"],
+  "create-transaksi-manual": ["Owner", "Manajer", "Kasir"]
 };
 
 
@@ -141,6 +143,7 @@ function routeBisnis(action, body) {
       case "list-produk":          return ok_(listProduk_());
       case "list-kapster":         return ok_(listKapster_());
       case "create-transaksi":     return createTransaksi_(body, user);
+      case "create-transaksi-manual": return createTransaksi_(body, user, true);
       case "list-transaksi":       return listTransaksi_(body, user);
       case "batalkan-transaksi":   return batalkanTransaksi_(body, user);
       case "pulihkan-transaksi":   return pulihkanTransaksi_(body, user);
@@ -432,7 +435,7 @@ function komisiProduk_(p, qty) {
  *         items: [{ tipe: "Layanan"|"Produk", refId, qty, kapsterId }] }
  * Harga & komisi dihitung dari sheet, bukan dari client.
  */
-function createTransaksi_(body, user) {
+function createTransaksi_(body, user, manual) {
   var items = body.items || [];
   if (!items.length) return fail_("Keranjang kosong.");
   if (["Tunai", "QRIS", "Gabungan"].indexOf(body.metode) === -1) return fail_("Metode pembayaran tidak valid.");
@@ -442,7 +445,21 @@ function createTransaksi_(body, user) {
   var produkMap = {};
   readTable_(SHEET_PRODUK).forEach(function (p) { produkMap[p.kode] = p; });
   var peng = getPengaturan_(), override = komisiOverride_();
-  var nowJam = Number(fmtTanggal_(new Date(), "HHmm"));
+  // Rekap manual: transaksi dari buku, waktunya diambil dari tanggal (+ jam, default 12:00) yang diinput.
+  var now = new Date(), notaBuku = "";
+  if (manual) {
+    var tgl = (body.tanggal || "").toString();
+    var jamIn = (body.jam || "12:00").toString();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(tgl)) return fail_("Tanggal transaksi tidak valid.");
+    if (parseHhmm_(jamIn) === null) return fail_("Format jam harus HH:MM.");
+    if (tgl > fmtTanggal_(new Date(), "yyyy-MM-dd")) return fail_("Tanggal tidak boleh di masa depan.");
+    notaBuku = (body.nomorNota || "").toString().trim().toUpperCase();
+    if (notaBuku.length < 3) return fail_("Nomor nota dari buku wajib diisi.");
+    var dipakai = readTable_(SHEET_TRANSAKSI).some(function (t) { return t.id === notaBuku || t.nota_buku === notaBuku; });
+    if (dipakai) return fail_("Nomor nota sudah dipakai.");
+    now = new Date(tgl + "T" + jamIn + ":00+07:00");
+  }
+  var nowJam = Number(fmtTanggal_(now, "HHmm"));
   var lembur = isLembur_(nowJam, peng);
   var kapsterMap = {};
   getSheet(SHEET_USERS).getDataRange().getValues().slice(1).forEach(function (u) {
@@ -488,14 +505,14 @@ function createTransaksi_(body, user) {
   if (body.metode === "QRIS") { tunai = 0; qris = total; }
   if (tunai + qris < total) return fail_("Pembayaran kurang Rp " + (total - tunai - qris) + ".");
 
-  var now = new Date();
-  var id = nextInvoiceId_(now);
+  var id = manual ? notaBuku : nextInvoiceId_(now);
   appendObj_(SHEET_TRANSAKSI, {
     id: id, waktu: now, tanggal: fmtTanggal_(now, "yyyy-MM-dd"), jam: fmtTanggal_(now, "HH.mm"),
     metode: body.metode, subtotal: subtotal, diskon: diskon, total: total,
     bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, status: "Lunas",
     dibuat_oleh_id: user.id, dibuat_oleh: user.nama + " · " + user.role,
-    lembur: lembur ? "Ya" : "Tidak"
+    lembur: lembur ? "Ya" : "Tidak",
+    manual: manual ? "Ya" : "", nota_buku: notaBuku
   });
   lines.forEach(function (ln) { ln.trx_id = id; appendObj_(SHEET_TRX_ITEM, ln); });
 
@@ -503,7 +520,7 @@ function createTransaksi_(body, user) {
     mutasiStok_(kode, stokBaru[kode] - Number(produkMap[kode].stok), "Penjualan", id, user);
   });
 
-  writeAuditLog(user.id, user.nama, "TRANSAKSI", id + " total " + total);
+  writeAuditLog(user.id, user.nama, manual ? "REKAP_MANUAL" : "TRANSAKSI", id + " total " + total);
   return ok_({ id: id, total: total, kembalian: tunai + qris - total, lembur: lembur });
 }
 
@@ -546,7 +563,7 @@ function bentukTransaksi_(t, itemsByTrx) {
     subtotal: t.subtotal,
     discount: t.diskon,
     total: t.total,
-    status: t.status,
+    status: t.status === "Lunas" && t.manual === "Ya" ? "Manual" : t.status,
     createdTime: fmtTanggal_(new Date(t.waktu), "d MMM HH.mm"),
     createdBy: t.dibuat_oleh,
     voidReason: t.void_alasan || undefined,
