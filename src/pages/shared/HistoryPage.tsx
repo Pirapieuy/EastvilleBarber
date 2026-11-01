@@ -260,6 +260,16 @@ export function HistoryPage({
     }
   }
 
+  // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
+  const loading = Boolean(getToken()) && !live && !liveError
+  if (loading) {
+    return (
+      <div className="content">
+        <p>Memuat riwayat transaksi...</p>
+      </div>
+    )
+  }
+
   if (!selected) {
     return (
       <div className="content">

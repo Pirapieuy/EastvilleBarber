@@ -190,6 +190,16 @@ export function ExpensesPage() {
     )
   }
 
+  // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
+  const loading = Boolean(getToken()) && !live && !liveError
+  if (loading) {
+    return (
+      <div className="content">
+        <p>Memuat pengeluaran...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />

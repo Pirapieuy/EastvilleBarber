@@ -233,6 +233,16 @@ export function ProductsPage() {
     setFormOpen(false)
   }
 
+  // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
+  const loading = Boolean(getToken()) && !live && !liveError
+  if (loading) {
+    return (
+      <div className="content">
+        <p>Memuat produk...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />

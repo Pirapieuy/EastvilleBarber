@@ -328,6 +328,16 @@ export function CashierPage({
     )
   }
 
+  // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
+  const loading = Boolean(getToken()) && !live && !liveError
+  if (loading) {
+    return (
+      <div className="content">
+        <p>Memuat kasir...</p>
+      </div>
+    )
+  }
+
   if (receipt) {
     return (
       <ReceiptView
