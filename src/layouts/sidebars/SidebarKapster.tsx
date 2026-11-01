@@ -45,7 +45,7 @@ export function SidebarKapster(props: SidebarProps) {
       {...props}
       groups={KAPSTER_GROUPS}
       user={{
-        name: "Seva",
+        name: props.userName || "Seva",
         role: "Kapster",
         roleBadge: "KAPSTER",
       }}

@@ -28,6 +28,8 @@ export interface SidebarProps {
   expanded?: boolean
   onToggleExpanded?: () => void
   onLogout?: () => void
+  /** Nama user yang sedang login; kalau kosong dipakai nama demo peran. */
+  userName?: string
 }
 
 interface BaseSidebarProps extends SidebarProps {

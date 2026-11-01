@@ -93,7 +93,7 @@ export function SidebarManajer(props: SidebarProps) {
       {...props}
       groups={MANAJER_GROUPS}
       user={{
-        name: "Dian Setiawan",
+        name: props.userName || "Dian Setiawan",
         role: "Manajer",
         roleBadge: "MANAJER",
       }}

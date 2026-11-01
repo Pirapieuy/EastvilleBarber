@@ -39,7 +39,7 @@ export function SidebarKasir(props: SidebarProps) {
       {...props}
       groups={KASIR_GROUPS}
       user={{
-        name: "Siti Rahma",
+        name: props.userName || "Siti Rahma",
         role: "Kasir",
         roleBadge: "KASIR",
       }}

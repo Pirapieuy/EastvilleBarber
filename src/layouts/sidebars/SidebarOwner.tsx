@@ -111,7 +111,7 @@ export function SidebarOwner(props: SidebarProps) {
       {...props}
       groups={OWNER_GROUPS}
       user={{
-        name: "Ardi Pradana",
+        name: props.userName || "Ardi Pradana",
         role: "Owner",
         roleBadge: "OWNER",
       }}

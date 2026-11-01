@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { AppLayout } from "./layouts/AppLayout"
 import { Login } from "./components/common/Login"
-import { DEMO_USERS, Role, toRoleKey } from "./types"
+import { AppUser, DEMO_USERS, Role, toRoleKey } from "./types"
 import { clearToken } from "./api"
 
 // Kasir Pages
@@ -55,7 +55,13 @@ export function App() {
   const [currentRole, setCurrentRole] = useState<Role>("Owner")
   const [activePage, setActivePage] = useState<string>("BerandaOwner")
 
-  const currentUser = DEMO_USERS[currentRole]
+  // User asli dari backend (hasil login). Kalau role diganti lewat pengalih peran demo,
+  // kembali ke data demo untuk peran itu.
+  const [sessionUser, setSessionUser] = useState<AppUser | null>(null)
+  const currentUser =
+    sessionUser && sessionUser.role === currentRole
+      ? sessionUser
+      : DEMO_USERS[currentRole]
   const roleKey = toRoleKey(currentRole)
 
   function handleRoleChange(newRole: Role) {
@@ -67,6 +73,7 @@ export function App() {
     return (
       <Login
         onLogin={(user, targetPage) => {
+          setSessionUser(user)
           setCurrentRole(user.role)
           setLoggedIn(true)
           if (targetPage) {
@@ -235,8 +242,10 @@ export function App() {
     <AppLayout
       activePage={activePage}
       currentRole={currentRole}
+      userName={currentUser.name}
       onLogout={() => {
         clearToken()
+        setSessionUser(null)
         setLoggedIn(false)
       }}
       onNavigate={setActivePage}

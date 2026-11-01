@@ -13,6 +13,7 @@ export interface AppLayoutProps {
   onNavigate: (page: string) => void
   onRoleChange?: (role: Role) => void
   onLogout?: () => void
+  userName?: string
   children?: ReactNode
 }
 
@@ -24,6 +25,7 @@ export function AppLayout({
   onNavigate,
   onRoleChange,
   onLogout,
+  userName,
   children,
 }: AppLayoutProps) {
   const [sidebarExpanded, setSidebarExpanded] = useState(true)
@@ -53,6 +55,7 @@ export function AppLayout({
             activePage={activePage}
             expanded={sidebarExpanded}
             onLogout={onLogout}
+            userName={userName}
             onNavigate={handleNavigate}
             onToggleExpanded={() => setSidebarExpanded(!sidebarExpanded)}
           />
@@ -62,6 +65,7 @@ export function AppLayout({
             activePage={activePage}
             expanded={sidebarExpanded}
             onLogout={onLogout}
+            userName={userName}
             onNavigate={handleNavigate}
             onToggleExpanded={() => setSidebarExpanded(!sidebarExpanded)}
           />
@@ -71,6 +75,7 @@ export function AppLayout({
             activePage={activePage}
             expanded={sidebarExpanded}
             onLogout={onLogout}
+            userName={userName}
             onNavigate={handleNavigate}
             onToggleExpanded={() => setSidebarExpanded(!sidebarExpanded)}
           />
@@ -80,6 +85,7 @@ export function AppLayout({
             activePage={activePage}
             expanded={sidebarExpanded}
             onLogout={onLogout}
+            userName={userName}
             onNavigate={handleNavigate}
             onToggleExpanded={() => setSidebarExpanded(!sidebarExpanded)}
           />
