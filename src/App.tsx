@@ -249,7 +249,9 @@ export function App() {
         setLoggedIn(false)
       }}
       onNavigate={setActivePage}
-      onRoleChange={handleRoleChange}
+      // Pengalih peran demo disembunyikan saat login lewat backend: role ditentukan akun,
+      // dan server menolak aksi di luar role token.
+      onRoleChange={sessionUser ? undefined : handleRoleChange}
     >
       {renderPageContent()}
     </AppLayout>
