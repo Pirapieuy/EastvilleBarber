@@ -1,8 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AppLayout } from "./layouts/AppLayout"
 import { Login } from "./components/common/Login"
 import { AppUser, DEMO_USERS, Role, toRoleKey } from "./types"
-import { clearToken } from "./api"
+import { clearToken, getToken, restoreSession } from "./api"
 
 // Kasir Pages
 import { KasirPOS } from "./pages/kasir/KasirPOS"
@@ -51,7 +51,10 @@ const ROLE_DEFAULT_PAGES: Record<Role, string> = {
 }
 
 export function App() {
-  const [loggedIn, setLoggedIn] = useState(true)
+  // Mulai dari belum login. Kalau ada token tersimpan, sesi dicek ke server dulu supaya
+  // refresh tidak mengeluarkan user yang sah (dan tidak masuk sebagai Owner demo).
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(() => Boolean(getToken()))
   const [currentRole, setCurrentRole] = useState<Role>("Owner")
   const [activePage, setActivePage] = useState<string>("BerandaOwner")
 
@@ -67,6 +70,23 @@ export function App() {
   function handleRoleChange(newRole: Role) {
     setCurrentRole(newRole)
     setActivePage(ROLE_DEFAULT_PAGES[newRole])
+  }
+
+  useEffect(() => {
+    if (!checkingSession) return
+    restoreSession().then((user) => {
+      if (user) {
+        setSessionUser({ id: user.id, name: user.name, username: user.username, role: user.role })
+        setCurrentRole(user.role)
+        setActivePage(ROLE_DEFAULT_PAGES[user.role])
+        setLoggedIn(true)
+      }
+      setCheckingSession(false)
+    })
+  }, [])
+
+  if (checkingSession) {
+    return <div style={{ padding: 24 }}>Memuat sesi...</div>
   }
 
   if (!loggedIn) {

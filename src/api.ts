@@ -48,6 +48,28 @@ export async function loginBackend(username: string, pin: string): Promise<Login
   return json.data.user as LoginUser
 }
 
+/** Cek token tersimpan ke server. Mengembalikan user bila sesi masih berlaku, atau null. */
+export async function restoreSession(): Promise<LoginUser | null> {
+  const token = getToken()
+  if (!token || !API_URL) return null
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "verify-session", token }),
+    })
+    const json = await res.json()
+    if (!json.success) {
+      clearToken()
+      return null
+    }
+    return json.data.user as LoginUser
+  } catch {
+    // Server tidak terjangkau: token dibiarkan, tapi user diminta login lagi.
+    return null
+  }
+}
+
 export function getToken(): string {
   try {
     return localStorage.getItem(TOKEN_KEY) ?? ""
