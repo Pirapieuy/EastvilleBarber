@@ -26,3 +26,7 @@ dist-ssr
 # env lokal
 .env
 .env.local
+
+# dari branch fitra
+frontend/node_modules/
+*.traineddata

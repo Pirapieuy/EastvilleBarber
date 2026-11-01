@@ -21,26 +21,31 @@ export function clearToken() {
   }
 }
 
-/**
- * Login ke backend asli untuk mendapat token. Dipanggil setelah login prototipe
- * lolos; kalau gagal, halaman tetap memakai data demo (tidak melempar error).
- */
-export async function loginBackend(username: string, pin: string): Promise<boolean> {
+export interface LoginUser {
+  id: string
+  name: string
+  username: string
+  role: "Owner" | "Manajer" | "Kasir" | "Kapster"
+}
+
+/** Login ke backend; menyimpan token dan mengembalikan data user. Melempar ApiError bila gagal. */
+export async function loginBackend(username: string, pin: string): Promise<LoginUser> {
   clearToken()
-  if (!API_URL) return false
+  if (!API_URL) throw new ApiError("VITE_API_URL belum diisi di file .env.")
+  let json
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: "login", username, pin }),
     })
-    const json = await res.json()
-    if (!json.success) return false
-    localStorage.setItem(TOKEN_KEY, json.data.token)
-    return true
+    json = await res.json()
   } catch {
-    return false
+    throw new ApiError("Gagal terhubung ke server. Coba lagi.")
   }
+  if (!json.success) throw new ApiError(json.error ?? "Login gagal.")
+  localStorage.setItem(TOKEN_KEY, json.data.token)
+  return json.data.user as LoginUser
 }
 
 export function getToken(): string {

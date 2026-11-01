@@ -1,42 +1,8 @@
 import { FormEvent, useState } from "react"
 import { Icon } from "./Icon"
 import { Button, BrandMark } from "./UI"
-import { AppUser, DEMO_USERS, Page, Role } from "../../types"
+import { AppUser, Page } from "../../types"
 import { loginBackend } from "../../api"
-
-interface PrototypeCredential {
-  user: AppUser
-  pin: string
-  redirectPage: Page
-  roleTitle: Role
-}
-
-const PROTOTYPE_CREDENTIALS: Record<string, PrototypeCredential> = {
-  "ardi.owner": {
-    user: DEMO_USERS.Owner,
-    pin: "111111",
-    redirectPage: "dashboard",
-    roleTitle: "Owner",
-  },
-  "dian.manajer": {
-    user: DEMO_USERS.Manajer,
-    pin: "222222",
-    redirectPage: "services",
-    roleTitle: "Manajer",
-  },
-  "siti.kasir": {
-    user: DEMO_USERS.Kasir,
-    pin: "333333",
-    redirectPage: "cashier",
-    roleTitle: "Kasir",
-  },
-  "seva.kapster": {
-    user: DEMO_USERS.Kapster,
-    pin: "444444",
-    redirectPage: "dashboard",
-    roleTitle: "Kapster",
-  },
-}
 
 export function Login({
   onLogin,
@@ -50,6 +16,7 @@ export function Login({
   const [view, setView] = useState<"login" | "email" | "sent" | "reset">("login")
   const [email, setEmail] = useState("")
   const [newPin, setNewPin] = useState("")
+  const [loading, setLoading] = useState(false)
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -65,35 +32,28 @@ export function Login({
       return
     }
 
-    const cred = PROTOTYPE_CREDENTIALS[cleanUsername]
-    if (cred) {
-      if (cleanPin !== cred.pin && cleanPin !== "123456") {
-        setError(`PIN salah untuk akun ${cred.roleTitle}. PIN: ${cred.pin}`)
-        return
+    setError("")
+    setLoading(true)
+    try {
+      const user = await loginBackend(cleanUsername, cleanPin)
+      const appUser: AppUser = {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        role: user.role,
       }
-      setError("")
-      await loginBackend(cleanUsername, cleanPin)
-      onLogin(cred.user, cred.redirectPage)
-      return
-    }
-
-    const fallbackUser = Object.values(DEMO_USERS).find(
-      (u) => u.username.toLowerCase() === cleanUsername,
-    )
-    if (fallbackUser) {
-      setError("")
       const targetPage: Page =
-        fallbackUser.role === "Kasir"
+        user.role === "Kasir"
           ? "cashier"
-          : fallbackUser.role === "Manajer"
+          : user.role === "Manajer"
             ? "services"
             : "dashboard"
-      await loginBackend(cleanUsername, cleanPin)
-      onLogin(fallbackUser, targetPage)
-      return
+      onLogin(appUser, targetPage)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Login gagal.")
+    } finally {
+      setLoading(false)
     }
-
-    setError("Username tidak terdaftar. Periksa kredensial akun.")
   }
 
   if (view !== "login") {
@@ -274,8 +234,12 @@ export function Login({
             </div>
             {error && <small>{error}</small>}
           </label>
-          <Button className="primary-button login-submit-btn" type="submit">
-            Masuk <Icon name="arrow" />
+          <Button
+            className="primary-button login-submit-btn"
+            disabled={loading}
+            type="submit"
+          >
+            {loading ? "Memproses..." : "Masuk"} <Icon name="arrow" />
           </Button>
           <Button
             className="text-button"
