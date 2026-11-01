@@ -55,6 +55,7 @@ var HEADERS = {
   KomisiKapster: ["user_id", "persen", "diubah_oleh", "waktu"]
 };
 
+var STOK_MENIPIS = 3; // produk aktif dengan stok <= angka ini muncul di "Perlu perhatian"
 var KATEGORI_PENGELUARAN = ["Perlengkapan", "Listrik", "Air", "Sewa", "Lain-lain"];
 
 // ---- Hak akses per action ----
@@ -78,7 +79,9 @@ var AKSES = {
   "set-komisi-kapster":  ["Owner", "Manajer"],
   "list-komisi":         ["Owner", "Manajer", "Kapster"],
   "simpan-layanan":      ["Owner", "Manajer"],
-  "create-transaksi-manual": ["Owner", "Manajer", "Kasir"]
+  "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
+  "laporan-keuangan":    ["Owner", "Manajer"],
+  "laporan-produk":      ["Owner", "Manajer"]
 };
 
 
@@ -159,6 +162,8 @@ function routeBisnis(action, body) {
       case "set-komisi-kapster":   return setKomisiKapster_(body, user);
       case "list-komisi":          return listKomisi_(body, user);
       case "simpan-layanan":       return simpanLayanan_(body, user);
+      case "laporan-keuangan":     return laporanKeuangan_(body);
+      case "laporan-produk":       return laporanProduk_(body);
     }
   } finally {
     lock.releaseLock();
@@ -636,6 +641,97 @@ function listKomisi_(body, user) {
   });
   hasil.sort(function (a, b) { return b.totalKomisi - a.totalKomisi; });
   return ok_(hasil);
+}
+
+/** true bila tanggal (yyyy-MM-dd) masuk rentang body.dari..body.sampai (keduanya opsional). */
+function dalamRentang_(tgl, body) {
+  return !(body.dari && tgl < body.dari) && !(body.sampai && tgl > body.sampai);
+}
+
+/**
+ * Ringkasan keuangan untuk Laporan Keuangan dan Beranda. Body: { dari, sampai } (yyyy-MM-dd).
+ * Hanya transaksi Lunas dan pengeluaran Aktif. sisa = pemasukan - pengeluaran - komisi kapster.
+ */
+function laporanKeuangan_(body) {
+  var trx = {}, perHari = {}, tunai = 0, qris = 0, pemasukan = 0, komisi = 0, jumlah = 0;
+  readTable_(SHEET_TRANSAKSI).forEach(function (t) {
+    if (t.status !== "Lunas") return;
+    var tgl = fmtTanggal_(new Date(t.waktu), "yyyy-MM-dd");
+    if (!dalamRentang_(tgl, body)) return;
+    trx[t.id] = true;
+    var total = Number(t.total) || 0, q = Math.min(Number(t.bayar_qris) || 0, total);
+    pemasukan += total; qris += q; tunai += total - q; komisi += Number(t.komisi_total) || 0; jumlah++;
+    var h = perHari[tgl] = perHari[tgl] || { tanggal: tgl, total: 0, tunai: 0, qris: 0 };
+    h.total += total; h.qris += q; h.tunai += total - q;
+  });
+
+  var pengeluaran = 0;
+  readTable_(SHEET_PENGELUARAN).forEach(function (e) {
+    if (e.status !== "Aktif") return;
+    if (dalamRentang_(fmtTanggal_(new Date(e.tanggal), "yyyy-MM-dd"), body)) pengeluaran += Number(e.jumlah) || 0;
+  });
+
+  var per = {};
+  readTable_(SHEET_TRX_ITEM).forEach(function (i) {
+    if (!trx[i.trx_id]) return;
+    var k = per[i.kapster_id] = per[i.kapster_id] || { kapsterId: i.kapster_id, kapster: i.kapster, trx: {}, omzet: 0, komisi: 0 };
+    k.trx[i.trx_id] = true;
+    k.omzet += Number(i.harga) * Number(i.qty);
+    k.komisi += Number(i.komisi) || 0;
+  });
+  var perKapster = Object.keys(per).map(function (id) {
+    var k = per[id];
+    return { kapsterId: k.kapsterId, kapster: k.kapster, pelanggan: Object.keys(k.trx).length, omzet: k.omzet, komisi: k.komisi };
+  }).sort(function (a, b) { return b.omzet - a.omzet; });
+
+  var stokMenipis = readTable_(SHEET_PRODUK)
+    .filter(function (p) { return p.status === "Aktif" && Number(p.stok) <= STOK_MENIPIS; })
+    .map(function (p) { return { kode: p.kode, nama: p.nama, stok: Number(p.stok) }; });
+
+  return ok_({
+    pemasukan: pemasukan, tunai: tunai, qris: qris, pengeluaran: pengeluaran, komisi: komisi,
+    sisa: pemasukan - pengeluaran - komisi, jumlahTransaksi: jumlah,
+    perHari: Object.keys(perHari).sort().map(function (k) { return perHari[k]; }),
+    perKapster: perKapster, stokMenipis: stokMenipis
+  });
+}
+
+/**
+ * Penjualan produk per baris item, lengkap dengan pembagian kapster / pemasok / Eastville.
+ * Body: { dari, sampai }. Termasuk transaksi BATAL (ditandai) agar bisa ditampilkan sebagai koreksi.
+ */
+function laporanProduk_(body) {
+  var produk = {};
+  readTable_(SHEET_PRODUK).forEach(function (p) { produk[p.kode] = p; });
+  var trx = {};
+  readTable_(SHEET_TRANSAKSI).forEach(function (t) {
+    if (dalamRentang_(fmtTanggal_(new Date(t.waktu), "yyyy-MM-dd"), body)) trx[t.id] = t;
+  });
+  var rows = [];
+  readTable_(SHEET_TRX_ITEM).forEach(function (i) {
+    var t = trx[i.trx_id];
+    if (!t || i.tipe !== "Produk") return;
+    var p = produk[i.ref_id] || {};
+    var qty = Number(i.qty), harga = Number(i.harga), omzet = harga * qty;
+    var penjual = p.skema === "Persentase"
+      ? Math.round(harga * Number(p.persen_penjual) / 100) * qty
+      : (Number(p.nominal_penjual) || 0) * qty;
+    var kapster = Number(i.komisi) || 0;
+    rows.push({
+      id: t.id,
+      time: fmtTanggal_(new Date(t.waktu), "d MMM HH.mm"),
+      waktu: new Date(t.waktu).getTime(),
+      product: i.nama, qty: qty, unitPrice: harga, totalOmzet: omzet,
+      barber: i.kapster, seller: p.penjual || "-",
+      barberShare: kapster, sellerShare: penjual, eastvilleShare: omzet - kapster - penjual,
+      status: t.status === "BATAL" ? "Batal" : "Lunas",
+      voidReason: t.void_alasan || undefined,
+      voidBy: t.void_oleh || undefined,
+      voidAt: t.void_waktu ? fmtTanggal_(new Date(t.void_waktu), "d MMM HH.mm") : undefined
+    });
+  });
+  rows.sort(function (a, b) { return b.waktu - a.waktu; });
+  return ok_(rows);
 }
 
 function cariTransaksi_(id) {

@@ -217,3 +217,24 @@ export const apiKomisi = {
   list: (range: { dari?: string; sampai?: string; kapsterId?: string } = {}) =>
     api<KomisiKapsterRow[]>("list-komisi", range),
 }
+
+export interface LaporanKeuangan {
+  pemasukan: number
+  tunai: number
+  qris: number
+  pengeluaran: number
+  komisi: number
+  /** pemasukan - pengeluaran - komisi kapster */
+  sisa: number
+  jumlahTransaksi: number
+  perHari: { tanggal: string; total: number; tunai: number; qris: number }[]
+  perKapster: { kapsterId: string; kapster: string; pelanggan: number; omzet: number; komisi: number }[]
+  stokMenipis: { kode: string; nama: string; stok: number }[]
+}
+
+export const apiLaporan = {
+  keuangan: (range: { dari?: string; sampai?: string } = {}) =>
+    api<LaporanKeuangan>("laporan-keuangan", range),
+  produk: (range: { dari?: string; sampai?: string } = {}) =>
+    api<unknown[]>("laporan-produk", range),
+}
