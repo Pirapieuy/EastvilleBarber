@@ -138,6 +138,12 @@ export interface CheckoutPayload {
   items: CheckoutItem[]
 }
 
+export const apiLayanan = {
+  list: () => api<LayananRow[]>("list-layanan"),
+  simpan: (layanan: { id?: number; nama: string; harga: number; status: "Aktif" | "Nonaktif" }) =>
+    api<{ id: number }>("simpan-layanan", { layanan }),
+}
+
 export const apiKasir = {
   layanan: () => api<LayananRow[]>("list-layanan"),
   produk: () => api<ProdukRow[]>("list-produk"),

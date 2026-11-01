@@ -75,7 +75,8 @@ var AKSES = {
   "get-pengaturan":      ["Owner", "Manajer"],
   "simpan-pengaturan":   ["Owner", "Manajer"],
   "set-komisi-kapster":  ["Owner", "Manajer"],
-  "list-komisi":         ["Owner", "Manajer", "Kapster"]
+  "list-komisi":         ["Owner", "Manajer", "Kapster"],
+  "simpan-layanan":      ["Owner", "Manajer"]
 };
 
 
@@ -154,6 +155,7 @@ function routeBisnis(action, body) {
       case "simpan-pengaturan":    return simpanPengaturan_(body, user);
       case "set-komisi-kapster":   return setKomisiKapster_(body, user);
       case "list-komisi":          return listKomisi_(body, user);
+      case "simpan-layanan":       return simpanLayanan_(body, user);
     }
   } finally {
     lock.releaseLock();
@@ -359,6 +361,37 @@ function listLayanan_() {
   return readTable_(SHEET_LAYANAN).map(stripRow_);
 }
 /** Kapster aktif dari sheet Users, untuk pilihan kapster di kasir. */
+/**
+ * Body: { layanan: { id?, nama, harga, status: "Aktif"|"Nonaktif" } }. Tanpa id = layanan baru.
+ * Harga baru tidak mengubah transaksi lama (harga tersimpan di TransaksiItem).
+ */
+function simpanLayanan_(body, user) {
+  var l = body.layanan || {};
+  var nama = (l.nama || "").toString().trim();
+  var harga = toInt_(l.harga);
+  var status = l.status === "Nonaktif" ? "Nonaktif" : "Aktif";
+  if (!nama) return fail_("Nama layanan wajib diisi.");
+  if (harga < 0) return fail_("Harga tidak valid.");
+
+  var semua = readTable_(SHEET_LAYANAN);
+  var sama = semua.filter(function (x) { return String(x.nama).toLowerCase() === nama.toLowerCase() && String(x.id) !== String(l.id); });
+  if (sama.length) return fail_("Layanan dengan nama itu sudah ada.");
+
+  if (l.id !== undefined && l.id !== "") {
+    var lama = semua.filter(function (x) { return String(x.id) === String(l.id); })[0];
+    if (!lama) return fail_("Layanan tidak ditemukan.");
+    setCell_(SHEET_LAYANAN, lama._row, "nama", nama);
+    setCell_(SHEET_LAYANAN, lama._row, "harga", harga);
+    setCell_(SHEET_LAYANAN, lama._row, "status", status);
+    writeAuditLog(user.id, user.nama, "UBAH_LAYANAN", lama.nama + " Rp " + lama.harga + " " + lama.status + " → " + nama + " Rp " + harga + " " + status);
+    return ok_({ id: lama.id });
+  }
+  var id = semua.reduce(function (m, x) { return Math.max(m, Number(x.id) || 0); }, 0) + 1;
+  appendObj_(SHEET_LAYANAN, { id: id, nama: nama, harga: harga, status: status });
+  writeAuditLog(user.id, user.nama, "TAMBAH_LAYANAN", nama + " Rp " + harga);
+  return ok_({ id: id });
+}
+
 function listKapster_() {
   return getSheet(SHEET_USERS).getDataRange().getValues().slice(1)
     .filter(function (u) { return u[4] === "Kapster" && u[7] === "Aktif"; })
