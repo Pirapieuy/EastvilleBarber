@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
@@ -72,6 +73,7 @@ export function ProductsPage() {
   })
   const [changeReason, setChangeReason] = useState("")
   const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
   const [stockCode, setStockCode] = useState("")
   const [stockQty, setStockQty] = useState("10")
   const [stockNote, setStockNote] = useState("")
@@ -111,9 +113,13 @@ export function ProductsPage() {
     })
   }
   useEffect(() => {
-    if (!getToken()) return
-    loadLive().catch(() => {
-      /* tetap pakai data demo */
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    loadLive().catch((e) => {
+      console.error("Gagal memuat produk:", e)
+      setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
   }, [])
   const [changeLogs, setChangeLogs] = useState([
@@ -229,6 +235,7 @@ export function ProductsPage() {
 
   return (
     <div className="content">
+      <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Data master & komisi"
         title="Produk"

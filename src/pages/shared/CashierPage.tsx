@@ -3,6 +3,7 @@ import { Icon } from "../../components/common/Icon"
 import { Button, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiKasir, getToken } from "../../api"
+import { DemoNotice } from "../../components/common/DemoNotice"
 
 export type CatalogItem = {
   id: number | string
@@ -220,9 +221,13 @@ export function CashierPage({
   const [invoice, setInvoice] = useState<string | undefined>()
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState("")
+  const [liveError, setLiveError] = useState("")
 
   useEffect(() => {
-    if (!getToken()) return
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
     Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster()])
       .then(([layanan, produk, kapster]) => {
         setCatalogData([
@@ -245,8 +250,9 @@ export function CashierPage({
         setCash(0)
         setLive(true)
       })
-      .catch(() => {
-        /* tetap pakai data demo */
+      .catch((e) => {
+        console.error("Gagal memuat data kasir:", e)
+        setLiveError(e instanceof Error ? e.message : "gagal memuat data")
       })
   }, [])
 
@@ -352,6 +358,7 @@ export function CashierPage({
   return (
     <div className="cashier-page">
       <section className="catalog">
+        <DemoNotice live={live} error={liveError} />
         <div className="cashier-heading">
           <small>KASIR</small>
           <span>Pilih layanan</span>

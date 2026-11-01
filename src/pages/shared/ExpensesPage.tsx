@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
@@ -81,6 +82,7 @@ export function ExpensesPage() {
   })
 
   const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
@@ -90,9 +92,13 @@ export function ExpensesPage() {
     })
   }
   useEffect(() => {
-    if (!getToken()) return
-    loadLive().catch(() => {
-      /* tetap pakai data demo */
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    loadLive().catch((e) => {
+      console.error("Gagal memuat pengeluaran:", e)
+      setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
   }, [])
 
@@ -186,6 +192,7 @@ export function ExpensesPage() {
 
   return (
     <div className="content">
+      <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Operasional"
         title="Pengeluaran"

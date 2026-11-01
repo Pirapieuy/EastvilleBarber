@@ -500,7 +500,8 @@ function bentukTransaksi_(t, itemsByTrx) {
   return {
     id: t.id,
     date: fmtTanggal_(new Date(t.waktu), "d MMM yyyy"),
-    time: t.jam,
+    // dihitung dari waktu; kolom "jam" bisa diubah Sheets jadi nilai waktu otomatis
+    time: fmtTanggal_(new Date(t.waktu), "HH.mm"),
     items: items.map(function (i) { return { name: i.nama, qty: i.qty, price: i.harga, type: i.tipe }; }),
     barber: Object.keys(kapsters).join(", "),
     method: t.metode,

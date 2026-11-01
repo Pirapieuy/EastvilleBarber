@@ -3,6 +3,7 @@ import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { apiTransaksi, getToken } from "../../api"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { CartLine, ReceiptView } from "./CashierPage"
 
 export interface HistoryItemDetail {
@@ -193,6 +194,7 @@ export function HistoryPage({
   const [showReceipt, setShowReceipt] = useState(false)
 
   const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
 
   const selected = txList.find((tx) => tx.id === selectedId) || txList[0]
 
@@ -206,9 +208,13 @@ export function HistoryPage({
     })
   }
   useEffect(() => {
-    if (!getToken()) return
-    loadLive().catch(() => {
-      /* tetap pakai data demo */
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    loadLive().catch((e) => {
+      console.error("Gagal memuat riwayat:", e)
+      setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
   }, [])
 
@@ -298,6 +304,7 @@ export function HistoryPage({
 
   return (
     <div className="content">
+      <DemoNotice live={live} error={liveError} />
       <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
         <div className="input-shell">
