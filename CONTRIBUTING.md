@@ -99,7 +99,36 @@ komisi kapster dan jam kerja (backend; tampilannya belum ada).
 Aturan komisi: layanan 40% untuk kapster (bisa diatur per kapster); di luar jam kerja (default
 10:00–21:00) otomatis lembur 50%. Dihitung dari jam transaksi.
 
-## 7. Tugas terbuka (usul untuk Fitra)
+## 7. Pembagian kerja (disepakati Rania & Fitra)
+
+Prinsip: **pemilik data = pemilik halaman.** Masing-masing bekerja di branch sendiri (`rania`, `fitra`).
+
+| Rania | Fitra |
+|---|---|
+| Layanan & Harga + kartu "Jam kerja & komisi" | Tim (sheet `Users`; sambungkan "Komisi pribadi" ke `apiPengaturan.setKomisiKapster`) |
+| Rekap Manual | Absensi (pegawai dan admin) |
+| Laporan Keuangan, Laporan Produk | Jejak Audit |
+| Beranda Owner dan Manajer | Lupa/Reset PIN + keamanan login (lihat bagian 8) |
+| Backup | Halaman Gaji: Gaji & Kasbon, Gaji Saya, Komisi Produk Saya, Beranda Kapster |
+| API `list-komisi` (komisi per kapster per periode) untuk halaman Gaji | |
+
+Gaji bergantung pada dua sisi: komisi dari transaksi (data Rania) dan kehadiran (data Fitra).
+Rania menyediakan `list-komisi`, Fitra membangun halamannya.
+
+**Aturan backend: satu orang, satu file.**
+- Rania: `backend/Bisnis.js`.
+- Fitra: file sendiri (misalnya `backend/Akun.js`) dengan fungsi `routeAkun(action, body)`, dipanggil dari
+  `default:` di `doPost` (`Kode.js`) setelah `routeBisnis`. Sheet baru milik Fitra didaftarkan di `HEADERS` file-nya sendiri.
+- Fungsi bersama (`readTable_`, `appendObj_`, `setCell_`, `ok_`, `fail_`, `writeAuditLog`) dipakai bersama;
+  jangan mengubah perilakunya tanpa memberi tahu satu sama lain.
+- Di `src/api.ts` tambah bagian terpisah di akhir file (Rania `apiLaporan...`, Fitra `apiTim...`, `apiAbsensi...`).
+- **Jangan menyentuh halaman milik orang lain.** Mau ubah komponen bersama (`UI.tsx`, `AppLayout.tsx`)? Kabari dulu.
+
+**Alur git:** kerja di branch masing-masing, `git fetch && git merge origin/<branch-lain>` secara berkala
+(minimal sehari sekali, dan sebelum mulai fitur baru) supaya bentrok kecil dan cepat dibereskan.
+Deploy backend (`clasp deploy -i`) dilakukan hanya setelah `git pull`/merge, agar file orang lain tidak tertimpa.
+
+## 8. Tugas keamanan login (Fitra)
 
 1. **Lupa/reset PIN tidak aman:** `reset-pin` hanya meminta email. Perlu token reset yang diverifikasi
    dan punya masa berlaku.
@@ -107,6 +136,4 @@ Aturan komisi: layanan 40% untuk kapster (bisa diatur per kapster); di luar jam 
 3. **Token sesi memakai `Math.random()`.** Ganti ke `Utilities.getUuid()`.
 4. Pastikan sheet database **tidak** di-share "Anyone with the link" (berisi hash PIN).
 5. Hapus `package-lock.json` di root (project ini memakai pnpm).
-6. Sambungkan halaman yang masih data demo: Beranda, Laporan, Gaji dan kasbon, Absensi, Tim.
-7. Kartu "Jam kerja & komisi" di halaman Layanan & Harga, dan sambungkan "Komisi pribadi" di halaman Tim
-   (API sudah ada: `apiPengaturan` di `src/api.ts`).
+6. Halaman Tim, Absensi, Audit, dan Gaji: lihat pembagian di bagian 7.
