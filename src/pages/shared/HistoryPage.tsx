@@ -195,12 +195,21 @@ export function HistoryPage({
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
+  const [dateFilter, setDateFilter] = useState("")
+  const [barberFilter, setBarberFilter] = useState("Semua kapster")
+
+  const barberOptions = Array.from(
+    new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
+  ).sort()
+  const visibleTx = txList.filter(
+    (tx) => barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter),
+  )
 
   const selected = txList.find((tx) => tx.id === selectedId) || txList[0]
 
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return apiTransaksi.list().then((rows) => {
+    return apiTransaksi.list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {}).then((rows) => {
       const list = rows as HistoryTransactionRecord[]
       setTxList(list)
       setSelectedId((cur) => (list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? "")))
@@ -216,7 +225,7 @@ export function HistoryPage({
       console.error("Gagal memuat riwayat:", e)
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
-  }, [])
+  }, [dateFilter])
 
   async function handleConfirmAction(reason: string) {
     if (live && selected) {
@@ -319,11 +328,16 @@ export function HistoryPage({
       <div className="filters">
         <div className="input-shell">
           <Icon name="calendar" />
-          <input defaultValue="2026-10-29" type="date" />
+          <input
+            onChange={(e) => setDateFilter(e.target.value)}
+            title="Kosongkan untuk semua tanggal"
+            type="date"
+            value={dateFilter}
+          />
         </div>
-        <select defaultValue="Semua kapster">
+        <select onChange={(e) => setBarberFilter(e.target.value)} value={barberFilter}>
           <option>Semua kapster</option>
-          {["Seva", "Tata", "Faisal", "Fadhil", "Ferdi"].map((barber) => (
+          {barberOptions.map((barber) => (
             <option key={barber}>{barber}</option>
           ))}
         </select>
@@ -336,7 +350,7 @@ export function HistoryPage({
             <span>Total</span>
             <span>Status</span>
           </div>
-          {txList.map((tx) => (
+          {visibleTx.map((tx) => (
             <Button
               className={`transaction-row ${
                 tx.status === "BATAL" ? "voided" : ""

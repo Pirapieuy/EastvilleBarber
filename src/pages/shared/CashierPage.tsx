@@ -107,7 +107,11 @@ export function ReceiptView({
           <dl>
             <div>
               <dt>Tanggal</dt>
-              <dd>29 Okt 2026 · 10.24</dd>
+              <dd>
+                {new Date()
+                  .toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })
+                  .replace(",", " ·")}
+              </dd>
             </div>
             <div>
               <dt>No. nota</dt>
