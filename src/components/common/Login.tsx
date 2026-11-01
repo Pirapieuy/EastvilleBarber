@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react"
 import { Icon } from "./Icon"
 import { Button, BrandMark } from "./UI"
 import { AppUser, DEMO_USERS, Page, Role } from "../../types"
+import { loginBackend } from "../../api"
 
 interface PrototypeCredential {
   user: AppUser
@@ -50,7 +51,7 @@ export function Login({
   const [email, setEmail] = useState("")
   const [newPin, setNewPin] = useState("")
 
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault()
     const cleanUsername = username.trim().toLowerCase()
     const cleanPin = pin.trim()
@@ -71,6 +72,7 @@ export function Login({
         return
       }
       setError("")
+      await loginBackend(cleanUsername, cleanPin)
       onLogin(cred.user, cred.redirectPage)
       return
     }
@@ -86,6 +88,7 @@ export function Login({
           : fallbackUser.role === "Manajer"
             ? "services"
             : "dashboard"
+      await loginBackend(cleanUsername, cleanPin)
       onLogin(fallbackUser, targetPage)
       return
     }

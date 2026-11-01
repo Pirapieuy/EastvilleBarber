@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AppLayout } from "./layouts/AppLayout"
 import { Login } from "./components/common/Login"
 import { DEMO_USERS, Role, toRoleKey } from "./types"
+import { clearToken } from "./api"
 
 // Kasir Pages
 import { KasirPOS } from "./pages/kasir/KasirPOS"
@@ -234,7 +235,10 @@ export function App() {
     <AppLayout
       activePage={activePage}
       currentRole={currentRole}
-      onLogout={() => setLoggedIn(false)}
+      onLogout={() => {
+        clearToken()
+        setLoggedIn(false)
+      }}
       onNavigate={setActivePage}
       onRoleChange={handleRoleChange}
     >

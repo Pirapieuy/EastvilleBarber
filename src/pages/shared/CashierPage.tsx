@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
+import { apiKasir, getToken } from "../../api"
 
 export type CatalogItem = {
-  id: number
+  id: number | string
   name: string
   price: number
   type: "Layanan" | "Produk"
@@ -54,6 +55,7 @@ export function ReceiptView({
   qris,
   change,
   cashier,
+  invoice = "INV-291026-0084",
   onClose,
 }: {
   cart: CartLine[]
@@ -65,6 +67,7 @@ export function ReceiptView({
   qris: number
   change: number
   cashier: string
+  invoice?: string
   onClose: () => void
 }) {
   const [size, setSize] = useState<"58" | "80">("58")
@@ -107,7 +110,7 @@ export function ReceiptView({
             </div>
             <div>
               <dt>No. nota</dt>
-              <dd>INV-291026-0084</dd>
+              <dd>{invoice}</dd>
             </div>
             <div>
               <dt>Kasir</dt>
@@ -207,8 +210,82 @@ export function CashierPage({
   const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
 
-  const activeBarbers = ["Seva", "Tata", "Faisal", "Fadhil", "Ferdi"]
-  const items = catalog.filter((x) => x.type === tab)
+  // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
+  // halaman tetap memakai data demo.
+  const [live, setLive] = useState(false)
+  const [catalogData, setCatalogData] = useState<CatalogItem[]>(catalog)
+  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
+    ["Seva", "Tata", "Faisal", "Fadhil", "Ferdi"].map((name) => ({ name })),
+  )
+  const [invoice, setInvoice] = useState<string | undefined>()
+  const [paying, setPaying] = useState(false)
+  const [payError, setPayError] = useState("")
+
+  useEffect(() => {
+    if (!getToken()) return
+    Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster()])
+      .then(([layanan, produk, kapster]) => {
+        setCatalogData([
+          ...layanan
+            .filter((l) => l.status === "Aktif")
+            .map((l): CatalogItem => ({ id: l.id, name: l.nama, price: l.harga, type: "Layanan" })),
+          ...produk
+            .filter((p) => p.status === "Aktif")
+            .map((p): CatalogItem => ({
+              id: p.kode,
+              name: p.nama,
+              price: p.harga,
+              type: "Produk",
+              stock: p.stok,
+            })),
+        ])
+        setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
+        setSelectedBarber(kapster[0]?.nama ?? "")
+        setCart([])
+        setCash(0)
+        setLive(true)
+      })
+      .catch(() => {
+        /* tetap pakai data demo */
+      })
+  }, [])
+
+  async function pay() {
+    if (!live) return setReceipt(true)
+    setPayError("")
+    setPaying(true)
+    try {
+      const res = await apiKasir.checkout({
+        metode: method,
+        diskon: effectiveDiscount,
+        bayarTunai: method === "QRIS" ? 0 : cash,
+        bayarQris: method === "Tunai" ? 0 : qris,
+        items: cart.map((l) => ({
+          tipe: l.type,
+          refId: l.id,
+          qty: l.qty,
+          kapsterId: barberList.find((b) => b.name === l.barber)?.id ?? "",
+        })),
+      })
+      setInvoice(res.id)
+      setReceipt(true)
+      // Segarkan stok produk setelah terjual
+      apiKasir.produk().then((produk) =>
+        setCatalogData((cur) =>
+          cur.map((c) => {
+            const p = produk.find((x) => x.kode === c.id)
+            return p ? { ...c, stock: p.stok } : c
+          }),
+        ),
+      )
+    } catch (e) {
+      setPayError(e instanceof Error ? e.message : "Transaksi gagal.")
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  const items = catalogData.filter((x) => x.type === tab)
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
   const effectiveDiscount =
     appliedDiscountPercent === null
@@ -257,7 +334,17 @@ export function CashierPage({
         qris={qris}
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
-        onClose={() => setReceipt(false)}
+        invoice={invoice}
+        onClose={() => {
+          setReceipt(false)
+          if (live) {
+            setCart([])
+            setCash(0)
+            setQris(0)
+            setDiscount(0)
+            setAppliedDiscountPercent(null)
+          }
+        }}
       />
     )
   }
@@ -277,7 +364,7 @@ export function CashierPage({
             <small>Kapster aktif</small>
           </div>
           <div className="barber-options">
-            {activeBarbers.map((barber) => (
+            {barberList.map(({ name: barber }) => (
               <Button
                 className={`barber-btn ${selectedBarber === barber ? "active" : ""}`}
                 key={barber}
@@ -625,11 +712,12 @@ export function CashierPage({
               </div>
               <Button
                 className="primary-button cart-submit"
-                disabled={!cart.length || shortage > 0}
-                onClick={() => setReceipt(true)}
+                disabled={!cart.length || shortage > 0 || paying}
+                onClick={pay}
               >
-                Bayar <Icon name="cash" />
+                {paying ? "Memproses..." : "Bayar"} <Icon name="cash" />
               </Button>
+              {payError && <small className="pin-helper">{payError}</small>}
             </section>
           </div>
         </div>
