@@ -25,6 +25,7 @@ export function BarChart({
               background: "var(--brass)",
               borderRadius: "4px 4px 0 0",
               height: `${Math.max(3, (d.value / max) * 100)}%`,
+              maxWidth: 48,
               width: "100%",
             }}
           />
