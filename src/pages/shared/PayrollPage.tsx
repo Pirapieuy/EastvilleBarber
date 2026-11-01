@@ -4,7 +4,7 @@ import { Button, PageTitle, rupiah } from "../../components/common/UI"
 
 export const staffSalary = [
   ["Seva", "SV", 47, 1880000, 210000, 350000, "Belum dibayar"],
-  ["Tatas", "TT", 39, 1560000, 140000, 0, "Dibayar"],
+  ["Tata", "TT", 39, 1560000, 140000, 0, "Dibayar"],
   ["Faisal", "FS", 35, 1400000, 70000, 500000, "Belum dibayar"],
   ["Fadhil", "FH", 42, 1680000, 175000, 200000, "Belum dibayar"],
   ["Ferdi", "FR", 38, 1520000, 150000, 100000, "Belum dibayar"],
@@ -26,7 +26,7 @@ export function KasbonTab() {
       <div className="advance-grid">
         {[
           ["Seva", "SV", 350000],
-          ["Tatas", "TT", 0],
+          ["Tata", "TT", 0],
           ["Faisal", "FS", 500000],
           ["Fadhil", "FH", 200000],
           ["Ferdi", "FR", 100000],
@@ -215,7 +215,7 @@ export function PayrollPage() {
             <PageTitle eyebrow="Jejak pembayaran" title="Riwayat pembayaran" />
             <div className="history-payment">
               <span>DS</span>
-              <strong>Tatas</strong>
+              <strong>Tata</strong>
               <span>29 Okt 2026</span>
               <b>Rp 1.700.000</b>
               <Button className="danger-link">Batalkan pembayaran</Button>

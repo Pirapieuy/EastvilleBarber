@@ -70,7 +70,7 @@ export function KapsterDashboard({
       <div className="dashboard-grid">
         <section className="panel kapster-shift-panel">
           <PageTitle
-            eyebrow="Target & Proteksi Shift (v1.2 KK-61)"
+            eyebrow="Target & Proteksi Shift"
             title="Progres Shift 8 Jam Hari Ini"
             action={
               <div className="shift-badges">
@@ -92,11 +92,6 @@ export function KapsterDashboard({
               <strong>1</strong>
               <span>pelanggan</span>
             </div>
-            <p>
-              Tinggal satu pelanggan lagi untuk mencapai target reguler hari
-              ini. Jika target belum tercapai sampai akhir shift, proteksi
-              minimum &quot;1,5&quot; akan dicatat.
-            </p>
           </div>
           <div className="shift-progress">
             <div className="progress-bar-shell">

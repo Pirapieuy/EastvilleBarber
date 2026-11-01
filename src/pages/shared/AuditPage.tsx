@@ -11,7 +11,7 @@ export function AuditPage() {
       "8% → 10%",
       "Kesepakatan baru",
     ],
-    ["29 Okt 10.24", "Tatas", "Login", "Akun Tatas", "Berhasil", "—"],
+    ["29 Okt 10.24", "Tata", "Login", "Akun Tata", "Berhasil", "—"],
     [
       "29 Okt 09.54",
       "Ardi Santoso",
@@ -22,7 +22,7 @@ export function AuditPage() {
     ],
     [
       "29 Okt 09.12",
-      "Tatas",
+      "Tata",
       "Batalkan transaksi",
       "INV-291026-0082",
       "Rp 110.000",
@@ -40,7 +40,7 @@ export function AuditPage() {
       "28 Okt 16.20",
       "Ardi Santoso",
       "Bayar gaji",
-      "Tatas",
+      "Tata",
       "Rp 1.700.000",
       "Periode 16–31",
     ],

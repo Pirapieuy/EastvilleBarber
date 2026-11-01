@@ -44,7 +44,7 @@ export const INITIAL_PRODUCT_TRANSACTIONS: ProductTransactionRecord[] = [
     qty: 1,
     unitPrice: 70000,
     totalOmzet: 70000,
-    barber: "Tatas",
+    barber: "Tata",
     seller: "HAIRPRO Official",
     barberShare: 10000,
     sellerShare: 42000,
@@ -79,7 +79,7 @@ export const INITIAL_PRODUCT_TRANSACTIONS: ProductTransactionRecord[] = [
     eastvilleShare: 20000,
     status: "Batal",
     voidReason: "Salah input varian produk pomade oleh kasir saat pembayaran",
-    voidBy: "Dian Setiawan (Manajer)",
+    voidBy: "Dian Setiawan · Manajer",
     voidAt: "29 Okt 14.30",
   },
 ]
@@ -280,7 +280,7 @@ export function ProductReportsPage({
         />
         <Kpi
           icon="home"
-          label="Total Bagian Seller"
+          label="Total Bagian Pemasok"
           tone="amber"
           value={rupiah(totalSeller)}
           detail={`${totalOmzet > 0 ? ((totalSeller / totalOmzet) * 100).toFixed(1) : 0}% bagian pemasok`}
@@ -298,8 +298,8 @@ export function ProductReportsPage({
         <Icon name="check" />
         <span>
           <strong>Sistem Proteksi Omzet & Komisi Aktif:</strong> Transaksi yang
-          dibatalkan/void otomatis dikecualikan dari perhitungan total omzet dan
-          komisi (tercatat {voidCount} void: {rupiah(voidAmount)}).
+          dibatalkan otomatis dikecualikan dari perhitungan total omzet dan
+          komisi (tercatat {voidCount} pembatalan: {rupiah(voidAmount)}).
         </span>
       </div>
 
@@ -309,19 +309,25 @@ export function ProductReportsPage({
             className={activeTab === "transaksi" ? "active" : ""}
             onClick={() => setActiveTab("transaksi")}
           >
-            <Icon name="receipt" /> Detail Transaksi Produk
+            <Icon name="receipt" />
+            <span>Detail Transaksi Produk</span>
           </Button>
           <Button
             className={activeTab === "koreksi" ? "active" : ""}
             onClick={() => setActiveTab("koreksi")}
           >
-            <Icon name="history" /> Riwayat Koreksi & Void ({voidCount})
+            <Icon name="history" />
+            <span>Riwayat Pembatalan</span>
+            {voidCount > 0 && (
+              <span className="tab-count-badge">{voidCount}</span>
+            )}
           </Button>
           <Button
             className={activeTab === "ringkasan" ? "active" : ""}
             onClick={() => setActiveTab("ringkasan")}
           >
-            <Icon name="chart" /> Ringkasan Performa
+            <Icon name="chart" />
+            <span>Ringkasan Performa</span>
           </Button>
         </div>
       </div>
@@ -342,11 +348,7 @@ export function ProductReportsPage({
                     className={statusFilter === s ? "active" : ""}
                     onClick={() => setStatusFilter(s)}
                   >
-                    {s === "Semua"
-                      ? "Semua"
-                      : s === "Lunas"
-                        ? "Lunas (Sukses)"
-                        : "Dibatalkan (Void)"}
+                    {s}
                   </Button>
                 ))}
               </div>
@@ -358,10 +360,10 @@ export function ProductReportsPage({
               <span>Nota & Waktu</span>
               <span>Produk</span>
               <span>Capster</span>
-              <span>Seller / Pemasok</span>
+              <span>Pemasok</span>
               <span>Total Omzet</span>
               <span>Bagian Capster</span>
-              <span>Bagian Seller</span>
+              <span>Bagian Pemasok</span>
               <span>Bagian Eastville</span>
               <span>Status</span>
             </div>
@@ -374,11 +376,8 @@ export function ProductReportsPage({
                   <strong>{tx.id}</strong>
                   <small>{tx.time}</small>
                 </span>
-                <span>
+                <span className="tx-product-col">
                   <strong>{tx.product}</strong>
-                  <small>
-                    {tx.qty} unit @ {rupiah(tx.unitPrice)}
-                  </small>
                 </span>
                 <span>{tx.barber}</span>
                 <span>{tx.seller}</span>
@@ -404,12 +403,12 @@ export function ProductReportsPage({
                   <i
                     className={`chip ${tx.status === "Lunas" ? "lunas" : "batal"}`}
                   >
-                    {tx.status === "Lunas" ? "Lunas" : "Void / Batal"}
+                    {tx.status === "Lunas" ? "Lunas" : "Batal"}
                   </i>
                 </span>
                 {tx.status === "Batal" && (
                   <div className="void-reason-note">
-                    <Icon name="alert" /> Void oleh {tx.voidBy} ({tx.voidAt}):{" "}
+                    <Icon name="alert" /> Dibatalkan oleh {tx.voidBy} · {tx.voidAt}:{" "}
                     {tx.voidReason}
                   </div>
                 )}
@@ -423,12 +422,12 @@ export function ProductReportsPage({
         <section className="panel correction-panel">
           <PageTitle
             eyebrow="Audit & Kontrol"
-            title="Riwayat Koreksi & Pembatalan Transaksi Produk"
+            title="Riwayat Pembatalan Transaksi Produk"
           />
           <p className="correction-desc">
             Daftar transaksi produk yang dibatalkan oleh Owner atau Manajer.
             Transaksi yang dibatalkan dipastikan tidak masuk ke dalam
-            perhitungan omzet maupun komisi capster/seller.
+            perhitungan omzet maupun komisi capster dan pemasok.
           </p>
           <div className="correction-table">
             <div className="correction-head">
@@ -436,30 +435,27 @@ export function ProductReportsPage({
               <span>Produk</span>
               <span>Nilai Dibatalkan</span>
               <span>Diotorisasi Oleh</span>
-              <span>Alasan Pembatalan / Koreksi</span>
+              <span>Alasan Pembatalan</span>
               <span>Status</span>
             </div>
             {txList
               .filter((tx) => tx.status === "Batal")
               .map((tx) => (
                 <div key={tx.id} className="correction-row">
-                  <span>
+                  <span className="tx-meta-col">
                     <strong>{tx.id}</strong>
                     <small>{tx.voidAt || tx.time}</small>
                   </span>
-                  <span>
+                  <span className="tx-product-col">
                     <strong>{tx.product}</strong>
-                    <small>
-                      {tx.qty} unit · {tx.seller}
-                    </small>
                   </span>
                   <b className="void-amount">{rupiah(tx.totalOmzet)}</b>
-                  <span>{tx.voidBy || "Manajer"}</span>
+                  <span className="tx-auth-col">{tx.voidBy || "Manajer"}</span>
                   <span className="void-reason-text">
                     {tx.voidReason || "Salah input"}
                   </span>
                   <span>
-                    <i className="chip batal">Dibatalkan</i>
+                    <i className="chip batal">Batal</i>
                   </span>
                 </div>
               ))}
@@ -486,7 +482,7 @@ export function ProductReportsPage({
                 </span>
                 <span>
                   <i className="brass-dot" />
-                  Seller{" "}
+                  Pemasok{" "}
                   {totalOmzet > 0
                     ? ((totalSeller / totalOmzet) * 100).toFixed(1)
                     : 0}
@@ -523,14 +519,14 @@ export function ProductReportsPage({
               icon="user"
               rows={[
                 ["Seva", "44 unit", "Rp 520.000"],
-                ["Tatas", "36 unit", "Rp 420.000"],
+                ["Tata", "36 unit", "Rp 420.000"],
                 ["Faisal", "29 unit", "Rp 330.000"],
                 ["Fadhil", "38 unit", "Rp 410.000"],
                 ["Ferdi", "31 unit", "Rp 360.000"],
               ]}
             />
             <CompactDetail
-              title="Per seller"
+              title="Per pemasok"
               icon="home"
               rows={[
                 ["HAIRPRO Official", "118 unit", "Rp 5.840.000"],
@@ -545,7 +541,7 @@ export function ProductReportsPage({
         <WhatsAppDialog
           onClose={() => setWa(false)}
           title="Laporan Produk"
-          text={`Total Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi capster: ${rupiah(totalBarber)}\nTotal Bagian seller: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
+          text={`Total Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi capster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
         />
       )}
     </div>

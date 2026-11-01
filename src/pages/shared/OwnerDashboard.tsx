@@ -15,7 +15,7 @@ export function OwnerDashboard({
     <div className="content">
       <PageTitle
         eyebrow="Ringkasan operasional"
-        title="Selamat pagi, Ardi (Owner Eastville)."
+        title="Selamat pagi, Ardi."
         action={
           <div className="page-actions">
             <Button

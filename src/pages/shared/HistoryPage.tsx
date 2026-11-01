@@ -41,11 +41,11 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     barber: "Seva",
     method: "Gabungan",
     commission: 24000,
-    commissionNote: "40% dari total layanan (Rp 60.000)",
+    commissionNote: "40% total layanan Rp 60.000",
     total: 60000,
     status: "Lunas",
     createdTime: "29 Okt 2026, 10:24 WIB",
-    createdBy: "Siti Rahma (Kasir)",
+    createdBy: "Siti Rahma · Kasir",
   },
   {
     id: "INV-291026-0083",
@@ -54,14 +54,14 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     items: [
       { name: "Hair Coloring", qty: 1, price: 120000, type: "Layanan" },
     ],
-    barber: "Tatas",
+    barber: "Tata",
     method: "QRIS",
     commission: 48000,
-    commissionNote: "40% dari total layanan (Rp 120.000)",
+    commissionNote: "40% total layanan Rp 120.000",
     total: 120000,
     status: "Lunas",
     createdTime: "29 Okt 2026, 09:46 WIB",
-    createdBy: "Siti Rahma (Kasir)",
+    createdBy: "Siti Rahma · Kasir",
   },
   {
     id: "INV-291026-0082",
@@ -78,9 +78,9 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     total: 110000,
     status: "BATAL",
     createdTime: "29 Okt 2026, 09:05 WIB",
-    createdBy: "Siti Rahma (Kasir)",
+    createdBy: "Siti Rahma · Kasir",
     voidReason: "Salah input varian produk pomade oleh kasir saat pembayaran",
-    voidBy: "Dian Setiawan (Manajer)",
+    voidBy: "Dian Setiawan · Manajer",
     voidTime: "29 Okt 2026, 09:12 WIB",
   },
   {
@@ -97,7 +97,7 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     total: 50000,
     status: "Manual",
     createdTime: "29 Okt 2026, 08:51 WIB",
-    createdBy: "Dian Setiawan (Manajer - Input Rekap Manual)",
+    createdBy: "Dian Setiawan · Rekap Manual",
   },
   {
     id: "INV-291026-0038",
@@ -114,7 +114,7 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     total: 110000,
     status: "Lunas",
     createdTime: "29 Okt 2026, 08:15 WIB",
-    createdBy: "Siti Rahma (Kasir)",
+    createdBy: "Siti Rahma · Kasir",
   },
 ]
 
@@ -202,7 +202,7 @@ export function HistoryPage({
                 ...t,
                 status: "BATAL",
                 voidReason: reason,
-                voidBy: `${currentUser?.name || userRole} (${userRole})`,
+                voidBy: `${currentUser?.name || userRole} · ${userRole}`,
                 voidTime: "Baru saja",
               }
             : t,
@@ -268,7 +268,7 @@ export function HistoryPage({
         </div>
         <select defaultValue="Semua kapster">
           <option>Semua kapster</option>
-          {["Seva", "Tatas", "Faisal", "Fadhil", "Ferdi"].map((barber) => (
+          {["Seva", "Tata", "Faisal", "Fadhil", "Ferdi"].map((barber) => (
             <option key={barber}>{barber}</option>
           ))}
         </select>
@@ -402,7 +402,7 @@ export function HistoryPage({
                 <div className="audit-entry voided">
                   <i className="audit-dot voided" />
                   <div>
-                    <strong>Transaksi Dibatalkan (Void)</strong>
+                    <strong>Transaksi Dibatalkan</strong>
                     <small>
                       Dibatalkan oleh {selected.voidBy} · {selected.voidTime}
                     </small>

@@ -47,7 +47,7 @@ export function ManualPage() {
               <option>Treatment</option>
             </select>
             <select>
-              <option>{i ? "Tatas" : "Seva"}</option>
+              <option>{i ? "Tata" : "Seva"}</option>
               <option>Faisal</option>
               <option>Fadhil</option>
               <option>Ferdi</option>

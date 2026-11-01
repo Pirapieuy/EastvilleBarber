@@ -75,22 +75,22 @@ export function ProductsPage() {
       time: "29 Okt 10.15",
       product: "Free Style Dust",
       change: "Komisi capster 8% → 10%",
-      by: "Ardi Pradana (Owner)",
+      by: "Ardi Pradana · Owner",
       reason: "Penyesuaian kesepakatan komisi baru",
     },
     {
       time: "28 Okt 16.40",
       product: "Water Based Pomade",
       change: "Status Non-aktif → Aktif",
-      by: "Dian Setiawan (Manajer)",
+      by: "Dian Setiawan · Manajer",
       reason: "Stok baru diterima dari pemasok",
     },
     {
       time: "27 Okt 09.22",
       product: "Miracle Treatment",
-      change: "Bagian Seller Rp 35rb → Rp 40rb",
-      by: "Ardi Pradana (Owner)",
-      reason: "Penyesuaian harga seller",
+      change: "Bagian Pemasok Rp 35rb → Rp 40rb",
+      by: "Ardi Pradana · Owner",
+      reason: "Penyesuaian harga pemasok",
     },
   ])
 
@@ -134,8 +134,8 @@ export function ProductsPage() {
           {
             time: "Baru saja",
             product: formData.name,
-            change: `Update skema ${formData.scheme} (${formData.status})`,
-            by: "Owner / Manajer",
+            change: `Update skema ${formData.scheme} · ${formData.status}`,
+            by: "Owner atau Manajer",
             reason: changeReason,
           },
           ...logs,
@@ -147,8 +147,8 @@ export function ProductsPage() {
         {
           time: "Baru saja",
           product: formData.name,
-          change: `Produk baru (${formData.scheme}, ${formData.status})`,
-          by: "Owner / Manajer",
+          change: `Produk baru · ${formData.scheme}, ${formData.status}`,
+          by: "Owner atau Manajer",
           reason: changeReason || "Penambahan produk baru",
         },
         ...logs,
@@ -187,7 +187,8 @@ export function ProductsPage() {
           className={tab === "Riwayat perubahan" ? "active" : ""}
           onClick={() => setTab("Riwayat perubahan")}
         >
-          Riwayat perubahan komisi ({changeLogs.length})
+          <span>Riwayat perubahan komisi</span>
+          <span className="tab-count-badge">{changeLogs.length}</span>
         </Button>
       </div>
       {tab === "Daftar" ? (
@@ -205,7 +206,7 @@ export function ProductsPage() {
           </div>
           <div className="product-admin-head">
             <span>Produk</span>
-            <span>Seller / Pemasok</span>
+            <span>Pemasok</span>
             <span>Stok</span>
             <span>Skema komisi</span>
             <span>Status</span>
@@ -228,7 +229,7 @@ export function ProductsPage() {
               </span>
               <span className="scheme-tag">
                 {product.scheme === "Persentase"
-                  ? `Persen (${product.shares.barber}% / ${product.shares.seller}% / ${product.shares.eastville}%)`
+                  ? `Persen (${product.shares.barber}% · ${product.shares.seller}% · ${product.shares.eastville}%)`
                   : `Nominal (C:${rupiah(product.nominalShares.barber)} · S:${rupiah(product.nominalShares.seller)} · E:${rupiah(product.nominalShares.eastville)})`}
               </span>
               <i
@@ -309,7 +310,7 @@ export function ProductsPage() {
                   <small className="valid-text">Kode unik produk</small>
                 </label>
                 <label>
-                  <span>Nama Seller / Pemasok</span>
+                  <span>Nama Pemasok</span>
                   <input
                     required
                     value={formData.seller}
@@ -320,7 +321,7 @@ export function ProductsPage() {
                   />
                 </label>
                 <label>
-                  <span>Harga jual (Rp)</span>
+                  <span>Harga jual</span>
                   <input
                     type="number"
                     value={formData.price}
@@ -333,7 +334,7 @@ export function ProductsPage() {
                   />
                 </label>
                 <label>
-                  <span>Harga modal (Rp)</span>
+                  <span>Harga modal</span>
                   <input
                     type="number"
                     value={formData.costPrice}
@@ -346,7 +347,7 @@ export function ProductsPage() {
                   />
                 </label>
                 <label>
-                  <span>Stok produk (unit)</span>
+                  <span>Stok produk</span>
                   <input
                     type="number"
                     value={formData.stock}
@@ -399,7 +400,7 @@ export function ProductsPage() {
                     />
                     <span className="radio-circle" />
                     <div>
-                      <strong>Persentase (%)</strong>
+                      <strong>Persentase</strong>
                       <small>
                         Bagi hasil proporsional dari omzet penjualan
                       </small>
@@ -418,9 +419,9 @@ export function ProductsPage() {
                     />
                     <span className="radio-circle" />
                     <div>
-                      <strong>Nominal Tetap (Rp)</strong>
+                      <strong>Nominal Tetap</strong>
                       <small>
-                        Nilai tetap (flat fee) per unit produk terjual
+                        Nilai tetap per unit produk terjual
                       </small>
                     </div>
                   </label>
@@ -430,7 +431,7 @@ export function ProductsPage() {
                   <>
                     <div className="share-inputs">
                       <label>
-                        <span>Bagian Capster (%)</span>
+                        <span>Bagian Capster</span>
                         <div className="input-shell">
                           <input
                             onChange={(e) =>
@@ -449,7 +450,7 @@ export function ProductsPage() {
                         </div>
                       </label>
                       <label>
-                        <span>Bagian Seller / Pemasok (%)</span>
+                        <span>Bagian Pemasok</span>
                         <div className="input-shell">
                           <input
                             onChange={(e) =>
@@ -468,7 +469,7 @@ export function ProductsPage() {
                         </div>
                       </label>
                       <label>
-                        <span>Bagian Eastville (%)</span>
+                        <span>Bagian Eastville</span>
                         <div className="input-shell">
                           <input
                             onChange={(e) =>
@@ -529,9 +530,10 @@ export function ProductsPage() {
                 ) : (
                   <div className="nominal-scheme">
                     <label>
-                      <span>Bagian Capster (Rp/unit)</span>
+                      <span>Bagian Capster</span>
                       <input
                         type="number"
+                        placeholder="Rp per unit"
                         value={formData.nominalShares.barber}
                         onChange={(e) =>
                           setFormData({
@@ -545,9 +547,10 @@ export function ProductsPage() {
                       />
                     </label>
                     <label>
-                      <span>Bagian Seller / Pemasok (Rp/unit)</span>
+                      <span>Bagian Pemasok</span>
                       <input
                         type="number"
+                        placeholder="Rp per unit"
                         value={formData.nominalShares.seller}
                         onChange={(e) =>
                           setFormData({
@@ -561,9 +564,10 @@ export function ProductsPage() {
                       />
                     </label>
                     <label>
-                      <span>Bagian Eastville (Rp/unit)</span>
+                      <span>Bagian Eastville</span>
                       <input
                         type="number"
+                        placeholder="Rp per unit"
                         value={formData.nominalShares.eastville}
                         onChange={(e) =>
                           setFormData({
@@ -595,11 +599,11 @@ export function ProductsPage() {
                 )}
               </div>
               <label>
-                <span>Catatan / Alasan Perubahan Komisi</span>
+                <span>Alasan Perubahan Komisi</span>
                 <textarea
                   value={changeReason}
                   onChange={(e) => setChangeReason(e.target.value)}
-                  placeholder="Tuliskan alasan penyesuaian komisi atau catatan seller untuk jejak log..."
+                  placeholder="Tuliskan alasan penyesuaian komisi untuk jejak audit log..."
                 />
               </label>
             </div>
@@ -651,8 +655,8 @@ export function ProductsPage() {
               <input defaultValue="10" type="number" />
             </label>
             <label>
-              <span>Pemasok (opsional)</span>
-              <input defaultValue="HAIRPRO Official" />
+              <span>Pemasok</span>
+              <input defaultValue="HAIRPRO Official" placeholder="Nama pemasok atau konsinyasi" />
             </label>
             <footer>
               <Button

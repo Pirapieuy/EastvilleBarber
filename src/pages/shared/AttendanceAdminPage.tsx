@@ -68,7 +68,7 @@ export function AttendanceAdminPage({
                 "08.00",
               ],
               [
-                "Tatas",
+                "Tata",
                 "08.00",
                 "08.00",
                 "Libur",
@@ -139,7 +139,7 @@ export function AttendanceAdminPage({
           </div>
           {[
             ["Seva", "10.00", "09.54", "Tepat waktu"],
-            ["Tatas", "08.00", "08.07", "Terlambat 7 mnt"],
+            ["Tata", "08.00", "08.07", "Terlambat 7 mnt"],
             ["Faisal", "10.00", "10.12", "Dikoreksi"],
           ].map((row) => (
             <article key={row[0]}>
@@ -247,8 +247,8 @@ export function AttendanceAdminPage({
               </select>
             </label>
             <label>
-              <span>Alasan koreksi (wajib)</span>
-              <textarea placeholder="Tuliskan dasar koreksi..." />
+              <span>Alasan koreksi</span>
+              <textarea placeholder="Tuliskan dasar koreksi..." required />
             </label>
             <footer>
               <Button

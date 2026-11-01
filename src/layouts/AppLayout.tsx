@@ -87,29 +87,63 @@ export function AppLayout({
       </div>
 
       <main className="workspace">
-        <header className="app-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Button className="mobile-menu" onClick={() => setMobileNav(true)}>
-              <Icon name="menu" />
-            </Button>
-            <span className="eyebrow" style={{ margin: 0 }}>
-              Mode Aktif: <strong>{currentRole.toUpperCase()}</strong>
-            </span>
-          </div>
-
-          {onRoleChange && (
-            <div className="segmented" style={{ transform: "scale(0.9)", transformOrigin: "right center" }} title="Ubah peran untuk pengetesan">
-              {ROLES.map((role) => (
-                <Button
-                  className={toRoleKey(role) === roleKey ? "active" : ""}
-                  key={role}
-                  onClick={() => onRoleChange(role)}
-                >
-                  {role}
-                </Button>
-              ))}
+        <header className="app-header">
+          <div className="app-header-inner">
+            <div className="header-left">
+              <Button
+                className="mobile-menu"
+                onClick={() => setMobileNav(true)}
+                aria-label="Buka menu navigasi"
+                title="Buka Menu"
+              >
+                <Icon name="menu" />
+              </Button>
+              <div className="header-status-badge">
+                <span className="status-indicator-dot" />
+                <span className="status-badge-label">Mode Aktif:</span>
+                <strong className={`status-badge-role role-${roleKey}`}>
+                  {currentRole}
+                </strong>
+              </div>
             </div>
-          )}
+
+            {onRoleChange && (
+              <div className="header-role-controls">
+                <div
+                  className="segmented header-segmented-desktop"
+                  title="Ubah peran untuk pengetesan"
+                >
+                  {ROLES.map((role) => (
+                    <Button
+                      className={toRoleKey(role) === roleKey ? "active" : ""}
+                      key={role}
+                      onClick={() => onRoleChange(role)}
+                    >
+                      {role}
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="header-role-mobile">
+                  <div className="header-select-shell">
+                    <select
+                      className="header-role-select"
+                      value={typeof currentRole === "string" ? currentRole : ""}
+                      onChange={(e) => onRoleChange(e.target.value as Role)}
+                      aria-label="Ubah peran aktif"
+                    >
+                      {ROLES.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                    <Icon name="chevron" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </header>
 
         {children}

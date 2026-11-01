@@ -133,7 +133,7 @@ export function AttendancePage() {
             <label>
               <span>Jenis kendala</span>
               <select>
-                <option>Kamera rusak / tidak dapat dibuka</option>
+                <option>Kamera rusak atau tidak dapat dibuka</option>
                 <option>HP mati</option>
                 <option>Internet bermasalah</option>
               </select>

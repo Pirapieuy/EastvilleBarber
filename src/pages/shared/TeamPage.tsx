@@ -6,7 +6,7 @@ import { AppUser, Role } from "../../types"
 export const teamData = [
   ["AS", "Ardi Santoso", "Owner", "Aktif"],
   ["SV", "Seva", "Manajer,Kapster", "Aktif"],
-  ["TT", "Tatas", "Kasir,Kapster", "Aktif"],
+  ["TT", "Tata", "Kasir,Kapster", "Aktif"],
   ["FS", "Faisal", "Kapster", "Aktif"],
   ["FH", "Fadhil", "Kapster", "Aktif"],
   ["FR", "Ferdi", "Kapster", "Aktif"],
@@ -34,7 +34,7 @@ export function TeamPage({
         title={pageTitle}
         action={
           isManager ? (
-            <span className="chip active">Mode Lihat (Manajer)</span>
+            <span className="chip active">Mode Lihat</span>
           ) : (
             <Button className="primary-button" onClick={() => setForm(true)}>
               <Icon name="plus" /> Tambah anggota
@@ -44,8 +44,8 @@ export function TeamPage({
       />
       {isManager && (
         <div className="danger-banner" style={{ marginBottom: 14 }}>
-          <Icon name="lock" /> Sesuai KK-05, penambahan, pengubahan, dan
-          penonaktifan anggota tim hanya dapat dilakukan oleh Owner.
+          <Icon name="lock" /> Penambahan, pengubahan, dan penonaktifan anggota
+          tim hanya dapat dilakukan oleh Owner.
         </div>
       )}
       <div className="filters">
@@ -105,7 +105,7 @@ export function TeamPage({
             <header>
               <div>
                 <p className="eyebrow">Anggota tim</p>
-                <h2>Tambah / ubah data</h2>
+                <h2>Kelola data tim</h2>
               </div>
               <Button onClick={() => setForm(false)}>
                 <Icon name="close" />
@@ -130,7 +130,7 @@ export function TeamPage({
                   <input placeholder="••••••" type="password" />
                 </label>
               </div>
-              <span className="form-label">Peran (bisa lebih dari satu)</span>
+              <span className="form-label">Pilih peran</span>
               <div className="role-options">
                 {["Owner", "Manajer", "Kasir", "Kapster"].map((r) => (
                   <Button

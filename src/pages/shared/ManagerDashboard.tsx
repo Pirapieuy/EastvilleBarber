@@ -18,7 +18,7 @@ export function ManagerDashboard({
     <div className="content">
       <PageTitle
         eyebrow="Rabu, 29 Oktober 2026 · Operasional"
-        title={`Selamat pagi, ${firstName} (Manajer).`}
+        title={`Selamat pagi, ${firstName}.`}
         action={
           <div className="page-actions">
             <Button
@@ -62,8 +62,8 @@ export function ManagerDashboard({
           icon="check"
           label="Kehadiran Tim"
           tone="dark"
-          value="3 / 3 Hadir"
-          detail="Seva, Tatas, Ferdi · Tepat Waktu"
+          value="3 dari 3 Hadir"
+          detail="Seva, Tata, Ferdi · Tepat Waktu"
         />
       </div>
 
@@ -96,19 +96,19 @@ export function ManagerDashboard({
           </div>
         </section>
 
-        <section className="panel">
-          <PageTitle
-            eyebrow="Kapster Bertugas"
-            title="Status Shift & Absensi Hari Ini"
-            action={
+        <section className="panel staff-duty-panel">
+          <div className="staff-panel-header">
+            <div className="staff-panel-top">
+              <p className="eyebrow">Kapster Bertugas</p>
               <Button
-                className="text-button"
+                className="text-button staff-panel-action"
                 onClick={() => nav("AbsensiTim")}
               >
                 Lihat Semua Foto <Icon name="arrow" />
               </Button>
-            }
-          />
+            </div>
+            <h2 className="staff-panel-title">Status Shift & Absensi Hari Ini</h2>
+          </div>
           <div className="staff-duty-list">
             {[
               {
@@ -119,7 +119,7 @@ export function ManagerDashboard({
                 done: 5,
               },
               {
-                name: "Tatas",
+                name: "Tata",
                 shift: "10.00 - 20.00",
                 checkin: "09.48 WIB",
                 status: "Tepat Waktu",

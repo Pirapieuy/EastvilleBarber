@@ -5,7 +5,7 @@ import { AppUser, Role } from "../../types"
 
 export const barberReport = [
   ["Seva", 124, 12480000, 4992000],
-  ["Tatas", 97, 9730000, 3892000],
+  ["Tata", 97, 9730000, 3892000],
   ["Faisal", 57, 6040000, 2416000],
   ["Fadhil", 111, 11250000, 4500000],
   ["Ferdi", 86, 8750000, 3500000],

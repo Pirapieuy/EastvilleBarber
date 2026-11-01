@@ -192,9 +192,9 @@ export function CashierPage({
     { ...catalog[0], lineId: `${catalog[0].id}-Seva`, qty: 1, barber: "Seva" },
     {
       ...catalog[2],
-      lineId: `${catalog[2].id}-Tatas`,
+      lineId: `${catalog[2].id}-Tata`,
       qty: 1,
-      barber: "Tatas",
+      barber: "Tata",
     },
   ])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
@@ -207,7 +207,7 @@ export function CashierPage({
   const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
 
-  const activeBarbers = ["Seva", "Tatas", "Faisal", "Fadhil", "Ferdi"]
+  const activeBarbers = ["Seva", "Tata", "Faisal", "Fadhil", "Ferdi"]
   const items = catalog.filter((x) => x.type === tab)
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
   const effectiveDiscount =
