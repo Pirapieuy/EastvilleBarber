@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
+import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 
@@ -73,7 +74,27 @@ export function ExpensesPage() {
   const [newCategory, setNewCategory] = useState<ExpenseRecord["category"]>("Listrik")
   const [newAmount, setNewAmount] = useState("")
   const [newDescription, setNewDescription] = useState("")
-  const [newDate, setNewDate] = useState("2026-10-29")
+  const [newDate, setNewDate] = useState(() => {
+    const d = new Date()
+    const pad = (n: number) => String(n).padStart(2, "0")
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  })
+
+  const [live, setLive] = useState(false)
+
+  // Dengan token login, data dari backend; tanpa token tetap data demo.
+  function loadLive() {
+    return apiPengeluaran.list().then((rows) => {
+      setRecords(rows as ExpenseRecord[])
+      setLive(true)
+    })
+  }
+  useEffect(() => {
+    if (!getToken()) return
+    loadLive().catch(() => {
+      /* tetap pakai data demo */
+    })
+  }, [])
 
   const filteredRecords = records.filter((r) => {
     const matchCategory = category === "Semua" || r.category === category
@@ -83,11 +104,28 @@ export function ExpensesPage() {
     return matchCategory && matchSearch
   })
 
-  function handleCreate(e: FormEvent) {
+  async function handleCreate(e: FormEvent) {
     e.preventDefault()
     if (!newAmount || !newDescription) return
 
     const parsedAmount = Number(newAmount.replace(/\D/g, "")) || 0
+    if (live) {
+      try {
+        await apiPengeluaran.create({
+          tanggal: newDate,
+          kategori: newCategory,
+          deskripsi: newDescription,
+          jumlah: parsedAmount,
+        })
+        await loadLive()
+        setNewAmount("")
+        setNewDescription("")
+        setForm(false)
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : "Gagal menyimpan.")
+      }
+      return
+    }
     const dateFormatted = newDate
       ? new Date(newDate).toLocaleDateString("id-ID", {
           day: "numeric",
@@ -110,7 +148,24 @@ export function ExpensesPage() {
     setForm(false)
   }
 
-  function handleToggleStatus(id: string) {
+  async function handleToggleStatus(id: string) {
+    if (live) {
+      const item = records.find((r) => r.id === id)
+      if (!item) return
+      try {
+        if (item.status === "Aktif") {
+          const alasan = window.prompt("Alasan pembatalan pengeluaran?")?.trim()
+          if (!alasan) return
+          await apiPengeluaran.batalkan(id, alasan)
+        } else {
+          await apiPengeluaran.aktifkan(id)
+        }
+        await loadLive()
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : "Aksi gagal.")
+      }
+      return
+    }
     setRecords((prev) =>
       prev.map((item) => {
         if (item.id === id) {

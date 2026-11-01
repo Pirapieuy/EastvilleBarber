@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
+import { apiTransaksi, getToken } from "../../api"
 import { CartLine, ReceiptView } from "./CashierPage"
 
 export interface HistoryItemDetail {
@@ -191,9 +192,37 @@ export function HistoryPage({
   const [action, setAction] = useState<null | "void" | "restore">(null)
   const [showReceipt, setShowReceipt] = useState(false)
 
+  const [live, setLive] = useState(false)
+
   const selected = txList.find((tx) => tx.id === selectedId) || txList[0]
 
-  function handleConfirmAction(reason: string) {
+  // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
+  function loadLive() {
+    return apiTransaksi.list().then((rows) => {
+      const list = rows as HistoryTransactionRecord[]
+      setTxList(list)
+      setSelectedId((cur) => (list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? "")))
+      setLive(true)
+    })
+  }
+  useEffect(() => {
+    if (!getToken()) return
+    loadLive().catch(() => {
+      /* tetap pakai data demo */
+    })
+  }, [])
+
+  async function handleConfirmAction(reason: string) {
+    if (live && selected) {
+      try {
+        if (action === "void") await apiTransaksi.batalkan(selected.id, reason)
+        else if (action === "restore") await apiTransaksi.pulihkan(selected.id, reason)
+        await loadLive()
+      } catch (e) {
+        window.alert(e instanceof Error ? e.message : "Aksi gagal.")
+      }
+      return
+    }
     if (action === "void") {
       setTxList((prev) =>
         prev.map((t) =>
@@ -225,6 +254,14 @@ export function HistoryPage({
     }
   }
 
+  if (!selected) {
+    return (
+      <div className="content">
+        <p>Belum ada transaksi.</p>
+      </div>
+    )
+  }
+
   if (showReceipt) {
     const subtotal = selected.items.reduce((s, it) => s + it.price * it.qty, 0)
     const cartLines: CartLine[] = selected.items.map((it, idx) => ({
@@ -253,6 +290,7 @@ export function HistoryPage({
         }
         change={0}
         cashier={selected.createdBy}
+        invoice={selected.id}
         onClose={() => setShowReceipt(false)}
       />
     )

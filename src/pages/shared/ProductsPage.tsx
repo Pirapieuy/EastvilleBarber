@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
+import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
 
@@ -70,6 +71,51 @@ export function ProductsPage() {
     nominalShares: { barber: 7000, seller: 42000, eastville: 21000 },
   })
   const [changeReason, setChangeReason] = useState("")
+  const [live, setLive] = useState(false)
+  const [stockCode, setStockCode] = useState("")
+  const [stockQty, setStockQty] = useState("10")
+  const [stockNote, setStockNote] = useState("")
+
+  // Dengan token login, data dari backend; tanpa token tetap data demo.
+  function loadLive() {
+    return Promise.all([apiProduk.list(), apiProduk.log()]).then(([rows, logs]) => {
+      setProductsList(
+        rows.map((p: ProdukRow) => ({
+          code: p.kode,
+          name: p.nama,
+          seller: p.penjual,
+          stock: p.stok,
+          scheme: p.skema,
+          status: p.status,
+          price: p.harga,
+          costPrice: p.harga_modal,
+          shares: { barber: p.persen_kapster, seller: p.persen_penjual, eastville: p.persen_eastville },
+          nominalShares: { barber: p.nominal_kapster, seller: p.nominal_penjual, eastville: p.nominal_eastville },
+        })),
+      )
+      setChangeLogs(
+        (logs as { waktu: string; produk: string; perubahan: string; oleh: string; alasan: string }[]).map((l) => ({
+          time: new Date(l.waktu).toLocaleString("id-ID", {
+            day: "numeric",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          product: l.produk,
+          change: l.perubahan,
+          by: l.oleh,
+          reason: l.alasan,
+        })),
+      )
+      setLive(true)
+    })
+  }
+  useEffect(() => {
+    if (!getToken()) return
+    loadLive().catch(() => {
+      /* tetap pakai data demo */
+    })
+  }, [])
   const [changeLogs, setChangeLogs] = useState([
     {
       time: "29 Okt 10.15",
@@ -122,9 +168,33 @@ export function ProductsPage() {
     setFormOpen(true)
   }
 
-  function handleSave(e: FormEvent) {
+  async function handleSave(e: FormEvent) {
     e.preventDefault()
     if (!formData.name || !formData.code || !formData.seller) return
+    if (live) {
+      try {
+        await apiProduk.simpan(
+          {
+            kode: formData.code,
+            nama: formData.name,
+            penjual: formData.seller,
+            stok: formData.stock,
+            skema: formData.scheme,
+            status: formData.status,
+            harga: formData.price,
+            hargaModal: formData.costPrice,
+            shares: formData.shares,
+            nominalShares: formData.nominalShares,
+          },
+          changeReason,
+        )
+        await loadLive()
+        setFormOpen(false)
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : "Gagal menyimpan.")
+      }
+      return
+    }
     if (editingCode) {
       setProductsList((list) =>
         list.map((p) => (p.code === editingCode ? { ...formData } : p)),
@@ -632,8 +702,22 @@ export function ProductsPage() {
         <div className="modal-overlay">
           <form
             className="simple-modal"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault()
+              if (live) {
+                const code = stockCode || productsList[0]?.code
+                try {
+                  await apiProduk.adjustStok(
+                    code,
+                    Number(stockQty),
+                    `Pembelian stok${stockNote ? ` · ${stockNote}` : ""}`,
+                  )
+                  await loadLive()
+                } catch (err) {
+                  window.alert(err instanceof Error ? err.message : "Gagal menambah stok.")
+                  return
+                }
+              }
               setStockOpen(false)
             }}
           >
@@ -645,18 +729,32 @@ export function ProductsPage() {
             </header>
             <label>
               <span>Produk</span>
-              <select>
-                <option>Free Style Dust</option>
-                <option>Hair Paste Pomade</option>
+              <select
+                value={stockCode || productsList[0]?.code}
+                onChange={(e) => setStockCode(e.target.value)}
+              >
+                {productsList.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.name}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
               <span>Jumlah masuk</span>
-              <input defaultValue="10" type="number" />
+              <input
+                value={stockQty}
+                onChange={(e) => setStockQty(e.target.value)}
+                type="number"
+              />
             </label>
             <label>
               <span>Pemasok</span>
-              <input defaultValue="HAIRPRO Official" placeholder="Nama pemasok atau konsinyasi" />
+              <input
+                value={stockNote}
+                onChange={(e) => setStockNote(e.target.value)}
+                placeholder="Nama pemasok atau konsinyasi"
+              />
             </label>
             <footer>
               <Button

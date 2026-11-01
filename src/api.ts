@@ -131,6 +131,7 @@ export const apiPengeluaran = {
   create: (p: { tanggal: string; kategori: string; deskripsi: string; jumlah: number }) =>
     api<{ id: string }>("create-pengeluaran", { ...p }),
   batalkan: (id: string, alasan: string) => api("batalkan-pengeluaran", { id, alasan }),
+  aktifkan: (id: string) => api("aktifkan-pengeluaran", { id }),
 }
 
 export const apiProduk = {

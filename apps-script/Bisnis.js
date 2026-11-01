@@ -55,6 +55,7 @@ var AKSES = {
   "list-pengeluaran":    ["Owner", "Manajer"],
   "create-pengeluaran":  ["Owner", "Manajer"],
   "batalkan-pengeluaran": ["Owner", "Manajer"],
+  "aktifkan-pengeluaran": ["Owner", "Manajer"],
   "simpan-produk":       ["Owner", "Manajer"],
   "adjust-stok":         ["Owner", "Manajer"],
   "log-produk":          ["Owner", "Manajer"]
@@ -126,6 +127,7 @@ function routeBisnis(action, body) {
       case "list-pengeluaran":     return ok_(listPengeluaran_());
       case "create-pengeluaran":   return createPengeluaran_(body, user);
       case "batalkan-pengeluaran": return batalkanPengeluaran_(body, user);
+      case "aktifkan-pengeluaran": return aktifkanPengeluaran_(body, user);
       case "simpan-produk":        return simpanProduk_(body, user);
       case "adjust-stok":          return adjustStok_(body, user);
       case "log-produk":           return ok_(readTable_(SHEET_PRODUK_LOG).reverse());
@@ -480,6 +482,18 @@ function batalkanPengeluaran_(body, user) {
   setCell_(SHEET_PENGELUARAN, r._row, "status", "BATAL");
   setCell_(SHEET_PENGELUARAN, r._row, "alasan_batal", alasan);
   writeAuditLog(user.id, user.nama, "BATAL_PENGELUARAN", r.id + " — " + alasan);
+  return ok_({ id: r.id });
+}
+
+
+/** Body: { id }. Mengaktifkan kembali pengeluaran yang dibatalkan. */
+function aktifkanPengeluaran_(body, user) {
+  var r = readTable_(SHEET_PENGELUARAN).filter(function (x) { return x.id === body.id; })[0];
+  if (!r) return fail_("Pengeluaran tidak ditemukan.");
+  if (r.status !== "BATAL") return fail_("Pengeluaran ini sudah aktif.");
+  setCell_(SHEET_PENGELUARAN, r._row, "status", "Aktif");
+  setCell_(SHEET_PENGELUARAN, r._row, "alasan_batal", "");
+  writeAuditLog(user.id, user.nama, "AKTIFKAN_PENGELUARAN", r.id);
   return ok_({ id: r.id });
 }
 
