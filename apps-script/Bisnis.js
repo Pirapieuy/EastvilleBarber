@@ -16,7 +16,18 @@ var SHEET_PENGELUARAN = "Pengeluaran";
 var SHEET_STOK_MUTASI = "StokMutasi";
 var SHEET_PRODUK_LOG = "ProdukLog";
 
-var KOMISI_LAYANAN_PERSEN = 40;
+var SHEET_PENGATURAN = "Pengaturan";
+var SHEET_KOMISI_KAPSTER = "KomisiKapster";
+
+// Nilai awal pengaturan (bisa diubah lewat action simpan-pengaturan / sheet Pengaturan).
+// Jam disimpan sebagai angka HHMM (1000 = 10:00) supaya Sheets tidak mengubahnya jadi format waktu.
+var PENGATURAN_DEFAULT = {
+  jam_mulai: 1000,
+  jam_selesai: 2100,
+  komisi_default: 40,   // % layanan untuk kapster di jam kerja
+  komisi_lembur: 50     // % layanan untuk kapster di luar jam kerja
+};
+var SCHEMA_VERSION = "2";
 
 var HEADERS = {
   Layanan: ["id", "nama", "harga", "status"],
@@ -28,17 +39,19 @@ var HEADERS = {
   Transaksi: [
     "id", "waktu", "tanggal", "jam", "metode", "subtotal", "diskon", "total",
     "bayar_tunai", "bayar_qris", "komisi_total", "status",
-    "dibuat_oleh_id", "dibuat_oleh", "void_alasan", "void_oleh", "void_waktu"
+    "dibuat_oleh_id", "dibuat_oleh", "void_alasan", "void_oleh", "void_waktu", "lembur"
   ],
   TransaksiItem: [
-    "trx_id", "tipe", "ref_id", "nama", "qty", "harga", "kapster_id", "kapster", "komisi"
+    "trx_id", "tipe", "ref_id", "nama", "qty", "harga", "kapster_id", "kapster", "komisi", "komisi_persen"
   ],
   Pengeluaran: [
     "id", "tanggal", "kategori", "deskripsi", "jumlah", "status",
     "alasan_batal", "dibuat_oleh", "waktu"
   ],
   StokMutasi: ["waktu", "kode", "delta", "stok_akhir", "alasan", "trx_id", "oleh"],
-  ProdukLog: ["waktu", "kode", "produk", "perubahan", "oleh", "alasan"]
+  ProdukLog: ["waktu", "kode", "produk", "perubahan", "oleh", "alasan"],
+  Pengaturan: ["key", "value"],
+  KomisiKapster: ["user_id", "persen", "diubah_oleh", "waktu"]
 };
 
 var KATEGORI_PENGELUARAN = ["Perlengkapan", "Listrik", "Air", "Sewa", "Lain-lain"];
@@ -58,7 +71,10 @@ var AKSES = {
   "aktifkan-pengeluaran": ["Owner", "Manajer"],
   "simpan-produk":       ["Owner", "Manajer"],
   "adjust-stok":         ["Owner", "Manajer"],
-  "log-produk":          ["Owner", "Manajer"]
+  "log-produk":          ["Owner", "Manajer"],
+  "get-pengaturan":      ["Owner", "Manajer"],
+  "simpan-pengaturan":   ["Owner", "Manajer"],
+  "set-komisi-kapster":  ["Owner", "Manajer"]
 };
 
 
@@ -112,6 +128,8 @@ function routeBisnis(action, body) {
     return jsonResponse({ success: false, error: "Peran " + user.role + " tidak boleh melakukan aksi ini.", code: "FORBIDDEN" });
   }
 
+  ensureSchema_();
+
   // Aksi yang menulis data dikunci supaya stok/ID tidak balapan.
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -131,6 +149,9 @@ function routeBisnis(action, body) {
       case "simpan-produk":        return simpanProduk_(body, user);
       case "adjust-stok":          return adjustStok_(body, user);
       case "log-produk":           return ok_(readTable_(SHEET_PRODUK_LOG).reverse());
+      case "get-pengaturan":       return ok_(bentukPengaturan_());
+      case "simpan-pengaturan":    return simpanPengaturan_(body, user);
+      case "set-komisi-kapster":   return setKomisiKapster_(body, user);
     }
   } finally {
     lock.releaseLock();
@@ -211,6 +232,125 @@ function stripRow_(o) {
 
 
 // ============================================================
+// SKEMA & PENGATURAN
+// ============================================================
+
+/**
+ * Membuat sheet yang belum ada dan menambah kolom baru di kanan header lama,
+ * sekali per SCHEMA_VERSION (ditandai di CacheService). Aman dijalankan berulang.
+ */
+function ensureSchema_() {
+  var cache = CacheService.getScriptCache();
+  if (cache.get("bisnis_schema") === SCHEMA_VERSION) return;
+  var ss = getSpreadsheet();
+  Object.keys(HEADERS).forEach(function (name) {
+    var sh = ss.getSheetByName(name) || ss.insertSheet(name);
+    var head = HEADERS[name];
+    var cur = sh.getLastRow() === 0 ? [] : sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), 1)).getValues()[0];
+    while (cur.length && cur[cur.length - 1] === "") cur.pop();
+    for (var i = cur.length; i < head.length; i++) {
+      sh.getRange(1, i + 1).setValue(head[i]).setFontWeight("bold");
+    }
+  });
+  var peng = ss.getSheetByName(SHEET_PENGATURAN);
+  if (peng.getLastRow() < 2) {
+    Object.keys(PENGATURAN_DEFAULT).forEach(function (k) { peng.appendRow([k, PENGATURAN_DEFAULT[k]]); });
+  }
+  cache.put("bisnis_schema", SCHEMA_VERSION, 21600);
+}
+
+function getPengaturan_() {
+  var p = {};
+  Object.keys(PENGATURAN_DEFAULT).forEach(function (k) { p[k] = PENGATURAN_DEFAULT[k]; });
+  readTable_(SHEET_PENGATURAN).forEach(function (r) {
+    if (p.hasOwnProperty(r.key) && r.value !== "") p[r.key] = Number(r.value);
+  });
+  return p;
+}
+
+function komisiOverride_() {
+  var m = {};
+  readTable_(SHEET_KOMISI_KAPSTER).forEach(function (r) { if (r.persen !== "") m[r.user_id] = Number(r.persen); });
+  return m;
+}
+
+function hhmm_(n) { return ("0000" + n).slice(-4).replace(/(\d\d)(\d\d)/, "$1:$2"); }
+function parseHhmm_(str) {
+  var m = /^(\d{1,2}):(\d{2})$/.exec((str || "").toString().trim());
+  if (!m || Number(m[1]) > 23 || Number(m[2]) > 59) return null;
+  return Number(m[1]) * 100 + Number(m[2]);
+}
+
+/** true kalau jam (HHMM) di luar [jam_mulai, jam_selesai). */
+function isLembur_(hhmmNow, p) {
+  return !(hhmmNow >= p.jam_mulai && hhmmNow < p.jam_selesai);
+}
+
+function bentukPengaturan_() {
+  var p = getPengaturan_(), ov = komisiOverride_();
+  var kapster = getSheet(SHEET_USERS).getDataRange().getValues().slice(1)
+    .filter(function (u) { return u[4] === "Kapster" && u[7] === "Aktif"; })
+    .map(function (u) { return { id: u[0], nama: u[1], persen: ov[u[0]] === undefined ? null : ov[u[0]] }; });
+  return {
+    jamMulai: hhmm_(p.jam_mulai), jamSelesai: hhmm_(p.jam_selesai),
+    komisiDefault: p.komisi_default, komisiLembur: p.komisi_lembur, kapster: kapster
+  };
+}
+
+function upsertPengaturan_(key, value) {
+  var r = readTable_(SHEET_PENGATURAN).filter(function (x) { return x.key === key; })[0];
+  if (r) setCell_(SHEET_PENGATURAN, r._row, "value", value);
+  else appendObj_(SHEET_PENGATURAN, { key: key, value: value });
+}
+
+/** Body: { jamMulai:"10:00", jamSelesai:"21:00", komisiDefault, komisiLembur, alasan } */
+function simpanPengaturan_(body, user) {
+  var mulai = parseHhmm_(body.jamMulai), selesai = parseHhmm_(body.jamSelesai);
+  if (mulai === null || selesai === null) return fail_("Format jam harus HH:MM, contoh 10:00.");
+  if (mulai >= selesai) return fail_("Jam selesai harus setelah jam mulai.");
+  var kd = Number(body.komisiDefault), kl = Number(body.komisiLembur);
+  if (isNaN(kd) || isNaN(kl) || kd < 0 || kd > 100 || kl < 0 || kl > 100) return fail_("Persen komisi harus 0-100.");
+  var alasan = (body.alasan || "").trim();
+  if (!alasan) return fail_("Alasan perubahan wajib diisi.");
+
+  var lama = getPengaturan_();
+  var baru = { jam_mulai: mulai, jam_selesai: selesai, komisi_default: kd, komisi_lembur: kl };
+  var beda = [];
+  Object.keys(baru).forEach(function (k) {
+    if (Number(lama[k]) !== baru[k]) {
+      beda.push(k + " " + lama[k] + " → " + baru[k]);
+      upsertPengaturan_(k, baru[k]);
+    }
+  });
+  if (beda.length) writeAuditLog(user.id, user.nama, "UBAH_PENGATURAN", beda.join("; ") + " — " + alasan);
+  return ok_(bentukPengaturan_());
+}
+
+/** Body: { userId, persen (angka 0-100, atau null untuk kembali ke default), alasan } */
+function setKomisiKapster_(body, user) {
+  var alasan = (body.alasan || "").trim();
+  if (!alasan) return fail_("Alasan perubahan komisi wajib diisi.");
+  var kap = getSheet(SHEET_USERS).getDataRange().getValues().slice(1)
+    .filter(function (u) { return u[0] === body.userId && u[4] === "Kapster"; })[0];
+  if (!kap) return fail_("Kapster tidak ditemukan.");
+  var persen = body.persen === null || body.persen === "" || body.persen === undefined ? "" : Number(body.persen);
+  if (persen !== "" && (isNaN(persen) || persen < 0 || persen > 100)) return fail_("Persen komisi harus 0-100.");
+
+  var r = readTable_(SHEET_KOMISI_KAPSTER).filter(function (x) { return x.user_id === body.userId; })[0];
+  var oleh = user.nama + " · " + user.role;
+  if (r) {
+    setCell_(SHEET_KOMISI_KAPSTER, r._row, "persen", persen);
+    setCell_(SHEET_KOMISI_KAPSTER, r._row, "diubah_oleh", oleh);
+    setCell_(SHEET_KOMISI_KAPSTER, r._row, "waktu", new Date());
+  } else {
+    appendObj_(SHEET_KOMISI_KAPSTER, { user_id: body.userId, persen: persen, diubah_oleh: oleh, waktu: new Date() });
+  }
+  writeAuditLog(user.id, user.nama, "UBAH_KOMISI_KAPSTER", kap[1] + ": " + (persen === "" ? "default" : persen + "%") + " — " + alasan);
+  return ok_(bentukPengaturan_());
+}
+
+
+// ============================================================
 // KATALOG
 // ============================================================
 function listLayanan_() {
@@ -266,6 +406,9 @@ function createTransaksi_(body, user) {
   readTable_(SHEET_LAYANAN).forEach(function (l) { layananMap[l.id] = l; });
   var produkMap = {};
   readTable_(SHEET_PRODUK).forEach(function (p) { produkMap[p.kode] = p; });
+  var peng = getPengaturan_(), override = komisiOverride_();
+  var nowJam = Number(fmtTanggal_(new Date(), "HHmm"));
+  var lembur = isLembur_(nowJam, peng);
   var kapsterMap = {};
   getSheet(SHEET_USERS).getDataRange().getValues().slice(1).forEach(function (u) {
     if (u[4] === "Kapster") kapsterMap[u[0]] = u[1];
@@ -283,9 +426,11 @@ function createTransaksi_(body, user) {
       var l = layananMap[it.refId];
       if (!l || l.status !== "Aktif") return fail_("Layanan tidak tersedia.");
       var hargaL = Number(l.harga) * qty;
-      var kom = Math.round(hargaL * KOMISI_LAYANAN_PERSEN / 100);
+      var persenL = lembur ? peng.komisi_lembur
+        : (override[it.kapsterId] !== undefined ? override[it.kapsterId] : peng.komisi_default);
+      var kom = Math.round(hargaL * persenL / 100);
       subtotal += hargaL; komisiTotal += kom;
-      lines.push({ tipe: "Layanan", ref_id: l.id, nama: l.nama, qty: qty, harga: Number(l.harga), kapster_id: it.kapsterId, kapster: namaKapster, komisi: kom });
+      lines.push({ tipe: "Layanan", ref_id: l.id, nama: l.nama, qty: qty, harga: Number(l.harga), kapster_id: it.kapsterId, kapster: namaKapster, komisi: kom, komisi_persen: persenL });
     } else if (it.tipe === "Produk") {
       var p = produkMap[it.refId];
       if (!p || p.status !== "Aktif") return fail_("Produk tidak tersedia.");
@@ -314,7 +459,8 @@ function createTransaksi_(body, user) {
     id: id, waktu: now, tanggal: fmtTanggal_(now, "yyyy-MM-dd"), jam: fmtTanggal_(now, "HH.mm"),
     metode: body.metode, subtotal: subtotal, diskon: diskon, total: total,
     bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, status: "Lunas",
-    dibuat_oleh_id: user.id, dibuat_oleh: user.nama + " · " + user.role
+    dibuat_oleh_id: user.id, dibuat_oleh: user.nama + " · " + user.role,
+    lembur: lembur ? "Ya" : "Tidak"
   });
   lines.forEach(function (ln) { ln.trx_id = id; appendObj_(SHEET_TRX_ITEM, ln); });
 
@@ -323,7 +469,7 @@ function createTransaksi_(body, user) {
   });
 
   writeAuditLog(user.id, user.nama, "TRANSAKSI", id + " total " + total);
-  return ok_({ id: id, total: total, kembalian: tunai + qris - total });
+  return ok_({ id: id, total: total, kembalian: tunai + qris - total, lembur: lembur });
 }
 
 /** Ubah stok produk dengan delta, catat di StokMutasi. Dipanggil dalam lock. */
@@ -345,9 +491,12 @@ function bentukTransaksi_(t, itemsByTrx) {
   var layananTotal = 0;
   items.forEach(function (i) { if (i.tipe === "Layanan") layananTotal += i.harga * i.qty; });
   var adaProduk = items.some(function (i) { return i.tipe === "Produk"; });
+  var persenNote = PENGATURAN_DEFAULT.komisi_default;
+  items.forEach(function (i) { if (i.tipe === "Layanan" && i.komisi_persen !== "") persenNote = i.komisi_persen; });
+  var lemburNote = t.lembur === "Ya" ? " (lembur)" : "";
   var catatan = items.length && !adaProduk
-    ? KOMISI_LAYANAN_PERSEN + "% total layanan Rp " + layananTotal
-    : "Layanan + produk";
+    ? persenNote + "%" + lemburNote + " total layanan Rp " + layananTotal
+    : "Layanan + produk" + lemburNote;
   return {
     id: t.id,
     date: fmtTanggal_(new Date(t.waktu), "d MMM yyyy"),
@@ -357,6 +506,7 @@ function bentukTransaksi_(t, itemsByTrx) {
     method: t.metode,
     commission: t.komisi_total,
     commissionNote: catatan,
+    overtime: t.lembur === "Ya",
     subtotal: t.subtotal,
     discount: t.diskon,
     total: t.total,

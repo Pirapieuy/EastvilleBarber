@@ -142,3 +142,24 @@ export const apiProduk = {
     api("adjust-stok", { kode, delta, alasan }),
   log: () => api<unknown[]>("log-produk"),
 }
+
+export interface PengaturanKomisi {
+  jamMulai: string
+  jamSelesai: string
+  komisiDefault: number
+  komisiLembur: number
+  kapster: { id: string; nama: string; persen: number | null }[]
+}
+
+export const apiPengaturan = {
+  get: () => api<PengaturanKomisi>("get-pengaturan"),
+  simpan: (p: {
+    jamMulai: string
+    jamSelesai: string
+    komisiDefault: number
+    komisiLembur: number
+    alasan: string
+  }) => api<PengaturanKomisi>("simpan-pengaturan", { ...p }),
+  setKomisiKapster: (userId: string, persen: number | null, alasan: string) =>
+    api<PengaturanKomisi>("set-komisi-kapster", { userId, persen, alasan }),
+}
