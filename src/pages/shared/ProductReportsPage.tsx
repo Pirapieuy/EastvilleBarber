@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { apiLaporan, getToken } from "../../api"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
@@ -84,16 +86,18 @@ export const INITIAL_PRODUCT_TRANSACTIONS: ProductTransactionRecord[] = [
   },
 ]
 
-export function ProductDetail() {
+export function ProductDetail({
+  rows = [
+    ["Free Style Dust", "46 unit", "Rp 3.220.000"],
+    ["Hair Paste Pomade", "38 unit", "Rp 2.660.000"],
+    ["Water Based Pomade", "34 unit", "Rp 2.380.000"],
+    ["Miracle Treatment", "29 unit", "Rp 2.030.000"],
+  ],
+}: { rows?: string[][] } = {}) {
   return (
     <section className="panel product-detail">
       <PageTitle eyebrow="Rincian" title="Per produk" />
-      {[
-        ["Free Style Dust", "46 unit", "Rp 3.220.000"],
-        ["Hair Paste Pomade", "38 unit", "Rp 2.660.000"],
-        ["Water Based Pomade", "34 unit", "Rp 2.380.000"],
-        ["Miracle Treatment", "29 unit", "Rp 2.030.000"],
-      ].map((x) => (
+      {rows.map((x) => (
         <div key={x[0]}>
           <strong>{x[0]}</strong>
           <span>{x[1]}</span>
@@ -145,7 +149,54 @@ export function ProductReportsPage({
   const [wa, setWa] = useState(false)
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">("Semua")
   const [activeTab, setActiveTab] = useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
-  const [txList] = useState<ProductTransactionRecord[]>(INITIAL_PRODUCT_TRANSACTIONS)
+  const [txList, setTxList] = useState<ProductTransactionRecord[]>(INITIAL_PRODUCT_TRANSACTIONS)
+  const [bulan, setBulan] = useState(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+  })
+  const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
+  const isKapsterView = role === "Kapster" || forcedRole === "Kapster" || currentUser?.role === "Kapster"
+
+  // Tampilan Owner/Manajer memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
+  useEffect(() => {
+    if (isKapsterView) return
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    let batal = false
+    const [y, m] = bulan.split("-").map(Number)
+    apiLaporan
+      .produk({ dari: `${bulan}-01`, sampai: `${bulan}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}` })
+      .then((rows) => {
+        if (batal) return
+        setTxList(rows as ProductTransactionRecord[])
+        setLive(true)
+        setLiveError("")
+      })
+      .catch((e) => {
+        console.error("Gagal memuat laporan produk:", e)
+        if (!batal) setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+      })
+    return () => {
+      batal = true
+    }
+  }, [bulan, isKapsterView])
+
+  const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
+    const per: Record<string, { unit: number; omzet: number }> = {}
+    txList
+      .filter((tx) => tx.status === "Lunas")
+      .forEach((tx) => {
+        const r = (per[kunci(tx)] = per[kunci(tx)] ?? { unit: 0, omzet: 0 })
+        r.unit += tx.qty
+        r.omzet += tx.totalOmzet
+      })
+    return Object.entries(per)
+      .sort((a, b) => b[1].omzet - a[1].omzet)
+      .map(([nama, r]) => [nama, `${r.unit} unit`, rupiah(r.omzet)])
+  }
 
   const validTransactions = useMemo(
     () => txList.filter((tx) => tx.status === "Lunas"),
@@ -186,7 +237,7 @@ export function ProductReportsPage({
     [txList],
   )
 
-  if (role === "Kapster" || forcedRole === "Kapster" || currentUser?.role === "Kapster") {
+  if (isKapsterView) {
     return (
       <div className="mobile-content">
         {!forcedRole && (
@@ -235,14 +286,19 @@ export function ProductReportsPage({
     )
   }
 
+  if (Boolean(getToken()) && !live && !liveError) {
+    return (
+      <div className="content">
+        <p>Memuat laporan produk...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="content">
+      <DemoNotice live={live} error={liveError} />
       <div className="report-toolbar">
-        <div className="segmented">
-          <Button>Harian</Button>
-          <Button>Mingguan</Button>
-          <Button className="active">Bulanan</Button>
-        </div>
+        <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         {!forcedRole && (
           <div className="role-preview">
             <span>Peran</span>
@@ -513,25 +569,21 @@ export function ProductReportsPage({
             </div>
           </section>
           <div className="product-detail-grid">
-            <ProductDetail />
+            <ProductDetail rows={live ? ringkas((tx) => tx.product) : undefined} />
             <CompactDetail
               title="Per kapster"
               icon="user"
-              rows={[
+              rows={live ? ringkas((tx) => tx.barber) : [
                 ["Seva", "44 unit", "Rp 520.000"],
                 ["Tata", "36 unit", "Rp 420.000"],
-                ["Faisal", "29 unit", "Rp 330.000"],
-                ["Fadhil", "38 unit", "Rp 410.000"],
-                ["Ferdi", "31 unit", "Rp 360.000"],
               ]}
             />
             <CompactDetail
               title="Per pemasok"
               icon="home"
-              rows={[
+              rows={live ? ringkas((tx) => tx.seller) : [
                 ["HAIRPRO Official", "118 unit", "Rp 5.840.000"],
                 ["Mitra Grooming", "29 unit", "Rp 1.160.000"],
-                ["Eastville Internal", "8 unit", "Rp 420.000"],
               ]}
             />
           </div>
