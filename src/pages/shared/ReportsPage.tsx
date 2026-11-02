@@ -153,6 +153,8 @@ export function ReportsPage({
           <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         )}
         <div>
+          <Button className="secondary-button">Excel</Button>
+          <Button className="secondary-button">PDF</Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
           </Button>

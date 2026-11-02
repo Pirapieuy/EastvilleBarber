@@ -298,6 +298,11 @@ export function ProductReportsPage({
     <div className="content">
       <DemoNotice live={live} error={liveError} />
       <div className="report-toolbar">
+        <div className="segmented">
+          <Button>Harian</Button>
+          <Button>Mingguan</Button>
+          <Button className="active">Bulanan</Button>
+        </div>
         <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         {!forcedRole && (
           <div className="role-preview">

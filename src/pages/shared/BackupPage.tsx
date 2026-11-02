@@ -21,6 +21,7 @@ export function BackupPage() {
   const [liveError, setLiveError] = useState("")
   const [backingUp, setBackingUp] = useState(false)
   const [message, setMessage] = useState("")
+  const [restore, setRestore] = useState<0 | 1 | 2>(0)
 
   function loadLive() {
     return apiBackup.list().then((rows) => {
@@ -122,7 +123,9 @@ export function BackupPage() {
             <span>{row.dibuat}</span>
             <span>{row.baris} baris</span>
             <i className="chip lunas">Siap</i>
-            <span />
+            <Button className="restore-danger-button" onClick={() => setRestore(1)}>
+              <Icon name="restore" /> Pulihkan
+            </Button>
           </article>
         ))}
         {backups.length === 0 && (
@@ -136,6 +139,32 @@ export function BackupPage() {
         (klik kanan tab sheet &gt; Tampilkan), lalu salin isinya ke sheet aslinya. Pemulihan otomatis sengaja tidak
         disediakan supaya data tidak tertimpa tanpa pengawasan.
       </div>
+      {restore > 0 && (
+        <div className="modal-overlay">
+          <section className="restore-confirm">
+            <span className="restore-danger-icon">
+              <Icon name="alert" />
+            </span>
+            <p className="eyebrow">Konfirmasi {restore} dari 2</p>
+            <h2>{restore === 1 ? "Pulihkan dari backup?" : "Pemulihan manual"}</h2>
+            <p>
+              {restore === 1
+                ? "Data saat ini akan diganti dengan isi backup terpilih."
+                : "Pemulihan otomatis belum tersedia. Salin isi sheet BAK_... ke sheet aslinya di Google Sheets."}
+            </p>
+            <div>
+              <Button className="secondary-button" onClick={() => setRestore(0)}>
+                {restore === 1 ? "Batal" : "Mengerti"}
+              </Button>
+              {restore === 1 && (
+                <Button className="restore-danger-button" onClick={() => setRestore(2)}>
+                  Lanjutkan
+                </Button>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   )
 }
