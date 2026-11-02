@@ -42,7 +42,14 @@ export function WhatsAppDialog({
           <Button className="secondary-button" onClick={onClose}>
             Kembali
           </Button>
-          <Button className="whatsapp-button" onClick={onClose}>
+          <Button
+            className="whatsapp-button"
+            onClick={() => {
+              const pesan = `*Eastville Barbershop*\n${text}\n\nPenjualan batal tidak dihitung.`
+              window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, "_blank", "noopener")
+              onClose()
+            }}
+          >
             <Icon name="whatsapp" /> Buka WhatsApp
           </Button>
         </footer>

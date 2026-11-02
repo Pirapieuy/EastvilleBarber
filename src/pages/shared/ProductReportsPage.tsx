@@ -135,6 +135,23 @@ export function CompactDetail({
   )
 }
 
+const pad2 = (n: number) => String(n).padStart(2, "0")
+const isoLokal = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+
+/** Rentang yyyy-MM-dd: satu hari, satu pekan (Senin-Minggu) yang memuat tanggal, atau satu bulan. */
+function rentangProduk(mode: "Harian" | "Mingguan" | "Bulanan", tanggal: string, bulan: string) {
+  if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
+  if (mode === "Mingguan") {
+    const d = new Date(`${tanggal}T00:00:00`)
+    const mundur = (d.getDay() + 6) % 7
+    const senin = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mundur)
+    const minggu = new Date(senin.getFullYear(), senin.getMonth(), senin.getDate() + 6)
+    return { dari: isoLokal(senin), sampai: isoLokal(minggu) }
+  }
+  const [y, m] = bulan.split("-").map(Number)
+  return { dari: `${bulan}-01`, sampai: `${bulan}-${pad2(new Date(y, m, 0).getDate())}` }
+}
+
 export function ProductReportsPage({
   currentUser,
   role: forcedRole,
@@ -152,6 +169,8 @@ export function ProductReportsPage({
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">("Semua")
   const [activeTab, setActiveTab] = useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
   const [txList, setTxList] = useState<ProductTransactionRecord[]>(INITIAL_PRODUCT_TRANSACTIONS)
+  const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
+  const [tanggal, setTanggal] = useState(() => isoLokal(new Date()))
   const [bulan, setBulan] = useState(() => {
     const d = new Date()
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
@@ -159,6 +178,8 @@ export function ProductReportsPage({
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   const isKapsterView = role === "Kapster" || forcedRole === "Kapster" || currentUser?.role === "Kapster"
+
+  const rentang = rentangProduk(mode, tanggal, bulan)
 
   // Tampilan Owner/Manajer memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
   useEffect(() => {
@@ -168,9 +189,8 @@ export function ProductReportsPage({
       return
     }
     let batal = false
-    const [y, m] = bulan.split("-").map(Number)
     apiLaporan
-      .produk({ dari: `${bulan}-01`, sampai: `${bulan}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}` })
+      .produk({ dari: rentang.dari, sampai: rentang.sampai })
       .then((rows) => {
         if (batal) return
         setTxList(rows as ProductTransactionRecord[])
@@ -184,7 +204,7 @@ export function ProductReportsPage({
     return () => {
       batal = true
     }
-  }, [bulan, isKapsterView])
+  }, [rentang.dari, rentang.sampai, isKapsterView])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
     const per: Record<string, { unit: number; omzet: number }> = {}
@@ -215,9 +235,9 @@ export function ProductReportsPage({
   }, [txList, statusFilter, cari])
 
   const tabelEkspor = (): TabelEkspor => ({
-    berkas: `laporan-produk-${bulan}`,
+    berkas: `laporan-produk-${rentang.dari}_${rentang.sampai}`,
     judul: "Laporan Produk",
-    keterangan: `Periode ${bulan} · transaksi lunas ${validTransactions.length} · batal tidak dihitung dalam total`,
+    keterangan: `Periode ${rentang.dari} s/d ${rentang.sampai} · transaksi lunas ${validTransactions.length} · batal tidak dihitung dalam total`,
     kolom: ["Nota", "Waktu", "Produk", "Qty", "Kapster", "Pemasok", "Total Omzet", "Bagian Kapster", "Bagian Pemasok", "Bagian Eastville", "Status"],
     baris: txList.map((tx) => [tx.id, tx.time, tx.product, tx.qty, tx.barber, tx.seller, tx.totalOmzet, tx.barberShare, tx.sellerShare, tx.eastvilleShare, tx.status]),
   })
@@ -313,11 +333,17 @@ export function ProductReportsPage({
       <DemoNotice live={live} error={liveError} />
       <div className="report-toolbar">
         <div className="segmented">
-          <Button>Harian</Button>
-          <Button>Mingguan</Button>
-          <Button className="active">Bulanan</Button>
+          {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+            <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
+              {m}
+            </Button>
+          ))}
         </div>
-        <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+        {mode === "Bulanan" ? (
+          <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+        ) : (
+          <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
+        )}
         {!forcedRole && (
           <div className="role-preview">
             <span>Peran</span>
@@ -620,7 +646,7 @@ export function ProductReportsPage({
         <WhatsAppDialog
           onClose={() => setWa(false)}
           title="Laporan Produk"
-          text={`Total Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi capster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
+          text={`Periode: ${rentang.dari === rentang.sampai ? rentang.dari : `${rentang.dari} s/d ${rentang.sampai}`}\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi capster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
         />
       )}
     </div>
