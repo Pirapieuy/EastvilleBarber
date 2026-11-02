@@ -301,8 +301,8 @@ export const apiTim = {
     api<{ success: boolean }>("toggle-user-status", { id, status }),
 }
 
-/** CRUD layanan versi Tim B. Halaman Layanan & Harga memakai apiLayanan (simpan-layanan, Bisnis.js). */
-export const apiLayananTimB = {
+/** CRUD layanan versi Fitra. Halaman Layanan & Harga memakai apiLayanan (simpan-layanan, Bisnis.js). */
+export const apiLayananFitra = {
   list: () => api<LayananRow[]>("list-layanan"),
   create: (nama: string, harga: number) =>
     api<LayananRow>("create-layanan", { nama, harga }),
