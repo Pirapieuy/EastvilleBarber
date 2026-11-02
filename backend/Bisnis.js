@@ -801,21 +801,29 @@ function backupStamps_() {
 }
 
 function backupList_() {
-  // Satu kali lewat semua sheet (getSheets() mahal), bukan satu kali per backup.
-  var stat = {};
+  // Backup tidak pernah berubah setelah dibuat, jadi jumlah sheet/baris per backup di-cache;
+  // getLastRow() per sheet adalah bagian yang mahal.
+  var cache = CacheService.getScriptCache();
+  var perStamp = {};
   getSpreadsheet().getSheets().forEach(function (sh) {
     var m = /^BAK_(\d{8}_\d{4})_/.exec(sh.getName());
     if (!m) return;
-    var st = stat[m[1]] = stat[m[1]] || { sheet: 0, baris: 0 };
-    st.sheet++;
-    st.baris += Math.max(sh.getLastRow() - 1, 0);
+    (perStamp[m[1]] = perStamp[m[1]] || []).push(sh);
   });
-  return Object.keys(stat).sort().reverse().map(function (st) {
+  return Object.keys(perStamp).sort().reverse().map(function (st) {
+    var hit = cache.get("bakstat_" + st), stat;
+    if (hit) {
+      stat = JSON.parse(hit);
+    } else {
+      stat = { sheet: perStamp[st].length, baris: 0 };
+      perStamp[st].forEach(function (sh) { stat.baris += Math.max(sh.getLastRow() - 1, 0); });
+      cache.put("bakstat_" + st, JSON.stringify(stat), 21600);
+    }
     var p = /^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})$/.exec(st);
     return {
       nama: "BAK_" + st,
       dibuat: p[3] + "/" + p[2] + "/" + p[1] + " · " + p[4] + "." + p[5],
-      sheet: stat[st].sheet, baris: stat[st].baris
+      sheet: stat.sheet, baris: stat.baris
     };
   });
 }
