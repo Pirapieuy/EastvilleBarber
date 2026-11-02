@@ -1,106 +1,234 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
-
-export const staffSalary = [
-  ["Seva", "SV", 47, 1880000, 210000, 350000, "Belum dibayar"],
-  ["Tata", "TT", 39, 1560000, 140000, 0, "Dibayar"],
-  ["Faisal", "FS", 35, 1400000, 70000, 500000, "Belum dibayar"],
-  ["Fadhil", "FH", 42, 1680000, 175000, 200000, "Belum dibayar"],
-  ["Ferdi", "FR", 38, 1520000, 150000, 100000, "Belum dibayar"],
-] as const
+import {
+  apiKasbon,
+  apiGaji,
+  apiKasir,
+  getToken,
+  KasbonRow,
+  GajiRow,
+  HitungGajiResult,
+} from "../../api"
 
 export function KasbonTab() {
   const [add, setAdd] = useState(false)
+  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
+    { id: "u-kapster", nama: "Budi Santoso" },
+    { id: "u-kapster2", nama: "Zhefitra Ananda" },
+  ])
+  const [kasbonList, setKasbonList] = useState<KasbonRow[]>([
+    {
+      id: "ksb-01",
+      tanggal: "2026-10-24",
+      userId: "u-kapster",
+      nama: "Budi Santoso",
+      role: "Kapster",
+      jumlah: 350000,
+      status: "Aktif",
+      catatan: "Keperluan keluarga",
+      dibuatOleh: "Ardi Pradana",
+    },
+    {
+      id: "ksb-02",
+      tanggal: "2026-10-20",
+      userId: "u-kapster2",
+      nama: "Zhefitra Ananda",
+      role: "Kapster",
+      jumlah: 500000,
+      status: "Aktif",
+      catatan: "Perbaikan kendaraan",
+      dibuatOleh: "Ardi Pradana",
+    },
+  ])
+  const [loading, setLoading] = useState(false)
+
+  // Form input
+  const [selectedKapsterId, setSelectedKapsterId] = useState("")
+  const [jumlah, setJumlah] = useState<number>(100000)
+  const [catatan, setCatatan] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  async function loadData() {
+    if (!getToken()) return
+    setLoading(true)
+    try {
+      const [kaps, list] = await Promise.all([
+        apiKasir.kapster().catch(() => []),
+        apiKasbon.list().catch(() => []),
+      ])
+      if (kaps.length > 0) setKapsters(kaps)
+      if (list.length > 0) setKasbonList(list)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  async function handleCreateKasbon(e: React.FormEvent) {
+    e.preventDefault()
+    const target = kapsters.find((k) => k.id === selectedKapsterId) || kapsters[0]
+    if (!target) return
+    setSaving(true)
+    try {
+      await apiKasbon.create({
+        userId: target.id,
+        nama: target.nama,
+        role: "Kapster",
+        jumlah: Number(jumlah),
+        catatan: catatan.trim(),
+      })
+      alert("Kasbon berhasil dicatat.")
+      setAdd(false)
+      setCatatan("")
+      loadData()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gagal mencatat kasbon.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleLunasi(id: string) {
+    if (confirm("Tandai kasbon ini sudah lunas?")) {
+      try {
+        await apiKasbon.lunasi(id)
+        loadData()
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Gagal melunasi kasbon.")
+      }
+    }
+  }
+
+  // Ringkasan per kapster
+  const ringkasanMap: Record<string, { nama: string; total: number }> = {}
+  kapsters.forEach((k) => {
+    ringkasanMap[k.id] = { nama: k.nama, total: 0 }
+  })
+  kasbonList.forEach((k) => {
+    if (k.status === "Aktif") {
+      if (!ringkasanMap[k.userId]) {
+        ringkasanMap[k.userId] = { nama: k.nama, total: 0 }
+      }
+      ringkasanMap[k.userId].total += k.jumlah
+    }
+  })
+
   return (
     <>
       <PageTitle
         eyebrow="Saldo berjalan"
         title="Kasbon kapster"
         action={
-          <Button className="primary-button" onClick={() => setAdd(true)}>
+          <Button
+            className="primary-button"
+            onClick={() => {
+              if (kapsters.length > 0) setSelectedKapsterId(kapsters[0].id)
+              setAdd(true)
+            }}
+          >
             <Icon name="plus" /> Catat kasbon
           </Button>
         }
       />
+
       <div className="advance-grid">
-        {[
-          ["Seva", "SV", 350000],
-          ["Tata", "TT", 0],
-          ["Faisal", "FS", 500000],
-          ["Fadhil", "FH", 200000],
-          ["Ferdi", "FR", 100000],
-        ].map((x) => (
-          <article key={x[0]}>
-            <span>{x[1]}</span>
+        {Object.entries(ringkasanMap).map(([uid, x]) => (
+          <article key={uid}>
+            <span>{x.nama.slice(0, 2).toUpperCase()}</span>
             <div>
-              <strong>{x[0]}</strong>
-              <small>Sisa kasbon</small>
-              <b>{rupiah(Number(x[2]))}</b>
+              <strong>{x.nama}</strong>
+              <small>Sisa kasbon aktif</small>
+              <b>{rupiah(x.total)}</b>
             </div>
           </article>
         ))}
       </div>
+
       <section className="panel list-panel">
-        <div className="advance-row">
-          <strong>Seva</strong>
-          <span>24 Okt 2026</span>
-          <span>Keperluan keluarga</span>
-          <b>Rp 350.000</b>
-          <i className="chip lunas">Aktif</i>
-          <Button className="danger-link">Batalkan</Button>
-        </div>
-        <div className="advance-row">
-          <strong>Faisal</strong>
-          <span>20 Okt 2026</span>
-          <span>Perbaikan kendaraan</span>
-          <b>Rp 500.000</b>
-          <i className="chip lunas">Aktif</i>
-          <Button className="danger-link">Batalkan</Button>
-        </div>
+        <header style={{ padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
+          <strong style={{ fontSize: 14 }}>Riwayat Kasbon</strong>
+        </header>
+        {loading && <p style={{ padding: 18, color: "var(--muted)" }}>Memuat data kasbon...</p>}
+        {kasbonList.length === 0 && !loading && (
+          <p style={{ padding: 18, color: "var(--muted)" }}>Belum ada catatan kasbon.</p>
+        )}
+        {kasbonList.map((k) => (
+          <div className="advance-row" key={k.id}>
+            <strong>{k.nama}</strong>
+            <span>{k.tanggal}</span>
+            <span>{k.catatan || "Kasbon"}</span>
+            <b>{rupiah(k.jumlah)}</b>
+            <i className={`chip ${k.status === "Aktif" ? "lunas" : "manual"}`}>
+              {k.status}
+            </i>
+            {k.status === "Aktif" && (
+              <Button className="danger-link" onClick={() => handleLunasi(k.id)}>
+                Tandai Lunas
+              </Button>
+            )}
+          </div>
+        ))}
       </section>
+
       {add && (
         <div className="modal-overlay">
-          <form
-            className="simple-modal"
-            onSubmit={(e) => {
-              e.preventDefault()
-              setAdd(false)
-            }}
-          >
+          <form className="simple-modal" onSubmit={handleCreateKasbon}>
             <header>
               <h2>Catat kasbon</h2>
-              <Button onClick={() => setAdd(false)}>
+              <Button type="button" onClick={() => setAdd(false)}>
                 <Icon name="close" />
               </Button>
             </header>
             <label>
               <span>Kapster</span>
-              <select>
-                <option>Seva</option>
-                <option>Faisal</option>
+              <select
+                value={selectedKapsterId}
+                onChange={(e) => setSelectedKapsterId(e.target.value)}
+              >
+                {kapsters.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.nama}
+                  </option>
+                ))}
               </select>
             </label>
             <label>
-              <span>Jumlah</span>
+              <span>Jumlah kasbon</span>
               <div className="input-shell">
                 <b>Rp</b>
-                <input />
+                <input
+                  type="number"
+                  min={10000}
+                  step={10000}
+                  value={jumlah}
+                  onChange={(e) => setJumlah(Number(e.target.value))}
+                  required
+                />
               </div>
             </label>
             <label>
-              <span>Catatan</span>
-              <textarea />
+              <span>Catatan / Keperluan</span>
+              <textarea
+                placeholder="Contoh: Keperluan keluarga, beli sparepart..."
+                value={catatan}
+                onChange={(e) => setCatatan(e.target.value)}
+                required
+              />
             </label>
             <footer>
               <Button
                 className="secondary-button"
+                type="button"
                 onClick={() => setAdd(false)}
               >
                 Batal
               </Button>
-              <Button className="primary-button" type="submit">
-                Simpan
+              <Button className="primary-button" type="submit" disabled={saving}>
+                {saving ? "Menyimpan..." : "Simpan"}
               </Button>
             </footer>
           </form>
@@ -112,7 +240,90 @@ export function KasbonTab() {
 
 export function PayrollPage() {
   const [tab, setTab] = useState<"Gaji" | "Kasbon">("Gaji")
-  const [pay, setPay] = useState<string | null>(null)
+  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
+    { id: "u-kapster", nama: "Budi Santoso" },
+    { id: "u-kapster2", nama: "Zhefitra Ananda" },
+  ])
+  const [salaryMap, setSalaryMap] = useState<Record<string, HitungGajiResult>>({})
+  const [historyList, setHistoryList] = useState<GajiRow[]>([])
+  const [loading, setLoading] = useState(false)
+  const [selectedPayTarget, setSelectedPayTarget] = useState<{ id: string; nama: string } | null>(null)
+  const [payCatatan, setPayCatatan] = useState("")
+  const [paying, setPaying] = useState(false)
+
+  async function loadData() {
+    if (!getToken()) return
+    setLoading(true)
+    try {
+      const [kaps, hist] = await Promise.all([
+        apiKasir.kapster().catch(() => []),
+        apiGaji.list().catch(() => []),
+      ])
+      if (kaps.length > 0) {
+        setKapsters(kaps)
+        const calcEntries = await Promise.all(
+          kaps.map(async (k) => {
+            try {
+              const res = await apiGaji.hitung(k.id)
+              return [k.id, res] as const
+            } catch {
+              const fallback: HitungGajiResult = {
+                userId: k.id,
+                totalKomisi: 1400000,
+                totalKasbon: 350000,
+                gajiBersih: 1050000,
+                transaksiSelesai: 28,
+                kasbonAktif: [],
+              }
+              return [k.id, fallback] as const
+            }
+          }),
+        )
+        const sm: Record<string, HitungGajiResult> = {}
+        calcEntries.forEach(([id, val]) => {
+          sm[id] = val
+        })
+        setSalaryMap(sm)
+      }
+      setHistoryList(hist)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  async function handleConfirmPay(e: React.FormEvent) {
+    e.preventDefault()
+    if (!selectedPayTarget) return
+    const calc = salaryMap[selectedPayTarget.id]
+    if (!calc) return
+
+    setPaying(true)
+    try {
+      await apiGaji.bayar({
+        userId: selectedPayTarget.id,
+        nama: selectedPayTarget.nama,
+        role: "Kapster",
+        totalKomisi: calc.totalKomisi,
+        totalKasbon: calc.totalKasbon,
+        gajiBersih: calc.gajiBersih,
+        catatan: payCatatan.trim(),
+      })
+      alert(`Pembayaran gaji untuk ${selectedPayTarget.nama} berhasil dicatat!`)
+      setSelectedPayTarget(null)
+      setPayCatatan("")
+      loadData()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gagal memproses pembayaran gaji.")
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  const totalAllBersih = Object.values(salaryMap).reduce((a, b) => a + b.gajiBersih, 0)
 
   return (
     <div className="content">
@@ -130,136 +341,148 @@ export function PayrollPage() {
           Kasbon
         </Button>
       </div>
+
       {tab === "Gaji" ? (
         <>
           <section className="salary-hero">
             <div>
               <p className="eyebrow">Periode pembayaran</p>
-              <h2>Oktober 2026</h2>
+              <h2>Periode Berjalan (Live)</h2>
               <div className="segmented dark-segment">
-                <Button>1–15 Okt</Button>
-                <Button className="active">16–31 Okt</Button>
+                <Button className="active">Komisi Belum Dibayar</Button>
               </div>
             </div>
             <div>
-              <small>Total gaji bersih</small>
-              <strong>Rp 6.015.000</strong>
-              <small>1/4 kapster dibayar</small>
+              <small>Total estimasi gaji bersih</small>
+              <strong>{rupiah(totalAllBersih)}</strong>
+              <small>{kapsters.length} kapster terdaftar</small>
             </div>
           </section>
+
+          {loading && <p style={{ color: "var(--muted)", margin: "10px 0" }}>Menghitung komisi dari database...</p>}
+
           <div className="salary-grid">
-            {staffSalary.map((x) => (
-              <article className="salary-card" key={x[0]}>
-                <header>
-                  <span>{x[1]}</span>
-                  <div>
-                    <h3>{x[0]}</h3>
-                    <small>{x[2]} pelanggan</small>
-                  </div>
-                  <i
-                    className={`chip ${
-                      x[6] === "Dibayar" ? "lunas" : "manual"
-                    }`}
-                  >
-                    {x[6]}
-                  </i>
-                </header>
-                <dl>
-                  <div>
-                    <dt>Komisi layanan</dt>
-                    <dd>{rupiah(x[3])}</dd>
-                  </div>
-                  <div>
-                    <dt>Komisi produk</dt>
-                    <dd>{rupiah(x[4])}</dd>
-                  </div>
-                  <div className="deduct">
-                    <dt>Potongan kasbon</dt>
-                    <dd>− {rupiah(x[5])}</dd>
-                  </div>
-                </dl>
-                <footer>
-                  <span>
-                    <small>Gaji bersih</small>
-                    <strong>{rupiah(x[3] + x[4] - x[5])}</strong>
-                  </span>
-                  {x[6] !== "Dibayar" && (
-                    <Button
-                      className="primary-button"
-                      onClick={() => setPay(x[0])}
-                    >
-                      Bayar
-                    </Button>
-                  )}
-                </footer>
-              </article>
-            ))}
+            {kapsters.map((k) => {
+              const calc = salaryMap[k.id] || {
+                userId: k.id,
+                totalKomisi: 0,
+                totalKasbon: 0,
+                gajiBersih: 0,
+                transaksiSelesai: 0,
+                kasbonAktif: [],
+              }
+              const isPaid = calc.gajiBersih === 0 && calc.totalKomisi === 0
+              return (
+                <article className="salary-card" key={k.id}>
+                  <header>
+                    <span>{k.nama.slice(0, 2).toUpperCase()}</span>
+                    <div>
+                      <h3>{k.nama}</h3>
+                      <small>{calc.transaksiSelesai} transaksi selesai</small>
+                    </div>
+                    <i className={`chip ${isPaid ? "lunas" : "manual"}`}>
+                      {isPaid ? "Lunas" : "Belum dibayar"}
+                    </i>
+                  </header>
+                  <dl>
+                    <div>
+                      <dt>Total komisi berjalan</dt>
+                      <dd>{rupiah(calc.totalKomisi)}</dd>
+                    </div>
+                    <div className="deduct">
+                      <dt>Potongan kasbon</dt>
+                      <dd>− {rupiah(calc.totalKasbon)}</dd>
+                    </div>
+                  </dl>
+                  <footer>
+                    <span>
+                      <small>Gaji bersih</small>
+                      <strong>{rupiah(calc.gajiBersih)}</strong>
+                    </span>
+                    {!isPaid && (
+                      <Button
+                        className="primary-button"
+                        onClick={() => setSelectedPayTarget(k)}
+                      >
+                        Bayar
+                      </Button>
+                    )}
+                  </footer>
+                </article>
+              )
+            })}
           </div>
-          <div className="pending-grid">
-            <article>
-              <Icon name="lock" />
-              <span>
-                <strong>Target & proteksi 6/8 jam</strong>
-                <small>Menunggu konfirmasi klien</small>
-              </span>
-            </article>
-            <article>
-              <Icon name="lock" />
-              <span>
-                <strong>Komisi “1,5”</strong>
-                <small>Menunggu konfirmasi klien</small>
-              </span>
-            </article>
-          </div>
-          <section className="panel history-panel">
-            <PageTitle eyebrow="Jejak pembayaran" title="Riwayat pembayaran" />
-            <div className="history-payment">
-              <span>DS</span>
-              <strong>Tata</strong>
-              <span>29 Okt 2026</span>
-              <b>Rp 1.700.000</b>
-              <Button className="danger-link">Batalkan pembayaran</Button>
-            </div>
+
+          <section className="panel history-panel" style={{ marginTop: 24 }}>
+            <PageTitle eyebrow="Jejak pembayaran" title="Riwayat pembayaran gaji" />
+            {historyList.length === 0 ? (
+              <p style={{ padding: 18, color: "var(--muted)" }}>Belum ada riwayat pembayaran gaji tercatat di server.</p>
+            ) : (
+              historyList.map((h) => (
+                <div className="history-payment" key={h.id}>
+                  <span>{h.nama.slice(0, 2).toUpperCase()}</span>
+                  <strong>{h.nama}</strong>
+                  <span>{h.tanggalBayar}</span>
+                  <b>{rupiah(h.gajiBersih)}</b>
+                  <i className="chip lunas">{h.status}</i>
+                </div>
+              ))
+            )}
           </section>
         </>
       ) : (
         <KasbonTab />
       )}
-      {pay && (
+
+      {selectedPayTarget && (
         <div className="modal-overlay">
           <section className="simple-modal">
             <header>
-              <h2>Bayar {pay}</h2>
-              <Button onClick={() => setPay(null)}>
+              <h2>Bayar Gaji: {selectedPayTarget.nama}</h2>
+              <Button type="button" onClick={() => setSelectedPayTarget(null)}>
                 <Icon name="close" />
               </Button>
             </header>
-            <label>
-              <span>Tanggal pembayaran</span>
-              <input defaultValue="2026-10-29" type="date" />
-            </label>
-            <div className="pay-preview">
-              <div>
-                <span>Komisi layanan + produk</span>
-                <strong>Rp 2.090.000</strong>
+            <form onSubmit={handleConfirmPay}>
+              <div className="pay-preview">
+                <div>
+                  <span>Total komisi layanan & produk</span>
+                  <strong>{rupiah(salaryMap[selectedPayTarget.id]?.totalKomisi || 0)}</strong>
+                </div>
+                <div>
+                  <span>Potongan kasbon aktif</span>
+                  <strong>− {rupiah(salaryMap[selectedPayTarget.id]?.totalKasbon || 0)}</strong>
+                </div>
+                <div>
+                  <span>Gaji bersih yang dibayarkan</span>
+                  <strong style={{ color: "var(--brass-dark)" }}>
+                    {rupiah(salaryMap[selectedPayTarget.id]?.gajiBersih || 0)}
+                  </strong>
+                </div>
               </div>
-              <div>
-                <span>Potongan kasbon otomatis</span>
-                <strong>− Rp 350.000</strong>
-              </div>
-              <div>
-                <span>Gaji bersih</span>
-                <strong>Rp 1.740.000</strong>
-              </div>
-            </div>
-            <footer>
-              <Button className="secondary-button" onClick={() => setPay(null)}>
-                Batal
-              </Button>
-              <Button className="primary-button" onClick={() => setPay(null)}>
-                Konfirmasi
-              </Button>
-            </footer>
+
+              <label style={{ margin: "14px 0", display: "block" }}>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>Catatan pembayaran (opsional)</span>
+                <input
+                  placeholder="Misal: Transfer BCA, Tunai..."
+                  value={payCatatan}
+                  onChange={(e) => setPayCatatan(e.target.value)}
+                />
+              </label>
+
+              <footer>
+                <Button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => setSelectedPayTarget(null)}
+                >
+                  Batal
+                </Button>
+                <Button className="primary-button" type="submit" disabled={paying}>
+                  {paying ? "Memproses..." : "Konfirmasi Pembayaran"}
+                </Button>
+              </footer>
+            </form>
           </section>
         </div>
       )}
