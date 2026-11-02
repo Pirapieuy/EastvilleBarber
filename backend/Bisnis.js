@@ -456,6 +456,12 @@ function komisiProduk_(p, qty) {
 function createTransaksi_(body, user, manual) {
   var items = body.items || [];
   if (!items.length) return fail_("Keranjang kosong.");
+  // Idempotensi: permintaan yang sama (mis. Bayar ditekan ulang setelah timeout) tidak membuat nota ganda.
+  var reqKey = !manual && body.clientRequestId ? "trx_req_" + String(body.clientRequestId).slice(0, 60) : "";
+  if (reqKey) {
+    var sudah = CacheService.getScriptCache().get(reqKey);
+    if (sudah) return ok_(JSON.parse(sudah));
+  }
   if (["Tunai", "QRIS", "Gabungan"].indexOf(body.metode) === -1) return fail_("Metode pembayaran tidak valid.");
 
   var layananMap = {};
@@ -524,6 +530,17 @@ function createTransaksi_(body, user, manual) {
     if (!alasanGratis) return fail_("Alasan transaksi gratis wajib diisi.");
     diskon = subtotal;
   }
+  // Diskon oleh Kasir wajib disetujui PIN Owner/Manajer (diverifikasi di server).
+  if (diskon > 0 && user.role === "Kasir") {
+    var cache = CacheService.getScriptCache(), kunci = "pin_atasan_gagal_" + user.id;
+    var gagal = Number(cache.get(kunci) || 0);
+    if (gagal >= 5) return fail_("Terlalu banyak PIN salah. Coba lagi dalam 5 menit.");
+    if (!pinAtasanValid_(body.pinOtorisasi)) {
+      cache.put(kunci, String(gagal + 1), 300);
+      return fail_("PIN Owner/Manajer salah atau belum diisi. Diskon tidak diizinkan.");
+    }
+    cache.remove(kunci);
+  }
   var total = subtotal - diskon;
   if (total === 0 && !gratis) return fail_("Total Rp0 hanya untuk transaksi gratis. Pilih Gratis dan isi alasannya.");
   var tunai = toInt_(body.bayarTunai), qris = toInt_(body.bayarQris);
@@ -549,7 +566,21 @@ function createTransaksi_(body, user, manual) {
   });
 
   writeAuditLog(user.id, user.nama, manual ? "REKAP_MANUAL" : "TRANSAKSI", id + " total " + total + (gratis ? " GRATIS: " + alasanGratis : ""));
-  return ok_({ id: id, total: total, kembalian: tunai + qris - total, lembur: lembur });
+  var hasil = { id: id, total: total, kembalian: tunai + qris - total, lembur: lembur };
+  if (reqKey) CacheService.getScriptCache().put(reqKey, JSON.stringify(hasil), 600);
+  return ok_(hasil);
+}
+
+/** True bila PIN cocok dengan salah satu akun Owner/Manajer yang aktif. */
+function pinAtasanValid_(pin) {
+  pin = (pin || "").toString();
+  if (!pin) return false;
+  var rows = getSheet(SHEET_USERS).getDataRange().getValues().slice(1);
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if ((r[4] === "Owner" || r[4] === "Manajer") && r[7] === "Aktif" && verifyPin(pin, r[3])) return true;
+  }
+  return false;
 }
 
 /** Ubah stok produk dengan delta, catat di StokMutasi. Dipanggil dalam lock. */
@@ -591,6 +622,9 @@ function bentukTransaksi_(t, itemsByTrx) {
     subtotal: t.subtotal,
     discount: t.diskon,
     total: t.total,
+    bayarTunai: Number(t.bayar_tunai) || 0,
+    bayarQris: Number(t.bayar_qris) || 0,
+    gratis: t.gratis || undefined,
     status: t.status === "Lunas" && t.manual === "Ya" ? "Manual" : t.status,
     createdTime: fmtTanggal_(new Date(t.waktu), "d MMM HH.mm"),
     createdBy: t.dibuat_oleh,

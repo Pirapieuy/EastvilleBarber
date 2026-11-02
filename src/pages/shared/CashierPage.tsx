@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
@@ -228,12 +228,19 @@ export function CashierPage({
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState("")
   const [liveError, setLiveError] = useState("")
+  const [reloadKey, setReloadKey] = useState(0)
+  const [pinAtasan, setPinAtasan] = useState("")
+  // Id unik per percobaan bayar: kirim ulang setelah timeout tidak membuat nota ganda.
+  const requestId = useRef(`${Date.now()}-${Math.random().toString(36).slice(2, 10)}`)
+  const punyaToken = !!getToken()
+  const gagalMuat = punyaToken && !live
 
   useEffect(() => {
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    setLiveError("")
     Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster()])
       .then(([layanan, produk, kapster]) => {
         setCatalogData([
@@ -260,7 +267,7 @@ export function CashierPage({
         console.error("Gagal memuat data kasir:", e)
         setLiveError(e instanceof Error ? e.message : "gagal memuat data")
       })
-  }, [])
+  }, [reloadKey])
 
   async function pay() {
     if (!live) return setReceipt(true)
@@ -272,6 +279,8 @@ export function CashierPage({
         diskon: effectiveDiscount,
         gratis,
         alasan: gratis ? gratisAlasan : undefined,
+        pinOtorisasi: effectiveDiscount > 0 ? pinAtasan : undefined,
+        clientRequestId: requestId.current,
         bayarTunai: method === "QRIS" ? 0 : cash,
         bayarQris: method === "Tunai" ? 0 : qris,
         items: cart.map((l) => ({
@@ -283,6 +292,7 @@ export function CashierPage({
       })
       setInvoice(res.id)
       setReceipt(true)
+      requestId.current = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
       // Segarkan stok produk setelah terjual
       apiKasir.produk().then((produk) =>
         setCatalogData((cur) =>
@@ -303,6 +313,11 @@ export function CashierPage({
     (x) => x.type === tab && x.name.toLowerCase().includes(cari.trim().toLowerCase()),
   )
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
+  // Jumlah produk di keranjang (semua kapster) dibatasi stok yang tersisa.
+  const qtyDiKeranjang = (id: number | string) =>
+    cart.filter((x) => x.id === id).reduce((s, x) => s + x.qty, 0)
+  const stokHabis = (id: number | string, stock?: number) =>
+    stock !== undefined && qtyDiKeranjang(id) >= stock
   const effectiveDiscount =
     appliedDiscountPercent === null
       ? discount
@@ -318,6 +333,21 @@ export function CashierPage({
   const shortage = Math.max(0, payableTotal - paid)
   const change =
     method === "QRIS" ? 0 : Math.max(0, cash - (payableTotal - qris))
+
+  // Pembayaran mengikuti total otomatis (item/diskon/metode berubah); kasir tetap bisa mengetik manual.
+  useEffect(() => {
+    if (method === "Tunai") {
+      setCash(payableTotal)
+      setQris(0)
+    } else if (method === "QRIS") {
+      setCash(0)
+      setQris(payableTotal)
+    } else {
+      const cashPart = Math.round(payableTotal / 2 / 1000) * 1000
+      setCash(cashPart)
+      setQris(Math.max(0, payableTotal - cashPart))
+    }
+  }, [payableTotal, method])
 
   if (currentUser && currentUser.role !== "Kasir") {
     return (
@@ -442,7 +472,8 @@ export function CashierPage({
           {items.map((item) => (
             <Button
               className={`catalog-item ${item.stock === 0 ? "disabled" : ""}`}
-              disabled={item.stock === 0}
+              disabled={item.stock === 0 || stokHabis(item.id, item.stock) || !selectedBarber}
+              title={!selectedBarber ? "Pilih kapster dulu" : stokHabis(item.id, item.stock) ? "Stok habis di keranjang" : undefined}
               key={item.id}
               onClick={() =>
                 setCart((c) => {
@@ -538,6 +569,13 @@ export function CashierPage({
                       </Button>
                       <span>{line.qty}</span>
                       <Button
+                        disabled={
+                          line.type === "Produk" &&
+                          stokHabis(
+                            line.id,
+                            catalogData.find((c) => c.id === line.id)?.stock,
+                          )
+                        }
                         onClick={() =>
                           setCart((c) =>
                             c.map((x) =>
@@ -599,7 +637,14 @@ export function CashierPage({
                   <span>PIN Owner/Manajer</span>
                   <div className="input-shell">
                     <Icon name="lock" />
-                    <input defaultValue="123456" type="password" />
+                    <input
+                      autoComplete="off"
+                      inputMode="numeric"
+                      onChange={(e) => setPinAtasan(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Masukkan PIN"
+                      type="password"
+                      value={pinAtasan}
+                    />
                   </div>
                 </label>
                 <label>
@@ -642,7 +687,7 @@ export function CashierPage({
                   </Button>
                   <Button
                     className="secondary-button"
-                    disabled={draftPenuh && !gratisAlasan.trim()}
+                    disabled={(draftPenuh && !gratisAlasan.trim()) || (live && !pinAtasan)}
                     onClick={() => {
                       const normalizedDiscount =
                         discountMode === "Persen"
@@ -652,22 +697,10 @@ export function CashierPage({
                         discountMode === "Persen"
                           ? Math.round((total * normalizedDiscount) / 100)
                           : normalizedDiscount
-                      const updatedTotal = Math.max(0, total - appliedDiscount)
                       setDiscount(appliedDiscount)
                       setAppliedDiscountPercent(
                         discountMode === "Persen" ? normalizedDiscount : null,
                       )
-                      if (method === "Tunai") {
-                        setCash(updatedTotal)
-                        setQris(0)
-                      } else if (method === "QRIS") {
-                        setCash(0)
-                        setQris(updatedTotal)
-                      } else {
-                        const cashPart = Math.min(cash, updatedTotal)
-                        setCash(cashPart)
-                        setQris(updatedTotal - cashPart)
-                      }
                       setDiscountOpen(false)
                     }}
                   >
@@ -701,20 +734,7 @@ export function CashierPage({
                   <Button
                     className={method === value ? "active" : ""}
                     key={value}
-                    onClick={() => {
-                      setMethod(value)
-                      if (value === "Tunai") {
-                        setCash(payableTotal)
-                        setQris(0)
-                      } else if (value === "QRIS") {
-                        setCash(0)
-                        setQris(payableTotal)
-                      } else {
-                        const cashPart = Math.min(30000, payableTotal)
-                        setCash(cashPart)
-                        setQris(payableTotal - cashPart)
-                      }
-                    }}
+                    onClick={() => setMethod(value)}
                   >
                     <Icon name={value === "QRIS" ? "qris" : "cash"} />
                     <strong>{value}</strong>
@@ -729,9 +749,11 @@ export function CashierPage({
                       <b>Rp</b>
                       <input
                         inputMode="numeric"
-                        onChange={(e) =>
-                          setCash(Number(e.target.value.replace(/\D/g, "")))
-                        }
+                        onChange={(e) => {
+                          const v = Number(e.target.value.replace(/\D/g, ""))
+                          setCash(v)
+                          if (method === "Gabungan") setQris(Math.max(0, payableTotal - v))
+                        }}
                         value={cash}
                       />
                     </div>
@@ -753,6 +775,16 @@ export function CashierPage({
                   </label>
                 )}
               </div>
+              {method === "Tunai" && payableTotal > 0 && (
+                <div className="quick-cash" style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "8px 0" }}>
+                  <Button onClick={() => setCash(payableTotal)}>Uang pas</Button>
+                  {[50000, 100000, 200000].filter((n) => n > payableTotal).map((n) => (
+                    <Button key={n} onClick={() => setCash(n)}>
+                      {rupiah(n)}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {method !== "Tunai" && (
                 <div className="cart-qris-note">
                   <Icon name="qris" /> Pastikan pembayaran QRIS sudah masuk.
@@ -768,12 +800,22 @@ export function CashierPage({
               </div>
               <Button
                 className="primary-button cart-submit"
-                disabled={!cart.length || shortage > 0 || paying || (gratis && !gratisAlasan.trim()) || (payableTotal === 0 && !gratis)}
+                disabled={!cart.length || gagalMuat || shortage > 0 || paying || (gratis && !gratisAlasan.trim()) || (payableTotal === 0 && !gratis)}
                 onClick={pay}
               >
                 {paying ? "Memproses..." : "Bayar"} <Icon name="cash" />
               </Button>
-              {payError && <small className="pin-helper">{payError}</small>}
+              {gagalMuat && (
+                <div className="payment-result danger" role="alert">
+                  <span>Data kasir gagal dimuat{liveError ? `: ${liveError}` : ""}</span>
+                  <Button onClick={() => setReloadKey((k) => k + 1)}>Coba lagi</Button>
+                </div>
+              )}
+              {payError && (
+                <div className="payment-result danger" role="alert">
+                  <strong>{payError}</strong>
+                </div>
+              )}
             </section>
           </div>
         </div>

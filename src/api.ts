@@ -141,6 +141,10 @@ export interface CheckoutPayload {
   /** Transaksi gratis (promo/traktiran): total Rp0 hanya diterima server bila true + alasan */
   gratis?: boolean
   alasan?: string
+  /** PIN Owner/Manajer untuk menyetujui diskon (diverifikasi server) */
+  pinOtorisasi?: string
+  /** Id unik per percobaan bayar: server tidak membuat nota ganda bila dikirim ulang */
+  clientRequestId?: string
 }
 
 export const apiLayanan = {
