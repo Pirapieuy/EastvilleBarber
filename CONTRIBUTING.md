@@ -128,6 +128,10 @@ Aksi `Bisnis.js` yang ditambahkan sejak catatan sebelumnya:
 - `simpan-produk` menerima parameter `baru` (true = tambah produk baru, kode harus belum dipakai).
 - **Transaksi gratis** = diskon penuh + alasan; ditandai kolom `gratis` di sheet `Transaksi` (`SCHEMA_VERSION` 5).
   Total Rp0 tanpa tanda gratis **ditolak** server.
+- `create-transaksi`: diskon oleh Kasir wajib `pinOtorisasi` (PIN Owner/Manajer, dicek server, 5x salah = tunggu 5 menit);
+  `clientRequestId` mencegah nota ganda bila Bayar terkirim dua kali.
+- `list-transaksi` kini juga mengirim `bayarTunai`, `bayarQris`, `gratis` (dipakai cetak ulang struk).
+- `backup-hapus` dan `backup-unduh` (Owner); `backup-buat` menolak bila sudah ada backup di menit yang sama.
 - `hitung-gaji` (Kode.js, Fitra) menghitung transaksi berstatus Lunas sejak gaji terakhir dibayar.
 
 Aturan komisi: layanan 40% untuk kapster (bisa diatur per kapster); di luar jam kerja (default
