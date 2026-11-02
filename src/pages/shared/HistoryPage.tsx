@@ -5,6 +5,7 @@ import { AppUser, Role } from "../../types"
 import { apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { CartLine, ReceiptView } from "./CashierPage"
+import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 
 export interface HistoryItemDetail {
   name: string
@@ -23,6 +24,11 @@ export interface HistoryTransactionRecord {
   commission: number
   commissionNote: string
   total: number
+  subtotal?: number
+  discount?: number
+  bayarTunai?: number
+  bayarQris?: number
+  gratis?: string
   status: "Lunas" | "BATAL" | "Manual"
   createdTime: string
   createdBy: string
@@ -129,9 +135,11 @@ export function ReasonDialog({
   title: string
   warning: string
   onClose: () => void
-  onConfirm?: (reason: string) => void
+  onConfirm?: (reason: string) => void | Promise<void>
 }) {
   const [reason, setReason] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
   return (
     <div className="modal-overlay">
       <section className="reason-dialog">
@@ -164,15 +172,28 @@ export function ReasonDialog({
           </Button>
           <Button
             className="danger-button"
-            disabled={reason.length < 5}
-            onClick={() => {
-              if (onConfirm) onConfirm(reason)
-              onClose()
+            disabled={reason.trim().length < 5 || busy}
+            onClick={async () => {
+              setError("")
+              setBusy(true)
+              try {
+                await onConfirm?.(reason.trim())
+                onClose()
+              } catch (e) {
+                setError(e instanceof Error ? e.message : "Aksi gagal.")
+                setBusy(false)
+              }
             }}
           >
-            Konfirmasi
+            {busy ? "Memproses..." : "Konfirmasi"}
           </Button>
         </footer>
+        {error && (
+          <div className="info-banner" role="alert">
+            <Icon name="alert" />
+            {error}
+          </div>
+        )}
       </section>
     </div>
   )
@@ -195,21 +216,44 @@ export function HistoryPage({
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
+  const [dari, setDari] = useState("")
+  const [sampai, setSampai] = useState("")
   const [barberFilter, setBarberFilter] = useState("Semua kapster")
+  const [statusFilter, setStatusFilter] = useState("Semua status")
+  const [methodFilter, setMethodFilter] = useState("Semua metode")
+  const [cari, setCari] = useState("")
 
   const barberOptions = Array.from(
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
   ).sort()
   const visibleTx = txList.filter(
-    (tx) => barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter),
+    (tx) =>
+      (barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter)) &&
+      (statusFilter === "Semua status" || tx.status === statusFilter) &&
+      (methodFilter === "Semua metode" || tx.method === methodFilter) &&
+      (!cari.trim() || tx.id.toLowerCase().includes(cari.trim().toLowerCase())),
   )
 
-  const selected = txList.find((tx) => tx.id === selectedId) || txList[0]
+  const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
+
+  function ekspor(jenis: "excel" | "pdf") {
+    const tabel: TabelEkspor = {
+      berkas: `riwayat-transaksi-${dari || "semua"}${sampai ? `_${sampai}` : ""}`,
+      judul: "Riwayat Transaksi",
+      keterangan: `${dari || "Awal"} s/d ${sampai || "sekarang"} · ${visibleTx.length} transaksi`,
+      kolom: ["Nota", "Tanggal", "Jam", "Kapster", "Metode", "Subtotal", "Diskon", "Total", "Status"],
+      baris: visibleTx.map((t) => [
+        t.id, t.date, t.time, t.barber, t.method,
+        t.subtotal ?? t.total, t.discount ?? 0, t.total, t.status,
+      ]),
+    }
+    if (jenis === "excel") eksporExcel(tabel)
+    else eksporPdf(tabel)
+  }
 
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return apiTransaksi.list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {}).then((rows) => {
+    return apiTransaksi.list({ ...(dari ? { dari } : {}), ...(sampai ? { sampai } : {}) }).then((rows) => {
       const list = rows as HistoryTransactionRecord[]
       setTxList(list)
       setSelectedId((cur) => (list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? "")))
@@ -225,17 +269,14 @@ export function HistoryPage({
       console.error("Gagal memuat riwayat:", e)
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
-  }, [dateFilter])
+  }, [dari, sampai])
 
   async function handleConfirmAction(reason: string) {
     if (live && selected) {
-      try {
-        if (action === "void") await apiTransaksi.batalkan(selected.id, reason)
-        else if (action === "restore") await apiTransaksi.pulihkan(selected.id, reason)
-        await loadLive()
-      } catch (e) {
-        window.alert(e instanceof Error ? e.message : "Aksi gagal.")
-      }
+      // Error dilempar ke dialog (ditampilkan inline, dialog tetap terbuka)
+      if (action === "void") await apiTransaksi.batalkan(selected.id, reason)
+      else if (action === "restore") await apiTransaksi.pulihkan(selected.id, reason)
+      await loadLive()
       return
     }
     if (action === "void") {
@@ -279,16 +320,14 @@ export function HistoryPage({
     )
   }
 
-  if (!selected) {
-    return (
-      <div className="content">
-        <p>Belum ada transaksi.</p>
-      </div>
-    )
-  }
-
-  if (showReceipt) {
-    const subtotal = selected.items.reduce((s, it) => s + it.price * it.qty, 0)
+  if (showReceipt && selected) {
+    const subtotal = selected.subtotal ?? selected.items.reduce((s, it) => s + it.price * it.qty, 0)
+    // Server lama belum mengirim rincian bayar: pakai perkiraan dari metode.
+    const adaRincian = selected.bayarTunai !== undefined
+    const tunai = adaRincian ? (selected.bayarTunai ?? 0) : selected.method === "QRIS" ? 0 : selected.total
+    const qrisBayar = adaRincian
+      ? (selected.bayarQris ?? 0)
+      : selected.method === "Tunai" ? 0 : selected.method === "QRIS" ? selected.total : selected.total / 2
     const cartLines: CartLine[] = selected.items.map((it, idx) => ({
       id: idx + 100,
       lineId: `${selected.id}-${idx}`,
@@ -302,20 +341,16 @@ export function HistoryPage({
       <ReceiptView
         cart={cartLines}
         subtotal={subtotal}
-        discount={0}
+        discount={selected.discount ?? 0}
         total={selected.total}
         method={selected.method}
-        cash={selected.method === "QRIS" ? 0 : selected.total}
-        qris={
-          selected.method === "Tunai"
-            ? 0
-            : selected.method === "QRIS"
-              ? selected.total
-              : selected.total / 2
-        }
-        change={0}
+        cash={tunai}
+        qris={qrisBayar}
+        change={Math.max(0, tunai + qrisBayar - selected.total)}
         cashier={selected.createdBy}
         invoice={selected.id}
+        tanggal={`${selected.date} · ${selected.time}`}
+        contoh={!live}
         onClose={() => setShowReceipt(false)}
       />
     )
@@ -327,20 +362,57 @@ export function HistoryPage({
       <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
         <div className="input-shell">
-          <Icon name="calendar" />
+          <Icon name="search" />
           <input
-            onChange={(e) => setDateFilter(e.target.value)}
-            title="Kosongkan untuk semua tanggal"
-            type="date"
-            value={dateFilter}
+            onChange={(e) => setCari(e.target.value)}
+            placeholder="Cari nomor nota"
+            value={cari}
           />
         </div>
+        <div className="input-shell">
+          <Icon name="calendar" />
+          <input
+            max={sampai || undefined}
+            onChange={(e) => setDari(e.target.value)}
+            title="Dari tanggal (kosongkan untuk semua)"
+            type="date"
+            value={dari}
+          />
+        </div>
+        <div className="input-shell">
+          <Icon name="calendar" />
+          <input
+            min={dari || undefined}
+            onChange={(e) => setSampai(e.target.value)}
+            title="Sampai tanggal (kosongkan untuk semua)"
+            type="date"
+            value={sampai}
+          />
+        </div>
+        <select onChange={(e) => setStatusFilter(e.target.value)} value={statusFilter}>
+          <option>Semua status</option>
+          <option>Lunas</option>
+          <option>Manual</option>
+          <option>BATAL</option>
+        </select>
+        <select onChange={(e) => setMethodFilter(e.target.value)} value={methodFilter}>
+          <option>Semua metode</option>
+          <option>Tunai</option>
+          <option>QRIS</option>
+          <option>Gabungan</option>
+        </select>
         <select onChange={(e) => setBarberFilter(e.target.value)} value={barberFilter}>
           <option>Semua kapster</option>
           {barberOptions.map((barber) => (
             <option key={barber}>{barber}</option>
           ))}
         </select>
+        <Button onClick={() => ekspor("excel")} disabled={!visibleTx.length}>
+          Excel
+        </Button>
+        <Button onClick={() => ekspor("pdf")} disabled={!visibleTx.length}>
+          PDF
+        </Button>
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
@@ -350,11 +422,14 @@ export function HistoryPage({
             <span>Total</span>
             <span>Status</span>
           </div>
+          {visibleTx.length === 0 && (
+            <p style={{ padding: 16, color: "var(--slate)" }}>Tidak ada transaksi yang cocok.</p>
+          )}
           {visibleTx.map((tx) => (
             <Button
               className={`transaction-row ${
                 tx.status === "BATAL" ? "voided" : ""
-              } ${selected.id === tx.id ? "selected" : ""}`}
+              } ${selected?.id === tx.id ? "selected" : ""}`}
               key={tx.id}
               onClick={() => setSelectedId(tx.id)}
             >
@@ -379,6 +454,7 @@ export function HistoryPage({
           ))}
         </section>
 
+        {selected && (
         <aside className="panel detail">
           <div className="detail-header-row">
             <div>
@@ -444,6 +520,7 @@ export function HistoryPage({
                 <small>Kapster</small>
                 <strong>{selected.barber}</strong>
               </div>
+              {userRole !== "Kasir" && (
               <div>
                 <Icon name="wallet" />
                 <small>Rincian Komisi</small>
@@ -452,6 +529,7 @@ export function HistoryPage({
                   {selected.commissionNote}
                 </span>
               </div>
+              )}
             </div>
           </div>
 
@@ -522,8 +600,9 @@ export function HistoryPage({
             )}
           </div>
         </aside>
+        )}
       </div>
-      {action && (
+      {action && selected && (
         <ReasonDialog
           title={
             action === "restore" ? "Pulihkan transaksi?" : "Batalkan transaksi?"

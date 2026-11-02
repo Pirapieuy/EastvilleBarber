@@ -57,6 +57,8 @@ export function ReceiptView({
   change,
   cashier,
   invoice = "INV-291026-0084",
+  tanggal,
+  contoh,
   onClose,
 }: {
   cart: CartLine[]
@@ -69,8 +71,23 @@ export function ReceiptView({
   change: number
   cashier: string
   invoice?: string
+  /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
+  tanggal?: string
+  /** Struk dari data demo (tidak tersimpan di server) */
+  contoh?: boolean
   onClose: () => void
 }) {
+  const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
+  const teksWa = [
+    `*EASTVILLE BARBERSHOP*`,
+    `Nota: ${invoice}`,
+    ...cart.map((l) => `${l.name} (${l.barber}) ${l.qty} x ${fmt(l.price)} = ${fmt(l.price * l.qty)}`),
+    discount > 0 ? `Diskon: -${fmt(discount)}` : "",
+    `*TOTAL: Rp ${fmt(total)}* (${method})`,
+    `Terima kasih sudah mempercayakan gaya Anda kepada Eastville.`,
+  ]
+    .filter(Boolean)
+    .join("\n")
   const [size, setSize] = useState<"58" | "80">("58")
   return (
     <div className="flow-page">
@@ -92,6 +109,11 @@ export function ReceiptView({
             80 mm
           </Button>
         </div>
+        <Button
+          onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(teksWa)}`, "_blank")}
+        >
+          Kirim WhatsApp
+        </Button>
         <Button className="primary-button" onClick={() => window.print()}>
           <Icon name="print" /> Cetak
         </Button>
@@ -102,15 +124,17 @@ export function ReceiptView({
             <div>E</div>
             <h2>EASTVILLE</h2>
             <p>EASTVILLE BARBERSHOP</p>
+            {contoh && <p><strong>*** CONTOH (DEMO) ***</strong></p>}
           </header>
           <hr />
           <dl>
             <div>
               <dt>Tanggal</dt>
               <dd>
-                {new Date()
-                  .toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })
-                  .replace(",", " ·")}
+                {tanggal ??
+                  new Date()
+                    .toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })
+                    .replace(",", " ·")}
               </dd>
             </div>
             <div>
@@ -396,6 +420,7 @@ export function CashierPage({
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
         invoice={invoice}
+        contoh={!live}
         onClose={() => {
           setReceipt(false)
           if (live) {
