@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
+import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
@@ -79,6 +80,11 @@ export function ProductsPage() {
   const [stockCode, setStockCode] = useState("")
   const [stockQty, setStockQty] = useState("10")
   const [stockNote, setStockNote] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState("")
+  const [stockError, setStockError] = useState("")
+  const [urut, setUrut] = useState("Nama")
+  const [reloadKey, setReloadKey] = useState(0)
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
@@ -119,11 +125,12 @@ export function ProductsPage() {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    setLiveError("")
     loadLive().catch((e) => {
       console.error("Gagal memuat produk:", e)
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
-  }, [])
+  }, [reloadKey])
   const [changeLogs, setChangeLogs] = useState([
     {
       time: "29 Okt 10.15",
@@ -148,6 +155,8 @@ export function ProductsPage() {
     },
   ])
 
+  const nominalTotal =
+    formData.nominalShares.barber + formData.nominalShares.seller + formData.nominalShares.eastville
   const shareTotal =
     formData.shares.barber + formData.shares.seller + formData.shares.eastville
 
@@ -166,6 +175,7 @@ export function ProductsPage() {
       nominalShares: { barber: 7000, seller: 42000, eastville: 21000 },
     })
     setChangeReason("")
+    setFormError("")
     setFormOpen(true)
   }
 
@@ -173,13 +183,33 @@ export function ProductsPage() {
     setEditingCode(prod.code)
     setFormData({ ...prod })
     setChangeReason("")
+    setFormError("")
     setFormOpen(true)
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault()
-    if (!formData.name || !formData.code || !formData.seller) return
+    if (saving) return
+    setFormError("")
+    if (!formData.name.trim() || !formData.code.trim() || !formData.seller.trim()) {
+      return setFormError("Nama, kode, dan pemasok wajib diisi.")
+    }
+    if (!(formData.price > 0)) return setFormError("Harga jual harus lebih dari 0.")
+    if (formData.costPrice < 0 || formData.stock < 0) return setFormError("Harga modal dan stok tidak boleh negatif.")
+    if (formData.scheme === "Nominal tetap" && nominalTotal !== formData.price) {
+      return setFormError(`Total pembagian nominal (${rupiah(nominalTotal)}) harus sama dengan harga jual (${rupiah(formData.price)}).`)
+    }
+    if (live && editingCode && !changeReason.trim()) {
+      return setFormError("Alasan perubahan wajib diisi saat mengubah produk.")
+    }
+    if (editingCode) {
+      const lama = productsList.find((p) => p.code === editingCode)
+      if (lama?.status === "Aktif" && formData.status === "Nonaktif") {
+        if (!window.confirm(`Nonaktifkan "${formData.name}"? Produk tidak akan muncul di Kasir.`)) return
+      }
+    }
     if (live) {
+      setSaving(true)
       try {
         await apiProduk.simpan(
           {
@@ -200,7 +230,9 @@ export function ProductsPage() {
         await loadLive()
         setFormOpen(false)
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : "Gagal menyimpan.")
+        setFormError(err instanceof Error ? err.message : "Gagal menyimpan.")
+      } finally {
+        setSaving(false)
       }
       return
     }
@@ -246,6 +278,52 @@ export function ProductsPage() {
     )
   }
 
+  if (getToken() && !live && liveError) {
+    return (
+      <div className="content">
+        <DemoNotice live={live} error={liveError} />
+        <p>Data produk gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
+
+  const STOK_MENIPIS = 3
+  const daftar = productsList
+    .filter((p) => {
+      const q = cari.trim().toLowerCase()
+      return (
+        (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)) &&
+        (statusFilter === "Semua status" ||
+          (statusFilter === "Aktif"
+            ? p.status === "Aktif"
+            : statusFilter === "Stok menipis"
+              ? p.stock <= STOK_MENIPIS
+              : p.status !== "Aktif"))
+      )
+    })
+    .sort((a, b) =>
+      urut === "Stok terendah"
+        ? a.stock - b.stock
+        : urut === "Harga tertinggi"
+          ? b.price - a.price
+          : a.name.localeCompare(b.name),
+    )
+
+  function ekspor(jenis: "excel" | "pdf") {
+    const tabel: TabelEkspor = {
+      berkas: "daftar-produk",
+      judul: "Daftar Produk",
+      keterangan: `${daftar.length} produk`,
+      kolom: ["Kode", "Nama", "Pemasok", "Stok", "Harga jual", "Harga modal", "Skema", "Status"],
+      baris: daftar.map((p) => [p.code, p.name, p.seller, p.stock, p.price, p.costPrice, p.scheme, p.status]),
+    }
+    if (jenis === "excel") eksporExcel(tabel)
+    else eksporPdf(tabel)
+  }
+
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />
@@ -256,7 +334,10 @@ export function ProductsPage() {
           <div className="page-actions">
             <Button
               className="secondary-button"
-              onClick={() => setStockOpen(true)}
+              onClick={() => {
+                setStockError("")
+                setStockOpen(true)
+              }}
             >
               <Icon name="plus" /> Pembelian stok
             </Button>
@@ -296,7 +377,19 @@ export function ProductsPage() {
               <option>Semua status</option>
               <option>Aktif</option>
               <option>Non-aktif</option>
+              <option>Stok menipis</option>
             </select>
+            <select value={urut} onChange={(e) => setUrut(e.target.value)} title="Urutkan">
+              <option>Nama</option>
+              <option>Stok terendah</option>
+              <option>Harga tertinggi</option>
+            </select>
+            <Button disabled={!daftar.length} onClick={() => ekspor("excel")}>
+              Excel
+            </Button>
+            <Button disabled={!daftar.length} onClick={() => ekspor("pdf")}>
+              PDF
+            </Button>
           </div>
           <div className="product-admin-head">
             <span>Produk</span>
@@ -306,15 +399,10 @@ export function ProductsPage() {
             <span>Status</span>
             <span>Aksi</span>
           </div>
-          {productsList
-            .filter((p) => {
-              const q = cari.trim().toLowerCase()
-              return (
-                (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)) &&
-                (statusFilter === "Semua status" ||
-                  (statusFilter === "Aktif" ? p.status === "Aktif" : p.status !== "Aktif"))
-              )
-            })
+          {daftar.length === 0 && (
+            <p style={{ padding: 16, color: "var(--slate)" }}>Tidak ada produk yang cocok.</p>
+          )}
+          {daftar
             .map((product) => (
             <article className="product-admin-row" key={product.code}>
               <span>
@@ -327,7 +415,7 @@ export function ProductsPage() {
                 </span>
               </span>
               <span>{product.seller}</span>
-              <span className={product.stock <= 3 ? "stock-low" : ""}>
+              <span className={product.stock <= STOK_MENIPIS ? "stock-low" : ""}>
                 {product.stock} unit
               </span>
               <span className="scheme-tag">
@@ -426,6 +514,8 @@ export function ProductsPage() {
                 <label>
                   <span>Harga jual</span>
                   <input
+                    min={1}
+                    required
                     type="number"
                     value={formData.price}
                     onChange={(e) =>
@@ -439,6 +529,7 @@ export function ProductsPage() {
                 <label>
                   <span>Harga modal</span>
                   <input
+                    min={0}
                     type="number"
                     value={formData.costPrice}
                     onChange={(e) =>
@@ -452,6 +543,8 @@ export function ProductsPage() {
                 <label>
                   <span>Stok produk</span>
                   <input
+                    disabled={Boolean(editingCode) && live}
+                    min={0}
                     type="number"
                     value={formData.stock}
                     onChange={(e) =>
@@ -461,6 +554,9 @@ export function ProductsPage() {
                       })
                     }
                   />
+                  {Boolean(editingCode) && live && (
+                    <small>Ubah stok lewat tombol "Pembelian stok".</small>
+                  )}
                 </label>
                 <div className="status-toggle-field">
                   <span>Status produk</span>
@@ -702,14 +798,23 @@ export function ProductsPage() {
                 )}
               </div>
               <label>
-                <span>Alasan Perubahan Komisi</span>
+                <span>
+                  Alasan Perubahan Komisi{editingCode && live ? " (wajib)" : ""}
+                </span>
                 <textarea
+                  required={Boolean(editingCode) && live}
                   value={changeReason}
                   onChange={(e) => setChangeReason(e.target.value)}
                   placeholder="Tuliskan alasan penyesuaian komisi untuk jejak audit log..."
                 />
               </label>
             </div>
+            {formError && (
+              <div className="info-banner" role="alert">
+                <Icon name="alert" />
+                {formError}
+              </div>
+            )}
             <footer>
               <Button
                 className="secondary-button"
@@ -721,11 +826,11 @@ export function ProductsPage() {
               <Button
                 className="primary-button"
                 disabled={
-                  formData.scheme === "Persentase" && shareTotal !== 100
+                  saving || (formData.scheme === "Persentase" && shareTotal !== 100)
                 }
                 type="submit"
               >
-                Simpan produk
+                {saving ? "Menyimpan..." : "Simpan produk"}
               </Button>
             </footer>
           </form>
@@ -737,19 +842,29 @@ export function ProductsPage() {
             className="simple-modal"
             onSubmit={async (event) => {
               event.preventDefault()
+              if (saving) return
+              setStockError("")
+              const qty = Math.trunc(Number(stockQty))
+              const code = stockCode || productsList[0]?.code
+              if (!code) return setStockError("Pilih produk dulu.")
+              if (!qty || qty < 1) return setStockError("Jumlah masuk harus lebih dari 0.")
               if (live) {
-                const code = stockCode || productsList[0]?.code
+                setSaving(true)
                 try {
                   await apiProduk.adjustStok(
                     code,
-                    Number(stockQty),
+                    qty,
                     `Pembelian stok${stockNote ? ` · ${stockNote}` : ""}`,
                   )
                   await loadLive()
                 } catch (err) {
-                  window.alert(err instanceof Error ? err.message : "Gagal menambah stok.")
+                  setStockError(err instanceof Error ? err.message : "Gagal menambah stok.")
                   return
+                } finally {
+                  setSaving(false)
                 }
+              } else {
+                setProductsList((list) => list.map((p) => (p.code === code ? { ...p, stock: p.stock + qty } : p)))
               }
               setStockOpen(false)
             }}
@@ -776,6 +891,7 @@ export function ProductsPage() {
             <label>
               <span>Jumlah masuk</span>
               <input
+                min={1}
                 value={stockQty}
                 onChange={(e) => setStockQty(e.target.value)}
                 type="number"
@@ -789,6 +905,12 @@ export function ProductsPage() {
                 placeholder="Nama pemasok atau konsinyasi"
               />
             </label>
+            {stockError && (
+              <div className="info-banner" role="alert">
+                <Icon name="alert" />
+                {stockError}
+              </div>
+            )}
             <footer>
               <Button
                 className="secondary-button"
@@ -796,8 +918,8 @@ export function ProductsPage() {
               >
                 Batal
               </Button>
-              <Button className="primary-button" type="submit">
-                Tambah stok
+              <Button className="primary-button" disabled={saving} type="submit">
+                {saving ? "Menyimpan..." : "Tambah stok"}
               </Button>
             </footer>
           </form>
