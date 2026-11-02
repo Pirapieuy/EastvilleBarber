@@ -27,7 +27,7 @@ var PENGATURAN_DEFAULT = {
   komisi_default: 40,   // % layanan untuk kapster di jam kerja
   komisi_lembur: 50     // % layanan untuk kapster di luar jam kerja
 };
-var SCHEMA_VERSION = "4";
+var SCHEMA_VERSION = "5";
 
 var HEADERS = {
   Layanan: ["id", "nama", "harga", "status", "kategori"],
@@ -40,7 +40,7 @@ var HEADERS = {
     "id", "waktu", "tanggal", "jam", "metode", "subtotal", "diskon", "total",
     "bayar_tunai", "bayar_qris", "komisi_total", "status",
     "dibuat_oleh_id", "dibuat_oleh", "void_alasan", "void_oleh", "void_waktu", "lembur",
-    "manual", "nota_buku"
+    "manual", "nota_buku", "gratis"
   ],
   TransaksiItem: [
     "trx_id", "tipe", "ref_id", "nama", "qty", "harga", "kapster_id", "kapster", "komisi", "komisi_persen"
@@ -519,10 +519,19 @@ function createTransaksi_(body, user, manual) {
   }
 
   var diskon = Math.min(Math.max(0, toInt_(body.diskon)), subtotal);
+  // Transaksi gratis (promo/traktiran) harus eksplisit + beralasan; total Rp0 tanpa itu ditolak.
+  var gratis = body.gratis === true;
+  var alasanGratis = (body.alasan || "").toString().trim();
+  if (gratis) {
+    if (!alasanGratis) return fail_("Alasan transaksi gratis wajib diisi.");
+    diskon = subtotal;
+  }
   var total = subtotal - diskon;
+  if (total === 0 && !gratis) return fail_("Total Rp0 hanya untuk transaksi gratis. Pilih Gratis dan isi alasannya.");
   var tunai = toInt_(body.bayarTunai), qris = toInt_(body.bayarQris);
   if (body.metode === "Tunai") qris = 0;
   if (body.metode === "QRIS") { tunai = 0; qris = total; }
+  if (gratis) { tunai = 0; qris = 0; }
   if (tunai + qris < total) return fail_("Pembayaran kurang Rp " + (total - tunai - qris) + ".");
 
   var id = manual ? notaBuku : nextInvoiceId_(now);
@@ -532,7 +541,8 @@ function createTransaksi_(body, user, manual) {
     bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, status: "Lunas",
     dibuat_oleh_id: user.id, dibuat_oleh: user.nama + " · " + user.role,
     lembur: lembur ? "Ya" : "Tidak",
-    manual: manual ? "Ya" : "", nota_buku: notaBuku
+    manual: manual ? "Ya" : "", nota_buku: notaBuku,
+    gratis: gratis ? alasanGratis : ""
   });
   lines.forEach(function (ln) { ln.trx_id = id; appendObj_(SHEET_TRX_ITEM, ln); });
 
@@ -540,7 +550,7 @@ function createTransaksi_(body, user, manual) {
     mutasiStok_(kode, stokBaru[kode] - Number(produkMap[kode].stok), "Penjualan", id, user);
   });
 
-  writeAuditLog(user.id, user.nama, manual ? "REKAP_MANUAL" : "TRANSAKSI", id + " total " + total);
+  writeAuditLog(user.id, user.nama, manual ? "REKAP_MANUAL" : "TRANSAKSI", id + " total " + total + (gratis ? " GRATIS: " + alasanGratis : ""));
   return ok_({ id: id, total: total, kembalian: tunai + qris - total, lembur: lembur });
 }
 

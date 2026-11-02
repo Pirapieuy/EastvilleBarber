@@ -138,6 +138,9 @@ export interface CheckoutPayload {
   bayarTunai: number
   bayarQris: number
   items: CheckoutItem[]
+  /** Transaksi gratis (promo/traktiran): total Rp0 hanya diterima server bila true + alasan */
+  gratis?: boolean
+  alasan?: string
 }
 
 export const apiLayanan = {
