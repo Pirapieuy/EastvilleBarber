@@ -1,15 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
-
-export const barberReport = [
-  ["Seva", 124, 12480000, 4992000],
-  ["Tata", 97, 9730000, 3892000],
-  ["Faisal", 57, 6040000, 2416000],
-  ["Fadhil", 111, 11250000, 4500000],
-  ["Ferdi", 86, 8750000, 3500000],
-]
+import { apiLaporan, getToken, RingkasanLaporan } from "../../api"
 
 export function WhatsAppDialog({
   onClose,
@@ -20,27 +13,37 @@ export function WhatsAppDialog({
   title: string
   text: string
 }) {
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(
+    `*Eastville Barbershop — ${title}*\n\n${text}\n\n_Dibuat otomatis oleh Sistem Eastville_`,
+  )}`
+
   return (
     <div className="modal-overlay">
       <section className="simple-modal whatsapp-modal">
         <header>
           <h2>{title}</h2>
-          <Button onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             <Icon name="close" />
           </Button>
         </header>
-        <pre>
+        <pre style={{ whiteSpace: "pre-wrap", background: "var(--bone)", padding: 12, borderRadius: 8, fontSize: 13 }}>
           *Eastville Barbershop*{"\n"}
           {text}
-          {"\n\n"}Penjualan batal tidak dihitung.
+          {"\n\n"}Penjualan batal/void tidak dihitung.
         </pre>
         <footer>
-          <Button className="secondary-button" onClick={onClose}>
+          <Button className="secondary-button" type="button" onClick={onClose}>
             Kembali
           </Button>
-          <Button className="whatsapp-button" onClick={onClose}>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="whatsapp-button"
+            style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
             <Icon name="whatsapp" /> Buka WhatsApp
-          </Button>
+          </a>
         </footer>
       </section>
     </div>
@@ -57,89 +60,216 @@ export function ReportsPage({
   const [wa, setWa] = useState(false)
   const isManager = (role ?? currentUser?.role) === "Manajer"
 
+  const [mode, setMode] = useState<"Harian" | "Bulanan">("Bulanan")
+  const [data, setData] = useState<RingkasanLaporan>({
+    totalOmset: 48750000,
+    totalDiskon: 0,
+    totalBayarTunai: 31420000,
+    totalBayarQris: 17330000,
+    totalKomisi: 18650000,
+    totalPengeluaran: 8420000,
+    sisaOwner: 21680000,
+    jumlahTransaksi: 124,
+    pengeluaranKategori: {
+      Perlengkapan: 4200000,
+      Listrik: 1500000,
+      Sewa: 2000000,
+      "Lain-lain": 720000,
+    },
+    harian: [],
+  })
+  const [loading, setLoading] = useState(false)
+
+  // Rentang tanggal
+  const today = new Date().toISOString().slice(0, 10)
+  const [dari, setDari] = useState(
+    mode === "Harian" ? today : today.slice(0, 7) + "-01",
+  )
+  const [sampai, setSampai] = useState(today)
+
+  async function loadReport(fromVal = dari, toVal = sampai) {
+    if (!getToken()) return
+    setLoading(true)
+    try {
+      const res = await apiLaporan.ringkasan({ dari: fromVal, sampai: toVal })
+      setData(res)
+    } catch {
+      // Fallback
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadReport(dari, sampai)
+  }, [dari, sampai])
+
+  function handleModeChange(m: "Harian" | "Bulanan") {
+    setMode(m)
+    if (m === "Harian") {
+      setDari(today)
+      setSampai(today)
+    } else {
+      setDari(today.slice(0, 7) + "-01")
+      setSampai(today)
+    }
+  }
+
+  function exportCsv() {
+    let csv = "\uFEFFTanggal,Omset,Tunai,QRIS,Jumlah Transaksi\n"
+    if (data.harian.length > 0) {
+      data.harian.forEach((h) => {
+        csv += `"${h.tanggal}",${h.omset},${h.tunai},${h.qris},${h.count}\n`
+      })
+    } else {
+      csv += `"${dari} s/d ${sampai}",${data.totalOmset},${data.totalBayarTunai},${data.totalBayarQris},${data.jumlahTransaksi}\n`
+    }
+    csv += `\nRingkasan:\nTotal Omset,${data.totalOmset}\nTotal Pengeluaran,${data.totalPengeluaran}\nTotal Komisi,${data.totalKomisi}\nSisa Bersih,${data.sisaOwner}\n`
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `Laporan_Eastville_${dari}_sd_${sampai}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const reportText = `Periode: ${dari} s/d ${sampai}
+Jumlah Transaksi: ${data.jumlahTransaksi}
+Total Pemasukan: ${rupiah(data.totalOmset)}
+• Tunai: ${rupiah(data.totalBayarTunai)}
+• QRIS: ${rupiah(data.totalBayarQris)}
+Total Pengeluaran: ${rupiah(data.totalPengeluaran)}
+Total Komisi: ${rupiah(data.totalKomisi)}
+-----------------------------
+${isManager ? "Laba Bersih" : "Sisa untuk Owner"}: ${rupiah(data.sisaOwner)}`
+
   return (
     <div className="content">
       <div className="report-toolbar">
         <div className="segmented">
-          <Button>Harian</Button>
-          <Button className="active">Bulanan</Button>
+          <Button
+            className={mode === "Harian" ? "active" : ""}
+            onClick={() => handleModeChange("Harian")}
+          >
+            Harian
+          </Button>
+          <Button
+            className={mode === "Bulanan" ? "active" : ""}
+            onClick={() => handleModeChange("Bulanan")}
+          >
+            Bulanan
+          </Button>
         </div>
-        <select>
-          <option>Oktober 2026</option>
-        </select>
+
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            type="date"
+            value={dari}
+            onChange={(e) => setDari(e.target.value)}
+            style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--line)" }}
+          />
+          <span>s/d</span>
+          <input
+            type="date"
+            value={sampai}
+            onChange={(e) => setSampai(e.target.value)}
+            style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--line)" }}
+          />
+        </div>
+
         <div>
-          <Button className="secondary-button">Excel</Button>
-          <Button className="secondary-button">PDF</Button>
+          <Button className="secondary-button" onClick={exportCsv}>
+            Export Excel (CSV)
+          </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
           </Button>
         </div>
       </div>
+
+      {loading && <p style={{ color: "var(--muted)", margin: "10px 0" }}>Menghitung laporan dari database...</p>}
+
       <div className="kpi-grid">
         <Kpi
           icon="cash"
           label="Pemasukan"
           tone="sage"
-          value="Rp 48.750.000"
-          detail="Tunai 31,42 jt · QRIS 17,33 jt"
+          value={rupiah(data.totalOmset)}
+          detail={`Tunai ${rupiah(data.totalBayarTunai)} · QRIS ${rupiah(data.totalBayarQris)}`}
         />
         <Kpi
           icon="expense"
           label="Pengeluaran"
           tone="amber"
-          value="Rp 8.420.000"
-          detail="Oktober 2026"
+          value={rupiah(data.totalPengeluaran)}
+          detail={`${Object.keys(data.pengeluaranKategori).length} kategori aktif`}
         />
         <Kpi
           icon="people"
           label="Total Komisi"
           tone="brass"
-          value="Rp 18.650.000"
-          detail="Layanan + produk"
+          value={rupiah(data.totalKomisi)}
+          detail="Layanan + produk kapster"
         />
         <Kpi
           icon="wallet"
           label={isManager ? "Laba Bersih" : "Sisa Owner"}
           tone="dark"
-          value="Rp 21.680.000"
-          detail="Setelah semua biaya"
+          value={rupiah(data.sisaOwner)}
+          detail={`${data.jumlahTransaksi} transaksi sukses`}
         />
       </div>
-      <section className="panel report-chart">
-        <PageTitle eyebrow="Tren pemasukan" title="Pemasukan per hari" />
-        <div className="bar-chart large">
-          {[42, 58, 46, 72, 62, 84, 54, 91, 66, 78, 96, 74, 82, 59, 89, 71].map(
-            (_, i) => (
-              <span className={`chart-bar b${(i % 12) + 1}`} key={i}>
-                <i />
-                <b />
-              </span>
-            ),
-          )}
-        </div>
-      </section>
-      <section className="panel report-table">
-        <PageTitle eyebrow="Kinerja tim" title="Rincian per kapster" />
-        <div className="report-head">
-          <span>Kapster</span>
-          <span>Pelanggan</span>
-          <span>Omzet</span>
-          <span>Komisi</span>
-        </div>
-        {barberReport.map((x) => (
-          <div className="report-row" key={x[0]}>
-            <strong>{x[0]}</strong>
-            <span>{x[1]} orang</span>
-            <b>{rupiah(Number(x[2]))}</b>
-            <b>{rupiah(Number(x[3]))}</b>
+
+      {data.harian.length > 0 && (
+        <section className="panel report-table" style={{ marginTop: 20 }}>
+          <PageTitle eyebrow="Rincian tanggal" title="Arus Kas Harian" />
+          <div className="report-head">
+            <span>Tanggal</span>
+            <span>Jumlah Trx</span>
+            <span>Tunai / QRIS</span>
+            <span>Total Omset</span>
           </div>
-        ))}
-      </section>
+          {data.harian.map((h) => (
+            <div className="report-row" key={h.tanggal}>
+              <strong>{h.tanggal}</strong>
+              <span>{h.count} transaksi</span>
+              <span>{rupiah(h.tunai)} / {rupiah(h.qris)}</span>
+              <b>{rupiah(h.omset)}</b>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {Object.keys(data.pengeluaranKategori).length > 0 && (
+        <section className="panel report-table" style={{ marginTop: 20 }}>
+          <PageTitle eyebrow="Biaya operasional" title="Rincian Pengeluaran per Kategori" />
+          <div className="report-head">
+            <span>Kategori</span>
+            <span>Porsi</span>
+            <span>Status</span>
+            <span>Nominal</span>
+          </div>
+          {Object.entries(data.pengeluaranKategori).map(([kat, jml]) => {
+            const pct = data.totalPengeluaran > 0 ? Math.round((jml / data.totalPengeluaran) * 100) : 0
+            return (
+              <div className="report-row" key={kat}>
+                <strong>{kat}</strong>
+                <span>{pct}% dari total</span>
+                <i className="chip lunas">Aktif</i>
+                <b style={{ color: "var(--oxblood)" }}>− {rupiah(jml)}</b>
+              </div>
+            )
+          })}
+        </section>
+      )}
+
       {wa && (
         <WhatsAppDialog
           onClose={() => setWa(false)}
-          title="Laporan Bulanan"
-          text={`Pemasukan: Rp 48.750.000\nPengeluaran: Rp 8.420.000\nKomisi: Rp 18.650.000\nSisa Owner: Rp 21.680.000`}
+          title={`Laporan ${mode}`}
+          text={reportText}
         />
       )}
     </div>

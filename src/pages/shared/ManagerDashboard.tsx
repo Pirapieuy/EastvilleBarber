@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, PageTitle } from "../../components/common/UI"
+import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
+import { apiLaporan, getToken, RingkasanLaporan } from "../../api"
 
 export function ManagerDashboard({
   user,
@@ -13,11 +15,28 @@ export function ManagerDashboard({
 } = {}) {
   const nav = onNavigate ?? navigate ?? (() => {})
   const firstName = user?.name ? user.name.split(" ")[0] : "Dian"
+  const [data, setData] = useState<RingkasanLaporan>({
+    totalOmset: 2450000,
+    totalDiskon: 0,
+    totalBayarTunai: 1150000,
+    totalBayarQris: 1300000,
+    totalKomisi: 980000,
+    totalPengeluaran: 320000,
+    sisaOwner: 1150000,
+    jumlahTransaksi: 14,
+    pengeluaranKategori: {},
+    harian: [],
+  })
+
+  useEffect(() => {
+    if (!getToken()) return
+    apiLaporan.ringkasan().then(setData).catch(() => {})
+  }, [])
 
   return (
     <div className="content">
       <PageTitle
-        eyebrow="Rabu, 29 Oktober 2026 · Operasional"
+        eyebrow="Operasional Harian"
         title={`Selamat pagi, ${firstName}.`}
         action={
           <div className="page-actions">
@@ -41,29 +60,29 @@ export function ManagerDashboard({
           icon="cash"
           label="Pemasukan"
           tone="sage"
-          value="Rp 2.450.000"
-          detail="Tunai Rp 1.150.000 · QRIS Rp 1.300.000"
+          value={rupiah(data.totalOmset)}
+          detail={`Tunai ${rupiah(data.totalBayarTunai)} · QRIS ${rupiah(data.totalBayarQris)}`}
         />
         <Kpi
           icon="expense"
           label="Pengeluaran"
           tone="amber"
-          value="Rp 320.000"
-          detail="Operasional harian"
+          value={rupiah(data.totalPengeluaran)}
+          detail="Operasional berjalan"
         />
         <Kpi
           icon="people"
           label="Komisi Kapster"
           tone="brass"
-          value="Rp 980.000"
-          detail="3 kapster bertugas hari ini"
+          value={rupiah(data.totalKomisi)}
+          detail="Total komisi tim"
         />
         <Kpi
-          icon="check"
-          label="Kehadiran Tim"
+          icon="wallet"
+          label="Laba Bersih"
           tone="dark"
-          value="3 dari 3 Hadir"
-          detail="Seva, Tata, Ferdi · Tepat Waktu"
+          value={rupiah(data.sisaOwner)}
+          detail={`${data.jumlahTransaksi} transaksi sukses`}
         />
       </div>
 
@@ -74,13 +93,13 @@ export function ManagerDashboard({
             <div>
               <i className="dot sage-dot" />
               <span>
-                Tunai: <strong>Rp 1.150.000</strong>
+                Tunai: <strong>{rupiah(data.totalBayarTunai)}</strong>
               </span>
             </div>
             <div>
-              <i className="dot amber-dot" />
+              <i className="dot brass-dot" />
               <span>
-                QRIS: <strong>Rp 1.300.000</strong>
+                QRIS: <strong>{rupiah(data.totalBayarQris)}</strong>
               </span>
             </div>
           </div>
@@ -88,65 +107,33 @@ export function ManagerDashboard({
             {[45, 60, 52, 70, 85, 65, 78].map((h, i) => (
               <div key={i} className="bar-col">
                 <div className="bar-fill" style={{ height: `${h}%` }} />
-                <small>
-                  {["Kam", "Jum", "Sab", "Min", "Sen", "Sel", "Rab"][i]}
-                </small>
+                <span>Hari {i + 1}</span>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="panel staff-duty-panel">
-          <div className="staff-panel-header">
-            <div className="staff-panel-top">
-              <p className="eyebrow">Kapster Bertugas</p>
-              <Button
-                className="text-button staff-panel-action"
-                onClick={() => nav("AbsensiTim")}
-              >
-                Lihat Semua Foto <Icon name="arrow" />
-              </Button>
+        <section className="panel attention">
+          <PageTitle eyebrow="Tindakan Diperlukan" title="Perhatian Toko" />
+          <div className="attention-item">
+            <span className="dot amber-dot" />
+            <div>
+              <strong>Stok Produk</strong>
+              <small>Pantau stok pomade & perlengkapan</small>
             </div>
-            <h2 className="staff-panel-title">Status Shift & Absensi Hari Ini</h2>
+            <Button className="text-button" onClick={() => nav("MasterProduk")}>
+              Lihat
+            </Button>
           </div>
-          <div className="staff-duty-list">
-            {[
-              {
-                name: "Seva",
-                shift: "10.00 - 20.00",
-                checkin: "09.52 WIB",
-                status: "Tepat Waktu",
-                done: 5,
-              },
-              {
-                name: "Tata",
-                shift: "10.00 - 20.00",
-                checkin: "09.48 WIB",
-                status: "Tepat Waktu",
-                done: 6,
-              },
-              {
-                name: "Ferdi",
-                shift: "12.00 - 21.00",
-                checkin: "11.55 WIB",
-                status: "Tepat Waktu",
-                done: 4,
-              },
-            ].map((s, idx) => (
-              <div key={idx} className="staff-duty-row">
-                <div className="staff-avatar">{s.name.charAt(0)}</div>
-                <div className="staff-duty-info">
-                  <strong>{s.name}</strong>
-                  <small>
-                    Shift {s.shift} · Check-in: {s.checkin}
-                  </small>
-                </div>
-                <div className="staff-duty-status">
-                  <span className="chip active">{s.status}</span>
-                  <small>{s.done} pelanggan dilayani</small>
-                </div>
-              </div>
-            ))}
+          <div className="attention-item">
+            <span className="dot sage-dot" />
+            <div>
+              <strong>Absensi & Jadwal</strong>
+              <small>Cek kehadiran kapster hari ini</small>
+            </div>
+            <Button className="text-button" onClick={() => nav("AbsensiTim")}>
+              Lihat
+            </Button>
           </div>
         </section>
       </div>

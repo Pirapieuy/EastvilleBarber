@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
+import { apiAbsensi, apiKasir, getToken, AbsensiRow } from "../../api"
 
 export function AttendanceAdminPage({
   currentUser,
@@ -12,11 +13,64 @@ export function AttendanceAdminPage({
   role?: Role
   title?: string
 } = {}) {
-  const [tab, setTab] = useState<"Jadwal" | "Riwayat" | "Koreksi">("Jadwal")
+  const [tab, setTab] = useState<"Jadwal" | "Riwayat" | "Koreksi">("Riwayat")
   const [correctionOpen, setCorrectionOpen] = useState(false)
-  const [photoOpen, setPhotoOpen] = useState(false)
   const isManager = (role ?? currentUser?.role) === "Manajer"
   const pageTitle = title ?? (isManager ? "Absensi Tim" : "Absensi Admin")
+
+  const today = new Date().toISOString().slice(0, 10)
+  const [filterTanggal, setFilterTanggal] = useState(today)
+  const [filterKapster, setFilterKapster] = useState("Semua")
+  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([])
+  const [list, setList] = useState<AbsensiRow[]>([
+    {
+      id: "a-01",
+      waktu: new Date().toISOString(),
+      tanggal: today,
+      jam: "09.54",
+      userId: "u-kapster",
+      nama: "Budi Santoso",
+      role: "Kapster",
+      tipe: "Masuk",
+      status: "Tepat waktu",
+    },
+    {
+      id: "a-02",
+      waktu: new Date().toISOString(),
+      tanggal: today,
+      jam: "08.07",
+      userId: "u-kapster2",
+      nama: "Zhefitra Ananda",
+      role: "Kapster",
+      tipe: "Masuk",
+      status: "Hadir",
+    },
+  ])
+  const [loading, setLoading] = useState(false)
+
+  async function loadData() {
+    if (!getToken()) return
+    setLoading(true)
+    try {
+      const [kaps, abs] = await Promise.all([
+        apiKasir.kapster().catch(() => []),
+        apiAbsensi.list({ tanggal: filterTanggal || undefined }).catch(() => []),
+      ])
+      if (kaps.length > 0) setKapsters(kaps)
+      if (abs.length > 0) setList(abs)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [filterTanggal])
+
+  const filtered = list.filter((item) => {
+    if (filterKapster !== "Semua" && item.userId !== filterKapster) return false
+    return true
+  })
 
   return (
     <div className="content">
@@ -25,7 +79,7 @@ export function AttendanceAdminPage({
         title={pageTitle}
       />
       <div className="segmented page-segment">
-        {(["Jadwal", "Riwayat", "Koreksi"] as const).map((value) => (
+        {(["Riwayat", "Jadwal", "Koreksi"] as const).map((value) => (
           <Button
             className={tab === value ? "active" : ""}
             key={value}
@@ -35,16 +89,69 @@ export function AttendanceAdminPage({
           </Button>
         ))}
       </div>
+
+      {tab === "Riwayat" && (
+        <section className="panel attendance-admin-list">
+          <div className="filters">
+            <div className="input-shell">
+              <Icon name="calendar" />
+              <input
+                type="date"
+                value={filterTanggal}
+                onChange={(e) => setFilterTanggal(e.target.value)}
+              />
+            </div>
+            <select
+              value={filterKapster}
+              onChange={(e) => setFilterKapster(e.target.value)}
+            >
+              <option value="Semua">Semua kapster</option>
+              {kapsters.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.nama}
+                </option>
+              ))}
+            </select>
+            <Button className="secondary-button" onClick={() => loadData()}>
+              <Icon name="history" /> Refresh
+            </Button>
+          </div>
+
+          {loading && <p style={{ padding: 18, color: "var(--muted)" }}>Memuat data absensi...</p>}
+
+          {filtered.length === 0 && !loading && (
+            <p style={{ padding: 18, color: "var(--muted)" }}>Tidak ada data absensi untuk filter ini.</p>
+          )}
+
+          {filtered.map((row) => (
+            <article key={row.id}>
+              <span className="photo-thumb">
+                <Icon name="user" />
+              </span>
+              <span>
+                <strong>{row.nama}</strong>
+                <small>{row.role}</small>
+              </span>
+              <span>
+                <small>Tipe</small>
+                <strong>{row.tipe || "Masuk"}</strong>
+              </span>
+              <span>
+                <small>Jam Server</small>
+                <strong>{row.jam}</strong>
+              </span>
+              <i className="chip lunas">
+                {row.status || "Hadir"}
+              </i>
+            </article>
+          ))}
+        </section>
+      )}
+
       {tab === "Jadwal" && (
         <section className="panel schedule-grid-card">
           <div className="schedule-toolbar">
-            <Button className="secondary-button">
-              <Icon name="back" />
-            </Button>
-            <strong>27 Okt – 2 Nov 2026</strong>
-            <Button className="secondary-button">
-              <Icon name="arrow" />
-            </Button>
+            <strong>Jadwal Reguler Kapster Eastville</strong>
             <Button className="primary-button">
               <Icon name="plus" /> Atur jadwal
             </Button>
@@ -57,56 +164,8 @@ export function AttendanceAdminPage({
               ))}
             </div>
             {[
-              [
-                "Seva",
-                "10.00",
-                "10.00",
-                "10.00",
-                "10.00",
-                "Libur",
-                "08.00",
-                "08.00",
-              ],
-              [
-                "Tata",
-                "08.00",
-                "08.00",
-                "Libur",
-                "08.00",
-                "08.00",
-                "10.00",
-                "10.00",
-              ],
-              [
-                "Faisal",
-                "10.00",
-                "Libur",
-                "10.00",
-                "10.00",
-                "10.00",
-                "08.00",
-                "08.00",
-              ],
-              [
-                "Fadhil",
-                "08.00",
-                "08.00",
-                "08.00",
-                "Libur",
-                "08.00",
-                "10.00",
-                "10.00",
-              ],
-              [
-                "Ferdi",
-                "10.00",
-                "10.00",
-                "08.00",
-                "08.00",
-                "Libur",
-                "10.00",
-                "08.00",
-              ],
+              ["Budi Santoso", "10.00", "10.00", "10.00", "10.00", "Libur", "08.00", "08.00"],
+              ["Zhefitra Ananda", "08.00", "08.00", "Libur", "08.00", "08.00", "10.00", "10.00"],
             ].map((row) => (
               <div className="week-row" key={row[0]}>
                 <strong>{row[0]}</strong>
@@ -123,56 +182,7 @@ export function AttendanceAdminPage({
           </div>
         </section>
       )}
-      {tab === "Riwayat" && (
-        <section className="panel attendance-admin-list">
-          <div className="filters">
-            <div className="input-shell">
-              <Icon name="calendar" />
-              <input defaultValue="2026-10-29" type="date" />
-            </div>
-            <select>
-              <option>Semua kapster</option>
-            </select>
-            <select>
-              <option>Semua status</option>
-            </select>
-          </div>
-          {[
-            ["Seva", "10.00", "09.54", "Tepat waktu"],
-            ["Tata", "08.00", "08.07", "Terlambat 7 mnt"],
-            ["Faisal", "10.00", "10.12", "Dikoreksi"],
-          ].map((row) => (
-            <article key={row[0]}>
-              <Button
-                className="photo-thumb"
-                onClick={() => setPhotoOpen(true)}
-              >
-                <Icon name="user" />
-              </Button>
-              <span>
-                <strong>{row[0]}</strong>
-              </span>
-              <span>
-                <small>Jadwal</small>
-                <strong>{row[1]}</strong>
-              </span>
-              <span>
-                <small>Check-in</small>
-                <strong>{row[2]}</strong>
-              </span>
-              <i
-                className={`chip ${
-                  row[3].startsWith("Terlambat") || row[3] === "Dikoreksi"
-                    ? "manual"
-                    : "lunas"
-                }`}
-              >
-                {row[3]}
-              </i>
-            </article>
-          ))}
-        </section>
-      )}
+
       {tab === "Koreksi" && (
         <section className="correction-grid">
           <article className="panel correction-card">
@@ -180,25 +190,9 @@ export function AttendanceAdminPage({
               <Icon name="camera" />
             </span>
             <div>
-              <strong>Faisal</strong>
-              <small>29 Okt 2026 · Kamera tidak dapat dibuka</small>
-              <p>Sudah mencoba izin kamera tetapi halaman tetap hitam.</p>
-            </div>
-            <Button
-              className="primary-button"
-              onClick={() => setCorrectionOpen(true)}
-            >
-              Koreksi
-            </Button>
-          </article>
-          <article className="panel correction-card">
-            <span className="alert-icon">
-              <Icon name="alert" />
-            </span>
-            <div>
-              <strong>Fadhil</strong>
-              <small>28 Okt 2026 · Internet mati</small>
-              <p>Check-in dilaporkan setelah koneksi kembali.</p>
+              <strong>Budi Santoso</strong>
+              <small>{today} · Kamera perangkat tidak dapat dibuka</small>
+              <p>Kendala perangkat telah dilaporkan.</p>
             </div>
             <Button
               className="primary-button"
@@ -209,73 +203,48 @@ export function AttendanceAdminPage({
           </article>
         </section>
       )}
+
       {correctionOpen && (
         <div className="modal-overlay">
           <form
             className="simple-modal"
             onSubmit={(event) => {
               event.preventDefault()
+              alert("Koreksi kehadiran berhasil disimpan.")
               setCorrectionOpen(false)
             }}
           >
             <header>
-              <h2>Koreksi absensi</h2>
-              <Button onClick={() => setCorrectionOpen(false)}>
+              <h2>Koreksi Kehadiran</h2>
+              <Button type="button" onClick={() => setCorrectionOpen(false)}>
                 <Icon name="close" />
               </Button>
             </header>
-            <div className="old-new">
-              <span>
-                <small>Nilai lama</small>
-                <strong>Belum check-in</strong>
-              </span>
-              <Icon name="arrow" />
-              <span>
-                <small>Nilai baru</small>
-                <strong>Hadir · 10.04</strong>
-              </span>
-            </div>
             <label>
-              <span>Waktu aktual</span>
-              <input defaultValue="10:04" type="time" />
-            </label>
-            <label>
-              <span>Status</span>
+              <span>Status Koreksi</span>
               <select>
-                <option>Tepat waktu</option>
-                <option>Terlambat</option>
+                <option>Hadir (Tepat Waktu)</option>
+                <option>Terlambat Disetujui</option>
+                <option>Izin / Sakit</option>
               </select>
             </label>
             <label>
-              <span>Alasan koreksi</span>
-              <textarea placeholder="Tuliskan dasar koreksi..." required />
+              <span>Catatan Koreksi</span>
+              <textarea placeholder="Alasan persetujuan koreksi..." required />
             </label>
             <footer>
               <Button
                 className="secondary-button"
+                type="button"
                 onClick={() => setCorrectionOpen(false)}
               >
                 Batal
               </Button>
               <Button className="primary-button" type="submit">
-                Simpan koreksi
+                Simpan
               </Button>
             </footer>
           </form>
-        </div>
-      )}
-      {photoOpen && (
-        <div className="modal-overlay photo-modal">
-          <section>
-            <Button onClick={() => setPhotoOpen(false)}>
-              <Icon name="close" />
-            </Button>
-            <div>
-              <Icon name="user" />
-            </div>
-            <h3>Seva</h3>
-            <p>Waktu server 09.54 · Jadwal 10.00</p>
-          </section>
         </div>
       )}
     </div>

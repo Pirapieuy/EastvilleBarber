@@ -190,3 +190,158 @@ export const apiPengaturan = {
   setKomisiKapster: (userId: string, persen: number | null, alasan: string) =>
     api<PengaturanKomisi>("set-komisi-kapster", { userId, persen, alasan }),
 }
+
+// ============================================================
+// TIM B: API CLIENT (Manajemen Tim, Layanan, Gaji & Kasbon, Laporan, Absensi)
+// ============================================================
+
+export const apiAuth = {
+  forgotPin: (email: string) =>
+    api<{ resetToken: string; email: string }>("forgot-pin", { email }),
+  resetPin: (email: string, resetToken: string, newPin: string) =>
+    api<{ success: boolean; message: string }>("reset-pin", { email, resetToken, newPin }),
+  logout: () => api<{ success: boolean; message: string }>("logout"),
+}
+
+export interface UserRow {
+  id: string
+  nama: string
+  username: string
+  role: "Owner" | "Manajer" | "Kasir" | "Kapster"
+  cabang: string
+  email: string
+  status: "Aktif" | "Nonaktif"
+  dibuat: string
+}
+
+export const apiTim = {
+  list: () => api<UserRow[]>("list-users"),
+  create: (p: {
+    nama: string
+    username: string
+    pin: string
+    role: string
+    cabang?: string
+    email: string
+  }) => api<UserRow>("create-user", { ...p }),
+  update: (p: {
+    id: string
+    nama: string
+    username: string
+    role: string
+    cabang?: string
+    email: string
+    newPin?: string
+  }) => api<{ success: boolean }>("update-user", { ...p }),
+  toggleStatus: (id: string, status: "Aktif" | "Nonaktif") =>
+    api<{ success: boolean }>("toggle-user-status", { id, status }),
+}
+
+export const apiLayanan = {
+  list: () => api<LayananRow[]>("list-layanan"),
+  create: (nama: string, harga: number) =>
+    api<LayananRow>("create-layanan", { nama, harga }),
+  update: (id: number, nama: string, harga: number, status: "Aktif" | "Nonaktif") =>
+    api<{ success: boolean }>("update-layanan", { id, nama, harga, status }),
+  toggleStatus: (id: number, status: "Aktif" | "Nonaktif") =>
+    api<{ success: boolean }>("toggle-layanan", { id, status }),
+}
+
+export interface KasbonRow {
+  id: string
+  tanggal: string
+  userId: string
+  nama: string
+  role: string
+  jumlah: number
+  status: "Aktif" | "Lunas"
+  catatan: string
+  dibuatOleh: string
+  lunasWaktu?: string
+}
+
+export interface GajiRow {
+  id: string
+  periode: string
+  userId: string
+  nama: string
+  role: string
+  totalKomisi: number
+  totalKasbon: number
+  gajiBersih: number
+  status: "Dibayar" | "Draft"
+  tanggalBayar: string
+  dibayarOleh: string
+  catatan: string
+}
+
+export interface HitungGajiResult {
+  userId: string
+  totalKomisi: number
+  totalKasbon: number
+  gajiBersih: number
+  transaksiSelesai: number
+  kasbonAktif: { id: string; tanggal: string; jumlah: number; catatan: string }[]
+}
+
+export const apiKasbon = {
+  list: () => api<KasbonRow[]>("list-kasbon"),
+  create: (p: { userId?: string; nama?: string; role?: string; jumlah: number; catatan?: string; tanggal?: string }) =>
+    api<KasbonRow>("create-kasbon", { ...p }),
+  lunasi: (id: string) => api<{ success: boolean }>("lunasi-kasbon", { id }),
+}
+
+export const apiGaji = {
+  hitung: (userId?: string) => api<HitungGajiResult>("hitung-gaji", { userId }),
+  bayar: (p: {
+    userId: string
+    nama: string
+    role: string
+    periode?: string
+    totalKomisi: number
+    totalKasbon: number
+    gajiBersih?: number
+    catatan?: string
+  }) => api<{ id: string; gajiBersih: number; status: string }>("bayar-gaji", { ...p }),
+  list: () => api<GajiRow[]>("list-gaji"),
+}
+
+export interface RingkasanLaporan {
+  totalOmset: number
+  totalDiskon: number
+  totalBayarTunai: number
+  totalBayarQris: number
+  totalKomisi: number
+  totalPengeluaran: number
+  sisaOwner: number
+  jumlahTransaksi: number
+  pengeluaranKategori: Record<string, number>
+  harian: { tanggal: string; omset: number; tunai: number; qris: number; count: number }[]
+}
+
+export const apiLaporan = {
+  ringkasan: (filter: { dari?: string; sampai?: string } = {}) =>
+    api<RingkasanLaporan>("ringkasan-laporan", filter),
+}
+
+export interface AbsensiRow {
+  id: string
+  waktu: string
+  tanggal: string
+  jam: string
+  userId: string
+  nama: string
+  role: string
+  tipe: "Masuk" | "Pulang"
+  fotoUrl?: string
+  status: string
+  catatan?: string
+}
+
+export const apiAbsensi = {
+  catat: (p: { tipe: "Masuk" | "Pulang"; fotoUrl?: string; catatan?: string }) =>
+    api<AbsensiRow>("catat-absensi", { ...p }),
+  list: (filter: { tanggal?: string; userId?: string } = {}) =>
+    api<AbsensiRow[]>("list-absensi", filter),
+}
+
