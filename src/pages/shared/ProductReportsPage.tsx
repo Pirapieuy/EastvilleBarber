@@ -177,6 +177,8 @@ export function ProductReportsPage({
   })
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
+  const [fetching, setFetching] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const isKapsterView = role === "Kapster" || forcedRole === "Kapster" || currentUser?.role === "Kapster"
 
   const rentang = rentangProduk(mode, tanggal, bulan)
@@ -188,6 +190,7 @@ export function ProductReportsPage({
       return
     }
     let batal = false
+    setFetching(true)
     apiLaporan
       .produk({ dari: rentang.dari, sampai: rentang.sampai })
       .then((rows) => {
@@ -198,12 +201,18 @@ export function ProductReportsPage({
       })
       .catch((e) => {
         console.error("Gagal memuat laporan produk:", e)
-        if (!batal) setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+        if (!batal) {
+          // Jangan biarkan data periode sebelumnya/demo tampil sebagai data periode ini
+          setLive(false)
+          setTxList([])
+          setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+        }
       })
+      .finally(() => !batal && setFetching(false))
     return () => {
       batal = true
     }
-  }, [rentang.dari, rentang.sampai])
+  }, [rentang.dari, rentang.sampai, reloadKey])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
     const per: Record<string, { unit: number; omzet: number }> = {}
@@ -238,7 +247,7 @@ export function ProductReportsPage({
     judul: "Laporan Produk",
     keterangan: `Periode ${rentang.dari} s/d ${rentang.sampai} · transaksi lunas ${validTransactions.length} · batal tidak dihitung dalam total`,
     kolom: ["Nota", "Waktu", "Produk", "Qty", "Kapster", "Pemasok", "Total Omzet", "Bagian Kapster", "Bagian Pemasok", "Bagian Eastville", "Status"],
-    baris: txList.map((tx) => [tx.id, tx.time, tx.product, tx.qty, tx.barber, tx.seller, tx.totalOmzet, tx.barberShare, tx.sellerShare, tx.eastvilleShare, tx.status]),
+    baris: filteredTransactions.map((tx) => [tx.id, tx.time, tx.product, tx.qty, tx.barber, tx.seller, tx.totalOmzet, tx.barberShare, tx.sellerShare, tx.eastvilleShare, tx.status]),
   })
 
   const totalOmzet = useMemo(
@@ -270,10 +279,29 @@ export function ProductReportsPage({
     [txList],
   )
 
+  // Dengan token: jangan tampilkan angka demo saat memuat atau gagal memuat.
+  if (getToken() && !live) {
+    return (
+      <div className="content">
+        {liveError ? (
+          <>
+            <DemoNotice live={live} error={liveError} />
+            <p>Laporan produk gagal dimuat: {liveError}</p>
+            <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+              Coba lagi
+            </Button>
+          </>
+        ) : (
+          <p>Memuat laporan produk...</p>
+        )}
+      </div>
+    )
+  }
+
   if (isKapsterView) {
     return (
       <div className="mobile-content">
-        {!forcedRole && (
+        {!forcedRole && !getToken() && (
           <div className="role-preview">
             <span>Pratinjau peran</span>
             <select
@@ -286,6 +314,7 @@ export function ProductReportsPage({
           </div>
         )}
         <DemoNotice live={live} error={liveError} />
+        {fetching && <small style={{ color: "var(--slate)" }}>Memuat periode...</small>}
         <div className="segmented full">
           {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
             <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
@@ -357,6 +386,7 @@ export function ProductReportsPage({
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />
+        {fetching && <small style={{ color: "var(--slate)" }}>Memuat periode...</small>}
       <div className="report-toolbar">
         <div className="segmented">
           {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
@@ -370,7 +400,7 @@ export function ProductReportsPage({
         ) : (
           <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
         )}
-        {!forcedRole && (
+        {!forcedRole && !getToken() && (
           <div className="role-preview">
             <span>Peran</span>
             <select
