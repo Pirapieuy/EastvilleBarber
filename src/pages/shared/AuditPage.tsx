@@ -5,16 +5,16 @@ import { apiAudit, AuditLogRow, getToken } from "../../api"
 
 const DEMO_LOGS: string[][] = [
   [
-    "29 Okt 10.42",
+    "29 Okt 2026, 10:42",
     "Ardi Santoso",
     "Ubah komisi",
     "Free Style Dust",
     "8% → 10%",
     "Kesepakatan baru",
   ],
-  ["29 Okt 10.24", "Tata", "Login", "Akun Tata", "Berhasil", "—"],
+  ["29 Okt 2026, 10:24", "Tata", "Login", "Akun Tata", "Berhasil", "—"],
   [
-    "29 Okt 09.54",
+    "29 Okt 2026, 09:54",
     "Ardi Santoso",
     "Buka foto absensi",
     "Seva",
@@ -22,7 +22,7 @@ const DEMO_LOGS: string[][] = [
     "Pemeriksaan harian",
   ],
   [
-    "29 Okt 09.12",
+    "29 Okt 2026, 09:12",
     "Tata",
     "Batalkan transaksi",
     "INV-291026-0082",
@@ -30,7 +30,7 @@ const DEMO_LOGS: string[][] = [
     "Salah input",
   ],
   [
-    "28 Okt 18.40",
+    "28 Okt 2026, 18:40",
     "Seva",
     "Pulihkan transaksi",
     "INV-281026-0077",
@@ -38,7 +38,7 @@ const DEMO_LOGS: string[][] = [
     "Transaksi valid",
   ],
   [
-    "28 Okt 16.20",
+    "28 Okt 2026, 16:20",
     "Ardi Santoso",
     "Bayar gaji",
     "Tata",
@@ -81,25 +81,34 @@ const AKSI_MAP: Record<string, string> = {
 }
 
 function parseAuditRow(row: AuditLogRow): string[] {
-  let waktuStr = row.jam || ""
-  if (row.tanggal) {
-    const tgl = new Date(row.tanggal)
-    if (!isNaN(tgl.getTime())) {
-      const bln = tgl.toLocaleDateString("id-ID", { day: "numeric", month: "short" })
-      waktuStr = `${bln} ${row.jam || ""}`.trim()
-    } else {
-      waktuStr = `${row.tanggal} ${row.jam || ""}`.trim()
-    }
-  } else if (row.waktu) {
+  let waktuStr = ""
+
+  if (row.waktu) {
     const d = new Date(row.waktu)
     if (!isNaN(d.getTime())) {
-      waktuStr = d.toLocaleDateString("id-ID", {
+      const tglStr = d.toLocaleDateString("id-ID", {
         day: "numeric",
         month: "short",
+        year: "numeric",
+      })
+      const jamStr = d.toLocaleTimeString("id-ID", {
         hour: "2-digit",
         minute: "2-digit",
-      })
+        hour12: false,
+      }).replace(".", ":")
+      waktuStr = `${tglStr}, ${jamStr}`
     }
+  }
+
+  if (!waktuStr && row.tanggal) {
+    const d = new Date(row.tanggal)
+    const tglStr = !isNaN(d.getTime())
+      ? d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
+      : row.tanggal
+    const jamClean = row.jam ? row.jam.replace(".", ":") : ""
+    waktuStr = jamClean ? `${tglStr}, ${jamClean}` : tglStr
+  } else if (!waktuStr) {
+    waktuStr = row.jam ? row.jam.replace(".", ":") : "—"
   }
 
   const aksiLabel = AKSI_MAP[row.aksi] || row.aksi
