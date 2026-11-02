@@ -81,8 +81,17 @@ const pad = (n: number) => String(n).padStart(2, "0")
 const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 
 /** Rentang yyyy-MM-dd untuk mode harian (tanggal) atau bulanan (yyyy-MM). */
-export function rentangLaporan(mode: "Harian" | "Bulanan", tanggal: string, bulan: string) {
+export function rentangLaporan(mode: "Harian" | "Mingguan" | "Bulanan", tanggal: string, bulan: string) {
   if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
+  if (mode === "Mingguan") {
+    // Senin-Minggu pada pekan yang memuat `tanggal`
+    const d = new Date(`${tanggal}T00:00:00`)
+    const senin = new Date(d)
+    senin.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+    const minggu = new Date(senin)
+    minggu.setDate(senin.getDate() + 6)
+    return { dari: isoDate(senin), sampai: isoDate(minggu) }
+  }
   const [y, m] = bulan.split("-").map(Number)
   const akhir = new Date(y, m, 0).getDate()
   return { dari: `${bulan}-01`, sampai: `${bulan}-${pad(akhir)}` }
@@ -97,7 +106,8 @@ export function ReportsPage({
 } = {}) {
   const [wa, setWa] = useState(false)
   const isManager = (role ?? currentUser?.role) === "Manajer"
-  const [mode, setMode] = useState<"Harian" | "Bulanan">("Bulanan")
+  const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
+  const [reloadKey, setReloadKey] = useState(0)
   const [tanggal, setTanggal] = useState(() => isoDate(new Date()))
   const [bulan, setBulan] = useState(() => isoDate(new Date()).slice(0, 7))
   const [data, setData] = useState<LaporanKeuangan>(demoLaporan)
@@ -122,13 +132,17 @@ export function ReportsPage({
       })
       .catch((e) => {
         console.error("Gagal memuat laporan keuangan:", e)
-        if (!batal) setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+        // Data periode sebelumnya tidak boleh tampil di bawah periode baru
+        if (!batal) {
+          setLive(false)
+          setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+        }
       })
       .finally(() => !batal && setFetching(false))
     return () => {
       batal = true
     }
-  }, [mode, tanggal, bulan])
+  }, [mode, tanggal, bulan, reloadKey])
 
   if (Boolean(getToken()) && !live && !liveError) {
     return (
@@ -137,9 +151,23 @@ export function ReportsPage({
       </div>
     )
   }
+  const gagalMuat = Boolean(getToken()) && !live && Boolean(liveError)
+  if (gagalMuat) {
+    return (
+      <div className="content">
+        <DemoNotice live={live} error={liveError} />
+        <p>Laporan gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
 
   const juta = (n: number) => rupiah(n)
-  const periode = mode === "Harian" ? tanggal : bulan
+  const rentang = rentangLaporan(mode, tanggal, bulan)
+  const periode =
+    mode === "Harian" ? tanggal : mode === "Mingguan" ? `${rentang.dari} s/d ${rentang.sampai}` : bulan
   const chart = data.perHari.map((h) => ({ label: h.tanggal.slice(8), value: h.total }))
   const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${isManager ? "Laba Bersih" : "Sisa Owner"}: ${juta(data.sisa)}`
 
@@ -148,7 +176,18 @@ export function ReportsPage({
     judul: "Laporan Keuangan",
     keterangan: `Periode ${periode} · ${data.jumlahTransaksi} transaksi · Pemasukan ${data.pemasukan} · Pengeluaran ${data.pengeluaran} · Komisi ${data.komisi} · ${isManager ? "Laba Bersih" : "Sisa Owner"} ${data.sisa}`,
     kolom: ["Kapster", "Transaksi", "Omzet", "Komisi"],
-    baris: data.perKapster.map((k) => [k.kapster, k.pelanggan, k.omzet, k.komisi]),
+    baris: [
+      ...data.perKapster.map((k): (string | number)[] => [k.kapster, k.pelanggan, k.omzet, k.komisi]),
+      ["", "", "", ""],
+      ["Ringkasan", "Tunai", "QRIS", "Total"],
+      ["Pemasukan", data.tunai, data.qris, data.pemasukan],
+      ["Pengeluaran", "", "", data.pengeluaran],
+      ["Komisi", "", "", data.komisi],
+      [isManager ? "Laba Bersih" : "Sisa Owner", "", "", data.sisa],
+      ["", "", "", ""],
+      ["Tanggal", "Pemasukan", "", ""],
+      ...data.perHari.map((h): (string | number)[] => [h.tanggal, h.total, "", ""]),
+    ],
   })
 
   return (
@@ -159,11 +198,14 @@ export function ReportsPage({
           <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
             Harian
           </Button>
+          <Button className={mode === "Mingguan" ? "active" : ""} onClick={() => setMode("Mingguan")}>
+            Mingguan
+          </Button>
           <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
             Bulanan
           </Button>
         </div>
-        {mode === "Harian" ? (
+        {mode !== "Bulanan" ? (
           <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
         ) : (
           <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
@@ -176,6 +218,7 @@ export function ReportsPage({
           </Button>
         </div>
       </div>
+      {fetching && <small style={{ color: "var(--slate)" }}>Memuat periode...</small>}
       <div className="kpi-grid" style={fetching ? { opacity: 0.6 } : undefined}>
         <Kpi
           icon="cash"
