@@ -85,7 +85,9 @@ var AKSES = {
   "aktivitas-kapster":   ["Kapster"],
   "backup-buat":         ["Owner"],
   "backup-list":         ["Owner"],
-  "backup-pulihkan":     ["Owner"]
+  "backup-pulihkan":     ["Owner"],
+  "backup-hapus":        ["Owner"],
+  "backup-unduh":        ["Owner"]
 };
 
 var KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"];
@@ -175,6 +177,8 @@ function routeBisnis(action, body) {
       case "backup-buat":          return backupBuat_(user);
       case "backup-list":          return ok_(backupList_());
       case "backup-pulihkan":      return backupPulihkan_(body, user);
+      case "backup-hapus":         return backupHapus_(body, user);
+      case "backup-unduh":         return backupUnduh_(body);
     }
   } finally {
     lock.releaseLock();
@@ -829,6 +833,9 @@ var BACKUP_SIMPAN = 5; // jumlah backup terakhir yang dipertahankan
 function backupBuat_(user) {
   var ss = getSpreadsheet();
   var stamp = fmtTanggal_(new Date(), "yyyyMMdd_HHmm");
+  if (backupStamps_().indexOf(stamp) !== -1) {
+    return fail_("Backup sudah dibuat pada menit ini (" + stamp + "). Tunggu satu menit lalu coba lagi.");
+  }
   var baris = 0;
   BACKUP_SHEETS.forEach(function (name) {
     var sh = ss.getSheetByName(name);
@@ -846,6 +853,40 @@ function backupBuat_(user) {
   });
   writeAuditLog(user.id, user.nama, "BACKUP", "BAK_" + stamp + " · " + baris + " baris");
   return ok_({ nama: "BAK_" + stamp });
+}
+
+/** Sheet-sheet milik satu backup ("BAK_yyyyMMdd_HHmm"), atau null bila nama tidak valid. */
+function sheetBackup_(nama) {
+  var m = /^BAK_(\d{8}_\d{4})$/.exec((nama || "").toString());
+  if (!m) return null;
+  return getSpreadsheet().getSheets().filter(function (sh) { return sh.getName().indexOf(nama + "_") === 0; });
+}
+
+/** Body: { nama: "BAK_20261102_0316" }. Menghapus satu backup (sheet tersembunyinya saja). */
+function backupHapus_(body, user) {
+  var list = sheetBackup_(body.nama);
+  if (list === null) return fail_("Nama backup tidak valid.");
+  if (!list.length) return fail_("Backup tidak ditemukan.");
+  var ss = getSpreadsheet();
+  list.forEach(function (sh) { ss.deleteSheet(sh); });
+  CacheService.getScriptCache().remove("bakstat_" + body.nama.slice(4));
+  writeAuditLog(user.id, user.nama, "BACKUP_HAPUS", body.nama);
+  return ok_({ nama: body.nama });
+}
+
+/** Body: { nama }. Mengembalikan isi backup sebagai {sheet: [[sel,...],...]} untuk diunduh di browser. */
+function backupUnduh_(body) {
+  var list = sheetBackup_(body.nama);
+  if (list === null) return fail_("Nama backup tidak valid.");
+  if (!list.length) return fail_("Backup tidak ditemukan.");
+  var hasil = {};
+  list.forEach(function (sh) {
+    var nama = sh.getName().slice(body.nama.length + 1);
+    hasil[nama] = sh.getDataRange().getValues().map(function (r) {
+      return r.map(function (c) { return c instanceof Date ? c.toISOString() : c; });
+    });
+  });
+  return ok_({ nama: body.nama, sheets: hasil });
 }
 
 /** Stempel waktu backup yang ada, terbaru dulu. */

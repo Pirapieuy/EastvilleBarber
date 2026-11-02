@@ -16,7 +16,9 @@ const demoBackups: BackupRow[] = [
 ]
 
 export function BackupPage() {
-  const [backups, setBackups] = useState<BackupRow[]>(demoBackups)
+  const [backups, setBackups] = useState<BackupRow[]>(getToken() ? [] : demoBackups)
+  const [reloadKey, setReloadKey] = useState(0)
+  const [busyNama, setBusyNama] = useState("")
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   const [backingUp, setBackingUp] = useState(false)
@@ -55,11 +57,48 @@ export function BackupPage() {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    setLiveError("")
     loadLive().catch((e) => {
       console.error("Gagal memuat daftar backup:", e)
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
-  }, [])
+  }, [reloadKey])
+
+  async function hapus(nama: string) {
+    if (!window.confirm(`Hapus ${nama}? Backup yang dihapus tidak bisa dikembalikan.`)) return
+    setMessage("")
+    setBusyNama(nama)
+    try {
+      await apiBackup.hapus(nama)
+      await loadLive()
+      setMessage(`${nama} dihapus.`)
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Gagal menghapus backup.")
+    } finally {
+      setBusyNama("")
+    }
+  }
+
+  async function unduh(nama: string) {
+    setMessage("")
+    setBusyNama(nama)
+    try {
+      const res = await apiBackup.unduh(nama)
+      const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${nama}.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Gagal mengunduh backup.")
+    } finally {
+      setBusyNama("")
+    }
+  }
 
   async function startBackup() {
     setMessage("")
@@ -80,6 +119,18 @@ export function BackupPage() {
     return (
       <div className="content">
         <p>Memuat backup...</p>
+      </div>
+    )
+  }
+
+  if (Boolean(getToken()) && !live && liveError) {
+    return (
+      <div className="content">
+        <DemoNotice live={false} error={liveError} />
+        <p>Daftar backup gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
       </div>
     )
   }
@@ -121,6 +172,9 @@ export function BackupPage() {
           </p>
           {message && <small>{message}</small>}
         </div>
+        <Button onClick={() => setReloadKey((k) => k + 1)} disabled={!getToken() || backingUp}>
+          Muat ulang
+        </Button>
         <Button className="primary-button" onClick={startBackup} disabled={backingUp}>
           <Icon name={backingUp ? "clock" : "plus"} />
           {backingUp ? "Membuat backup..." : "Backup sekarang"}
@@ -142,11 +196,19 @@ export function BackupPage() {
               <strong>{row.nama}</strong>
             </span>
             <span>{row.dibuat}</span>
-            <span>{row.baris} baris</span>
+            <span>{row.sheet} sheet · {row.baris} baris</span>
             <i className="chip lunas">Siap</i>
-            <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
-              <Icon name="restore" /> Pulihkan
-            </Button>
+            <div style={{ display: "flex", gap: 6 }}>
+              <Button disabled={!live || busyNama === row.nama} onClick={() => unduh(row.nama)}>
+                Unduh
+              </Button>
+              <Button disabled={!live || busyNama === row.nama} onClick={() => hapus(row.nama)}>
+                Hapus
+              </Button>
+              <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
+                <Icon name="restore" /> Pulihkan
+              </Button>
+            </div>
           </article>
         ))}
         {backups.length === 0 && (

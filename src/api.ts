@@ -274,6 +274,9 @@ export const apiBackup = {
   /** Mengganti isi sheet bisnis dengan isi backup; server membuat backup pengaman dulu. */
   pulihkan: (nama: string) =>
     api<{ nama: string; sheet: number; pengaman: string }>("backup-pulihkan", { nama }),
+  hapus: (nama: string) => api<{ nama: string }>("backup-hapus", { nama }),
+  unduh: (nama: string) =>
+    api<{ nama: string; sheets: Record<string, (string | number | boolean)[][]> }>("backup-unduh", { nama }),
 }
 
 // ============================================================
