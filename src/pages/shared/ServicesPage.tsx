@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react"
 import { apiLayanan, apiPengaturan, getToken, LayananRow, PengaturanKomisi } from "../../api"
+import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
@@ -40,6 +41,8 @@ export function ServicesPage() {
   const [aktif, setAktif] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
+  const [reloadKey, setReloadKey] = useState(0)
+  const [urut, setUrut] = useState("Nama")
 
   const [jamMulai, setJamMulai] = useState(demoPengaturan.jamMulai)
   const [jamSelesai, setJamSelesai] = useState(demoPengaturan.jamSelesai)
@@ -70,11 +73,12 @@ export function ServicesPage() {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    setLiveError("")
     loadLive().catch((e) => {
       console.error("Gagal memuat layanan:", e)
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
-  }, [])
+  }, [reloadKey])
 
   function openForm(service: LayananRow | null) {
     setEditing(service)
@@ -90,19 +94,28 @@ export function ServicesPage() {
     event.preventDefault()
     const hargaAngka = Number(harga.replace(/\D/g, "")) || 0
     const status = aktif ? "Aktif" : "Nonaktif"
+    if (saving) return
     if (!nama.trim()) return setFormError("Nama layanan wajib diisi.")
+    if (hargaAngka < 1) return setFormError("Harga harus lebih dari 0.")
+    const kembar = rows.some((r) => r.id !== editing?.id && r.nama.trim().toLowerCase() === nama.trim().toLowerCase())
+    if (kembar) return setFormError("Nama layanan sudah ada.")
+    if (editing?.status === "Aktif" && status === "Nonaktif") {
+      if (!window.confirm(`Nonaktifkan "${editing.nama}"? Layanan tidak akan muncul di Kasir.`)) return
+    }
     if (live) {
       setSaving(true)
       setFormError("")
       try {
         await apiLayanan.simpan({ id: editing?.id, nama: nama.trim(), harga: hargaAngka, status, kategori })
-        await loadLive()
-        setFormOpen(false)
       } catch (err) {
         setFormError(err instanceof Error ? err.message : "Gagal menyimpan.")
-      } finally {
         setSaving(false)
+        return
       }
+      // Simpan sudah berhasil; kegagalan muat ulang tidak boleh terbaca sebagai gagal simpan.
+      setFormOpen(false)
+      setSaving(false)
+      loadLive().catch(() => setKomisiMsg("Tersimpan, tetapi daftar gagal dimuat ulang. Muat ulang halaman."))
       return
     }
     const baru: LayananRow = {
@@ -119,6 +132,7 @@ export function ServicesPage() {
   async function handleSaveKomisi(event: FormEvent) {
     event.preventDefault()
     setKomisiMsg("")
+    if (jamMulai >= jamSelesai) return setKomisiMsg("Jam selesai harus setelah jam mulai.")
     const baru: PengaturanKomisi = {
       ...pengaturan,
       jamMulai,
@@ -150,12 +164,39 @@ export function ServicesPage() {
   }
 
   const aktifCount = rows.filter((r) => r.status === "Aktif").length
-  const filtered = rows.filter(
-    (r) =>
-      r.nama.toLowerCase().includes(search.toLowerCase()) &&
-      (statusFilter === "Semua" || r.status === statusFilter) &&
-      (kategoriFilter === "Semua" || r.kategori === kategoriFilter),
-  )
+  const filtered = rows
+    .filter(
+      (r) =>
+        r.nama.toLowerCase().includes(search.toLowerCase()) &&
+        (statusFilter === "Semua" || r.status === statusFilter) &&
+        (kategoriFilter === "Semua" || r.kategori === kategoriFilter),
+    )
+    .sort((a, b) => (urut === "Harga tertinggi" ? b.harga - a.harga : a.nama.localeCompare(b.nama)))
+  const kapsterPribadi = pengaturan.kapster.filter((k) => k.persen !== null).length
+
+  function ekspor(jenis: "excel" | "pdf") {
+    const tabel: TabelEkspor = {
+      berkas: "layanan-dan-harga",
+      judul: "Layanan dan Harga",
+      keterangan: `${filtered.length} layanan · komisi ${pengaturan.komisiDefault}% (lembur ${pengaturan.komisiLembur}%)`,
+      kolom: ["Layanan", "Kategori", "Harga", "Status"],
+      baris: filtered.map((r) => [r.nama, r.kategori || "-", r.harga, r.status]),
+    }
+    if (jenis === "excel") eksporExcel(tabel)
+    else eksporPdf(tabel)
+  }
+
+  if (Boolean(getToken()) && !live && liveError) {
+    return (
+      <div className="content">
+        <DemoNotice live={live} error={liveError} />
+        <p>Data layanan gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
 
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
   if (Boolean(getToken()) && !live && !liveError) {
@@ -195,7 +236,8 @@ export function ServicesPage() {
           <p className="eyebrow">Jam kerja &amp; komisi</p>
           <p style={{ color: "var(--slate)", fontSize: 12, margin: "4px 0 12px" }}>
             Transaksi di luar jam kerja otomatis memakai komisi lembur. Komisi per kapster
-            diatur di halaman Tim.
+            diatur di halaman Tim
+            {kapsterPribadi > 0 ? ` (${kapsterPribadi} kapster punya komisi pribadi)` : ""}.
           </p>
           <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
             <label style={{ display: "grid", gap: 6 }}>
@@ -272,11 +314,21 @@ export function ServicesPage() {
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </select>
+          <select value={urut} onChange={(e) => setUrut(e.target.value)} title="Urutkan">
+            <option>Nama</option>
+            <option>Harga tertinggi</option>
+          </select>
+          <Button disabled={!filtered.length} onClick={() => ekspor("excel")}>
+            Excel
+          </Button>
+          <Button disabled={!filtered.length} onClick={() => ekspor("pdf")}>
+            PDF
+          </Button>
         </div>
         <div className="service-head">
           <span>Layanan</span>
           <span>Kategori</span>
-          <span>Komisi kapster</span>
+          <span>Komisi kapster (default)</span>
           <span>Harga</span>
           <span>Status</span>
           <span>Aksi</span>
@@ -348,6 +400,7 @@ export function ServicesPage() {
                 <b>Rp</b>
                 <input
                   inputMode="numeric"
+                  required
                   value={harga}
                   onChange={(e) => setHarga(e.target.value.replace(/\D/g, ""))}
                 />
