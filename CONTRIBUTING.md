@@ -75,6 +75,21 @@ clasp deploy -i <ID_DEPLOYMENT> -d "deskripsi"   # update deployment yang sama, 
 - Header request dari browser harus `text/plain` (sudah ditangani `api.ts`) karena Apps Script tidak
   mendukung preflight CORS.
 
+### Aturan agar deploy tidak saling menimpa
+
+`clasp push` **menimpa semua file** di proyek Apps Script dengan isi folder `backend/` di laptop
+yang mem-push (tidak ada riwayat, tidak ada penggabungan). Salinan `Bisnis.js` atau `Kode.js` yang
+basi di laptop siapa pun akan menghapus kerja orang lain di server (pernah terjadi 2 Nov 2026).
+
+1. Kerja di branch sendiri (`rania` / `fitra`). Jangan `clasp push` ke server bersama dari branch itu.
+2. Server bersama hanya diisi dari branch gabungan (`mergebackend`) oleh **satu orang**, setelah
+   `git fetch` + merge semua branch dan kabar ke grup.
+3. Sebelum `clasp push`, cek `git status` bersih dan `backend/Kode.js` + `backend/Bisnis.js` sudah
+   hasil gabungan (bukan salinan lama).
+4. Jangan edit di editor Google; alurnya satu arah: laptop -> Apps Script.
+5. Untuk uji backend sendiri: buat proyek Apps Script + salinan spreadsheet pribadi (`clasp create`),
+   isi `.env` dengan URL-nya. `backend/.clasp.json` pribadi jangan di-commit.
+
 ## 5. Menambah fitur (pola yang dipakai)
 
 **Backend** (`backend/Bisnis.js`)
