@@ -1,4 +1,6 @@
 import { FormEvent, useEffect, useState } from "react"
+import { ReasonDialog } from "./HistoryPage"
+import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
@@ -113,6 +115,10 @@ export function ExpensesPage() {
   const [records, setRecords] = useState<ExpenseRecord[]>(initialRecords)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Semua")
+  const [bulan, setBulan] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState("")
+  const [batalId, setBatalId] = useState<string | null>(null)
 
   const [newCategory, setNewCategory] = useState<ExpenseRecord["category"]>("Listrik")
   const [newAmount, setNewAmount] = useState("")
@@ -145,26 +151,46 @@ export function ExpensesPage() {
   }, [])
 
   const kpi = live ? hitungKpi(records) : null
+  // Ada token tapi gagal memuat: jangan tampilkan angka contoh sebagai data asli.
+  const gagalMuat = Boolean(getToken()) && !live
 
   const filteredRecords = records.filter((r) => {
     const matchCategory = category === "Semua" || r.category === category
     const matchSearch =
       r.description.toLowerCase().includes(search.toLowerCase()) ||
       r.category.toLowerCase().includes(search.toLowerCase())
-    return matchCategory && matchSearch
+    const matchBulan = !bulan || !r.dateIso || r.dateIso.startsWith(bulan)
+    return matchCategory && matchSearch && matchBulan
   })
+
+  function ekspor(jenis: "excel" | "pdf") {
+    const tabel: TabelEkspor = {
+      berkas: `pengeluaran-${bulan || "semua"}`,
+      judul: "Pengeluaran",
+      keterangan: `${bulan || "Semua periode"} · kategori ${category} · ${filteredRecords.length} baris`,
+      kolom: ["Tanggal", "Kategori", "Keterangan", "Jumlah", "Status", "Alasan batal"],
+      baris: filteredRecords.map((r) => [
+        r.dateIso ?? r.date, r.category, r.description, r.amount, r.status, r.cancelReason ?? "",
+      ]),
+    }
+    if (jenis === "excel") eksporExcel(tabel)
+    else eksporPdf(tabel)
+  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault()
-    if (!newAmount || !newDescription) return
-
-    const parsedAmount = Number(newAmount.replace(/\D/g, "")) || 0
+    if (saving) return
+    setFormError("")
+    const parsedAmount = Math.round(Number(newAmount))
+    if (!parsedAmount || parsedAmount < 1) return setFormError("Jumlah harus lebih dari 0.")
+    if (!newDescription.trim()) return setFormError("Keterangan wajib diisi.")
     if (live) {
+      setSaving(true)
       try {
         await apiPengeluaran.create({
           tanggal: newDate,
           kategori: newCategory,
-          deskripsi: newDescription,
+          deskripsi: newDescription.trim(),
           jumlah: parsedAmount,
         })
         await loadLive()
@@ -172,7 +198,9 @@ export function ExpensesPage() {
         setNewDescription("")
         setForm(false)
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : "Gagal menyimpan.")
+        setFormError(err instanceof Error ? err.message : "Gagal menyimpan.")
+      } finally {
+        setSaving(false)
       }
       return
     }
@@ -202,14 +230,13 @@ export function ExpensesPage() {
     if (live) {
       const item = records.find((r) => r.id === id)
       if (!item) return
+      if (item.status === "Aktif") {
+        setBatalId(id) // alasan diminta lewat dialog
+        return
+      }
+      if (!window.confirm(`Pulihkan pengeluaran "${item.description}" (${rupiah(item.amount)})?`)) return
       try {
-        if (item.status === "Aktif") {
-          const alasan = window.prompt("Alasan pembatalan pengeluaran?")?.trim()
-          if (!alasan) return
-          await apiPengeluaran.batalkan(id, alasan)
-        } else {
-          await apiPengeluaran.aktifkan(id)
-        }
+        await apiPengeluaran.aktifkan(id)
         await loadLive()
       } catch (err) {
         window.alert(err instanceof Error ? err.message : "Aksi gagal.")
@@ -232,6 +259,12 @@ export function ExpensesPage() {
         return item
       }),
     )
+  }
+
+  async function konfirmasiBatal(alasan: string) {
+    if (!batalId) return
+    await apiPengeluaran.batalkan(batalId, alasan)
+    await loadLive()
   }
 
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
@@ -262,29 +295,29 @@ export function ExpensesPage() {
           icon="expense"
           label="Total bulan ini"
           tone="brass"
-          value={kpi ? rupiah(kpi.totalBulan) : "Rp 5.840.000"}
-          detail={kpi ? kpi.detailBulan : "Oktober 2026 · 14 transaksi"}
+          value={kpi ? rupiah(kpi.totalBulan) : gagalMuat ? "-" : "Rp 5.840.000"}
+          detail={kpi ? kpi.detailBulan : gagalMuat ? "Data gagal dimuat" : "Oktober 2026 · 14 transaksi"}
         />
         <Kpi
           icon="calendar"
           label="Total 7 hari terakhir"
           tone="sage"
-          value={kpi ? rupiah(kpi.totalMinggu) : "Rp 1.450.000"}
-          detail={kpi ? kpi.detailMinggu : "23 - 29 Okt · 4 transaksi"}
+          value={kpi ? rupiah(kpi.totalMinggu) : gagalMuat ? "-" : "Rp 1.450.000"}
+          detail={kpi ? kpi.detailMinggu : gagalMuat ? "Data gagal dimuat" : "23 - 29 Okt · 4 transaksi"}
         />
         <Kpi
           icon="wallet"
           label="Kategori terbesar"
           tone="dark"
-          value={kpi ? kpi.kategori : "Sewa Tempat"}
-          detail={kpi ? kpi.detailKategori : "Rp 3.500.000 (59,9%)"}
+          value={kpi ? kpi.kategori : gagalMuat ? "-" : "Sewa Tempat"}
+          detail={kpi ? kpi.detailKategori : gagalMuat ? "Data gagal dimuat" : "Rp 3.500.000 (59,9%)"}
         />
         <Kpi
           icon="chart"
           label="Total tahun ini"
           tone="amber"
-          value={kpi ? rupiah(kpi.totalTahun) : "Rp 62.450.000"}
-          detail={kpi ? kpi.detailTahun : "Jan - Okt 2026 · 10 bulan"}
+          value={kpi ? rupiah(kpi.totalTahun) : gagalMuat ? "-" : "Rp 62.450.000"}
+          detail={kpi ? kpi.detailTahun : gagalMuat ? "Data gagal dimuat" : "Jan - Okt 2026 · 10 bulan"}
         />
       </div>
 
@@ -306,6 +339,21 @@ export function ExpensesPage() {
             <option value="Sewa">Sewa</option>
             <option value="Lain-lain">Lain-lain</option>
           </select>
+          <div className="input-shell">
+            <Icon name="calendar" />
+            <input
+              onChange={(e) => setBulan(e.target.value)}
+              title="Filter bulan (kosongkan untuk semua)"
+              type="month"
+              value={bulan}
+            />
+          </div>
+          <Button disabled={!filteredRecords.length} onClick={() => ekspor("excel")}>
+            Excel
+          </Button>
+          <Button disabled={!filteredRecords.length} onClick={() => ekspor("pdf")}>
+            PDF
+          </Button>
         </div>
 
         <div className="expense-head">
@@ -345,7 +393,7 @@ export function ExpensesPage() {
                 onClick={() => handleToggleStatus(row.id)}
                 title="Batalkan pengeluaran"
               >
-                <Icon name="arrow" />
+                <Icon name="arrow" /> Batalkan
               </Button>
             )}
           </div>
@@ -358,6 +406,14 @@ export function ExpensesPage() {
         )}
       </section>
 
+      {batalId && (
+        <ReasonDialog
+          title="Batalkan pengeluaran?"
+          warning="Pengeluaran tidak dihapus, hanya ditandai BATAL dan bisa dipulihkan."
+          onClose={() => setBatalId(null)}
+          onConfirm={konfirmasiBatal}
+        />
+      )}
       {form && (
         <div className="modal-overlay">
           <form className="simple-modal" onSubmit={handleCreate}>
@@ -387,8 +443,10 @@ export function ExpensesPage() {
               <div className="input-shell">
                 <b>Rp</b>
                 <input
+                  min={1}
                   placeholder="0"
                   required
+                  step={1}
                   type="number"
                   value={newAmount}
                   onChange={(e) => setNewAmount(e.target.value)}
@@ -412,6 +470,12 @@ export function ExpensesPage() {
                 onChange={(e) => setNewDate(e.target.value)}
               />
             </label>
+            {formError && (
+              <div className="info-banner" role="alert">
+                <Icon name="alert" />
+                {formError}
+              </div>
+            )}
             <footer>
               <Button
                 className="secondary-button"
@@ -420,8 +484,8 @@ export function ExpensesPage() {
               >
                 Batal
               </Button>
-              <Button className="primary-button" type="submit">
-                Simpan
+              <Button className="primary-button" disabled={saving} type="submit">
+                {saving ? "Menyimpan..." : "Simpan"}
               </Button>
             </footer>
           </form>
