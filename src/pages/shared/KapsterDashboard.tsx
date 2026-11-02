@@ -21,6 +21,7 @@ export function KapsterDashboard({
   const hariIni = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
+  const [reloadKey, setReloadKey] = useState(0)
   const [komisi, setKomisi] = useState<KomisiKapsterRow | null>(null)
   const [aktivitas, setAktivitas] = useState<AktivitasKapster[] | null>(null)
   const [masuk, setMasuk] = useState<string | null>(null)
@@ -30,6 +31,7 @@ export function KapsterDashboard({
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    setLiveError("")
     Promise.all([
       apiKomisi.list({ dari: hariIni, sampai: hariIni }),
       apiKapster.aktivitas(hariIni),
@@ -46,7 +48,19 @@ export function KapsterDashboard({
         console.error("Gagal memuat beranda kapster:", e)
         setLiveError(e instanceof Error ? e.message : "gagal memuat data")
       })
-  }, [hariIni])
+  }, [hariIni, reloadKey])
+
+  if (Boolean(getToken()) && !live && liveError) {
+    return (
+      <div className="content">
+        <DemoNotice live={false} error={liveError} />
+        <p>Beranda gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
 
   if (Boolean(getToken()) && !live && !liveError) {
     return (
@@ -56,6 +70,8 @@ export function KapsterDashboard({
     )
   }
 
+  const jam = now.getHours()
+  const sapaan = jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
   const hari = now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
   const layananRows = (aktivitas ?? []).filter((r) => r.type === "Layanan")
   const produkRows = (aktivitas ?? []).filter((r) => r.type === "Produk")
@@ -72,8 +88,8 @@ export function KapsterDashboard({
     <div className="content kapster-dashboard">
       <DemoNotice live={live} error={liveError} />
       <PageTitle
-        eyebrow={live ? `${hari} · Shift aktif` : "Rabu, 29 Oktober 2026 · Shift aktif"}
-        title={`Selamat pagi, ${firstName}.`}
+        eyebrow={live ? hari : "Rabu, 29 Oktober 2026"}
+        title={`Selamat ${sapaan}, ${firstName}.`}
         action={
           <div className="page-actions">
             <Button

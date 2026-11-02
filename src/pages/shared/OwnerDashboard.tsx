@@ -16,12 +16,16 @@ function rentangBulan() {
   const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
   return {
     ini: { dari: iso(new Date(y, m, 1)), sampai: iso(now) },
-    lalu: { dari: iso(new Date(y, m - 1, 1)), sampai: iso(new Date(y, m, 0)) },
+    // Bulan lalu sampai tanggal yang sama (bandingan setara dengan bulan berjalan)
+    lalu: {
+      dari: iso(new Date(y, m - 1, 1)),
+      sampai: iso(new Date(y, m - 1, Math.min(now.getDate(), new Date(y, m, 0).getDate()))),
+    },
     namaBulan: now.toLocaleDateString("id-ID", { month: "long", year: "numeric" }),
   }
 }
 
-function selisih(sekarang: number, lalu: number, naik = "dari bulan lalu") {
+function selisih(sekarang: number, lalu: number, naik = "dari periode sama bulan lalu") {
   if (!lalu) return sekarang ? "Belum ada pembanding bulan lalu" : "Belum ada data"
   const persen = ((sekarang - lalu) / lalu) * 100
   return `${persen >= 0 ? "+" : "−"}${Math.abs(persen).toFixed(1).replace(".", ",")}% ${naik}`
@@ -39,12 +43,14 @@ export function OwnerDashboard({
   const [lalu, setLalu] = useState<LaporanKeuangan | null>(null)
   const [liveError, setLiveError] = useState("")
   const [{ ini, lalu: rentangLalu, namaBulan }] = useState(rentangBulan)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    setLiveError("")
     Promise.all([apiLaporan.keuangan(ini), apiLaporan.keuangan(rentangLalu)])
       .then(([a, b]) => {
         setData(a)
@@ -54,7 +60,19 @@ export function OwnerDashboard({
         console.error("Gagal memuat beranda:", e)
         setLiveError(e instanceof Error ? e.message : "gagal memuat data")
       })
-  }, [])
+  }, [reloadKey])
+
+  if (Boolean(getToken()) && !data && liveError) {
+    return (
+      <div className="content">
+        <DemoNotice live={false} error={liveError} />
+        <p>Beranda gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
 
   if (Boolean(getToken()) && !data && !liveError) {
     return (
@@ -100,6 +118,11 @@ export function OwnerDashboard({
             >
               <Icon name="expense" /> Catat Pengeluaran
             </Button>
+            {Boolean(getToken()) && (
+              <Button className="secondary-button" onClick={() => setReloadKey((k) => k + 1)}>
+                Muat ulang
+              </Button>
+            )}
           </div>
         }
       />
@@ -123,7 +146,7 @@ export function OwnerDashboard({
           label="Total Komisi"
           tone="brass"
           value={rupiah(d.komisi)}
-          detail="Layanan + produk"
+          detail={data ? `Layanan + produk · ${d.jumlahTransaksi} transaksi` : "Layanan + produk"}
         />
         <Kpi
           icon="wallet"
