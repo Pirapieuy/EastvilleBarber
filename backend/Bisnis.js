@@ -85,7 +85,8 @@ var AKSES = {
   "aktivitas-kapster":   ["Kapster"],
   "backup-buat":         ["Owner"],
   "backup-list":         ["Owner"],
-  "backup-pulihkan":     ["Owner"]
+  "backup-pulihkan":     ["Owner"],
+  "list-audit":          ["Owner"]
 };
 
 var KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"];
@@ -175,6 +176,7 @@ function routeBisnis(action, body) {
       case "backup-buat":          return backupBuat_(user);
       case "backup-list":          return ok_(backupList_());
       case "backup-pulihkan":      return backupPulihkan_(body, user);
+      case "list-audit":           return listAudit_(body);
     }
   } finally {
     lock.releaseLock();
@@ -887,6 +889,30 @@ function backupPulihkan_(body, user) {
   ensureSchema_();
   writeAuditLog(user.id, user.nama, "PULIHKAN_BACKUP", m[0] + " · " + daftar.length + " sheet · pengaman " + namaPengaman);
   return ok_({ nama: m[0], sheet: daftar.length, pengaman: namaPengaman });
+}
+
+/**
+ * Jejak audit (sheet AuditLog: waktu, user_id, nama, aksi, detail, alasan), terbaru dulu.
+ * Body: { dari?, sampai? (yyyy-MM-dd), limit? (default 500) }. Hanya baca; log tidak bisa diubah dari aplikasi.
+ */
+function listAudit_(body) {
+  var sh = getSpreadsheet().getSheetByName("AuditLog");
+  if (!sh || sh.getLastRow() < 2) return ok_([]);
+  var limit = Math.min(Math.max(toInt_(body.limit) || 500, 1), 2000);
+  var vals = sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues();
+  var out = [];
+  for (var i = vals.length - 1; i >= 0 && out.length < limit; i--) {
+    var w = vals[i][0] instanceof Date ? vals[i][0] : new Date(vals[i][0]);
+    var tgl = fmtTanggal_(w, "yyyy-MM-dd");
+    if (body.dari && tgl < body.dari) continue;
+    if (body.sampai && tgl > body.sampai) continue;
+    out.push({
+      waktu: fmtTanggal_(w, "d MMM HH.mm"), tanggal: tgl,
+      userId: vals[i][1], pengguna: vals[i][2], aksi: vals[i][3],
+      detail: String(vals[i][4]), alasan: String(vals[i][5])
+    });
+  }
+  return ok_(out);
 }
 
 function cariTransaksi_(id) {

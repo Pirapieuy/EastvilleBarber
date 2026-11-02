@@ -1036,14 +1036,27 @@ function handleHitungGaji(body) {
   var ss = getSpreadsheet();
   ensureTimBSheets_();
 
-  // Hitung total komisi dari TransaksiItem yang transaksinya "Selesai"
+  // Hitung total komisi dari TransaksiItem yang transaksinya "Lunas" (BATAL tidak dihitung)
   var itemSheet = ss.getSheetByName("TransaksiItem");
   var trxSheet = ss.getSheetByName("Transaksi");
   var statusTrxMap = {};
+  // Komisi dihitung sejak gaji terakhir dibayar (supaya komisi yang sudah dibayar tidak terhitung lagi).
+  var sejak = 0;
+  var gajiSheetH = ss.getSheetByName("Gaji");
+  if (gajiSheetH) {
+    var gData = gajiSheetH.getDataRange().getValues();
+    for (var g = 1; g < gData.length; g++) {
+      if (gData[g][2] === targetUserId && gData[g][8] === "Dibayar" && gData[g][9] instanceof Date) {
+        sejak = Math.max(sejak, gData[g][9].getTime());
+      }
+    }
+  }
   if (trxSheet) {
     var trxData = trxSheet.getDataRange().getValues();
     for (var t = 1; t < trxData.length; t++) {
-      statusTrxMap[trxData[t][0]] = trxData[t][11]; // status transaksi
+      var wkt = trxData[t][1] instanceof Date ? trxData[t][1].getTime() : 0;
+      // status transaksi; hanya yang terjadi setelah gaji terakhir dibayar
+      statusTrxMap[trxData[t][0]] = wkt > sejak ? trxData[t][11] : "";
     }
   }
 
@@ -1056,7 +1069,7 @@ function handleHitungGaji(body) {
       var trxId = itemData[i][0];
       var kapsterId = itemData[i][6];
       var komisi = parseInt(itemData[i][8], 10) || 0;
-      if (kapsterId === targetUserId && statusTrxMap[trxId] === "Selesai") {
+      if (kapsterId === targetUserId && (statusTrxMap[trxId] === "Lunas" || statusTrxMap[trxId] === "Selesai")) {
         totalKomisi += komisi;
         countTrx++;
         detailKomisi.push({
