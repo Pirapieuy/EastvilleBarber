@@ -855,6 +855,23 @@ function backupBuat_(user) {
   return ok_({ nama: "BAK_" + stamp });
 }
 
+/**
+ * Jadwal backup otomatis: 1x sehari sekitar 02:00 (Asia/Jakarta).
+ * Jalankan pasangJadwalBackup() SEKALI dari editor Apps Script (butuh izin ScriptApp); aman dijalankan ulang.
+ */
+function pasangJadwalBackup() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === "backupOtomatis") ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger("backupOtomatis").timeBased().everyDays(1).atHour(2).create();
+}
+
+/** Dipanggil trigger waktu; memakai logika backupBuat_ dan mencatat hasilnya di audit log. */
+function backupOtomatis() {
+  var hasil = JSON.parse(backupBuat_({ id: "sistem", nama: "Backup otomatis" }).getContent());
+  if (!hasil.success) writeAuditLog("sistem", "Backup otomatis", "BACKUP_GAGAL", hasil.error || "");
+}
+
 /** Sheet-sheet milik satu backup ("BAK_yyyyMMdd_HHmm"), atau null bila nama tidak valid. */
 function sheetBackup_(nama) {
   var m = /^BAK_(\d{8}_\d{4})$/.exec((nama || "").toString());
