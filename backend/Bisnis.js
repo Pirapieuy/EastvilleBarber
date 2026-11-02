@@ -195,23 +195,19 @@ function fail_(msg) {
 function authBisnis_(token) {
   token = (token || "").toString().trim();
   if (!token) return null;
-  var sessions = getSheet(SHEET_SESSIONS).getDataRange().getValues();
-  var userId = null;
-  for (var i = 1; i < sessions.length; i++) {
-    if (sessions[i][0] === token && sessions[i][4] === "Aktif") {
-      if (new Date() > new Date(sessions[i][3])) return null;
-      userId = sessions[i][1];
-      break;
-    }
-  }
-  if (!userId) return null;
-  var users = getSheet(SHEET_USERS).getDataRange().getValues();
-  for (var j = 1; j < users.length; j++) {
-    if (users[j][0] === userId && users[j][7] === "Aktif") {
-      return { id: users[j][0], nama: users[j][1], role: users[j][4] };
-    }
-  }
-  return null;
+  // Cari lewat TextFinder (kolom A saja) supaya tidak membaca seluruh Sessions yang terus membesar.
+  var ses = getSheet(SHEET_SESSIONS);
+  var hit = ses.getRange(1, 1, Math.max(ses.getLastRow(), 1), 1).createTextFinder(token).matchEntireCell(true).matchCase(true).findNext();
+  if (!hit) return null;
+  var row = ses.getRange(hit.getRow(), 1, 1, 5).getValues()[0];
+  if (row[0] !== token || row[4] !== "Aktif") return null;
+  if (new Date() > new Date(row[3])) return null;
+  var usr = getSheet(SHEET_USERS);
+  var uHit = usr.getRange(1, 1, Math.max(usr.getLastRow(), 1), 1).createTextFinder(row[1]).matchEntireCell(true).matchCase(true).findNext();
+  if (!uHit) return null;
+  var u = usr.getRange(uHit.getRow(), 1, 1, 8).getValues()[0];
+  if (u[7] !== "Aktif") return null;
+  return { id: u[0], nama: u[1], role: u[4] };
 }
 
 /** Baca satu sheet jadi array objek berdasarkan baris header. */
