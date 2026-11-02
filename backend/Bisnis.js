@@ -84,8 +84,7 @@ var AKSES = {
   "laporan-produk":      ["Owner", "Manajer"],
   "backup-buat":         ["Owner"],
   "backup-list":         ["Owner"],
-  "backup-pulihkan":     ["Owner"],
-  "perbaiki-id-kapster": ["Owner"]
+  "backup-pulihkan":     ["Owner"]
 };
 
 var KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"];
@@ -174,7 +173,6 @@ function routeBisnis(action, body) {
       case "backup-buat":          return backupBuat_(user);
       case "backup-list":          return ok_(backupList_());
       case "backup-pulihkan":      return backupPulihkan_(body, user);
-      case "perbaiki-id-kapster":  return perbaikiIdKapster_(body, user);
     }
   } finally {
     lock.releaseLock();
@@ -844,28 +842,6 @@ function backupPulihkan_(body, user) {
   ensureSchema_();
   writeAuditLog(user.id, user.nama, "PULIHKAN_BACKUP", m[0] + " · " + daftar.length + " sheet · pengaman " + namaPengaman);
   return ok_({ nama: m[0], sheet: daftar.length, pengaman: namaPengaman });
-}
-
-/**
- * SEMENTARA - diizinkan eksplisit oleh pemilik data (3 Nov 2026): id Zhefitra ganda dengan Budi.
- * Mengubah id user username "zhefitra.ananda" menjadi "u-kapster2". Hanya Owner; menolak kalau
- * baris yang cocok tidak tepat satu atau id tujuan sudah dipakai. HAPUS aksi ini setelah dipakai.
- */
-function perbaikiIdKapster_(body, user) {
-  var sh = getSheet(SHEET_USERS);
-  var vals = sh.getDataRange().getValues();
-  var cocok = [];
-  for (var i = 1; i < vals.length; i++) {
-    if (String(vals[i][2]).toLowerCase() === "zhefitra.ananda") cocok.push(i);
-  }
-  if (cocok.length !== 1) return fail_("Ditolak: ditemukan " + cocok.length + " baris zhefitra.ananda (harus tepat 1).");
-  for (var j = 1; j < vals.length; j++) {
-    if (vals[j][0] === "u-kapster2") return fail_("Ditolak: id u-kapster2 sudah dipakai.");
-  }
-  var lama = vals[cocok[0]][0];
-  sh.getRange(cocok[0] + 1, 1).setValue("u-kapster2");
-  writeAuditLog(user.id, user.nama, "UBAH_ID_USER", "zhefitra.ananda: " + lama + " → u-kapster2");
-  return ok_({ lama: lama, baru: "u-kapster2" });
 }
 
 function cariTransaksi_(id) {
