@@ -104,6 +104,8 @@ export interface LayananRow {
   nama: string
   harga: number
   status: "Aktif" | "Nonaktif"
+  /** Potong | Grooming | Coloring | Perawatan; kosong untuk layanan lama tanpa kategori */
+  kategori?: string
 }
 
 export interface ProdukRow {
@@ -140,7 +142,7 @@ export interface CheckoutPayload {
 
 export const apiLayanan = {
   list: () => api<LayananRow[]>("list-layanan"),
-  simpan: (layanan: { id?: number; nama: string; harga: number; status: "Aktif" | "Nonaktif" }) =>
+  simpan: (layanan: { id?: number; nama: string; harga: number; status: "Aktif" | "Nonaktif"; kategori: string }) =>
     api<{ id: number }>("simpan-layanan", { layanan }),
 }
 
@@ -242,4 +244,7 @@ export const apiLaporan = {
 export const apiBackup = {
   list: () => api<{ nama: string; dibuat: string; sheet: number; baris: number }[]>("backup-list"),
   buat: () => api<{ nama: string }>("backup-buat"),
+  /** Mengganti isi sheet bisnis dengan isi backup; server membuat backup pengaman dulu. */
+  pulihkan: (nama: string) =>
+    api<{ nama: string; sheet: number; pengaman: string }>("backup-pulihkan", { nama }),
 }

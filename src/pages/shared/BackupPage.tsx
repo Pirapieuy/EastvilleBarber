@@ -22,6 +22,27 @@ export function BackupPage() {
   const [backingUp, setBackingUp] = useState(false)
   const [message, setMessage] = useState("")
   const [restore, setRestore] = useState<0 | 1 | 2>(0)
+  const [target, setTarget] = useState("")
+  const [restoring, setRestoring] = useState(false)
+
+  async function doRestore() {
+    setMessage("")
+    if (!live) {
+      setRestore(0)
+      return setMessage("Mode demo: tidak ada data yang dipulihkan.")
+    }
+    setRestoring(true)
+    try {
+      const res = await apiBackup.pulihkan(target)
+      await loadLive()
+      setMessage(`Data dipulihkan dari ${res.nama} (${res.sheet} sheet). Kondisi sebelumnya disimpan di ${res.pengaman}.`)
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Pemulihan gagal.")
+    } finally {
+      setRestoring(false)
+      setRestore(0)
+    }
+  }
 
   function loadLive() {
     return apiBackup.list().then((rows) => {
@@ -123,7 +144,7 @@ export function BackupPage() {
             <span>{row.dibuat}</span>
             <span>{row.baris} baris</span>
             <i className="chip lunas">Siap</i>
-            <Button className="restore-danger-button" onClick={() => setRestore(1)}>
+            <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
               <Icon name="restore" /> Pulihkan
             </Button>
           </article>
@@ -135,9 +156,9 @@ export function BackupPage() {
         )}
       </section>
       <div className="info-banner">
-        <Icon name="alert" /> Pemulihan dilakukan manual: buka sheet tersembunyi BAK_... di Google Sheets
-        (klik kanan tab sheet &gt; Tampilkan), lalu salin isinya ke sheet aslinya. Pemulihan otomatis sengaja tidak
-        disediakan supaya data tidak tertimpa tanpa pengawasan.
+        <Icon name="alert" /> Pulihkan mengganti data layanan, produk, transaksi, pengeluaran, stok, dan pengaturan
+        komisi dengan isi backup. Sebelumnya sistem otomatis membuat backup baru dari kondisi saat ini sebagai
+        pengaman. Data akun tidak ikut.
       </div>
       {restore > 0 && (
         <div className="modal-overlay">
@@ -146,21 +167,23 @@ export function BackupPage() {
               <Icon name="alert" />
             </span>
             <p className="eyebrow">Konfirmasi {restore} dari 2</p>
-            <h2>{restore === 1 ? "Pulihkan dari backup?" : "Pemulihan manual"}</h2>
+            <h2>{restore === 1 ? "Pulihkan dari backup?" : `Pulihkan ${target}?`}</h2>
             <p>
               {restore === 1
                 ? "Data saat ini akan diganti dengan isi backup terpilih."
-                : "Pemulihan otomatis belum tersedia. Salin isi sheet BAK_... ke sheet aslinya di Google Sheets."}
+                : "Ini tindakan terakhir. Kondisi saat ini disimpan dulu sebagai backup baru, jadi masih bisa dikembalikan."}
             </p>
             <div>
-              <Button className="secondary-button" onClick={() => setRestore(0)}>
-                {restore === 1 ? "Batal" : "Mengerti"}
+              <Button className="secondary-button" disabled={restoring} onClick={() => setRestore(0)}>
+                Batal
               </Button>
-              {restore === 1 && (
-                <Button className="restore-danger-button" onClick={() => setRestore(2)}>
-                  Lanjutkan
-                </Button>
-              )}
+              <Button
+                className="restore-danger-button"
+                disabled={restoring}
+                onClick={() => (restore === 1 ? setRestore(2) : doRestore())}
+              >
+                {restoring ? "Memulihkan..." : restore === 1 ? "Lanjutkan" : "Ya, pulihkan"}
+              </Button>
             </div>
           </section>
         </div>

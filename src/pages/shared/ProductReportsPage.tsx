@@ -4,6 +4,7 @@ import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
+import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { WhatsAppDialog } from "./ReportsPage"
 
 export interface ProductTransactionRecord {
@@ -147,6 +148,7 @@ export function ProductReportsPage({
       : "Owner",
   )
   const [wa, setWa] = useState(false)
+  const [cari, setCari] = useState("")
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">("Semua")
   const [activeTab, setActiveTab] = useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
   const [txList, setTxList] = useState<ProductTransactionRecord[]>(INITIAL_PRODUCT_TRANSACTIONS)
@@ -204,9 +206,21 @@ export function ProductReportsPage({
   )
 
   const filteredTransactions = useMemo(() => {
-    if (statusFilter === "Semua") return txList
-    return txList.filter((tx) => tx.status === statusFilter)
-  }, [txList, statusFilter])
+    const q = cari.trim().toLowerCase()
+    return txList.filter(
+      (tx) =>
+        (statusFilter === "Semua" || tx.status === statusFilter) &&
+        (!q || [tx.id, tx.product, tx.barber, tx.seller].some((v) => v.toLowerCase().includes(q))),
+    )
+  }, [txList, statusFilter, cari])
+
+  const tabelEkspor = (): TabelEkspor => ({
+    berkas: `laporan-produk-${bulan}`,
+    judul: "Laporan Produk",
+    keterangan: `Periode ${bulan} · transaksi lunas ${validTransactions.length} · batal tidak dihitung dalam total`,
+    kolom: ["Nota", "Waktu", "Produk", "Qty", "Kapster", "Pemasok", "Total Omzet", "Bagian Kapster", "Bagian Pemasok", "Bagian Eastville", "Status"],
+    baris: txList.map((tx) => [tx.id, tx.time, tx.product, tx.qty, tx.barber, tx.seller, tx.totalOmzet, tx.barberShare, tx.sellerShare, tx.eastvilleShare, tx.status]),
+  })
 
   const totalOmzet = useMemo(
     () => validTransactions.reduce((acc, tx) => acc + tx.totalOmzet, 0),
@@ -317,8 +331,8 @@ export function ProductReportsPage({
           </div>
         )}
         <div>
-          <Button className="secondary-button">Excel</Button>
-          <Button className="secondary-button">PDF</Button>
+          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>Excel</Button>
+          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>PDF</Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
           </Button>
@@ -400,6 +414,14 @@ export function ProductReportsPage({
               eyebrow="Rincian Transaksi"
               title="Pembagian Komisi Otomatis Per Transaksi"
             />
+            <div className="search">
+              <Icon name="search" />
+              <input
+                placeholder="Cari nota, produk, kapster..."
+                value={cari}
+                onChange={(e) => setCari(e.target.value)}
+              />
+            </div>
             <div className="tx-filter-group">
               <span className="filter-label">Filter Status:</span>
               <div className="segmented">

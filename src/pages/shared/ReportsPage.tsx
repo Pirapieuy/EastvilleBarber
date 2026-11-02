@@ -3,6 +3,7 @@ import { apiLaporan, getToken, LaporanKeuangan } from "../../api"
 import { BarChart } from "../../components/common/BarChart"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
+import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 
@@ -135,6 +136,14 @@ export function ReportsPage({
   const chart = data.perHari.map((h) => ({ label: h.tanggal.slice(8), value: h.total }))
   const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${isManager ? "Laba Bersih" : "Sisa Owner"}: ${juta(data.sisa)}`
 
+  const tabelEkspor = (): TabelEkspor => ({
+    berkas: `laporan-keuangan-${periode}`,
+    judul: "Laporan Keuangan",
+    keterangan: `Periode ${periode} · ${data.jumlahTransaksi} transaksi · Pemasukan ${data.pemasukan} · Pengeluaran ${data.pengeluaran} · Komisi ${data.komisi} · ${isManager ? "Laba Bersih" : "Sisa Owner"} ${data.sisa}`,
+    kolom: ["Kapster", "Transaksi", "Omzet", "Komisi"],
+    baris: data.perKapster.map((k) => [k.kapster, k.pelanggan, k.omzet, k.komisi]),
+  })
+
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />
@@ -153,8 +162,8 @@ export function ReportsPage({
           <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         )}
         <div>
-          <Button className="secondary-button">Excel</Button>
-          <Button className="secondary-button">PDF</Button>
+          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>Excel</Button>
+          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>PDF</Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
           </Button>

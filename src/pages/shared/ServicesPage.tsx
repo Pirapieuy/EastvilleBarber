@@ -4,13 +4,15 @@ import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
 
+export const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
+
 export const serviceRows: LayananRow[] = [
-  { id: 1, nama: "Haircut", harga: 40000, status: "Aktif" },
-  { id: 2, nama: "Haircut + Cuci", harga: 50000, status: "Aktif" },
-  { id: 3, nama: "Shaving", harga: 25000, status: "Aktif" },
-  { id: 4, nama: "Hair Coloring", harga: 120000, status: "Aktif" },
-  { id: 5, nama: "Treatment", harga: 60000, status: "Aktif" },
-  { id: 6, nama: "Creambath", harga: 75000, status: "Nonaktif" },
+  { id: 1, nama: "Haircut", kategori: "Potong", harga: 40000, status: "Aktif" },
+  { id: 2, nama: "Haircut + Cuci", kategori: "Potong", harga: 50000, status: "Aktif" },
+  { id: 3, nama: "Shaving", kategori: "Grooming", harga: 25000, status: "Aktif" },
+  { id: 4, nama: "Hair Coloring", kategori: "Coloring", harga: 120000, status: "Aktif" },
+  { id: 5, nama: "Treatment", kategori: "Perawatan", harga: 60000, status: "Aktif" },
+  { id: 6, nama: "Creambath", kategori: "Perawatan", harga: 75000, status: "Nonaktif" },
 ]
 
 const demoPengaturan: PengaturanKomisi = {
@@ -29,10 +31,12 @@ export function ServicesPage() {
 
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("Semua")
+  const [kategoriFilter, setKategoriFilter] = useState("Semua")
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<LayananRow | null>(null)
   const [nama, setNama] = useState("")
   const [harga, setHarga] = useState("")
+  const [kategori, setKategori] = useState("Potong")
   const [aktif, setAktif] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
@@ -76,6 +80,7 @@ export function ServicesPage() {
     setEditing(service)
     setNama(service?.nama ?? "")
     setHarga(String(service?.harga ?? 40000))
+    setKategori(service?.kategori || "Potong")
     setAktif(service ? service.status === "Aktif" : true)
     setFormError("")
     setFormOpen(true)
@@ -90,7 +95,7 @@ export function ServicesPage() {
       setSaving(true)
       setFormError("")
       try {
-        await apiLayanan.simpan({ id: editing?.id, nama: nama.trim(), harga: hargaAngka, status })
+        await apiLayanan.simpan({ id: editing?.id, nama: nama.trim(), harga: hargaAngka, status, kategori })
         await loadLive()
         setFormOpen(false)
       } catch (err) {
@@ -105,6 +110,7 @@ export function ServicesPage() {
       nama: nama.trim(),
       harga: hargaAngka,
       status,
+      kategori,
     }
     setRows((prev) => (editing ? prev.map((r) => (r.id === editing.id ? baru : r)) : [...prev, baru]))
     setFormOpen(false)
@@ -147,7 +153,8 @@ export function ServicesPage() {
   const filtered = rows.filter(
     (r) =>
       r.nama.toLowerCase().includes(search.toLowerCase()) &&
-      (statusFilter === "Semua" || r.status === statusFilter),
+      (statusFilter === "Semua" || r.status === statusFilter) &&
+      (kategoriFilter === "Semua" || r.kategori === kategoriFilter),
   )
 
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
@@ -252,6 +259,14 @@ export function ServicesPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          <select value={kategoriFilter} onChange={(e) => setKategoriFilter(e.target.value)}>
+            <option value="Semua">Semua kategori</option>
+            {KATEGORI_LAYANAN.map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </select>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="Semua">Semua status</option>
             <option value="Aktif">Aktif</option>
@@ -260,6 +275,7 @@ export function ServicesPage() {
         </div>
         <div className="service-head">
           <span>Layanan</span>
+          <span>Kategori</span>
           <span>Komisi kapster</span>
           <span>Harga</span>
           <span>Status</span>
@@ -276,6 +292,7 @@ export function ServicesPage() {
               </i>
               <strong>{service.nama}</strong>
             </span>
+            <span>{service.kategori || "-"}</span>
             <span>
               {pengaturan.komisiDefault}% · lembur {pengaturan.komisiLembur}%
             </span>
@@ -314,6 +331,16 @@ export function ServicesPage() {
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
               />
+            </label>
+            <label>
+              <span>Kategori</span>
+              <select value={kategori} onChange={(e) => setKategori(e.target.value)}>
+                {KATEGORI_LAYANAN.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               <span>Harga</span>

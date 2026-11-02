@@ -56,6 +56,8 @@ export function ProductsPage() {
       nominalShares: { barber: 10000, seller: 40000, eastville: 20000 },
     },
   ])
+  const [cari, setCari] = useState("")
+  const [statusFilter, setStatusFilter] = useState("Semua status")
   const [editingCode, setEditingCode] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [stockOpen, setStockOpen] = useState(false)
@@ -283,9 +285,13 @@ export function ProductsPage() {
           <div className="filters">
             <div className="search">
               <Icon name="search" />
-              <input placeholder="Cari nama atau kode..." />
+              <input
+                placeholder="Cari nama atau kode..."
+                value={cari}
+                onChange={(e) => setCari(e.target.value)}
+              />
             </div>
-            <select>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option>Semua status</option>
               <option>Aktif</option>
               <option>Non-aktif</option>
@@ -299,7 +305,16 @@ export function ProductsPage() {
             <span>Status</span>
             <span>Aksi</span>
           </div>
-          {productsList.map((product) => (
+          {productsList
+            .filter((p) => {
+              const q = cari.trim().toLowerCase()
+              return (
+                (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)) &&
+                (statusFilter === "Semua status" ||
+                  (statusFilter === "Aktif" ? p.status === "Aktif" : p.status !== "Aktif"))
+              )
+            })
+            .map((product) => (
             <article className="product-admin-row" key={product.code}>
               <span>
                 <i>

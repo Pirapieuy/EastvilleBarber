@@ -27,10 +27,10 @@ var PENGATURAN_DEFAULT = {
   komisi_default: 40,   // % layanan untuk kapster di jam kerja
   komisi_lembur: 50     // % layanan untuk kapster di luar jam kerja
 };
-var SCHEMA_VERSION = "3";
+var SCHEMA_VERSION = "4";
 
 var HEADERS = {
-  Layanan: ["id", "nama", "harga", "status"],
+  Layanan: ["id", "nama", "harga", "status", "kategori"],
   Produk: [
     "kode", "nama", "penjual", "stok", "skema", "status", "harga", "harga_modal",
     "persen_kapster", "persen_penjual", "persen_eastville",
@@ -83,8 +83,13 @@ var AKSES = {
   "laporan-keuangan":    ["Owner", "Manajer"],
   "laporan-produk":      ["Owner", "Manajer"],
   "backup-buat":         ["Owner"],
-  "backup-list":         ["Owner"]
+  "backup-list":         ["Owner"],
+  "backup-pulihkan":     ["Owner"],
+  "perbaiki-id-kapster": ["Owner"]
 };
+
+var KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"];
+var KATEGORI_AWAL = { "Haircut": "Potong", "Haircut + Cuci": "Potong", "Shaving": "Grooming", "Hair Coloring": "Coloring", "Treatment": "Perawatan" };
 
 
 // ============================================================
@@ -101,12 +106,12 @@ function setupBisnis() {
 
   var layanan = ss.getSheetByName(SHEET_LAYANAN);
   if (layanan.getLastRow() === 1) {
-    layanan.getRange(2, 1, 5, 4).setValues([
-      [1, "Haircut", 40000, "Aktif"],
-      [2, "Haircut + Cuci", 50000, "Aktif"],
-      [3, "Shaving", 25000, "Aktif"],
-      [4, "Hair Coloring", 120000, "Aktif"],
-      [5, "Treatment", 60000, "Aktif"]
+    layanan.getRange(2, 1, 5, 5).setValues([
+      [1, "Haircut", 40000, "Aktif", "Potong"],
+      [2, "Haircut + Cuci", 50000, "Aktif", "Potong"],
+      [3, "Shaving", 25000, "Aktif", "Grooming"],
+      [4, "Hair Coloring", 120000, "Aktif", "Coloring"],
+      [5, "Treatment", 60000, "Aktif", "Perawatan"]
     ]);
   }
   var produk = ss.getSheetByName(SHEET_PRODUK);
@@ -168,6 +173,8 @@ function routeBisnis(action, body) {
       case "laporan-produk":       return laporanProduk_(body);
       case "backup-buat":          return backupBuat_(user);
       case "backup-list":          return ok_(backupList_());
+      case "backup-pulihkan":      return backupPulihkan_(body, user);
+      case "perbaiki-id-kapster":  return perbaikiIdKapster_(body, user);
     }
   } finally {
     lock.releaseLock();
@@ -267,6 +274,10 @@ function ensureSchema_() {
     for (var i = cur.length; i < head.length; i++) {
       sh.getRange(1, i + 1).setValue(head[i]).setFontWeight("bold");
     }
+  });
+  // Isi kategori untuk layanan bawaan yang kolomnya baru ditambahkan (hanya sel kosong).
+  readTable_(SHEET_LAYANAN).forEach(function (l) {
+    if (l.kategori === "" && KATEGORI_AWAL[l.nama]) setCell_(SHEET_LAYANAN, l._row, "kategori", KATEGORI_AWAL[l.nama]);
   });
   var peng = ss.getSheetByName(SHEET_PENGATURAN);
   if (peng.getLastRow() < 2) {
@@ -382,6 +393,7 @@ function simpanLayanan_(body, user) {
   var nama = (l.nama || "").toString().trim();
   var harga = toInt_(l.harga);
   var status = l.status === "Nonaktif" ? "Nonaktif" : "Aktif";
+  var kategori = KATEGORI_LAYANAN.indexOf(l.kategori) === -1 ? "Potong" : l.kategori;
   if (!nama) return fail_("Nama layanan wajib diisi.");
   if (harga < 0) return fail_("Harga tidak valid.");
 
@@ -395,12 +407,13 @@ function simpanLayanan_(body, user) {
     setCell_(SHEET_LAYANAN, lama._row, "nama", nama);
     setCell_(SHEET_LAYANAN, lama._row, "harga", harga);
     setCell_(SHEET_LAYANAN, lama._row, "status", status);
-    writeAuditLog(user.id, user.nama, "UBAH_LAYANAN", lama.nama + " Rp " + lama.harga + " " + lama.status + " → " + nama + " Rp " + harga + " " + status);
+    setCell_(SHEET_LAYANAN, lama._row, "kategori", kategori);
+    writeAuditLog(user.id, user.nama, "UBAH_LAYANAN", lama.nama + " Rp " + lama.harga + " " + lama.status + " " + lama.kategori + " → " + nama + " Rp " + harga + " " + status + " " + kategori);
     return ok_({ id: lama.id });
   }
   var id = semua.reduce(function (m, x) { return Math.max(m, Number(x.id) || 0); }, 0) + 1;
-  appendObj_(SHEET_LAYANAN, { id: id, nama: nama, harga: harga, status: status });
-  writeAuditLog(user.id, user.nama, "TAMBAH_LAYANAN", nama + " Rp " + harga);
+  appendObj_(SHEET_LAYANAN, { id: id, nama: nama, harga: harga, status: status, kategori: kategori });
+  writeAuditLog(user.id, user.nama, "TAMBAH_LAYANAN", nama + " Rp " + harga + " " + kategori);
   return ok_({ id: id });
 }
 
@@ -742,7 +755,7 @@ function laporanProduk_(body) {
 // BACKUP - salinan sheet bisnis di dalam spreadsheet yang sama (sheet tersembunyi "BAK_...").
 // Sengaja tanpa DriveApp: scope Drive baru memaksa otorisasi ulang dan bisa membuat seluruh web app gagal.
 // Melindungi dari salah edit/hapus lewat aplikasi; BUKAN pengganti salinan file di Drive.
-// Pemulihan dilakukan manual (salin isi sheet BAK_ kembali) agar tidak menimpa data tanpa pengawasan.
+// Pemulihan lewat action backup-pulihkan (Owner): menyalin isi BAK_ kembali setelah membuat backup pengaman.
 // ============================================================
 var BACKUP_SHEETS = ["Layanan", "Produk", "Transaksi", "TransaksiItem", "Pengeluaran", "StokMutasi", "ProdukLog", "Pengaturan", "KomisiKapster"];
 var BACKUP_SIMPAN = 5; // jumlah backup terakhir yang dipertahankan
@@ -793,6 +806,66 @@ function backupList_() {
       sheet: sheets, baris: baris
     };
   });
+}
+
+
+/**
+ * Body: { nama: "BAK_yyyyMMdd_HHmm" }. Mengganti isi sheet bisnis dengan isi backup.
+ * Sebelum menimpa, data saat ini disalin dulu jadi backup baru (jaring pengaman).
+ * Data akun (Users, Sessions) tidak disentuh.
+ */
+function backupPulihkan_(body, user) {
+  var m = /^BAK_(\d{8}_\d{4})$/.exec((body.nama || "").toString());
+  if (!m) return fail_("Nama backup tidak valid.");
+  var ss = getSpreadsheet();
+  if (backupStamps_()[0] === fmtTanggal_(new Date(), "yyyyMMdd_HHmm")) {
+    return fail_("Ada backup yang baru dibuat semenit ini. Tunggu satu menit lalu coba lagi.");
+  }
+  var sumber = {};
+  BACKUP_SHEETS.forEach(function (name) {
+    var sh = ss.getSheetByName("BAK_" + m[1] + "_" + name);
+    if (sh && sh.getLastRow() > 0) sumber[name] = sh.getDataRange().getValues();
+  });
+  var daftar = Object.keys(sumber);
+  if (!daftar.length) return fail_("Backup tidak ditemukan.");
+
+  // Nilai sumber sudah dibaca ke memori, jadi aman walau backup pengaman menggeser backup lama.
+  var pengaman = backupBuat_(user);
+  var namaPengaman = JSON.parse(pengaman.getContent()).data.nama;
+
+  daftar.forEach(function (name) {
+    var live = ss.getSheetByName(name);
+    var vals = sumber[name];
+    live.clearContents();
+    live.getRange(1, 1, vals.length, vals[0].length).setValues(vals);
+    live.getRange(1, 1, 1, vals[0].length).setFontWeight("bold");
+  });
+  CacheService.getScriptCache().remove("bisnis_schema"); // kolom baru (jika backup lama) ditambah ulang
+  ensureSchema_();
+  writeAuditLog(user.id, user.nama, "PULIHKAN_BACKUP", m[0] + " · " + daftar.length + " sheet · pengaman " + namaPengaman);
+  return ok_({ nama: m[0], sheet: daftar.length, pengaman: namaPengaman });
+}
+
+/**
+ * SEMENTARA - diizinkan eksplisit oleh pemilik data (3 Nov 2026): id Zhefitra ganda dengan Budi.
+ * Mengubah id user username "zhefitra.ananda" menjadi "u-kapster2". Hanya Owner; menolak kalau
+ * baris yang cocok tidak tepat satu atau id tujuan sudah dipakai. HAPUS aksi ini setelah dipakai.
+ */
+function perbaikiIdKapster_(body, user) {
+  var sh = getSheet(SHEET_USERS);
+  var vals = sh.getDataRange().getValues();
+  var cocok = [];
+  for (var i = 1; i < vals.length; i++) {
+    if (String(vals[i][2]).toLowerCase() === "zhefitra.ananda") cocok.push(i);
+  }
+  if (cocok.length !== 1) return fail_("Ditolak: ditemukan " + cocok.length + " baris zhefitra.ananda (harus tepat 1).");
+  for (var j = 1; j < vals.length; j++) {
+    if (vals[j][0] === "u-kapster2") return fail_("Ditolak: id u-kapster2 sudah dipakai.");
+  }
+  var lama = vals[cocok[0]][0];
+  sh.getRange(cocok[0] + 1, 1).setValue("u-kapster2");
+  writeAuditLog(user.id, user.nama, "UBAH_ID_USER", "zhefitra.ananda: " + lama + " → u-kapster2");
+  return ok_({ lama: lama, baru: "u-kapster2" });
 }
 
 function cariTransaksi_(id) {

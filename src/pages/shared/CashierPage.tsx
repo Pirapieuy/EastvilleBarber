@@ -195,6 +195,7 @@ export function CashierPage({
   onNavigate?: (page: string) => void
 } = {}) {
   const [tab, setTab] = useState<"Layanan" | "Produk">("Layanan")
+  const [cari, setCari] = useState("")
   const [selectedBarber, setSelectedBarber] = useState("Seva")
   const [cart, setCart] = useState<CartLine[]>([
     { ...catalog[0], lineId: `${catalog[0].id}-Seva`, qty: 1, barber: "Seva" },
@@ -295,7 +296,9 @@ export function CashierPage({
     }
   }
 
-  const items = catalogData.filter((x) => x.type === tab)
+  const items = catalogData.filter(
+    (x) => x.type === tab && x.name.toLowerCase().includes(cari.trim().toLowerCase()),
+  )
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
   const effectiveDiscount =
     appliedDiscountPercent === null
@@ -414,10 +417,19 @@ export function CashierPage({
           </div>
           <div className="search">
             <Icon name="search" />
-            <input placeholder={`Cari ${tab.toLowerCase()}...`} />
+            <input
+              placeholder={`Cari ${tab.toLowerCase()}...`}
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
+            />
           </div>
         </div>
         <div className="catalog-grid">
+          {items.length === 0 && (
+            <p style={{ color: "var(--slate)", gridColumn: "1 / -1", padding: "16px 0" }}>
+              Tidak ada {tab.toLowerCase()} yang cocok.
+            </p>
+          )}
           {items.map((item) => (
             <Button
               className={`catalog-item ${item.stock === 0 ? "disabled" : ""}`}

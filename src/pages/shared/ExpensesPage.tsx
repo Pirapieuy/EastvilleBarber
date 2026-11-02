@@ -12,6 +12,48 @@ export interface ExpenseRecord {
   amount: number
   status: "Aktif" | "BATAL"
   cancelReason?: string
+  /** yyyy-MM-dd; hanya ada pada data dari backend */
+  dateIso?: string
+}
+
+const BULAN_PENDEK = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+const BULAN_PANJANG = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+
+function isoLokal(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+/** Angka KPI dari pengeluaran Aktif (BATAL tidak dihitung). */
+function hitungKpi(records: ExpenseRecord[]) {
+  const now = new Date()
+  const hariIni = isoLokal(now)
+  const bulanIni = hariIni.slice(0, 7)
+  const tahunIni = hariIni.slice(0, 4)
+  const mulaiMinggu = new Date(now)
+  mulaiMinggu.setDate(now.getDate() - 6)
+  const batasMinggu = isoLokal(mulaiMinggu)
+
+  const aktif = records.filter((r) => r.status === "Aktif" && r.dateIso)
+  const bulan = aktif.filter((r) => r.dateIso!.startsWith(bulanIni))
+  const minggu = aktif.filter((r) => r.dateIso! >= batasMinggu && r.dateIso! <= hariIni)
+  const tahun = aktif.filter((r) => r.dateIso!.startsWith(tahunIni))
+  const jumlah = (rs: ExpenseRecord[]) => rs.reduce((a, r) => a + r.amount, 0)
+
+  const perKategori: Record<string, number> = {}
+  bulan.forEach((r) => (perKategori[r.category] = (perKategori[r.category] ?? 0) + r.amount))
+  const teratas = Object.entries(perKategori).sort((a, b) => b[1] - a[1])[0]
+  const totalBulan = jumlah(bulan)
+
+  return {
+    totalBulan,
+    detailBulan: `${BULAN_PANJANG[now.getMonth()]} ${now.getFullYear()} · ${bulan.length} transaksi`,
+    totalMinggu: jumlah(minggu),
+    detailMinggu: `${mulaiMinggu.getDate()} ${BULAN_PENDEK[mulaiMinggu.getMonth()]} - ${now.getDate()} ${BULAN_PENDEK[now.getMonth()]} · ${minggu.length} transaksi`,
+    kategori: teratas ? teratas[0] : "-",
+    detailKategori: teratas ? `${rupiah(teratas[1])} (${((teratas[1] / totalBulan) * 100).toFixed(1).replace(".", ",")}%)` : "Belum ada pengeluaran bulan ini",
+    totalTahun: jumlah(tahun),
+    detailTahun: `Jan - ${BULAN_PENDEK[now.getMonth()]} ${now.getFullYear()} · ${tahun.length} transaksi`,
+  }
 }
 
 export const expenses = [
@@ -101,6 +143,8 @@ export function ExpensesPage() {
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
   }, [])
+
+  const kpi = live ? hitungKpi(records) : null
 
   const filteredRecords = records.filter((r) => {
     const matchCategory = category === "Semua" || r.category === category
@@ -218,29 +262,29 @@ export function ExpensesPage() {
           icon="expense"
           label="Total bulan ini"
           tone="brass"
-          value="Rp 5.840.000"
-          detail="Oktober 2026 · 14 transaksi"
+          value={kpi ? rupiah(kpi.totalBulan) : "Rp 5.840.000"}
+          detail={kpi ? kpi.detailBulan : "Oktober 2026 · 14 transaksi"}
         />
         <Kpi
           icon="calendar"
-          label="Total minggu ini"
+          label="Total 7 hari terakhir"
           tone="sage"
-          value="Rp 1.450.000"
-          detail="23 - 29 Okt · 4 transaksi"
+          value={kpi ? rupiah(kpi.totalMinggu) : "Rp 1.450.000"}
+          detail={kpi ? kpi.detailMinggu : "23 - 29 Okt · 4 transaksi"}
         />
         <Kpi
           icon="wallet"
           label="Kategori terbesar"
           tone="dark"
-          value="Sewa Tempat"
-          detail="Rp 3.500.000 (59,9%)"
+          value={kpi ? kpi.kategori : "Sewa Tempat"}
+          detail={kpi ? kpi.detailKategori : "Rp 3.500.000 (59,9%)"}
         />
         <Kpi
           icon="chart"
           label="Total tahun ini"
           tone="amber"
-          value="Rp 62.450.000"
-          detail="Jan - Okt 2026 · 10 bulan"
+          value={kpi ? rupiah(kpi.totalTahun) : "Rp 62.450.000"}
+          detail={kpi ? kpi.detailTahun : "Jan - Okt 2026 · 10 bulan"}
         />
       </div>
 
