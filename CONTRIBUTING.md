@@ -35,7 +35,8 @@ Jalankan frontend: `pnpm dev`. Port 8443 sering sudah dipakai dev server Figma M
 otomatis. Kalau begitu, buka saja `http://localhost:8443` (restart kalau `.env` baru dibuat),
 atau jalankan di port lain: `pnpm dev --port 5173`.
 
-Uji login: PIN semua akun demo **123456** — `ardi.owner`, `dian.manajer`, `siti.kasir`, `budi.kapster`.
+Uji login: PIN semua akun demo **123456** — `ardi.owner`, `dian.manajer`, `siti.kasir`, `budi.kapster`,
+`zhefitra.ananda` (kapster, id `u-kapster2`).
 
 ## 2. Susunan folder
 
@@ -108,11 +109,36 @@ Peran dan hak akses ada di `AKSES` (backend). Frontend hanya menyembunyikan tomb
 
 ## 6. Yang sudah tersambung ke backend
 
-Login, Kasir (checkout), Riwayat transaksi (batal/pulihkan), Pengeluaran, Produk dan stok,
-komisi kapster dan jam kerja (backend; tampilannya belum ada).
+**Semua halaman sudah tersambung ke backend** (per 2 Nov 2026, server = deployment 32):
+
+| Area | Halaman | Pemilik |
+|---|---|---|
+| Transaksi | Kasir POS, Riwayat Transaksi (batal/pulihkan), Rekap Manual | Rania |
+| Keuangan | Pengeluaran, Laporan Keuangan dan Laporan Produk (Harian/Mingguan/Bulanan, Excel `.xls`, PDF lewat cetak, WhatsApp) | Rania |
+| Katalog | Master Produk + stok, Layanan & Harga (+ kategori) dan kartu Jam kerja & komisi | Rania |
+| Beranda | Owner, Manajer, Kapster (`aktivitas-kapster`), Komisi Produk Saya | Rania |
+| Data | Backup + Pulihkan (Owner) | Rania |
+| Akun | Login, Tim, Gaji & Kasbon, Absensi, Jejak Audit | Fitra |
+
+Aksi `Bisnis.js` yang ditambahkan sejak catatan sebelumnya:
+- `backup-pulihkan` (Owner): membuat backup pengaman dulu, baru memulihkan.
+- `aktivitas-kapster` (Kapster): ringkasan transaksi milik kapster itu sendiri untuk Beranda Kapster.
+- `laporan-produk` boleh dipanggil Kapster, tetapi hanya mengembalikan baris miliknya (tanpa bagian pemasok/Eastville).
+- `simpan-layanan` kini punya kolom `kategori` (Potong / Grooming / Coloring / Perawatan).
+- `simpan-produk` menerima parameter `baru` (true = tambah produk baru, kode harus belum dipakai).
+- **Transaksi gratis** = diskon penuh + alasan; ditandai kolom `gratis` di sheet `Transaksi` (`SCHEMA_VERSION` 5).
+  Total Rp0 tanpa tanda gratis **ditolak** server.
+- `hitung-gaji` (Kode.js, Fitra) menghitung transaksi berstatus Lunas sejak gaji terakhir dibayar.
 
 Aturan komisi: layanan 40% untuk kapster (bisa diatur per kapster); di luar jam kerja (default
 10:00–21:00) otomatis lembur 50%. Dihitung dari jam transaksi.
+
+### Aturan ID unik
+- ID user dibuat otomatis dan diberi akhiran bila bentrok (jangan dua baris `u-kapster`).
+- Email user harus unik.
+- Kode produk harus unik.
+- ID pengeluaran dan nomor invoice dibuat server. **Jangan hapus baris transaksi dengan nomor invoice
+  tertinggi di hari itu**, karena penomoran berikutnya bergantung pada nomor tertinggi.
 
 ## 7. Pembagian kerja (disepakati Rania & Fitra)
 
@@ -139,9 +165,17 @@ Rania menyediakan `list-komisi`, Fitra membangun halamannya.
 - Di `src/api.ts` tambah bagian terpisah di akhir file (Rania `apiLaporan...`, Fitra `apiTim...`, `apiAbsensi...`).
 - **Jangan menyentuh halaman milik orang lain.** Mau ubah komponen bersama (`UI.tsx`, `AppLayout.tsx`)? Kabari dulu.
 
-**Alur git:** kerja di branch masing-masing, `git fetch && git merge origin/<branch-lain>` secara berkala
-(minimal sehari sekali, dan sebelum mulai fitur baru) supaya bentrok kecil dan cepat dibereskan.
-Deploy backend (`clasp deploy -i`) dilakukan hanya setelah `git pull`/merge, agar file orang lain tidak tertimpa.
+**Alur git:** kerja di branch masing-masing (`rania` / `fitra`), lalu `git fetch && git merge origin/<branch-lain>`
+secara berkala (minimal sehari sekali, dan sebelum mulai fitur baru). Branch **`mergebackend`** adalah
+gabungan rania + fitra khusus untuk deploy. Fitra perlu `git merge origin/mergebackend` ke branch `fitra`
+agar `Bisnis.js` dan `Kode.js` di branch-nya sama dengan server.
+
+**Deploy hanya dari `mergebackend`**, dengan urutan:
+1. `git checkout mergebackend && git pull`, pastikan `git status` bersih.
+2. Clone versi live ke folder sementara: `mkdir /tmp/live && cd /tmp/live && clasp clone <scriptId>`.
+3. `diff /tmp/live/Kode.js backend/Kode.js` dan `diff /tmp/live/Bisnis.js backend/Bisnis.js`.
+   Ada baris di live yang tidak ada di repo = ada kerja orang lain yang belum di-merge. **Berhenti**, merge dulu.
+4. Baru `cd backend && clasp push -f && clasp deploy -i <ID_DEPLOYMENT> -d "..."`.
 
 ## 8. Tugas keamanan login (Fitra)
 
