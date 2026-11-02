@@ -223,6 +223,22 @@ export const apiKomisi = {
     api<KomisiKapsterRow[]>("list-komisi", range),
 }
 
+export interface AktivitasKapster {
+  item: string
+  qty: number
+  type: "Layanan" | "Produk"
+  /** HH.mm */
+  time: string
+  fee: number
+  comm: number
+  trx: string
+}
+
+export const apiKapster = {
+  /** Layanan & produk yang dikerjakan kapster yang login pada satu hari (default hari ini). */
+  aktivitas: (tanggal?: string) => api<AktivitasKapster[]>("aktivitas-kapster", { tanggal }),
+}
+
 export interface LaporanKeuangan {
   pemasukan: number
   tunai: number

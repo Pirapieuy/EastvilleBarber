@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react"
+import { apiAbsensi, apiKapster, apiKomisi, AktivitasKapster, getToken, KomisiKapsterRow } from "../../api"
+import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
@@ -14,10 +17,62 @@ export function KapsterDashboard({
   const nav = onNavigate ?? navigate ?? (() => {})
   const firstName = user?.name ? user.name.split(" ")[0] : "Seva"
 
+  const now = new Date()
+  const hariIni = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+  const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
+  const [komisi, setKomisi] = useState<KomisiKapsterRow | null>(null)
+  const [aktivitas, setAktivitas] = useState<AktivitasKapster[] | null>(null)
+  const [masuk, setMasuk] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    Promise.all([
+      apiKomisi.list({ dari: hariIni, sampai: hariIni }),
+      apiKapster.aktivitas(hariIni),
+      apiAbsensi.list({ tanggal: hariIni }).catch(() => []),
+    ])
+      .then(([k, a, abs]) => {
+        setKomisi(k[0] ?? null)
+        setAktivitas(a)
+        const m = abs.filter((r) => r.tipe === "Masuk").pop()
+        setMasuk(m ? m.jam : null)
+        setLive(true)
+      })
+      .catch((e) => {
+        console.error("Gagal memuat beranda kapster:", e)
+        setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+      })
+  }, [hariIni])
+
+  if (Boolean(getToken()) && !live && !liveError) {
+    return (
+      <div className="content">
+        <p>Memuat beranda...</p>
+      </div>
+    )
+  }
+
+  const hari = now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+  const layananRows = (aktivitas ?? []).filter((r) => r.type === "Layanan")
+  const produkRows = (aktivitas ?? []).filter((r) => r.type === "Produk")
+  const jumlahPelanggan = live ? komisi?.jumlahTransaksi ?? 0 : 5
+  const targetShift = 6
+  const persen = Math.min(100, Math.round((jumlahPelanggan / targetShift) * 100))
+  const komisiLayanan = live ? (komisi?.komisiLayanan ?? 0) + (komisi?.komisiLembur ?? 0) : 140000
+  const komisiProduk = live ? komisi?.komisiProduk ?? 0 : 30000
+  const rows = live
+    ? (aktivitas ?? []).map((r) => ({ item: r.item, time: r.time, fee: r.fee, comm: r.comm, type: r.type }))
+    : null
+
   return (
     <div className="content kapster-dashboard">
+      <DemoNotice live={live} error={liveError} />
       <PageTitle
-        eyebrow="Rabu, 29 Oktober 2026 · Shift aktif"
+        eyebrow={live ? `${hari} · Shift aktif` : "Rabu, 29 Oktober 2026 · Shift aktif"}
         title={`Selamat pagi, ${firstName}.`}
         action={
           <div className="page-actions">
@@ -41,29 +96,29 @@ export function KapsterDashboard({
           icon="people"
           label="Pelanggan Dilayani"
           tone="sage"
-          value="5 orang"
-          detail="Target shift 8 jam: 6 orang"
+          value={`${jumlahPelanggan} orang`}
+          detail={`Target shift 8 jam: ${targetShift} orang`}
         />
         <Kpi
           icon="wallet"
           label="Komisi Layanan"
           tone="brass"
-          value="Rp 140.000"
-          detail="40% dari 5 pengerjaan"
+          value={rupiah(komisiLayanan)}
+          detail={live ? `${layananRows.length} pengerjaan layanan hari ini` : "40% dari 5 pengerjaan"}
         />
         <Kpi
           icon="product"
           label="Komisi Produk"
           tone="amber"
-          value="Rp 30.000"
-          detail="3 produk terjual hari ini"
+          value={rupiah(komisiProduk)}
+          detail={live ? `${produkRows.reduce((n, r) => n + r.qty, 0)} produk terjual hari ini` : "3 produk terjual hari ini"}
         />
         <Kpi
           icon="check"
           label="Status Kehadiran"
           tone="dark"
-          value="Tepat Waktu"
-          detail="Check-in 09.52 WIB · Foto selfie OK"
+          value={live ? (masuk ? "Sudah check-in" : "Belum check-in") : "Tepat Waktu"}
+          detail={live ? (masuk ? `Check-in ${masuk} WIB` : "Belum ada check-in hari ini") : "Check-in 09.52 WIB · Foto selfie OK"}
         />
       </div>
 
@@ -84,22 +139,22 @@ export function KapsterDashboard({
           <div className="shift-overview">
             <div>
               <small>Sudah dilayani</small>
-              <strong>5</strong>
-              <span>dari 6 pelanggan</span>
+              <strong>{jumlahPelanggan}</strong>
+              <span>dari {targetShift} pelanggan</span>
             </div>
             <div>
               <small>Sisa target</small>
-              <strong>1</strong>
+              <strong>{Math.max(0, targetShift - jumlahPelanggan)}</strong>
               <span>pelanggan</span>
             </div>
           </div>
           <div className="shift-progress">
             <div className="progress-bar-shell">
-              <div className="progress-bar-fill" style={{ width: "83%" }} />
+              <div className="progress-bar-fill" style={{ width: `${persen}%` }} />
             </div>
             <div className="progress-meta">
-              <span>5 dari 6 pelanggan</span>
-              <strong>83%</strong>
+              <span>{jumlahPelanggan} dari {targetShift} pelanggan</span>
+              <strong>{persen}%</strong>
             </div>
           </div>
         </section>
@@ -110,7 +165,7 @@ export function KapsterDashboard({
             title="Aktivitas Layanan & Produk"
           />
           <div className="recent-list">
-            {[
+            {(rows ?? [
               {
                 item: "Haircut Classic",
                 time: "10.15",
@@ -146,7 +201,7 @@ export function KapsterDashboard({
                 comm: 20000,
                 type: "Layanan",
               },
-            ].map((row, idx) => (
+            ]).map((row, idx) => (
               <div key={idx} className="recent-row">
                 <div className="recent-icon">
                   <Icon name={row.type === "Produk" ? "product" : "cashier"} />
@@ -163,6 +218,9 @@ export function KapsterDashboard({
                 </div>
               </div>
             ))}
+            {rows && rows.length === 0 && (
+              <p style={{ color: "var(--slate)", padding: "12px 0" }}>Belum ada pengerjaan hari ini.</p>
+            )}
           </div>
         </section>
       </div>

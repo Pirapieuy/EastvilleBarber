@@ -81,7 +81,8 @@ var AKSES = {
   "simpan-layanan":      ["Owner", "Manajer"],
   "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
   "laporan-keuangan":    ["Owner", "Manajer"],
-  "laporan-produk":      ["Owner", "Manajer"],
+  "laporan-produk":      ["Owner", "Manajer", "Kapster"],
+  "aktivitas-kapster":   ["Kapster"],
   "backup-buat":         ["Owner"],
   "backup-list":         ["Owner"],
   "backup-pulihkan":     ["Owner"]
@@ -169,7 +170,8 @@ function routeBisnis(action, body) {
       case "list-komisi":          return listKomisi_(body, user);
       case "simpan-layanan":       return simpanLayanan_(body, user);
       case "laporan-keuangan":     return laporanKeuangan_(body);
-      case "laporan-produk":       return laporanProduk_(body);
+      case "laporan-produk":       return laporanProduk_(body, user);
+      case "aktivitas-kapster":    return aktivitasKapster_(body, user);
       case "backup-buat":          return backupBuat_(user);
       case "backup-list":          return ok_(backupList_());
       case "backup-pulihkan":      return backupPulihkan_(body, user);
@@ -718,10 +720,35 @@ function laporanKeuangan_(body) {
 }
 
 /**
+ * Aktivitas kapster pada satu hari (default hari ini): layanan & produk yang dikerjakan beserta komisinya.
+ * Body: { tanggal?: "yyyy-MM-dd" }. Hanya milik kapster yang login. Transaksi BATAL tidak ikut.
+ */
+function aktivitasKapster_(body, user) {
+  var tgl = (body.tanggal || "").toString() || fmtTanggal_(new Date(), "yyyy-MM-dd");
+  var trx = {};
+  readTable_(SHEET_TRANSAKSI).forEach(function (t) {
+    if (t.status === "Lunas" && fmtTanggal_(new Date(t.waktu), "yyyy-MM-dd") === tgl) trx[t.id] = t;
+  });
+  var rows = [];
+  readTable_(SHEET_TRX_ITEM).forEach(function (i) {
+    var t = trx[i.trx_id];
+    if (!t || i.kapster_id !== user.id) return;
+    rows.push({
+      item: i.nama, qty: Number(i.qty), type: i.tipe,
+      time: fmtTanggal_(new Date(t.waktu), "HH.mm"), waktu: new Date(t.waktu).getTime(),
+      fee: Number(i.harga) * Number(i.qty), comm: Number(i.komisi) || 0, trx: i.trx_id
+    });
+  });
+  rows.sort(function (a, b) { return a.waktu - b.waktu; });
+  return ok_(rows);
+}
+
+/**
  * Penjualan produk per baris item, lengkap dengan pembagian kapster / pemasok / Eastville.
  * Body: { dari, sampai }. Termasuk transaksi BATAL (ditandai) agar bisa ditampilkan sebagai koreksi.
  */
-function laporanProduk_(body) {
+function laporanProduk_(body, user) {
+  var kapsterSaja = user && user.role === "Kapster"; // Kapster: hanya barisnya sendiri, tanpa bagian pemasok/Eastville
   var produk = {};
   readTable_(SHEET_PRODUK).forEach(function (p) { produk[p.kode] = p; });
   var trx = {};
@@ -732,6 +759,7 @@ function laporanProduk_(body) {
   readTable_(SHEET_TRX_ITEM).forEach(function (i) {
     var t = trx[i.trx_id];
     if (!t || i.tipe !== "Produk") return;
+    if (kapsterSaja && i.kapster_id !== user.id) return;
     var p = produk[i.ref_id] || {};
     var qty = Number(i.qty), harga = Number(i.harga), omzet = harga * qty;
     var penjual = p.skema === "Persentase"
@@ -743,8 +771,8 @@ function laporanProduk_(body) {
       time: fmtTanggal_(new Date(t.waktu), "d MMM HH.mm"),
       waktu: new Date(t.waktu).getTime(),
       product: i.nama, qty: qty, unitPrice: harga, totalOmzet: omzet,
-      barber: i.kapster, seller: p.penjual || "-",
-      barberShare: kapster, sellerShare: penjual, eastvilleShare: omzet - kapster - penjual,
+      barber: i.kapster, seller: kapsterSaja ? "-" : (p.penjual || "-"),
+      barberShare: kapster, sellerShare: kapsterSaja ? 0 : penjual, eastvilleShare: kapsterSaja ? 0 : omzet - kapster - penjual,
       status: t.status === "BATAL" ? "Batal" : "Lunas",
       voidReason: t.void_alasan || undefined,
       voidBy: t.void_oleh || undefined,

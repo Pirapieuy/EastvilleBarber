@@ -183,7 +183,6 @@ export function ProductReportsPage({
 
   // Tampilan Owner/Manajer memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
   useEffect(() => {
-    if (isKapsterView) return
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")
       return
@@ -204,7 +203,7 @@ export function ProductReportsPage({
     return () => {
       batal = true
     }
-  }, [rentang.dari, rentang.sampai, isKapsterView])
+  }, [rentang.dari, rentang.sampai])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
     const per: Record<string, { unit: number; omzet: number }> = {}
@@ -286,33 +285,60 @@ export function ProductReportsPage({
             </select>
           </div>
         )}
+        <DemoNotice live={live} error={liveError} />
         <div className="segmented full">
-          <Button>Harian</Button>
-          <Button>Mingguan</Button>
-          <Button className="active">Bulanan</Button>
-        </div>
-        <article className="my-salary-hero">
-          <span>Komisi produk saya</span>
-          <strong>Rp 520.000</strong>
-          <p>44 unit · 18 transaksi</p>
-        </article>
-        <section className="panel customer-list">
-          <PageTitle eyebrow="Penjualan pribadi" title="Komisi per produk" />
-          {[
-            ["Free Style Dust", 10000],
-            ["Hair Paste Pomade", 20000],
-            ["Water Based Pomade", 10000],
-            ["Miracle Treatment", 10000],
-          ].map((x) => (
-            <div key={x[0]}>
-              <i>
-                <Icon name="product" />
-              </i>
-              <strong>{x[0]}</strong>
-              <b>+{rupiah(Number(x[1]))}</b>
-            </div>
+          {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+            <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
+              {m}
+            </Button>
           ))}
-        </section>
+        </div>
+        {mode === "Bulanan" ? (
+          <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+        ) : (
+          <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
+        )}
+        {(() => {
+          const lunas = live ? txList.filter((t) => t.status === "Lunas") : null
+          const perProduk: Record<string, number> = {}
+          lunas?.forEach((t) => (perProduk[t.product] = (perProduk[t.product] ?? 0) + t.barberShare))
+          const daftar: [string, number][] = lunas
+            ? Object.entries(perProduk).sort((x, y) => y[1] - x[1])
+            : [
+                ["Free Style Dust", 10000],
+                ["Hair Paste Pomade", 20000],
+                ["Water Based Pomade", 10000],
+                ["Miracle Treatment", 10000],
+              ]
+          return (
+            <>
+              <article className="my-salary-hero">
+                <span>Komisi produk saya</span>
+                <strong>{lunas ? rupiah(lunas.reduce((n, t) => n + t.barberShare, 0)) : "Rp 520.000"}</strong>
+                <p>
+                  {lunas
+                    ? `${lunas.reduce((n, t) => n + t.qty, 0)} unit · ${new Set(lunas.map((t) => t.id)).size} transaksi`
+                    : "44 unit · 18 transaksi"}
+                </p>
+              </article>
+              <section className="panel customer-list">
+                <PageTitle eyebrow="Penjualan pribadi" title="Komisi per produk" />
+                {daftar.map((x) => (
+                  <div key={x[0]}>
+                    <i>
+                      <Icon name="product" />
+                    </i>
+                    <strong>{x[0]}</strong>
+                    <b>+{rupiah(x[1])}</b>
+                  </div>
+                ))}
+                {lunas && daftar.length === 0 && (
+                  <p style={{ color: "var(--slate)", padding: "12px 0" }}>Belum ada penjualan produk pada periode ini.</p>
+                )}
+              </section>
+            </>
+          )
+        })()}
         <div className="privacy">
           <Icon name="lock" /> Bagian seller dan Eastville tidak ditampilkan.
         </div>
