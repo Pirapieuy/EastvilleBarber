@@ -696,9 +696,18 @@ function handleCreateUser(body) {
     if (data[i][2].toString().toLowerCase() === username) {
       return jsonResponse({ success: false, error: "Username '" + username + "' sudah digunakan." });
     }
+    // Reset PIN mencari akun lewat email, jadi email juga harus unik.
+    if (data[i][6].toString().toLowerCase() === email) {
+      return jsonResponse({ success: false, error: "Email '" + email + "' sudah dipakai akun lain." });
+    }
   }
 
-  var id = "u-" + username.replace(/[^a-z0-9]/g, "-").slice(0, 15);
+  // ID user wajib unik (dipakai di transaksi, komisi, absensi). Tambah akhiran angka bila bentrok.
+  var dasarId = "u-" + username.replace(/[^a-z0-9]/g, "-").slice(0, 15);
+  var idDipakai = {};
+  for (var d = 1; d < data.length; d++) idDipakai[String(data[d][0]).toLowerCase()] = true;
+  var id = dasarId, nomor = 2;
+  while (idDipakai[id.toLowerCase()]) { id = dasarId + nomor; nomor++; }
   var pinHash = hashPin(pin);
   var now = new Date();
 
@@ -760,6 +769,8 @@ function handleUpdateUser(body) {
       targetRow = i + 1;
     } else if (data[i][2].toString().toLowerCase() === username) {
       return jsonResponse({ success: false, error: "Username '" + username + "' sudah digunakan oleh akun lain." });
+    } else if (data[i][6].toString().toLowerCase() === email) {
+      return jsonResponse({ success: false, error: "Email '" + email + "' sudah dipakai akun lain." });
     }
   }
 

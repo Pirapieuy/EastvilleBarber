@@ -214,7 +214,6 @@ export function CashierPage({
   const [discountDraft, setDiscountDraft] = useState(0)
   const [appliedDiscountPercent, setAppliedDiscountPercent] = useState<number | null>(null)
   const [discountOpen, setDiscountOpen] = useState(false)
-  const [gratis, setGratis] = useState(false)
   const [gratisAlasan, setGratisAlasan] = useState("")
   const [receipt, setReceipt] = useState(false)
 
@@ -304,11 +303,15 @@ export function CashierPage({
     (x) => x.type === tab && x.name.toLowerCase().includes(cari.trim().toLowerCase()),
   )
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
-  const effectiveDiscount = gratis
-    ? total
-    : appliedDiscountPercent === null
+  const effectiveDiscount =
+    appliedDiscountPercent === null
       ? discount
       : Math.round((total * appliedDiscountPercent) / 100)
+  // Diskon yang menutup seluruh subtotal = transaksi gratis (promo/traktiran): alasan wajib.
+  const gratis = total > 0 && effectiveDiscount >= total
+  const draftPenuh =
+    total > 0 &&
+    (discountMode === "Persen" ? discountDraft >= 100 : discountDraft >= total)
   const payableTotal = Math.max(0, total - effectiveDiscount)
   const paid =
     method === "Tunai" ? cash : method === "QRIS" ? qris : cash + qris
@@ -371,7 +374,6 @@ export function CashierPage({
             setQris(0)
             setDiscount(0)
             setAppliedDiscountPercent(null)
-            setGratis(false)
             setGratisAlasan("")
           }
         }}
@@ -619,6 +621,18 @@ export function CashierPage({
                     />
                   </div>
                 </label>
+                {draftPenuh && (
+                  <label>
+                    <span>Alasan gratis (wajib)</span>
+                    <div className="input-shell">
+                      <input
+                        onChange={(e) => setGratisAlasan(e.target.value)}
+                        placeholder="Mis. traktiran pelanggan setia"
+                        value={gratisAlasan}
+                      />
+                    </div>
+                  </label>
+                )}
                 <div>
                   <Button
                     className="text-button"
@@ -628,6 +642,7 @@ export function CashierPage({
                   </Button>
                   <Button
                     className="secondary-button"
+                    disabled={draftPenuh && !gratisAlasan.trim()}
                     onClick={() => {
                       const normalizedDiscount =
                         discountMode === "Persen"
@@ -661,34 +676,13 @@ export function CashierPage({
                 </div>
               </div>
             )}
-            <Button
-              className="discount-button"
-              onClick={() => {
-                setGratis(!gratis)
-                setCash(0)
-                setQris(0)
-              }}
-            >
-              <Icon name="check" /> {gratis ? "Batalkan gratis" : "Gratis (promo/traktiran)"}
-            </Button>
-            {gratis && (
-              <label className="cart-discount-panel">
-                <span>Alasan gratis (wajib)</span>
-                <div className="input-shell">
-                  <input
-                    onChange={(e) => setGratisAlasan(e.target.value)}
-                    placeholder="Mis. traktiran pelanggan setia"
-                    value={gratisAlasan}
-                  />
-                </div>
-              </label>
-            )}
-            {discount > 0 && !gratis && (
+            {discount > 0 && (
               <div className="discount-applied">
                 <span>
-                  Diskon terotorisasi
+                  {gratis ? "Gratis" : "Diskon terotorisasi"}
                   {appliedDiscountPercent !== null &&
                     ` (${appliedDiscountPercent}%)`}
+                  {gratis && gratisAlasan.trim() && ` · ${gratisAlasan.trim()}`}
                 </span>
                 <strong>− {rupiah(effectiveDiscount)}</strong>
               </div>

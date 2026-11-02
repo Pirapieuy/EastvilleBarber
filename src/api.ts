@@ -177,8 +177,9 @@ export const apiPengeluaran = {
 
 export const apiProduk = {
   list: () => api<ProdukRow[]>("list-produk"),
-  simpan: (produk: Record<string, unknown>, alasan: string) =>
-    api("simpan-produk", { produk, alasan }),
+  /** baru=true: tolak bila kode produk sudah dipakai (tanpa ini, kode yang ada dianggap edit). */
+  simpan: (produk: Record<string, unknown>, alasan: string, baru = false) =>
+    api("simpan-produk", { produk, alasan, baru }),
   adjustStok: (kode: string, delta: number, alasan: string) =>
     api("adjust-stok", { kode, delta, alasan }),
   log: () => api<unknown[]>("log-produk"),

@@ -195,6 +195,7 @@ export function ProductsPage() {
             nominalShares: formData.nominalShares,
           },
           changeReason,
+          !editingCode,
         )
         await loadLive()
         setFormOpen(false)

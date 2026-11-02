@@ -992,7 +992,10 @@ function createPengeluaran_(body, user) {
   if (!deskripsi) return fail_("Keterangan wajib diisi.");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(body.tanggal || "")) return fail_("Format tanggal harus yyyy-MM-dd.");
 
+  var idAda = {};
+  readTable_(SHEET_PENGELUARAN).forEach(function (r) { idAda[r.id] = true; });
   var id = generateId("exp");
+  while (idAda[id]) id = generateId("exp");
   appendObj_(SHEET_PENGELUARAN, {
     id: id, tanggal: body.tanggal, kategori: body.kategori, deskripsi: deskripsi,
     jumlah: jumlah, status: "Aktif", dibuat_oleh: user.nama + " · " + user.role, waktu: new Date()
@@ -1057,8 +1060,11 @@ function simpanProduk_(body, user) {
     nominal_kapster: toInt_(n.barber), nominal_penjual: toInt_(n.seller), nominal_eastville: toInt_(n.eastville)
   };
 
-  var ada = readTable_(SHEET_PRODUK).filter(function (x) { return x.kode === p.kode; })[0];
+  p.kode = String(p.kode).trim(); baris.kode = p.kode;
+  var ada = readTable_(SHEET_PRODUK).filter(function (x) { return String(x.kode).toLowerCase() === p.kode.toLowerCase(); })[0];
+  if (ada && body.baru === true) return fail_("Kode produk '" + p.kode + "' sudah dipakai produk lain.");
   if (ada) {
+    p.kode = ada.kode; baris.kode = ada.kode;
     if (!alasan) return fail_("Alasan perubahan wajib diisi.");
     var beda = [];
     Object.keys(baris).forEach(function (k) {
