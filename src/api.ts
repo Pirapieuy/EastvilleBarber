@@ -240,21 +240,6 @@ export const apiKapster = {
   aktivitas: (tanggal?: string) => api<AktivitasKapster[]>("aktivitas-kapster", { tanggal }),
 }
 
-export interface AuditRow {
-  waktu: string
-  tanggal: string
-  userId: string
-  pengguna: string
-  aksi: string
-  detail: string
-  alasan: string
-}
-
-export const apiAudit = {
-  list: (range: { dari?: string; sampai?: string; limit?: number } = {}) =>
-    api<AuditRow[]>("list-audit", range),
-}
-
 export interface LaporanKeuangan {
   pemasukan: number
   tunai: number
@@ -436,4 +421,21 @@ export const apiAbsensi = {
   list: (filter: { tanggal?: string; userId?: string } = {}) =>
     api<AbsensiRow[]>("list-absensi", filter),
 }
+
+export interface AuditLogRow {
+  waktu: string
+  tanggal: string
+  jam: string
+  userId: string
+  namaUser: string
+  aksi: string
+  detail: string
+  alasan: string
+}
+
+export const apiAudit = {
+  list: (filter: { tanggal?: string; aksi?: string; user?: string } = {}) =>
+    api<AuditLogRow[]>("list-audit", filter),
+}
+
 

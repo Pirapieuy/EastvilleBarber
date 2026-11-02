@@ -198,6 +198,7 @@ function getUserFromToken_(token) {
 function ensureTimBSheets_() {
   var ss = getSpreadsheet();
   var timBSheets = {
+    AuditLog: ["waktu", "user_id", "nama_user", "aksi", "detail", "alasan"],
     Kasbon: ["id", "tanggal", "user_id", "nama", "role", "jumlah", "status", "catatan", "dibuat_oleh", "lunas_waktu"],
     Gaji: ["id", "periode", "user_id", "nama", "role", "total_komisi", "total_kasbon", "gaji_bersih", "status", "tanggal_bayar", "dibayar_oleh", "catatan"],
     Absensi: ["id", "waktu", "tanggal", "jam", "user_id", "nama", "role", "tipe", "foto_url", "status", "catatan"]
@@ -340,6 +341,10 @@ function doPost(e) {
         return handleCatatAbsensi(body);
       case "list-absensi":
         return handleListAbsensi(body);
+
+      // ---- JEJAK AUDIT (TIM B) ----
+      case "list-audit":
+        return handleListAudit(body);
 
       default:
         // Action bisnis (kasir, transaksi, pengeluaran, stok) ada di Bisnis.js (Tim A)
@@ -1386,6 +1391,61 @@ function handleListAbsensi(body) {
       fotoUrl: data[i][8] || "",
       status: data[i][9],
       catatan: data[i][10] || ""
+    });
+  }
+
+  return jsonResponse({ success: true, data: list.reverse() });
+}
+
+// ============================================================
+// HANDLER JEJAK AUDIT (TIM B)
+// ============================================================
+
+function handleListAudit(body) {
+  var user = getUserFromToken_(body.token);
+  if (!user) return jsonResponse({ success: false, error: "Session tidak valid.", code: "UNAUTHORIZED" });
+  if (user.role !== "Owner" && user.role !== "Manajer") {
+    return jsonResponse({ success: false, error: "Akses ditolak. Jejak audit hanya untuk Owner dan Manajer.", code: "FORBIDDEN" });
+  }
+
+  ensureTimBSheets_();
+  var ss = getSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_AUDIT);
+  if (!sheet) return jsonResponse({ success: true, data: [] });
+
+  var targetTanggal = (body.tanggal || "").trim();
+  var targetAksi = (body.aksi || "").trim().toUpperCase();
+  var targetUser = (body.userId || body.user || "").trim().toLowerCase();
+
+  var data = sheet.getDataRange().getValues();
+  var list = [];
+  // Baris 0 adalah header: ["waktu", "user_id", "nama_user", "aksi", "detail", "alasan"]
+  for (var i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    var rawDate = data[i][0];
+    var tglIso = rawDate instanceof Date ? formatDateIso_(rawDate) : (rawDate || "").toString().slice(0, 10);
+    var jamHhmm = rawDate instanceof Date ? formatTimeHhmm_(rawDate) : "";
+    var rowWaktu = rawDate instanceof Date ? rawDate.toISOString() : (rawDate || "").toString();
+
+    var rowUserId = (data[i][1] || "").toString();
+    var rowUserName = (data[i][2] || "").toString();
+    var rowAksi = (data[i][3] || "").toString();
+    var rowDetail = (data[i][4] || "").toString();
+    var rowAlasan = (data[i][5] || "").toString();
+
+    if (targetTanggal && tglIso !== targetTanggal) continue;
+    if (targetAksi && targetAksi !== "SEMUA" && rowAksi.toUpperCase() !== targetAksi) continue;
+    if (targetUser && targetUser !== "semua" && rowUserId.toLowerCase() !== targetUser && rowUserName.toLowerCase() !== targetUser) continue;
+
+    list.push({
+      waktu: rowWaktu,
+      tanggal: tglIso,
+      jam: jamHhmm,
+      userId: rowUserId,
+      namaUser: rowUserName,
+      aksi: rowAksi,
+      detail: rowDetail,
+      alasan: rowAlasan
     });
   }
 
