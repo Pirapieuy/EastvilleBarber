@@ -83,7 +83,8 @@ const AKSI_MAP: Record<string, string> = {
 function parseAuditRow(row: AuditLogRow): string[] {
   let waktuStr = ""
 
-  if (row.waktu) {
+  // 1. Jika ada ISO timestamp lengkap (e.g. "2026-11-02T08:32:42.138Z")
+  if (row.waktu && typeof row.waktu === "string" && row.waktu.includes("T")) {
     const d = new Date(row.waktu)
     if (!isNaN(d.getTime())) {
       const tglStr = d.toLocaleDateString("id-ID", {
@@ -100,15 +101,32 @@ function parseAuditRow(row: AuditLogRow): string[] {
     }
   }
 
-  if (!waktuStr && row.tanggal) {
-    const d = new Date(row.tanggal)
+  // 2. Jika ada tanggal format YYYY-MM-DD dan jam
+  if (!waktuStr && row.tanggal && /^\d{4}-\d{2}-\d{2}$/.test(row.tanggal)) {
+    const d = new Date(row.tanggal + "T12:00:00")
     const tglStr = !isNaN(d.getTime())
       ? d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
       : row.tanggal
     const jamClean = row.jam ? row.jam.replace(".", ":") : ""
     waktuStr = jamClean ? `${tglStr}, ${jamClean}` : tglStr
-  } else if (!waktuStr) {
-    waktuStr = row.jam ? row.jam.replace(".", ":") : "—"
+  }
+
+  // 3. Jika waktu adalah format string seperti "2 Nov 15.32" (jangan di-new Date agar tidak jadi 2015)
+  if (!waktuStr && row.waktu) {
+    // Jika mengandung tahun 202x
+    if (row.waktu.includes("202")) {
+      waktuStr = String(row.waktu)
+    } else {
+      // Tambahkan tahun 2026 agar lengkap
+      const thn = row.tanggal && row.tanggal.length >= 4 ? row.tanggal.slice(0, 4) : "2026"
+      const parts = String(row.waktu).split(" ")
+      if (parts.length >= 3) {
+        // e.g. "2 Nov 15.32" -> "2 Nov 2026, 15:32"
+        waktuStr = `${parts[0]} ${parts[1]} ${thn}, ${parts[2].replace(".", ":")}`
+      } else {
+        waktuStr = `${String(row.waktu)}, ${thn}`
+      }
+    }
   }
 
   const aksiLabel = AKSI_MAP[row.aksi] || row.aksi
@@ -132,9 +150,11 @@ function parseAuditRow(row: AuditLogRow): string[] {
     }
   }
 
+  const userName = row.namaUser || row.pengguna || row.userId || "—"
+
   return [
     waktuStr || "—",
-    row.namaUser || row.userId || "—",
+    userName,
     aksiLabel,
     objek,
     detail,
@@ -170,7 +190,7 @@ export function AuditPage() {
     if (!realLogs) return []
     const set = new Set<string>()
     realLogs.forEach((r) => {
-      const name = r.namaUser || r.userId
+      const name = r.namaUser || r.pengguna || r.userId
       if (name) set.add(name)
     })
     return Array.from(set).sort()
@@ -194,7 +214,7 @@ export function AuditPage() {
           }
         }
         if (filterUser !== "Semua pengguna") {
-          const name = r.namaUser || r.userId
+          const name = r.namaUser || r.pengguna || r.userId
           if (name !== filterUser) return false
         }
         return true

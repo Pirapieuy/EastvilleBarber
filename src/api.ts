@@ -425,9 +425,10 @@ export const apiAbsensi = {
 export interface AuditLogRow {
   waktu: string
   tanggal: string
-  jam: string
+  jam?: string
   userId: string
-  namaUser: string
+  namaUser?: string
+  pengguna?: string
   aksi: string
   detail: string
   alasan: string
