@@ -5932,7 +5932,7 @@ textarea {
 .audit-head,
 .audit-row {
   display: grid;
-  grid-template-columns: 0.85fr 1fr 1fr 1.1fr 1.1fr 1.2fr;
+  grid-template-columns: 1.2fr 1fr 1fr 1.05fr 1.1fr 1.15fr;
   align-items: center;
   gap: 8px;
 }
