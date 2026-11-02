@@ -166,7 +166,7 @@ export const apiTransaksi = {
     api<unknown[]>("list-transaksi", range),
   /** Rekap manual: transaksi susulan dari buku. Nomor nota = nomor buku. */
   manual: (p: CheckoutPayload & { tanggal: string; nomorNota: string; jam?: string }) =>
-    api<{ id: string; total: number }>("create-transaksi-manual", { ...p }),
+    api<{ id: string; total: number; lembur?: boolean }>("create-transaksi-manual", { ...p }),
   batalkan: (id: string, alasan: string) => api("batalkan-transaksi", { id, alasan }),
   pulihkan: (id: string, alasan: string) => api("pulihkan-transaksi", { id, alasan }),
 }
