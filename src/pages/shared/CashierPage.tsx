@@ -358,6 +358,7 @@ export function CashierPage({
       setDiscountPinError("PIN otorisasi salah. Default demo: 123456")
       return false
     }
+    setDiscountPinError("")
     setPinChecking(true)
     try {
       await apiKasir.verifikasiPin(pin)
@@ -856,7 +857,7 @@ export function CashierPage({
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="discount-body">
                     <div className="discount-mode segmented" style={{ marginBottom: 10 }}>
                       {(["Nominal", "Persen"] as const).map((mode) => (
                         <Button
@@ -907,7 +908,7 @@ export function CashierPage({
                         />
                       </div>
                     </label>
-                    <div>
+                    <div className="discount-actions">
                       <Button
                         className="text-button"
                         onClick={() => {

@@ -2801,6 +2801,27 @@ textarea {
   gap: 6px;
 }
 
+.cart-discount-panel > .discount-body {
+  display: grid;
+  gap: 8px;
+  justify-content: stretch;
+}
+
+.discount-body .discount-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.quick-cash button {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .cart-discount-panel .input-shell {
   background: var(--paper);
 }
