@@ -427,6 +427,8 @@ export const apiAbsensi = {
     api<AbsensiRow>("catat-absensi", { ...p }),
   list: (filter: { tanggal?: string; userId?: string } = {}) =>
     api<AbsensiRow[]>("list-absensi", filter),
+  koreksi: (p: { id: string; status: string; catatan?: string }) =>
+    api<{ id: string; status: string; koreksiOleh: string }>("koreksi-absensi", p),
 }
 
 export interface AuditLogRow {

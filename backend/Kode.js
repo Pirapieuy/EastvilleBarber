@@ -341,6 +341,8 @@ function doPost(e) {
         return handleCatatAbsensi(body);
       case "list-absensi":
         return handleListAbsensi(body);
+      case "koreksi-absensi":
+        return handleKoreksiAbsensi(body);
 
       // ---- JEJAK AUDIT (TIM B) ----
       case "list-audit":
@@ -1395,6 +1397,75 @@ function handleListAbsensi(body) {
   }
 
   return jsonResponse({ success: true, data: list.reverse() });
+}
+
+function handleKoreksiAbsensi(body) {
+  var user = getUserFromToken_(body.token);
+  if (!user) return jsonResponse({ success: false, error: "Session tidak valid.", code: "UNAUTHORIZED" });
+  if (user.role !== "Owner" && user.role !== "Manajer") {
+    return jsonResponse({ success: false, error: "Akses ditolak. Koreksi absensi hanya dapat dilakukan oleh Owner atau Manajer.", code: "FORBIDDEN" });
+  }
+
+  var id = (body.id || "").trim();
+  var status = (body.status || "").trim();
+  var catatan = (body.catatan || "").trim();
+
+  if (!id) {
+    return jsonResponse({ success: false, error: "ID absensi wajib disertakan." });
+  }
+  if (!status) {
+    return jsonResponse({ success: false, error: "Status koreksi wajib diisi." });
+  }
+
+  ensureTimBSheets_();
+  var ss = getSpreadsheet();
+  var sheet = ss.getSheetByName("Absensi");
+  if (!sheet) {
+    return jsonResponse({ success: false, error: "Sheet Absensi tidak ditemukan." });
+  }
+
+  var data = sheet.getDataRange().getValues();
+  var rowIndex = -1;
+  var targetRow = null;
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] && data[i][0].toString() === id) {
+      rowIndex = i + 1;
+      targetRow = data[i];
+      break;
+    }
+  }
+
+  if (rowIndex === -1 || !targetRow) {
+    return jsonResponse({ success: false, error: "Data absensi dengan ID tersebut tidak ditemukan." });
+  }
+
+  // Kolom 10 adalah status (1-indexed: 10), Kolom 11 adalah catatan (1-indexed: 11)
+  sheet.getRange(rowIndex, 10).setValue(status);
+  if (catatan) {
+    var oldCatatan = targetRow[10] ? targetRow[10].toString() : "";
+    var newCatatan = oldCatatan ? oldCatatan + " | Koreksi: " + catatan : "Koreksi: " + catatan;
+    sheet.getRange(rowIndex, 11).setValue(newCatatan);
+  }
+
+  var kapsterNama = targetRow[5] || id;
+  writeAuditLog(
+    user.id,
+    user.nama,
+    "KOREKSI_ABSENSI",
+    "Koreksi absensi " + kapsterNama + " (" + id + ") menjadi: " + status,
+    catatan || "Persetujuan koreksi kehadiran"
+  );
+
+  return jsonResponse({
+    success: true,
+    message: "Koreksi absensi berhasil disimpan.",
+    data: {
+      id: id,
+      status: status,
+      koreksiOleh: user.nama
+    }
+  });
 }
 
 // ============================================================
