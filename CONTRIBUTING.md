@@ -197,3 +197,11 @@ agar `Bisnis.js` dan `Kode.js` di branch-nya sama dengan server.
 4. Pastikan sheet database **tidak** di-share "Anyone with the link" (berisi hash PIN).
 5. Hapus `package-lock.json` di root (project ini memakai pnpm).
 6. Halaman Tim, Absensi, Audit, dan Gaji: lihat pembagian di bagian 7.
+
+## 9. Aturan tampilan (FE) vs backend
+
+- **Tampilan = milik FE (Raga/Sevia).** Branch `raga` adalah acuan terakhir. Yang mengerjakan backend/data **tidak menambah, menghapus, atau mengubah elemen tampilan** (tombol, filter, kolom, teks) tanpa persetujuan. Hanya sambungan data (hook, `api.ts`) yang boleh disentuh.
+- Backend menyesuaikan tampilan, bukan sebaliknya: bila tampilan butuh data yang belum ada, buat action baru di `Bisnis.js`.
+- Fitur tampilan baru (cari, filter, Excel/PDF, tab Mingguan, dll.) diusulkan ke FE dulu supaya masuk ke desain mereka.
+- Pemilih tanggal tidak boleh melewati hari ini maupun sebelum `TANGGAL_MULAI` (`src/utils/tanggal.ts`).
+- Daftar panjang di Beranda: tampilkan beberapa baris + tombol "Selengkapnya" ke halaman lengkapnya.

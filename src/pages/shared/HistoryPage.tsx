@@ -1,3 +1,4 @@
+import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
@@ -5,7 +6,6 @@ import { AppUser, Role } from "../../types"
 import { apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { CartLine, ReceiptView } from "./CashierPage"
-import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 
 export interface HistoryItemDetail {
   name: string
@@ -216,44 +216,22 @@ export function HistoryPage({
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
-  const [dari, setDari] = useState("")
-  const [sampai, setSampai] = useState("")
+  const [dateFilter, setDateFilter] = useState("")
   const [barberFilter, setBarberFilter] = useState("Semua kapster")
-  const [statusFilter, setStatusFilter] = useState("Semua status")
-  const [methodFilter, setMethodFilter] = useState("Semua metode")
-  const [cari, setCari] = useState("")
 
   const barberOptions = Array.from(
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
   ).sort()
   const visibleTx = txList.filter(
-    (tx) =>
-      (barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter)) &&
-      (statusFilter === "Semua status" || tx.status === statusFilter) &&
-      (methodFilter === "Semua metode" || tx.method === methodFilter) &&
-      (!cari.trim() || tx.id.toLowerCase().includes(cari.trim().toLowerCase())),
+    (tx) => barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter),
   )
 
   const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
 
-  function ekspor(jenis: "excel" | "pdf") {
-    const tabel: TabelEkspor = {
-      berkas: `riwayat-transaksi-${dari || "semua"}${sampai ? `_${sampai}` : ""}`,
-      judul: "Riwayat Transaksi",
-      keterangan: `${dari || "Awal"} s/d ${sampai || "sekarang"} · ${visibleTx.length} transaksi`,
-      kolom: ["Nota", "Tanggal", "Jam", "Kapster", "Metode", "Subtotal", "Diskon", "Total", "Status"],
-      baris: visibleTx.map((t) => [
-        t.id, t.date, t.time, t.barber, t.method,
-        t.subtotal ?? t.total, t.discount ?? 0, t.total, t.status,
-      ]),
-    }
-    if (jenis === "excel") eksporExcel(tabel)
-    else eksporPdf(tabel)
-  }
 
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return apiTransaksi.list({ ...(dari ? { dari } : {}), ...(sampai ? { sampai } : {}) }).then((rows) => {
+    return apiTransaksi.list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {}).then((rows) => {
       const list = rows as HistoryTransactionRecord[]
       setTxList(list)
       setSelectedId((cur) => (list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? "")))
@@ -269,7 +247,7 @@ export function HistoryPage({
       console.error("Gagal memuat riwayat:", e)
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
-  }, [dari, sampai])
+  }, [dateFilter])
 
   async function handleConfirmAction(reason: string) {
     if (live && selected) {
@@ -363,57 +341,22 @@ export function HistoryPage({
       <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
         <div className="input-shell">
-          <Icon name="search" />
-          <input
-            onChange={(e) => setCari(e.target.value)}
-            placeholder="Cari nomor nota"
-            value={cari}
-          />
-        </div>
-        <div className="input-shell">
           <Icon name="calendar" />
           <input
-            max={sampai || undefined}
-            onChange={(e) => setDari(e.target.value)}
-            title="Dari tanggal (kosongkan untuk semua)"
+            onChange={(e) => setDateFilter(e.target.value)}
+            title="Kosongkan untuk semua tanggal"
+            max={TANGGAL_MAKS()}
+            min={TANGGAL_MULAI}
             type="date"
-            value={dari}
+            value={dateFilter}
           />
         </div>
-        <div className="input-shell">
-          <Icon name="calendar" />
-          <input
-            min={dari || undefined}
-            onChange={(e) => setSampai(e.target.value)}
-            title="Sampai tanggal (kosongkan untuk semua)"
-            type="date"
-            value={sampai}
-          />
-        </div>
-        <select onChange={(e) => setStatusFilter(e.target.value)} value={statusFilter}>
-          <option>Semua status</option>
-          <option>Lunas</option>
-          <option>Manual</option>
-          <option>BATAL</option>
-        </select>
-        <select onChange={(e) => setMethodFilter(e.target.value)} value={methodFilter}>
-          <option>Semua metode</option>
-          <option>Tunai</option>
-          <option>QRIS</option>
-          <option>Gabungan</option>
-        </select>
         <select onChange={(e) => setBarberFilter(e.target.value)} value={barberFilter}>
           <option>Semua kapster</option>
           {barberOptions.map((barber) => (
             <option key={barber}>{barber}</option>
           ))}
         </select>
-        <Button onClick={() => ekspor("excel")} disabled={!visibleTx.length}>
-          Excel
-        </Button>
-        <Button onClick={() => ekspor("pdf")} disabled={!visibleTx.length}>
-          PDF
-        </Button>
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
@@ -423,9 +366,6 @@ export function HistoryPage({
             <span>Kapster</span>
             <span>Item</span>
           </div>
-          {visibleTx.length === 0 && (
-            <p style={{ padding: 16, color: "var(--slate)" }}>Tidak ada transaksi yang cocok.</p>
-          )}
           {visibleTx.map((tx) => (
             <Button
               className={`transaction-row ${

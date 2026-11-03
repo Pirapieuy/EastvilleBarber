@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
 import { ReasonDialog } from "./HistoryPage"
-import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
@@ -115,7 +114,6 @@ export function ExpensesPage() {
   const [records, setRecords] = useState<ExpenseRecord[]>(initialRecords)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Semua")
-  const [bulan, setBulan] = useState("")
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [batalId, setBatalId] = useState<string | null>(null)
@@ -159,23 +157,8 @@ export function ExpensesPage() {
     const matchSearch =
       r.description.toLowerCase().includes(search.toLowerCase()) ||
       r.category.toLowerCase().includes(search.toLowerCase())
-    const matchBulan = !bulan || !r.dateIso || r.dateIso.startsWith(bulan)
-    return matchCategory && matchSearch && matchBulan
+    return matchCategory && matchSearch
   })
-
-  function ekspor(jenis: "excel" | "pdf") {
-    const tabel: TabelEkspor = {
-      berkas: `pengeluaran-${bulan || "semua"}`,
-      judul: "Pengeluaran",
-      keterangan: `${bulan || "Semua periode"} · kategori ${category} · ${filteredRecords.length} baris`,
-      kolom: ["Tanggal", "Kategori", "Keterangan", "Jumlah", "Status", "Alasan batal"],
-      baris: filteredRecords.map((r) => [
-        r.dateIso ?? r.date, r.category, r.description, r.amount, r.status, r.cancelReason ?? "",
-      ]),
-    }
-    if (jenis === "excel") eksporExcel(tabel)
-    else eksporPdf(tabel)
-  }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault()
@@ -339,21 +322,6 @@ export function ExpensesPage() {
             <option value="Sewa">Sewa</option>
             <option value="Lain-lain">Lain-lain</option>
           </select>
-          <div className="input-shell">
-            <Icon name="calendar" />
-            <input
-              onChange={(e) => setBulan(e.target.value)}
-              title="Filter bulan (kosongkan untuk semua)"
-              type="month"
-              value={bulan}
-            />
-          </div>
-          <Button disabled={!filteredRecords.length} onClick={() => ekspor("excel")}>
-            Excel
-          </Button>
-          <Button disabled={!filteredRecords.length} onClick={() => ekspor("pdf")}>
-            PDF
-          </Button>
         </div>
 
         <div className="expense-head">
@@ -393,7 +361,7 @@ export function ExpensesPage() {
                 onClick={() => handleToggleStatus(row.id)}
                 title="Batalkan pengeluaran"
               >
-                <Icon name="arrow" /> Batalkan
+                <Icon name="arrow" />
               </Button>
             )}
           </div>
@@ -485,7 +453,7 @@ export function ExpensesPage() {
                 Batal
               </Button>
               <Button className="primary-button" disabled={saving} type="submit">
-                {saving ? "Menyimpan..." : "Simpan"}
+                Simpan
               </Button>
             </footer>
           </form>

@@ -1,3 +1,4 @@
+import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
 import { apiKasir, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
@@ -46,8 +47,6 @@ export function ManualPage() {
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState("")
   const [qris, setQris] = useState("")
-  const [diskon, setDiskon] = useState("")
-  const [pin, setPin] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -81,7 +80,7 @@ export function ManualPage() {
 
   const priceOf = (l: ManualLine) => (items.find((i) => i.id === l.itemId)?.price ?? 0) * l.qty
   const subtotal = lines.reduce((s, l) => s + priceOf(l), 0)
-  const diskonNum = Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
+  const diskonNum = 0
   const total = subtotal - diskonNum
   const cashNum = Number(cash.replace(/\D/g, "")) || 0
   const qrisNum = Number(qris.replace(/\D/g, "")) || 0
@@ -96,7 +95,6 @@ export function ManualPage() {
     paid >= total &&
     total > 0 &&
     !qrisBerlebih &&
-    (diskonNum === 0 || !live || pin.length > 0) &&
     !gagalMuat &&
     !saving
 
@@ -127,7 +125,6 @@ export function ManualPage() {
         nomorNota: cleanNote,
         metode: method,
         diskon: diskonNum,
-        pinOtorisasi: diskonNum > 0 ? pin : undefined,
         bayarTunai: method === "QRIS" ? 0 : cashNum,
         bayarQris: method === "Tunai" ? 0 : qrisNum,
         items: lines.map((l) => ({
@@ -140,8 +137,6 @@ export function ManualPage() {
       setSuccess(
         `Tersimpan sebagai ${res.id} (${rupiah(res.total)})${res.lembur ? ", dihitung LEMBUR (komisi 50%)" : ""}. Tandanya MANUAL di Riwayat.`,
       )
-      setDiskon("")
-      setPin("")
       setLines([])
       setNote("")
       setCash("")
@@ -162,7 +157,7 @@ export function ManualPage() {
         <div className="form-grid manual-info-grid">
           <label>
             <span>Tanggal transaksi</span>
-            <input max={today()} onChange={(e) => setTanggal(e.target.value)} required type="date" value={tanggal} />
+            <input max={today()} min={TANGGAL_MULAI} onChange={(e) => setTanggal(e.target.value)} required type="date" value={tanggal} />
             <small>Tanggal masa depan dinonaktifkan.</small>
           </label>
           <label>
@@ -171,9 +166,7 @@ export function ManualPage() {
             <small>Di luar jam kerja dihitung lembur.</small>
           </label>
           <label>
-            <span>
-              Nomor nota dari buku <b>Wajib</b>
-            </span>
+            <span>Nomor nota dari buku</span>
             <input
               minLength={3}
               onChange={(e) => setNote(e.target.value.toUpperCase())}
@@ -181,7 +174,6 @@ export function ManualPage() {
               required
               value={note}
             />
-            {note.length > 0 && cleanNote.length < 3 && <small className="error-text">Minimal 3 karakter.</small>}
           </label>
         </div>
       </section>
@@ -200,7 +192,7 @@ export function ManualPage() {
               {items.map((it) => (
                 <option key={it.id} value={it.id}>
                   {it.name}
-                  {it.tipe === "Produk" ? " (produk)" : ""} · {rupiah(it.price)}
+                  {it.tipe === "Produk" ? " (produk)" : ""}
                 </option>
               ))}
             </select>
@@ -257,36 +249,15 @@ export function ManualPage() {
               />
             </div>
           )}
-          <div className="input-shell" title="Diskon (opsional)">
-            <b>Diskon Rp</b>
-            <input inputMode="numeric" onChange={(e) => setDiskon(e.target.value)} placeholder="0" value={diskon} />
-          </div>
-          {diskonNum > 0 && (
-            <div className="input-shell" title="PIN Owner/Manajer">
-              <b>PIN</b>
-              <input
-                autoComplete="off"
-                inputMode="numeric"
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="PIN Owner/Manajer"
-                type="password"
-                value={pin}
-              />
-            </div>
-          )}
           <div className="manual-total">
             <small>Total transaksi</small>
             <strong>{rupiah(total)}</strong>
-            {kembalian > 0 && <small>Kembalian {rupiah(kembalian)}</small>}
-            {qrisBerlebih && <small className="error-text">QRIS melebihi total.</small>}
-            {paid < total && lines.length > 0 && <small className="error-text">Kurang {rupiah(total - paid)}</small>}
           </div>
         </div>
       </section>
       <div className="sticky-submit">
         <span>
           <b>MANUAL</b> Akan ditandai di Riwayat dan laporan.
-          {gagalMuat && <small className="error-text"> Data gagal dimuat: {liveError}. Muat ulang halaman.</small>}
           {error && <small className="error-text"> {error}</small>}
           {success && <small> {success}</small>}
         </span>

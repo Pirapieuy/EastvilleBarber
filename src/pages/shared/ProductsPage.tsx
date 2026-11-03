@@ -1,9 +1,10 @@
 import { FormEvent, useEffect, useState } from "react"
-import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
+
+const STOK_MENIPIS = 1
 
 export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [tab, setTab] = useState<"Daftar" | "Riwayat perubahan">("Daftar")
@@ -83,7 +84,6 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [stockError, setStockError] = useState("")
-  const [urut, setUrut] = useState("Nama")
   const [reloadKey, setReloadKey] = useState(0)
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
@@ -290,39 +290,16 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
     )
   }
 
-  const STOK_MENIPIS = 3
   const daftar = productsList
     .filter((p) => {
       const q = cari.trim().toLowerCase()
       return (
         (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)) &&
         (statusFilter === "Semua status" ||
-          (statusFilter === "Aktif"
-            ? p.status === "Aktif"
-            : statusFilter === "Stok menipis"
-              ? p.stock <= STOK_MENIPIS
-              : p.status !== "Aktif"))
+          (statusFilter === "Aktif" ? p.status === "Aktif" : p.status !== "Aktif"))
       )
     })
-    .sort((a, b) =>
-      urut === "Stok terendah"
-        ? a.stock - b.stock
-        : urut === "Harga tertinggi"
-          ? b.price - a.price
-          : a.name.localeCompare(b.name),
-    )
-
-  function ekspor(jenis: "excel" | "pdf") {
-    const tabel: TabelEkspor = {
-      berkas: "daftar-produk",
-      judul: "Daftar Produk",
-      keterangan: `${daftar.length} produk`,
-      kolom: ["Kode", "Nama", "Pemasok", "Stok", "Harga jual", "Harga modal", "Skema", "Status"],
-      baris: daftar.map((p) => [p.code, p.name, p.seller, p.stock, p.price, p.costPrice, p.scheme, p.status]),
-    }
-    if (jenis === "excel") eksporExcel(tabel)
-    else eksporPdf(tabel)
-  }
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <div className={embedded ? "catalog-embedded-view" : "content"}>
@@ -377,19 +354,7 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
               <option>Semua status</option>
               <option>Aktif</option>
               <option>Non-aktif</option>
-              <option>Stok menipis</option>
             </select>
-            <select value={urut} onChange={(e) => setUrut(e.target.value)} title="Urutkan">
-              <option>Nama</option>
-              <option>Stok terendah</option>
-              <option>Harga tertinggi</option>
-            </select>
-            <Button disabled={!daftar.length} onClick={() => ekspor("excel")}>
-              Excel
-            </Button>
-            <Button disabled={!daftar.length} onClick={() => ekspor("pdf")}>
-              PDF
-            </Button>
           </div>
           <div className="product-admin-head">
             <span>Produk</span>
@@ -399,9 +364,6 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
             <span>Status</span>
             <span>Aksi</span>
           </div>
-          {daftar.length === 0 && (
-            <p style={{ padding: 16, color: "var(--slate)" }}>Tidak ada produk yang cocok.</p>
-          )}
           {daftar
             .map((product) => (
             <article className="product-admin-row" key={product.code}>
@@ -554,9 +516,6 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                       })
                     }
                   />
-                  {Boolean(editingCode) && live && (
-                    <small>Ubah stok lewat tombol "Pembelian stok".</small>
-                  )}
                 </label>
                 <div className="status-toggle-field">
                   <span>Status produk</span>

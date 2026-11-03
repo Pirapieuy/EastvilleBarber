@@ -1,3 +1,4 @@
+import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useMemo, useState } from "react"
 import { apiLaporan, apiPengeluaran, getToken, LaporanKeuangan } from "../../api"
 import { BarChart } from "../../components/common/BarChart"
@@ -354,17 +355,14 @@ export function ReportsPage({
           <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
             Harian
           </Button>
-          <Button className={mode === "Mingguan" ? "active" : ""} onClick={() => setMode("Mingguan")}>
-            Mingguan
-          </Button>
           <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
             Bulanan
           </Button>
         </div>
         {mode !== "Bulanan" ? (
-          <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
+          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
         ) : (
-          <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         )}
         <div>
           <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>

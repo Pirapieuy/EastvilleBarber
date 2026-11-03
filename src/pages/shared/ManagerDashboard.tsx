@@ -11,6 +11,7 @@ import {
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { AppUser } from "../../types"
 
 const pad = (n: number) => String(n).padStart(2, "0")
@@ -237,6 +238,7 @@ export function ManagerDashboard({
                         <button
                           key={day}
                           type="button"
+                          disabled={curIso > todayIso || curIso < TANGGAL_MULAI}
                           onClick={() => { handleSelectDate(day); setShowDatePicker(false) }}
                           style={{
                             height: 30, borderRadius: 6,
@@ -391,6 +393,9 @@ export function ManagerDashboard({
                 ))
               )}
             </div>
+            <Button className="text-button" onClick={() => nav("RiwayatTransaksi")}>
+              Selengkapnya <Icon name="arrow" />
+            </Button>
           </section>
         </div>
 

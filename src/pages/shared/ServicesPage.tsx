@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
 import { apiLayanan, apiPengaturan, getToken, LayananRow, PengaturanKomisi } from "../../api"
-import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
@@ -42,7 +41,6 @@ export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) 
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
-  const [urut, setUrut] = useState("Nama")
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
@@ -124,20 +122,8 @@ export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) 
         (statusFilter === "Semua" || r.status === statusFilter) &&
         (kategoriFilter === "Semua" || r.kategori === kategoriFilter),
     )
-    .sort((a, b) => (urut === "Harga tertinggi" ? b.harga - a.harga : a.nama.localeCompare(b.nama)))
+    .sort((a, b) => a.nama.localeCompare(b.nama))
   const kapsterPribadi = pengaturan.kapster.filter((k) => k.persen !== null).length
-
-  function ekspor(jenis: "excel" | "pdf") {
-    const tabel: TabelEkspor = {
-      berkas: "layanan-dan-harga",
-      judul: "Layanan dan Harga",
-      keterangan: `${filtered.length} layanan · komisi ${pengaturan.komisiDefault}% (lembur ${pengaturan.komisiLembur}%)`,
-      kolom: ["Layanan", "Kategori", "Harga", "Status"],
-      baris: filtered.map((r) => [r.nama, r.kategori || "-", r.harga, r.status]),
-    }
-    if (jenis === "excel") eksporExcel(tabel)
-    else eksporPdf(tabel)
-  }
 
   if (Boolean(getToken()) && !live && liveError) {
     return (
@@ -207,16 +193,6 @@ export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) 
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </select>
-          <select value={urut} onChange={(e) => setUrut(e.target.value)} title="Urutkan">
-            <option>Nama</option>
-            <option>Harga tertinggi</option>
-          </select>
-          <Button disabled={!filtered.length} onClick={() => ekspor("excel")}>
-            Excel
-          </Button>
-          <Button disabled={!filtered.length} onClick={() => ekspor("pdf")}>
-            PDF
-          </Button>
         </div>
         <div className="service-head">
           <span>Layanan</span>

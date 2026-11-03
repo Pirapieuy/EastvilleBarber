@@ -1,3 +1,4 @@
+import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useMemo, useState } from "react"
 import { apiLaporan, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
@@ -313,7 +314,6 @@ export function ProductReportsPage({
           </div>
         )}
         <DemoNotice live={live} error={liveError} />
-        {fetching && <small style={{ color: "var(--slate)" }}>Memuat periode...</small>}
         <div className="segmented full">
           {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
             <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
@@ -322,9 +322,9 @@ export function ProductReportsPage({
           ))}
         </div>
         {mode === "Bulanan" ? (
-          <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         ) : (
-          <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
+          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
         )}
         {(() => {
           const lunas = live ? txList.filter((t) => t.status === "Lunas") : null
@@ -388,7 +388,6 @@ export function ProductReportsPage({
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />
-        {fetching && <small style={{ color: "var(--slate)" }}>Memuat periode...</small>}
       <div className="report-toolbar">
         <div className="segmented">
           {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
@@ -398,9 +397,9 @@ export function ProductReportsPage({
           ))}
         </div>
         {mode === "Bulanan" ? (
-          <input type="month" value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         ) : (
-          <input type="date" value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
+          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
         )}
         {!forcedRole && !getToken() && (
           <div className="role-preview">

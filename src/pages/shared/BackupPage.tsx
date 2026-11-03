@@ -172,9 +172,6 @@ export function BackupPage() {
           </p>
           {message && <small>{message}</small>}
         </div>
-        <Button onClick={() => setReloadKey((k) => k + 1)} disabled={!getToken() || backingUp}>
-          Muat ulang
-        </Button>
         <Button className="primary-button" onClick={startBackup} disabled={backingUp}>
           <Icon name={backingUp ? "clock" : "plus"} />
           {backingUp ? "Membuat backup..." : "Backup sekarang"}
@@ -196,19 +193,11 @@ export function BackupPage() {
               <strong>{row.nama}</strong>
             </span>
             <span>{row.dibuat}</span>
-            <span>{row.sheet} sheet · {row.baris} baris</span>
+            <span>{row.baris} baris</span>
             <i className="chip lunas">Siap</i>
-            <div style={{ display: "flex", gap: 6 }}>
-              <Button disabled={!live || busyNama === row.nama} onClick={() => unduh(row.nama)}>
-                Unduh
-              </Button>
-              <Button disabled={!live || busyNama === row.nama} onClick={() => hapus(row.nama)}>
-                Hapus
-              </Button>
-              <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
-                <Icon name="restore" /> Pulihkan
-              </Button>
-            </div>
+            <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
+              <Icon name="restore" /> Pulihkan
+            </Button>
           </article>
         ))}
         {backups.length === 0 && (
