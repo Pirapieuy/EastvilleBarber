@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import {
   apiAbsensi,
+  apiKasir,
   apiLaporan,
   apiTransaksi,
   getToken,
@@ -22,24 +23,8 @@ interface DailyServiceItem {
   kapsterName: string
   price: number
   method: "Tunai" | "QRIS"
-  status: "Selesai" | "Berjalan"
+  status: "Selesai" | "Dibatalkan"
 }
-
-const DEFAULT_DEMO_KAPSTERS = [
-  { id: "k1", nama: "Budi Santoso", shift: "09:00 - 18:00", jamMasuk: "08:54", status: "Hadir (Tepat Waktu)", layananCount: 7 },
-  { id: "k2", nama: "Zhefitra Ananda", shift: "09:00 - 18:00", jamMasuk: "08:58", status: "Hadir (Tepat Waktu)", layananCount: 6 },
-  { id: "k3", nama: "Tata Pratama", shift: "12:00 - 21:00", jamMasuk: "11:50", status: "Hadir (Tepat Waktu)", layananCount: 5 },
-  { id: "k4", nama: "Faisal Rahman", shift: "12:00 - 21:00", jamMasuk: "-", status: "Libur Mingguan", layananCount: 0 },
-]
-
-const DEFAULT_DEMO_SERVICES: DailyServiceItem[] = [
-  { id: "srv-1", time: "16:45", serviceName: "Haircut + Cuci", kapsterName: "Budi Santoso", price: 50000, method: "QRIS", status: "Selesai" },
-  { id: "srv-2", time: "16:15", serviceName: "Haircut", kapsterName: "Tata Pratama", price: 40000, method: "Tunai", status: "Selesai" },
-  { id: "srv-3", time: "15:30", serviceName: "Treatment & Grooming", kapsterName: "Zhefitra Ananda", price: 60000, method: "QRIS", status: "Selesai" },
-  { id: "srv-4", time: "14:50", serviceName: "Haircut", kapsterName: "Budi Santoso", price: 40000, method: "Tunai", status: "Selesai" },
-  { id: "srv-5", time: "14:10", serviceName: "Shaving & Haircut", kapsterName: "Zhefitra Ananda", price: 65000, method: "QRIS", status: "Selesai" },
-  { id: "srv-6", time: "13:30", serviceName: "Hair Coloring", kapsterName: "Tata Pratama", price: 120000, method: "Tunai", status: "Selesai" },
-]
 
 const NAMA_BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -66,10 +51,14 @@ export function ManagerDashboard({
   const [showDatePicker, setShowDatePicker] = useState(false)
 
   const [liveData, setLiveData] = useState<LaporanKeuangan | null>(null)
-  const [liveAbsensi, setLiveAbsensi] = useState<AbsensiRow[]>([])
+  // null = data absensi tidak tersedia (modul lain gagal), bukan "tidak ada yang hadir"
+  const [liveAbsensi, setLiveAbsensi] = useState<AbsensiRow[] | null>(null)
+  const [kapsterAll, setKapsterAll] = useState<{ id: string; nama: string }[]>([])
   const [liveServices, setLiveServices] = useState<DailyServiceItem[]>([])
   const [liveError, setLiveError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
+  const punyaToken = Boolean(getToken())
 
   const isToday = selectedDate === todayIso
 
@@ -78,55 +67,66 @@ export function ManagerDashboard({
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    let batal = false
     setLoading(true)
+    setLiveError("")
+    // Laporan & transaksi wajib berhasil; absensi/daftar kapster milik modul lain boleh gagal.
     Promise.all([
-      apiLaporan.keuangan({ dari: selectedDate, sampai: selectedDate }).catch(() => null),
-      apiAbsensi.list({ tanggal: selectedDate }).catch(() => []),
-      apiTransaksi.list({ dari: selectedDate, sampai: selectedDate }).catch(() => []),
+      apiLaporan.keuangan({ dari: selectedDate, sampai: selectedDate }),
+      apiTransaksi.list({ dari: selectedDate, sampai: selectedDate }),
+      apiAbsensi.list({ tanggal: selectedDate }).catch(() => null),
+      apiKasir.kapster().catch(() => []),
     ])
-      .then(([lap, abs, trx]) => {
-        if (lap) setLiveData(lap)
-        if (abs) setLiveAbsensi(abs)
-        if (Array.isArray(trx)) {
-          const mapped: DailyServiceItem[] = trx.map((t: any, idx: number) => ({
-            id: t.id || `trx-${idx}`,
-            time: t.time || (t.createdTime ? String(t.createdTime).slice(12, 17) : "12:00"),
-            serviceName: t.items?.[0]?.name || "Haircut",
-            kapsterName: t.barber || "Kapster",
-            price: Number(t.total) || 40000,
-            method: (t.method === "QRIS" ? "QRIS" : "Tunai"),
-            status: t.status === "BATAL" ? "Berjalan" : "Selesai",
-          }))
-          setLiveServices(mapped)
-        }
-        setLiveError("")
+      .then(([lap, trx, abs, kap]) => {
+        if (batal) return
+        setLiveData(lap)
+        setLiveAbsensi(abs)
+        setKapsterAll(kap)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setLiveServices((trx as any[]).map((t, idx) => ({
+          id: t.id || `trx-${idx}`,
+          time: t.time || "-",
+          serviceName: (t.items ?? []).map((i: { name: string }) => i.name).join(", ") || "-",
+          kapsterName: t.barber || "-",
+          price: Number(t.total) || 0,
+          method: t.method === "QRIS" ? "QRIS" : "Tunai",
+          status: t.status === "BATAL" ? "Dibatalkan" : "Selesai",
+        })))
       })
       .catch((e) => {
-        console.error("Gagal load aktivitas hari ini:", e)
-        setLiveError(e instanceof Error ? e.message : "Gagal memuat data")
+        console.error("Gagal memuat beranda:", e)
+        if (!batal) {
+          setLiveData(null)
+          setLiveError(e instanceof Error ? e.message : "Gagal memuat data")
+        }
       })
-      .finally(() => setLoading(false))
-  }, [selectedDate])
+      .finally(() => !batal && setLoading(false))
+    return () => {
+      batal = true
+    }
+  }, [selectedDate, reloadKey])
 
-  const dailyIncome = liveData ? liveData.pemasukan : (isToday ? 1850000 : 1420000)
-  const dailyCash = liveData ? liveData.tunai : (isToday ? 1050000 : 800000)
-  const dailyQris = liveData ? liveData.qris : (isToday ? 800000 : 620000)
-  const dailyExpense = liveData ? liveData.pengeluaran : (isToday ? 215000 : 150000)
-  const dailyCommission = liveData ? liveData.komisi : (isToday ? 740000 : 568000)
+  const dailyIncome = liveData?.pemasukan ?? 0
+  const dailyCash = liveData?.tunai ?? 0
+  const dailyQris = liveData?.qris ?? 0
+  const dailyExpense = liveData?.pengeluaran ?? 0
+  const dailyCommission = liveData?.komisi ?? 0
   const dailyNet = dailyIncome - dailyExpense - dailyCommission
 
-  const kapsterList = liveAbsensi.length > 0
-    ? liveAbsensi.map((a, idx) => ({
-        id: a.id || `k-${idx}`,
-        nama: a.nama,
-        shift: "09:00 - 18:00",
-        jamMasuk: a.jam || "09:00",
-        status: a.status || (a.tipe === "Masuk" ? "Hadir" : "Pulang"),
-        layananCount: isToday ? 5 + (idx % 3) : 4,
-      }))
-    : DEFAULT_DEMO_KAPSTERS
-
-  const servicesList = liveServices.length > 0 ? liveServices : DEFAULT_DEMO_SERVICES
+  // Kehadiran dari absensi asli (Masuk/Pulang) per kapster; jumlah layanan dari laporan keuangan.
+  const kapsterList = kapsterAll.map((k) => {
+    const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
+    const masuk = rows.find((r) => r.tipe === "Masuk")
+    const pulang = rows.find((r) => r.tipe === "Pulang")
+    return {
+      id: k.id,
+      nama: k.nama,
+      jamMasuk: masuk?.jam ?? "-",
+      status: pulang ? "Sudah pulang" : (masuk?.status ?? "Belum check-in"),
+      layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
+    }
+  })
+  const servicesList = liveServices
 
   const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay()
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
@@ -155,6 +155,18 @@ export function ManagerDashboard({
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   })
 
+  if (punyaToken && !liveData && liveError) {
+    return (
+      <div className="content">
+        <DemoNotice live={false} error={liveError} />
+        <p>Beranda gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className="content">
       <DemoNotice live={Boolean(liveData)} error={liveError} />
@@ -176,6 +188,11 @@ export function ManagerDashboard({
             >
               <Icon name="expense" /> Catat Pengeluaran
             </Button>
+            {punyaToken && (
+              <Button className="secondary-button" disabled={loading} onClick={() => setReloadKey((k) => k + 1)}>
+                {loading ? "Memuat..." : "Muat ulang"}
+              </Button>
+            )}
             <Button
               className="secondary-button"
               onClick={() => setShowDatePicker((v) => !v)}
@@ -292,12 +309,12 @@ export function ManagerDashboard({
                 <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Status Absensi Hari Ini</h3>
               </div>
               <span className="chip active">
-                {kapsterList.filter((k) => !k.status.toLowerCase().includes("libur")).length} Aktif Hadir
+                {liveAbsensi ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir` : "Absensi tidak tersedia"}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {kapsterList.map((k) => {
-                const isLibur = k.status.toLowerCase().includes("libur")
+                const isLibur = k.jamMasuk === "-"
                 return (
                   <div
                     key={k.id}
@@ -320,7 +337,7 @@ export function ManagerDashboard({
                       <div>
                         <strong style={{ fontSize: 14, color: "var(--ink)", display: "block" }}>{k.nama}</strong>
                         <small style={{ color: "var(--muted)", fontSize: 12 }}>
-                          Shift: {k.shift} · Masuk: {k.jamMasuk}
+                          Masuk: {k.jamMasuk === "-" ? "belum check-in" : `${k.jamMasuk} WIB`}
                         </small>
                       </div>
                     </div>
@@ -374,7 +391,7 @@ export function ManagerDashboard({
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <b style={{ fontSize: 13, color: "var(--ink)" }}>{rupiah(s.price)}</b>
-                      <span className="chip active" style={{ fontSize: 11, padding: "2px 8px" }}>{s.status}</span>
+                      <span className={`chip ${s.status === "Dibatalkan" ? "inactive" : "active"}`} style={{ fontSize: 11, padding: "2px 8px" }}>{s.status}</span>
                     </div>
                   </div>
                 ))
