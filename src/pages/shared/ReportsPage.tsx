@@ -459,7 +459,8 @@ export function ReportsPage({
 
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
       {subTab === "pengeluaran" && (
-          <section className="panel list-panel" style={{ padding: 20 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <div>
                 <p className="eyebrow">Operasional</p>
@@ -527,12 +528,14 @@ export function ReportsPage({
             </div>
           )}
         </section>
+        </div>
       )}
 
       {/* SUB-VIEW 3: TAB TOTAL KOMISI */}
       {subTab === "komisi" && (
-        <section className="panel report-table" style={{ padding: 20 }}>
-          <PageTitle eyebrow="Kinerja & Hak Tim" title="Komisi Kapster" />
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
+          <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
           <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
             Rincian akumulasi omzet dan bagian komisi yang berhak diterima setiap kapster pada periode {periode}.
           </p>
@@ -565,6 +568,7 @@ export function ReportsPage({
             </div>
           )}
         </section>
+        </div>
       )}
 
       {/* SUB-VIEW 4: TAB SISA OWNER */}

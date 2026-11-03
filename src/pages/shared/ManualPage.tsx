@@ -74,14 +74,8 @@ export function ManualPage() {
       })
   }, [])
 
-  const loading = Boolean(getToken()) && !live && !liveError
-  if (loading) {
-    return (
-      <div className="content">
-        <p>Memuat rekap manual...</p>
-      </div>
-    )
-  }
+  // Tidak blocking — form langsung tampil dengan data sementara (demo/cache),
+  // data server akan otomatis menggantikan saat selesai dimuat.
 
   const priceOf = (l: ManualLine) => (items.find((i) => i.id === l.itemId)?.price ?? 0) * l.qty
   const total = lines.reduce((s, l) => s + priceOf(l), 0)

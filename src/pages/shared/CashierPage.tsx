@@ -95,9 +95,14 @@ export function ReceiptView({
             80 mm
           </Button>
         </div>
-        <Button className="primary-button" onClick={() => window.print()}>
-          <Icon name="print" /> Cetak
-        </Button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button className="primary-button" onClick={() => window.print()}>
+            <Icon name="print" /> Cetak
+          </Button>
+          <Button className="secondary-button" onClick={onClose}>
+            <Icon name="arrow" /> Kembali
+          </Button>
+        </div>
       </div>
       <div className="receipt-stage">
         <article className={`thermal-receipt size-${size}`} id="print-receipt">
@@ -528,33 +533,6 @@ export function CashierPage({
                   <div>
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
-                      <label className="cart-line-kapster">
-                        <Icon name="user" />
-                        <select
-                          aria-label={`Pilih kapster untuk ${line.name}`}
-                          onChange={(e) => {
-                            const newBarber = e.target.value
-                            setCart((c) =>
-                              c.map((x) =>
-                                x.lineId === line.lineId
-                                  ? {
-                                      ...x,
-                                      barber: newBarber,
-                                      lineId: `${x.id}-${newBarber}`,
-                                    }
-                                  : x,
-                              ),
-                            )
-                          }}
-                          value={line.barber}
-                        >
-                          {barberList.map((b) => (
-                            <option key={b.name} value={b.name}>
-                              {b.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
                     </span>
                     <Button
                       onClick={() =>
@@ -567,6 +545,33 @@ export function CashierPage({
                     </Button>
                   </div>
                   <div>
+                    <label className="cart-line-kapster">
+                      <Icon name="user" />
+                      <select
+                        aria-label={`Pilih kapster untuk ${line.name}`}
+                        onChange={(e) => {
+                          const newBarber = e.target.value
+                          setCart((c) =>
+                            c.map((x) =>
+                              x.lineId === line.lineId
+                                ? {
+                                    ...x,
+                                    barber: newBarber,
+                                    lineId: `${x.id}-${newBarber}`,
+                                  }
+                                : x,
+                            ),
+                          )
+                        }}
+                        value={line.barber}
+                      >
+                        {barberList.map((b) => (
+                          <option key={b.name} value={b.name}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <div className="stepper">
                       <Button
                         onClick={() =>
@@ -620,7 +625,7 @@ export function CashierPage({
                 setDiscountOpen(!discountOpen)
               }}
             >
-              <Icon name="coupon" /> {discount > 0 ? "Ubah diskon" : "Beri diskon"}
+              <Icon name="receipt" /> {discount > 0 ? "Ubah diskon" : "Beri diskon"}
             </Button>
             {discountOpen && (
               <div className="cart-discount-panel">
@@ -629,7 +634,7 @@ export function CashierPage({
                     className={discountTypeTab === "event" ? "active" : ""}
                     onClick={() => setDiscountTypeTab("event")}
                   >
-                    <Icon name="tag" /> Diskon Event
+                    <Icon name="cash" /> Diskon Event
                   </Button>
                   <Button
                     className={discountTypeTab === "manual" ? "active" : ""}
