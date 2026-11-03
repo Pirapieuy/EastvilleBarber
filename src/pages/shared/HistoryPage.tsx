@@ -1,0 +1,514 @@
+import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { useEffect, useState } from "react"
+import { Icon } from "../../components/common/Icon"
+import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import { AppUser, Role } from "../../types"
+import { apiTransaksi, getToken } from "../../api"
+import { DemoNotice } from "../../components/common/DemoNotice"
+import { CartLine, ReceiptView } from "./CashierPage"
+
+export interface HistoryItemDetail {
+  name: string
+  qty: number
+  price: number
+  type: "Layanan" | "Produk"
+}
+
+export interface HistoryTransactionRecord {
+  id: string
+  time: string
+  date: string
+  items: HistoryItemDetail[]
+  barber: string
+  method: "Tunai" | "QRIS" | "Gabungan"
+  commission: number
+  commissionNote: string
+  total: number
+  subtotal?: number
+  discount?: number
+  bayarTunai?: number
+  bayarQris?: number
+  gratis?: string
+  status: "Lunas" | "BATAL" | "Manual"
+  createdTime: string
+  createdBy: string
+  voidReason?: string
+  voidBy?: string
+  voidTime?: string
+}
+
+export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
+  {
+    id: "INV-291026-0084",
+    time: "10.24",
+    date: "29 Okt 2026",
+    items: [
+      { name: "Haircut", qty: 1, price: 40000, type: "Layanan" },
+      { name: "Shaving", qty: 1, price: 20000, type: "Layanan" },
+    ],
+    barber: "Seva",
+    method: "Gabungan",
+    commission: 24000,
+    commissionNote: "40% total layanan Rp 60.000",
+    total: 60000,
+    status: "Lunas",
+    createdTime: "29 Okt 2026, 10:24 WIB",
+    createdBy: "Siti Rahma · Kasir",
+  },
+  {
+    id: "INV-291026-0083",
+    time: "09.46",
+    date: "29 Okt 2026",
+    items: [
+      { name: "Hair Coloring", qty: 1, price: 120000, type: "Layanan" },
+    ],
+    barber: "Tata",
+    method: "QRIS",
+    commission: 48000,
+    commissionNote: "40% total layanan Rp 120.000",
+    total: 120000,
+    status: "Lunas",
+    createdTime: "29 Okt 2026, 09:46 WIB",
+    createdBy: "Siti Rahma · Kasir",
+  },
+  {
+    id: "INV-291026-0082",
+    time: "09.05",
+    date: "29 Okt 2026",
+    items: [
+      { name: "Haircut", qty: 1, price: 40000, type: "Layanan" },
+      { name: "Free Style Dust", qty: 1, price: 70000, type: "Produk" },
+    ],
+    barber: "Faisal",
+    method: "Tunai",
+    commission: 23000,
+    commissionNote: "Layanan Rp 16.000 + Produk Rp 7.000",
+    total: 110000,
+    status: "BATAL",
+    createdTime: "29 Okt 2026, 09:05 WIB",
+    createdBy: "Siti Rahma · Kasir",
+    voidReason: "Salah input varian produk pomade oleh kasir saat pembayaran",
+    voidBy: "Dian Setiawan · Manajer",
+    voidTime: "29 Okt 2026, 09:12 WIB",
+  },
+  {
+    id: "INV-291026-0041",
+    time: "08.51",
+    date: "29 Okt 2026",
+    items: [
+      { name: "Haircut + Cuci", qty: 1, price: 50000, type: "Layanan" },
+    ],
+    barber: "Seva",
+    method: "Tunai",
+    commission: 20000,
+    commissionNote: "Rekap manual shift pagi",
+    total: 50000,
+    status: "Manual",
+    createdTime: "29 Okt 2026, 08:51 WIB",
+    createdBy: "Dian Setiawan · Rekap Manual",
+  },
+  {
+    id: "INV-291026-0038",
+    time: "08.15",
+    date: "29 Okt 2026",
+    items: [
+      { name: "Haircut", qty: 1, price: 40000, type: "Layanan" },
+      { name: "Hair Paste Pomade", qty: 1, price: 70000, type: "Produk" },
+    ],
+    barber: "Fadhil",
+    method: "QRIS",
+    commission: 26000,
+    commissionNote: "Layanan Rp 16.000 + Produk Rp 10.000",
+    total: 110000,
+    status: "Lunas",
+    createdTime: "29 Okt 2026, 08:15 WIB",
+    createdBy: "Siti Rahma · Kasir",
+  },
+]
+
+export function ReasonDialog({
+  title,
+  warning,
+  onClose,
+  onConfirm,
+}: {
+  title: string
+  warning: string
+  onClose: () => void
+  onConfirm?: (reason: string) => void | Promise<void>
+}) {
+  const [reason, setReason] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
+  return (
+    <div className="modal-overlay">
+      <section className="reason-dialog">
+        <header>
+          <div>
+            <p className="eyebrow">Aksi berisiko</p>
+            <h2>{title}</h2>
+          </div>
+          <Button onClick={onClose}>
+            <Icon name="close" />
+          </Button>
+        </header>
+        <div className="info-banner">
+          <Icon name="alert" />
+          {warning}
+        </div>
+        <label>
+          <span>
+            Alasan <b>Wajib</b>
+          </span>
+          <textarea
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Tuliskan alasan..."
+            value={reason}
+          />
+        </label>
+        <footer>
+          <Button className="secondary-button" onClick={onClose}>
+            Kembali
+          </Button>
+          <Button
+            className="danger-button"
+            disabled={reason.trim().length < 5 || busy}
+            onClick={async () => {
+              setError("")
+              setBusy(true)
+              try {
+                await onConfirm?.(reason.trim())
+                onClose()
+              } catch (e) {
+                setError(e instanceof Error ? e.message : "Aksi gagal.")
+                setBusy(false)
+              }
+            }}
+          >
+            {busy ? "Memproses..." : "Konfirmasi"}
+          </Button>
+        </footer>
+        {error && (
+          <div className="info-banner" role="alert">
+            <Icon name="alert" />
+            {error}
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
+export function HistoryPage({
+  currentUser,
+  role,
+}: {
+  currentUser?: AppUser
+  role?: Role
+} = {}) {
+  const userRole = role ?? currentUser?.role ?? "Owner"
+  const [txList, setTxList] = useState<HistoryTransactionRecord[]>(
+    INITIAL_HISTORY_TRANSACTIONS,
+  )
+  const [selectedId, setSelectedId] = useState(INITIAL_HISTORY_TRANSACTIONS[0].id)
+  const [action, setAction] = useState<null | "void" | "restore">(null)
+  const [showReceipt, setShowReceipt] = useState(false)
+
+  const [live, setLive] = useState(false)
+  const [liveError, setLiveError] = useState("")
+  const [dateFilter, setDateFilter] = useState("")
+  const [barberFilter, setBarberFilter] = useState("Semua kapster")
+
+  const barberOptions = Array.from(
+    new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
+  ).sort()
+  const visibleTx = txList.filter(
+    (tx) => barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter),
+  )
+
+  const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
+
+
+  // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
+  function loadLive() {
+    return apiTransaksi.list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {}).then((rows) => {
+      const list = rows as HistoryTransactionRecord[]
+      setTxList(list)
+      setSelectedId((cur) => (list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? "")))
+      setLive(true)
+    })
+  }
+  useEffect(() => {
+    if (!getToken()) {
+      setLiveError("belum login ke server (token tidak ada)")
+      return
+    }
+    loadLive().catch((e) => {
+      console.error("Gagal memuat riwayat:", e)
+      setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+    })
+  }, [dateFilter])
+
+  async function handleConfirmAction(reason: string) {
+    if (live && selected) {
+      // Error dilempar ke dialog (ditampilkan inline, dialog tetap terbuka)
+      if (action === "void") await apiTransaksi.batalkan(selected.id, reason)
+      else if (action === "restore") await apiTransaksi.pulihkan(selected.id, reason)
+      await loadLive()
+      return
+    }
+    if (action === "void") {
+      setTxList((prev) =>
+        prev.map((t) =>
+          t.id === selected.id
+            ? {
+                ...t,
+                status: "BATAL",
+                voidReason: reason,
+                voidBy: `${currentUser?.name || userRole} · ${userRole}`,
+                voidTime: "Baru saja",
+              }
+            : t,
+        ),
+      )
+    } else if (action === "restore") {
+      setTxList((prev) =>
+        prev.map((t) =>
+          t.id === selected.id
+            ? {
+                ...t,
+                status: "Lunas",
+                voidReason: undefined,
+                voidBy: undefined,
+                voidTime: undefined,
+              }
+            : t,
+        ),
+      )
+    }
+  }
+
+  // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
+  const loading = Boolean(getToken()) && !live && !liveError
+  if (loading) {
+    return (
+      <div className="content">
+        <p>Memuat riwayat transaksi...</p>
+      </div>
+    )
+  }
+
+  if (showReceipt && selected) {
+    const subtotal = selected.subtotal ?? selected.items.reduce((s, it) => s + it.price * it.qty, 0)
+    // Server lama belum mengirim rincian bayar: pakai perkiraan dari metode.
+    const adaRincian = selected.bayarTunai !== undefined
+    const tunai = adaRincian ? (selected.bayarTunai ?? 0) : selected.method === "QRIS" ? 0 : selected.total
+    const qrisBayar = adaRincian
+      ? (selected.bayarQris ?? 0)
+      : selected.method === "Tunai" ? 0 : selected.method === "QRIS" ? selected.total : selected.total / 2
+    const cartLines: CartLine[] = selected.items.map((it, idx) => ({
+      id: idx + 100,
+      lineId: `${selected.id}-${idx}`,
+      name: it.name,
+      price: it.price,
+      type: it.type,
+      qty: it.qty,
+      barber: selected.barber,
+    }))
+    return (
+      <ReceiptView
+        cart={cartLines}
+        subtotal={subtotal}
+        discount={selected.discount ?? 0}
+        total={selected.total}
+        method={selected.method}
+        cash={tunai}
+        qris={qrisBayar}
+        change={Math.max(0, tunai + qrisBayar - selected.total)}
+        cashier={selected.createdBy}
+        invoice={selected.id}
+        tanggal={`${selected.date} · ${selected.time}`}
+        contoh={!live}
+        backLabel="Kembali ke Riwayat"
+        onClose={() => setShowReceipt(false)}
+      />
+    )
+  }
+
+  return (
+    <div className="content">
+      <DemoNotice live={live} error={liveError} />
+      <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
+      <div className="filters">
+        <div className="input-shell">
+          <Icon name="calendar" />
+          <input
+            onChange={(e) => setDateFilter(e.target.value)}
+            title="Kosongkan untuk semua tanggal"
+            max={TANGGAL_MAKS()}
+            min={TANGGAL_MULAI}
+            type="date"
+            value={dateFilter}
+          />
+        </div>
+        <select onChange={(e) => setBarberFilter(e.target.value)} value={barberFilter}>
+          <option>Semua kapster</option>
+          {barberOptions.map((barber) => (
+            <option key={barber}>{barber}</option>
+          ))}
+        </select>
+      </div>
+      <div className="master-detail">
+        <section className="panel transaction-list">
+          <div className="table-head">
+            <span>Inv</span>
+            <span>Waktu</span>
+            <span>Kapster</span>
+            <span>Item</span>
+          </div>
+          {visibleTx.map((tx) => (
+            <Button
+              className={`transaction-row ${
+                tx.status === "BATAL" ? "voided" : ""
+              } ${selected?.id === tx.id ? "selected" : ""}`}
+              key={tx.id}
+              onClick={() => setSelectedId(tx.id)}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <strong className="tx-cell-nota">{tx.id}</strong>
+                <small style={{ fontSize: "10px", color: "var(--slate)" }}>{tx.date}</small>
+              </div>
+              <small className="tx-cell-nota">{tx.time}</small>
+              <span className="tx-cell-kapster">{tx.barber}</span>
+              <span className="tx-cell-kapster">
+                {tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}
+              </span>
+            </Button>
+          ))}
+        </section>
+
+        {selected && (
+        <aside className="panel detail">
+          <div className="detail-header-row">
+            <div>
+              <p className="eyebrow">Detail Transaksi</p>
+              <h2>{selected.id}</h2>
+              <small className="detail-timestamp">
+                {selected.date} · {selected.time} WIB
+              </small>
+            </div>
+            <i
+              className={`chip ${
+                selected.status === "BATAL"
+                  ? "batal"
+                  : selected.status === "Manual"
+                    ? "manual"
+                    : "lunas"
+              }`}
+            >
+              {selected.status === "BATAL" ? "Batal" : selected.status}
+            </i>
+          </div>
+
+          <div className="detail-section">
+            <h3>Item Layanan & Produk ({selected.items.length})</h3>
+            <div className="detail-items-list">
+              {selected.items.map((item, idx) => (
+                <div key={idx} className="detail-item-line">
+                  <div className="detail-item-info">
+                    <div className="detail-item-title-row">
+                      <strong>{item.name}</strong>
+                      <span
+                        className={`item-type-badge ${item.type.toLowerCase()}`}
+                      >
+                        {item.type}
+                      </span>
+                    </div>
+                    <small>
+                      {item.qty} × {rupiah(item.price)}
+                    </small>
+                  </div>
+                  <b className="detail-item-price">
+                    {rupiah(item.qty * item.price)}
+                  </b>
+                </div>
+              ))}
+            </div>
+            <div className="detail-total-bar">
+              <span>Total Akhir</span>
+              <strong>{rupiah(selected.total)}</strong>
+            </div>
+          </div>
+
+          <div className="detail-section">
+            <h3>Info Operasional</h3>
+            <div className="detail-cards">
+              <div>
+                <Icon name={selected.method === "QRIS" ? "qris" : "cash"} />
+                <small>Metode Pembayaran</small>
+                <strong>{selected.method}</strong>
+              </div>
+              <div>
+                <Icon name="user" />
+                <small>Kapster</small>
+                <strong>{selected.barber}</strong>
+              </div>
+              {userRole !== "Kasir" && (
+              <div>
+                <Icon name="wallet" />
+                <small>Rincian Komisi</small>
+                <strong>{rupiah(selected.commission)}</strong>
+                <span className="commission-hint">
+                  {(selected.commissionNote || "").replace("(lembur)", "").replace("50%", "").trim()}
+                </span>
+              </div>
+              )}
+            </div>
+          </div>
+
+          <div className="detail-actions-group">
+            <Button
+              className="secondary-button"
+              onClick={() => setShowReceipt(true)}
+            >
+              <Icon name="print" /> Cetak Struk
+            </Button>
+            {selected.status !== "BATAL" && (
+              <Button
+                className="danger-button"
+                onClick={() => setAction("void")}
+              >
+                <Icon name="trash" /> Batalkan Transaksi
+              </Button>
+            )}
+            {selected.status === "BATAL" && userRole !== "Kasir" && (
+              <Button
+                className="primary-button"
+                onClick={() => setAction("restore")}
+              >
+                <Icon name="restore" /> Pulihkan Transaksi
+              </Button>
+            )}
+          </div>
+        </aside>
+        )}
+      </div>
+      {action && selected && (
+        <ReasonDialog
+          title={
+            action === "restore" ? "Pulihkan transaksi?" : "Batalkan transaksi?"
+          }
+          warning={
+            action === "restore"
+              ? "Laporan periode lama akan berubah."
+              : "Data tetap tersimpan dalam riwayat."
+          }
+          onClose={() => setAction(null)}
+          onConfirm={handleConfirmAction}
+        />
+      )}
+    </div>
+  )
+}
+
+export default HistoryPage

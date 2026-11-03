@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eastville Barbershop - Test Login Backend</title>
+</head>
+<body>
+  <h1>Eastville Barbershop - Test Backend Login</h1>
+  <p>Halaman ini untuk testing backend login Google Apps Script.</p>
+  <hr>
+
+  <!-- KONFIGURASI API URL -->
+  <div>
+    <h3>1. Masukkan URL API Google Apps Script</h3>
+    <p>URL didapat setelah deploy Apps Script sebagai Web App</p>
+    <input type="text" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec" size="70">
+    <button onclick="testApi()">Test Koneksi</button>
+    <pre id="apiStatus"></pre>
+  </div>
+
+  <hr>
+
+  <!-- LOGIN -->
+  <div>
+    <h3>2. Login</h3>
+    <label>Username: <input type="text" id="loginUsername" value="ardi.owner"></label><br><br>
+    <label>PIN (6 digit): <input type="password" id="loginPin" value="123456" maxlength="6"></label><br><br>
+    <button onclick="doLogin()">Login</button>
+    <pre id="loginResult"></pre>
+  </div>
+
+  <hr>
+
+  <!-- VERIFY SESSION -->
+  <div>
+    <h3>3. Verifikasi Session</h3>
+    <label>Token: <input type="text" id="verifyToken" size="70" placeholder="otomatis terisi setelah login"></label><br><br>
+    <button onclick="doVerify()">Verifikasi Session</button>
+    <pre id="verifyResult"></pre>
+  </div>
+
+  <hr>
+
+  <!-- LOGOUT -->
+  <div>
+    <h3>4. Logout</h3>
+    <label>Token: <input type="text" id="logoutToken" size="70" placeholder="otomatis terisi setelah login"></label><br><br>
+    <button onclick="doLogout()">Logout</button>
+    <pre id="logoutResult"></pre>
+  </div>
+
+  <hr>
+
+  <!-- LUPA PIN -->
+  <div>
+    <h3>5. Lupa PIN</h3>
+    <label>Email: <input type="email" id="forgotEmail" value="ardi@eastville.id"></label><br><br>
+    <button onclick="doForgotPin()">Kirim Reset Link</button>
+    <pre id="forgotResult"></pre>
+  </div>
+
+  <hr>
+
+  <!-- RESET PIN -->
+  <div>
+    <h3>6. Reset PIN</h3>
+    <label>Email: <input type="email" id="resetEmail" value="ardi@eastville.id"></label><br><br>
+    <label>PIN Baru (6 digit): <input type="password" id="resetNewPin" maxlength="6" placeholder="654321"></label><br><br>
+    <button onclick="doResetPin()">Reset PIN</button>
+    <pre id="resetResult"></pre>
+  </div>
+
+  <hr>
+
+  <!-- AKUN DEMO -->
+  <div>
+    <h3>Akun Demo (PIN semua: 123456)</h3>
+    <table border="1" cellpadding="8" cellspacing="0">
+      <tr>
+        <th>Role</th>
+        <th>Nama</th>
+        <th>Username</th>
+        <th>Cabang</th>
+        <th>Email</th>
+      </tr>
+      <tr>
+        <td>Owner</td>
+        <td>Ardi Pradana</td>
+        <td>ardi.owner</td>
+        <td>Semua cabang</td>
+        <td>ardi@eastville.id</td>
+      </tr>
+      <tr>
+        <td>Manajer</td>
+        <td>Dian Setiawan</td>
+        <td>dian.manajer</td>
+        <td>Patihan</td>
+        <td>dian@eastville.id</td>
+      </tr>
+      <tr>
+        <td>Kasir</td>
+        <td>Siti Rahma</td>
+        <td>siti.kasir</td>
+        <td>Patihan</td>
+        <td>siti@eastville.id</td>
+      </tr>
+      <tr>
+        <td>Kapster</td>
+        <td>Budi Santoso</td>
+        <td>budi.kapster</td>
+        <td>Patihan</td>
+        <td>budi@eastville.id</td>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    // Ambil URL API
+    function getApiUrl() {
+      var url = document.getElementById("apiUrl").value.trim();
+      if (!url) {
+        alert("Masukkan URL API Google Apps Script dulu!");
+        return null;
+      }
+      return url;
+    }
+
+    // Kirim POST request ke API
+    function postApi(data, resultElementId) {
+      var url = getApiUrl();
+      if (!url) return;
+
+      var el = document.getElementById(resultElementId);
+      el.textContent = "Loading...";
+
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(data),
+        redirect: "follow"
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(json) {
+        el.textContent = JSON.stringify(json, null, 2);
+        return json;
+      })
+      .then(function(json) {
+        // Otomatis isi token jika login berhasil
+        if (data.action === "login" && json.success && json.data && json.data.token) {
+          document.getElementById("verifyToken").value = json.data.token;
+          document.getElementById("logoutToken").value = json.data.token;
+        }
+      })
+      .catch(function(err) {
+        el.textContent = "ERROR: " + err.message;
+      });
+    }
+
+    // Test koneksi API (GET)
+    function testApi() {
+      var url = getApiUrl();
+      if (!url) return;
+
+      var el = document.getElementById("apiStatus");
+      el.textContent = "Testing...";
+
+      fetch(url, { redirect: "follow" })
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+          el.textContent = JSON.stringify(json, null, 2);
+        })
+        .catch(function(err) {
+          el.textContent = "ERROR: " + err.message;
+        });
+    }
+
+    // Login
+    function doLogin() {
+      postApi({
+        action: "login",
+        username: document.getElementById("loginUsername").value,
+        pin: document.getElementById("loginPin").value
+      }, "loginResult");
+    }
+
+    // Verify session
+    function doVerify() {
+      postApi({
+        action: "verify-session",
+        token: document.getElementById("verifyToken").value
+      }, "verifyResult");
+    }
+
+    // Logout
+    function doLogout() {
+      postApi({
+        action: "logout",
+        token: document.getElementById("logoutToken").value
+      }, "logoutResult");
+    }
+
+    // Lupa PIN
+    function doForgotPin() {
+      postApi({
+        action: "forgot-pin",
+        email: document.getElementById("forgotEmail").value
+      }, "forgotResult");
+    }
+
+    // Reset PIN
+    function doResetPin() {
+      postApi({
+        action: "reset-pin",
+        email: document.getElementById("resetEmail").value,
+        newPin: document.getElementById("resetNewPin").value
+      }, "resetResult");
+    }
+  </script>
+</body>
+</html>
