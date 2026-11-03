@@ -696,9 +696,9 @@ textarea {
 }
 
 .product-tx-head {
-  min-width: 1100px;
+  min-width: 900px;
   display: grid;
-  grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr) 90px;
+  grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr);
   align-items: center;
   gap: 16px;
   min-height: 40px;
@@ -716,9 +716,9 @@ textarea {
 }
 
 .product-tx-row {
-  min-width: 1100px;
+  min-width: 900px;
   display: grid;
-  grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr) 90px;
+  grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr);
   align-items: center;
   gap: 16px;
   min-height: 58px;
@@ -1851,6 +1851,13 @@ textarea {
   min-width: 0;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
 .header-status-badge {
   display: inline-flex;
   align-items: center;
@@ -1979,6 +1986,10 @@ textarea {
 
 .content.narrow {
   width: min(1060px, 100%);
+}
+
+.catalog-embedded-view {
+  width: 100%;
 }
 
 .page-title {
@@ -2623,8 +2634,10 @@ textarea {
 .cart-line-title {
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .cart-line-title small {
@@ -2638,6 +2651,30 @@ textarea {
 .cart-line-title small .icon {
   width: 10px;
   color: var(--brass-dark);
+}
+
+.cart-line-kapster {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cart-line-kapster .icon {
+  width: 10px;
+  color: var(--brass-dark);
+}
+
+.cart-line-kapster select {
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 11px;
+  color: var(--ink);
+  cursor: pointer;
 }
 
 .cart-lines article .button {
@@ -4001,30 +4038,36 @@ textarea {
 }
 
 .payment-form-row {
-  display: grid;
-  grid-template-columns: auto 1fr 0.8fr;
-  align-items: end;
+  display: flex;
+  align-items: center;
   gap: 10px;
   margin-top: 14px;
+  flex-wrap: wrap;
 }
 
 .manual-total {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 11px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
   border-radius: 9px;
   color: var(--paper);
   background: var(--ink);
+  white-space: nowrap;
 }
 
 .manual-total small {
-  color: rgb(255 255 255 / 45%);
+  color: rgb(255 255 255 / 50%);
   font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .manual-total strong {
-  font: 700 17px/1 var(--heading);
+  font: 700 18px/1 var(--heading);
+  color: #fff;
+  letter-spacing: -0.03em;
 }
 
 .sticky-submit {
@@ -4058,6 +4101,8 @@ textarea {
 
 /* Expenses and generic lists */
 .list-panel {
+  width: 100%;
+  min-width: 0;
   margin-top: 11px;
   overflow: hidden;
 }
@@ -4072,7 +4117,7 @@ textarea {
 .expense-head,
 .expense-row {
   display: grid;
-  grid-template-columns: 0.7fr 0.9fr minmax(170px, 1.8fr) 0.9fr 0.7fr 80px;
+  grid-template-columns: 0.8fr minmax(0, 2fr) minmax(150px, 1fr) minmax(140px, 0.9fr);
   align-items: center;
   gap: 8px;
 }
@@ -4587,18 +4632,20 @@ textarea {
 }
 
 .report-table {
+  width: 100%;
+  min-width: 0;
   margin-top: 10px;
   overflow: hidden;
 }
 
 .report-table > .page-title {
-  padding: 16px;
+  padding: 0 0 16px;
 }
 
 .report-head,
 .report-row {
   display: grid;
-  grid-template-columns: 1.3fr 0.8fr 0.9fr 0.9fr;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr);
   align-items: center;
   gap: 8px;
 }
@@ -6346,6 +6393,14 @@ textarea {
     background: var(--paper);
     border: 1px solid var(--line);
     margin-right: 0;
+  }
+
+  .mobile-menu.mobile-fab {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 30;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   }
 
   .app-header-inner {

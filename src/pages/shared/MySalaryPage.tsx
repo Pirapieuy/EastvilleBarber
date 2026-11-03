@@ -14,7 +14,7 @@ export function MySalaryPage() {
   })
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
+  function fetchData() {
     if (!getToken()) return
     setLoading(true)
     apiGaji
@@ -28,6 +28,11 @@ export function MySalaryPage() {
       .finally(() => {
         setLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -36,8 +41,8 @@ export function MySalaryPage() {
         eyebrow="Pendapatan pribadi"
         title="Gaji Saya"
         action={
-          <Button className="secondary-button" onClick={() => window.location.reload()}>
-            <Icon name="history" /> Refresh
+          <Button className="secondary-button" onClick={fetchData} disabled={loading}>
+            <Icon name="history" /> {loading ? "Memperbarui..." : "Refresh"}
           </Button>
         }
       />

@@ -11,6 +11,7 @@ import { RekapManual as RekapManualKasir } from "./pages/kasir/RekapManual"
 
 // Manajer Pages
 import { BerandaManajer } from "./pages/manajer/BerandaManajer"
+import { CatalogPage } from "./pages/shared/CatalogPage"
 import { RiwayatTransaksi as RiwayatTransaksiManajer } from "./pages/manajer/RiwayatTransaksi"
 import { LaporanKeuangan as LaporanKeuanganManajer } from "./pages/manajer/LaporanKeuangan"
 import { LaporanProduk as LaporanProdukManajer } from "./pages/manajer/LaporanProduk"
@@ -133,23 +134,31 @@ export function App() {
       if (activePage === "RiwayatTransaksi" || activePage === "history") {
         return <RiwayatTransaksiManajer currentUser={currentUser} />
       }
-      if (activePage === "LaporanKeuangan" || activePage === "reports") {
-        return <LaporanKeuanganManajer currentUser={currentUser} />
-      }
-      if (activePage === "LaporanProduk" || activePage === "product-reports") {
-        return <LaporanProdukManajer currentUser={currentUser} />
-      }
+    if (activePage === "LaporanKeuangan" || activePage === "reports") {
+      return <LaporanKeuanganOwner currentUser={currentUser} />
+    }
+    if (activePage === "LaporanProduk" || activePage === "product-reports" || activePage === "laporan-produk") {
+      return <LaporanProdukOwner currentUser={currentUser} />
+    }
       if (activePage === "Pengeluaran" || activePage === "expenses") {
         return <PengeluaranManajer />
       }
       if (activePage === "RekapManual" || activePage === "manual") {
         return <RekapManualManajer />
       }
-      if (activePage === "LayananHarga" || activePage === "services") {
-        return <LayananHargaManajer />
-      }
-      if (activePage === "MasterProduk" || activePage === "products") {
-        return <MasterProdukManajer />
+      if (
+        activePage === "KatalogLayananProduk" ||
+        activePage === "catalog" ||
+        activePage === "LayananHarga" ||
+        activePage === "services" ||
+        activePage === "MasterProduk" ||
+        activePage === "products"
+      ) {
+        const initialTab =
+          activePage === "MasterProduk" || activePage === "products"
+            ? "produk"
+            : "layanan"
+        return <CatalogPage initialTab={initialTab} />
       }
       if (activePage === "TimManajer" || activePage === "team") {
         return <TimManajer currentUser={currentUser} />
@@ -160,7 +169,9 @@ export function App() {
       if (
         activePage === "AbsensiTim" ||
         activePage === "attendance-admin" ||
-        activePage === "attendance-tim"
+        activePage === "attendance-tim" ||
+        activePage === "JadwalAbsensi" ||
+        activePage === "jadwal-absensi"
       ) {
         return <AbsensiTim currentUser={currentUser} />
       }
@@ -220,7 +231,7 @@ export function App() {
     if (activePage === "LaporanKeuangan" || activePage === "reports") {
       return <LaporanKeuanganOwner currentUser={currentUser} />
     }
-    if (activePage === "LaporanProduk" || activePage === "product-reports") {
+    if (activePage === "LaporanProduk" || activePage === "product-reports" || activePage === "laporan-produk") {
       return <LaporanProdukOwner currentUser={currentUser} />
     }
     if (activePage === "Pengeluaran" || activePage === "expenses") {
@@ -229,11 +240,19 @@ export function App() {
     if (activePage === "RekapManual" || activePage === "manual") {
       return <RekapManualOwner />
     }
-    if (activePage === "LayananHarga" || activePage === "services") {
-      return <LayananHargaOwner />
-    }
-    if (activePage === "MasterProduk" || activePage === "products") {
-      return <MasterProdukOwner />
+    if (
+      activePage === "KatalogLayananProduk" ||
+      activePage === "catalog" ||
+      activePage === "LayananHarga" ||
+      activePage === "services" ||
+      activePage === "MasterProduk" ||
+      activePage === "products"
+    ) {
+      const initialTab =
+        activePage === "MasterProduk" || activePage === "products"
+          ? "produk"
+          : "layanan"
+      return <CatalogPage initialTab={initialTab} />
     }
     if (activePage === "TimEastville" || activePage === "team") {
       return <TimEastville currentUser={currentUser} />
@@ -241,7 +260,12 @@ export function App() {
     if (activePage === "GajiKasbon" || activePage === "payroll") {
       return <GajiKasbonOwner />
     }
-    if (activePage === "AbsensiAdmin" || activePage === "attendance-admin") {
+    if (
+      activePage === "AbsensiAdmin" ||
+      activePage === "attendance-admin" ||
+      activePage === "JadwalAbsensi" ||
+      activePage === "jadwal-absensi"
+    ) {
       return <AbsensiAdminOwner currentUser={currentUser} />
     }
     if (activePage === "JejakAudit" || activePage === "audit") {

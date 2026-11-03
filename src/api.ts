@@ -159,6 +159,8 @@ export const apiKasir = {
   kapster: () => api<{ id: string; nama: string }[]>("list-kapster"),
   checkout: (p: CheckoutPayload) =>
     api<{ id: string; total: number; kembalian: number }>("create-transaksi", { ...p }),
+  /** Cek PIN Owner/Manajer lebih awal (khusus Kasir; 5x salah = tunggu 5 menit). Gagal -> melempar Error. */
+  verifikasiPin: (pin: string) => api<{ valid: boolean }>("verifikasi-pin-otorisasi", { pin }),
 }
 
 export const apiTransaksi = {
@@ -236,7 +238,10 @@ export interface AktivitasKapster {
   time: string
   fee: number
   comm: number
+  /** id invoice */
   trx: string
+  /** transaksi di luar jam kerja (komisi lembur) */
+  lembur?: boolean
 }
 
 export const apiKapster = {

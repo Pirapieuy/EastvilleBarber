@@ -228,7 +228,7 @@ export function AuditPage() {
       <div className="append-only-note">
         <Icon name="lock" />
         <span>
-          <strong>Log hanya-tambah</strong>Data tidak dapat diubah atau dihapus.
+          <strong>Catatan Keamanan Permanen</strong>Data terlindungi dan tidak dapat diubah atau dihapus.
         </span>
       </div>
       <section className="panel audit-list">

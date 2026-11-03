@@ -130,6 +130,10 @@ Aksi `Bisnis.js` yang ditambahkan sejak catatan sebelumnya:
   Total Rp0 tanpa tanda gratis **ditolak** server.
 - `create-transaksi`: diskon oleh Kasir wajib `pinOtorisasi` (PIN Owner/Manajer, dicek server, 5x salah = tunggu 5 menit);
   `clientRequestId` mencegah nota ganda bila Bayar terkirim dua kali.
+- `verifikasi-pin-otorisasi` (`{ pin }`, hanya Kasir): cek PIN Owner/Manajer saat klik "Terapkan" diskon, sebelum Bayar.
+  Memakai penghitung salah yang sama dengan `create-transaksi` (5x salah = tunggu 5 menit). Balasan `{ valid: true }` atau error.
+- `aktivitas-kapster`: tiap baris kini punya `lembur` (true bila transaksi di luar jam kerja). Rincian layanan = baris ber-`type` "Layanan"
+  (`trx` = id invoice, `time` = jam, `item` = nama layanan, `comm` = komisi layanan).
 - `list-transaksi` kini juga mengirim `bayarTunai`, `bayarQris`, `gratis` (dipakai cetak ulang struk).
 - `backup-hapus` dan `backup-unduh` (Owner); `backup-buat` menolak bila sudah ada backup di menit yang sama.
 - `hitung-gaji` (Kode.js, Fitra) menghitung transaksi berstatus Lunas sejak gaji terakhir dibayar.

@@ -156,6 +156,7 @@ function routeBisnis(action, body) {
       case "list-kapster":         return ok_(listKapster_());
       case "create-transaksi":     return createTransaksi_(body, user);
       case "create-transaksi-manual": return createTransaksi_(body, user, true);
+      case "verifikasi-pin-otorisasi": return verifikasiPinOtorisasi_(body, user);
       case "list-transaksi":       return listTransaksi_(body, user);
       case "batalkan-transaksi":   return batalkanTransaksi_(body, user);
       case "pulihkan-transaksi":   return pulihkanTransaksi_(body, user);
@@ -536,14 +537,8 @@ function createTransaksi_(body, user, manual) {
   }
   // Diskon oleh Kasir wajib disetujui PIN Owner/Manajer (diverifikasi di server).
   if (diskon > 0 && user.role === "Kasir") {
-    var cache = CacheService.getScriptCache(), kunci = "pin_atasan_gagal_" + user.id;
-    var gagal = Number(cache.get(kunci) || 0);
-    if (gagal >= 5) return fail_("Terlalu banyak PIN salah. Coba lagi dalam 5 menit.");
-    if (!pinAtasanValid_(body.pinOtorisasi)) {
-      cache.put(kunci, String(gagal + 1), 300);
-      return fail_("PIN Owner/Manajer salah atau belum diisi. Diskon tidak diizinkan.");
-    }
-    cache.remove(kunci);
+    var salahPin = cekPinOtorisasi_(user, body.pinOtorisasi);
+    if (salahPin) return fail_(salahPin);
   }
   var total = subtotal - diskon;
   if (total === 0 && !gratis) return fail_("Total Rp0 hanya untuk transaksi gratis. Pilih Gratis dan isi alasannya.");
@@ -573,6 +568,29 @@ function createTransaksi_(body, user, manual) {
   var hasil = { id: id, total: total, kembalian: tunai + qris - total, lembur: lembur };
   if (reqKey) CacheService.getScriptCache().put(reqKey, JSON.stringify(hasil), 600);
   return ok_(hasil);
+}
+
+/**
+ * Cek PIN Owner/Manajer untuk Kasir dengan batas 5x salah per 5 menit (per user).
+ * Mengembalikan pesan error, atau "" bila PIN sah (penghitung salah direset).
+ */
+function cekPinOtorisasi_(user, pin) {
+  var cache = CacheService.getScriptCache(), kunci = "pin_atasan_gagal_" + user.id;
+  var gagal = Number(cache.get(kunci) || 0);
+  if (gagal >= 5) return "Terlalu banyak PIN salah. Coba lagi dalam 5 menit.";
+  if (!pinAtasanValid_(pin)) {
+    cache.put(kunci, String(gagal + 1), 300);
+    return "PIN Owner/Manajer salah atau belum diisi. Diskon tidak diizinkan.";
+  }
+  cache.remove(kunci);
+  return "";
+}
+
+/** Action verifikasi-pin-otorisasi: Kasir cek PIN diskon lebih awal (saat klik Terapkan), sebelum Bayar. */
+function verifikasiPinOtorisasi_(body, user) {
+  if (user.role !== "Kasir") return fail_("Verifikasi PIN otorisasi hanya untuk Kasir.");
+  var salah = cekPinOtorisasi_(user, body.pin);
+  return salah ? fail_(salah) : ok_({ valid: true });
 }
 
 /** True bila PIN cocok dengan salah satu akun Owner/Manajer yang aktif. */
@@ -760,6 +778,8 @@ function laporanKeuangan_(body) {
 /**
  * Aktivitas kapster pada satu hari (default hari ini): layanan & produk yang dikerjakan beserta komisinya.
  * Body: { tanggal?: "yyyy-MM-dd" }. Hanya milik kapster yang login. Transaksi BATAL tidak ikut.
+ * Tiap baris: trx (id invoice), time (jam), item (nama), type (Layanan/Produk), comm (komisi), lembur (true/false).
+ * Rincian layanan = baris ber-type "Layanan".
  */
 function aktivitasKapster_(body, user) {
   var tgl = (body.tanggal || "").toString() || fmtTanggal_(new Date(), "yyyy-MM-dd");
@@ -774,7 +794,8 @@ function aktivitasKapster_(body, user) {
     rows.push({
       item: i.nama, qty: Number(i.qty), type: i.tipe,
       time: fmtTanggal_(new Date(t.waktu), "HH.mm"), waktu: new Date(t.waktu).getTime(),
-      fee: Number(i.harga) * Number(i.qty), comm: Number(i.komisi) || 0, trx: i.trx_id
+      fee: Number(i.harga) * Number(i.qty), comm: Number(i.komisi) || 0, trx: i.trx_id,
+      lembur: t.lembur === "Ya"
     });
   });
   rows.sort(function (a, b) { return a.waktu - b.waktu; });

@@ -147,7 +147,7 @@ export function KapsterDashboard({
               <div className="shift-badges">
                 <span className="chip active">Shift 8 Jam</span>
                 <small className="pending-client">
-                  Menunggu konfirmasi klien
+                  Pelanggan dalam antrean
                 </small>
               </div>
             }

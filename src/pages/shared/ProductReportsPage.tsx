@@ -237,10 +237,9 @@ export function ProductReportsPage({
     const q = cari.trim().toLowerCase()
     return txList.filter(
       (tx) =>
-        (statusFilter === "Semua" || tx.status === statusFilter) &&
-        (!q || [tx.id, tx.product, tx.barber, tx.seller].some((v) => v.toLowerCase().includes(q))),
+        !q || [tx.id, tx.product, tx.barber, tx.seller].some((v) => v.toLowerCase().includes(q)),
     )
-  }, [txList, statusFilter, cari])
+  }, [txList, cari])
 
   const tabelEkspor = (): TabelEkspor => ({
     berkas: `laporan-produk-${rentang.dari}_${rentang.sampai}`,
@@ -349,6 +348,14 @@ export function ProductReportsPage({
                     ? `${lunas.reduce((n, t) => n + t.qty, 0)} unit · ${new Set(lunas.map((t) => t.id)).size} transaksi`
                     : "44 unit · 18 transaksi"}
                 </p>
+                <i><b /></i>
+                <small>
+                  {!live && getToken() && !liveError
+                    ? "Memuat data dari server..."
+                    : live
+                    ? "Dihitung live dari transaksi selesai"
+                    : "Data contoh · belum terhubung ke server"}
+                </small>
               </article>
               <section className="panel customer-list">
                 <PageTitle eyebrow="Penjualan pribadi" title="Komisi per produk" />
@@ -375,13 +382,8 @@ export function ProductReportsPage({
     )
   }
 
-  if (Boolean(getToken()) && !live && !liveError) {
-    return (
-      <div className="content">
-        <p>Memuat laporan produk...</p>
-      </div>
-    )
-  }
+  // Tidak blocking — tampilan langsung muncul dengan data sementara;
+  // data server otomatis menggantikan saat selesai dimuat.
 
   return (
     <div className="content">
@@ -430,10 +432,10 @@ export function ProductReportsPage({
         />
         <Kpi
           icon="people"
-          label="Total Komisi Capster"
+          label="Total Komisi Kapster"
           tone="brass"
           value={rupiah(totalBarber)}
-          detail={`${totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0}% bagian capster`}
+          detail={`${totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0}% bagian kapster`}
         />
         <Kpi
           icon="home"
@@ -470,16 +472,6 @@ export function ProductReportsPage({
             <span>Detail Transaksi Produk</span>
           </Button>
           <Button
-            className={activeTab === "koreksi" ? "active" : ""}
-            onClick={() => setActiveTab("koreksi")}
-          >
-            <Icon name="history" />
-            <span>Riwayat Pembatalan</span>
-            {voidCount > 0 && (
-              <span className="tab-count-badge">{voidCount}</span>
-            )}
-          </Button>
-          <Button
             className={activeTab === "ringkasan" ? "active" : ""}
             onClick={() => setActiveTab("ringkasan")}
           >
@@ -504,33 +496,19 @@ export function ProductReportsPage({
                 onChange={(e) => setCari(e.target.value)}
               />
             </div>
-            <div className="tx-filter-group">
-              <span className="filter-label">Filter Status:</span>
-              <div className="segmented">
-                {(["Semua", "Lunas", "Batal"] as const).map((s) => (
-                  <Button
-                    key={s}
-                    className={statusFilter === s ? "active" : ""}
-                    onClick={() => setStatusFilter(s)}
-                  >
-                    {s}
-                  </Button>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           <div className="product-tx-table-wrap">
             <div className="product-tx-head">
               <span>Nota & Waktu</span>
               <span>Produk</span>
-              <span>Capster</span>
+              <span>Kapster</span>
               <span>Pemasok</span>
               <span>Total Omzet</span>
-              <span>Bagian Capster</span>
+              <span>Bagian Kapster</span>
               <span>Bagian Pemasok</span>
               <span>Bagian Eastville</span>
-              <span>Status</span>
             </div>
             {filteredTransactions.map((tx) => (
               <div
@@ -564,13 +542,6 @@ export function ProductReportsPage({
                 >
                   {rupiah(tx.eastvilleShare)}
                 </span>
-                <span>
-                  <i
-                    className={`chip ${tx.status === "Lunas" ? "lunas" : "batal"}`}
-                  >
-                    {tx.status === "Lunas" ? "Lunas" : "Batal"}
-                  </i>
-                </span>
                 {tx.status === "Batal" && (
                   <div className="void-reason-note">
                     <Icon name="alert" /> Dibatalkan oleh {tx.voidBy} · {tx.voidAt}:{" "}
@@ -583,50 +554,6 @@ export function ProductReportsPage({
         </section>
       )}
 
-      {activeTab === "koreksi" && (
-        <section className="panel correction-panel">
-          <PageTitle
-            eyebrow="Audit & Kontrol"
-            title="Riwayat Pembatalan Transaksi Produk"
-          />
-          <p className="correction-desc">
-            Daftar transaksi produk yang dibatalkan oleh Owner atau Manajer.
-            Transaksi yang dibatalkan dipastikan tidak masuk ke dalam
-            perhitungan omzet maupun komisi capster dan pemasok.
-          </p>
-          <div className="correction-table">
-            <div className="correction-head">
-              <span>Nota & Waktu</span>
-              <span>Produk</span>
-              <span>Nilai Dibatalkan</span>
-              <span>Diotorisasi Oleh</span>
-              <span>Alasan Pembatalan</span>
-              <span>Status</span>
-            </div>
-            {txList
-              .filter((tx) => tx.status === "Batal")
-              .map((tx) => (
-                <div key={tx.id} className="correction-row">
-                  <span className="tx-meta-col">
-                    <strong>{tx.id}</strong>
-                    <small>{tx.voidAt || tx.time}</small>
-                  </span>
-                  <span className="tx-product-col">
-                    <strong>{tx.product}</strong>
-                  </span>
-                  <b className="void-amount">{rupiah(tx.totalOmzet)}</b>
-                  <span className="tx-auth-col">{tx.voidBy || "Manajer"}</span>
-                  <span className="void-reason-text">
-                    {tx.voidReason || "Salah input"}
-                  </span>
-                  <span>
-                    <i className="chip batal">Batal</i>
-                  </span>
-                </div>
-              ))}
-          </div>
-        </section>
-      )}
 
       {activeTab === "ringkasan" && (
         <>
@@ -639,7 +566,7 @@ export function ProductReportsPage({
               <div className="legend">
                 <span>
                   <i className="sage-dot" />
-                  Capster{" "}
+                  Kapster{" "}
                   {totalOmzet > 0
                     ? ((totalBarber / totalOmzet) * 100).toFixed(1)
                     : 0}
@@ -702,7 +629,7 @@ export function ProductReportsPage({
         <WhatsAppDialog
           onClose={() => setWa(false)}
           title="Laporan Produk"
-          text={`Periode: ${rentang.dari === rentang.sampai ? rentang.dari : `${rentang.dari} s/d ${rentang.sampai}`}\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi capster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
+          text={`Periode: ${rentang.dari === rentang.sampai ? rentang.dari : `${rentang.dari} s/d ${rentang.sampai}`}\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi kapster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
         />
       )}
     </div>

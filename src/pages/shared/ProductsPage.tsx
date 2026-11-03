@@ -5,7 +5,7 @@ import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
 
-export function ProductsPage() {
+export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [tab, setTab] = useState<"Daftar" | "Riwayat perubahan">("Daftar")
   const [productsList, setProductsList] = useState([
     {
@@ -135,7 +135,7 @@ export function ProductsPage() {
     {
       time: "29 Okt 10.15",
       product: "Free Style Dust",
-      change: "Komisi capster 8% → 10%",
+      change: "Komisi kapster 8% → 10%",
       by: "Ardi Pradana · Owner",
       reason: "Penyesuaian kesepakatan komisi baru",
     },
@@ -272,7 +272,7 @@ export function ProductsPage() {
   const loading = Boolean(getToken()) && !live && !liveError
   if (loading) {
     return (
-      <div className="content">
+      <div className={embedded ? "catalog-embedded-view" : "content"}>
         <p>Memuat produk...</p>
       </div>
     )
@@ -325,7 +325,7 @@ export function ProductsPage() {
   }
 
   return (
-    <div className="content">
+    <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Data master & komisi"
@@ -630,7 +630,7 @@ export function ProductsPage() {
                   <>
                     <div className="share-inputs">
                       <label>
-                        <span>Bagian Capster</span>
+                        <span>Bagian Kapster</span>
                         <div className="input-shell">
                           <input
                             onChange={(e) =>
@@ -706,7 +706,7 @@ export function ProductsPage() {
                         : `Total ${shareTotal}% · harus 100%`}
                     </span>
                     <div className="commission-preview">
-                      Contoh jual 1 unit {rupiah(formData.price)} → Capster:{" "}
+                      Contoh jual 1 unit {rupiah(formData.price)} → Kapster:{" "}
                       {rupiah(
                         Math.round(
                           (formData.price * formData.shares.barber) / 100,
@@ -729,7 +729,7 @@ export function ProductsPage() {
                 ) : (
                   <div className="nominal-scheme">
                     <label>
-                      <span>Bagian Capster</span>
+                      <span>Bagian Kapster</span>
                       <input
                         type="number"
                         placeholder="Rp per unit"
@@ -789,7 +789,7 @@ export function ProductsPage() {
                       (Harga jual: {rupiah(formData.price)})
                     </div>
                     <div className="commission-preview">
-                      Contoh jual 1 unit {rupiah(formData.price)} → Capster:{" "}
+                      Contoh jual 1 unit {rupiah(formData.price)} → Kapster:{" "}
                       {rupiah(formData.nominalShares.barber)} · Seller:{" "}
                       {rupiah(formData.nominalShares.seller)} · Eastville:{" "}
                       {rupiah(formData.nominalShares.eastville)}

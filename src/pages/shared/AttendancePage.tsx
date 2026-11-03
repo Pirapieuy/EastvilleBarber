@@ -182,7 +182,7 @@ export function AttendancePage() {
           <p className="eyebrow">Waktu server tervalidasi</p>
           <h2>{serverTime}</h2>
           <i className="chip lunas">Berhasil tercatat</i>
-          <p>Absensi {tipe.toLowerCase()} berhasil disimpan di Google Sheets.</p>
+          <p>Absensi {tipe.toLowerCase()} berhasil dicatat di sistem.</p>
           <div style={{ marginTop: 12 }}>
             <Button
               className="secondary-button"
