@@ -132,6 +132,9 @@ Aksi `Bisnis.js` yang ditambahkan sejak catatan sebelumnya:
   `clientRequestId` mencegah nota ganda bila Bayar terkirim dua kali.
 - `verifikasi-pin-otorisasi` (`{ pin }`, hanya Kasir): cek PIN Owner/Manajer saat klik "Terapkan" diskon, sebelum Bayar.
   Memakai penghitung salah yang sama dengan `create-transaksi` (5x salah = tunggu 5 menit). Balasan `{ valid: true }` atau error.
+- Tutup Kasir per shift (sheet baru `TutupKasir`, SCHEMA_VERSION 6): `rekap-kasir` (Kasir; ringkasan sejak tutup terakhir hari itu),
+  `tutup-kasir` (`{ uangFisik, catatan }`, Kasir; angka sistem dihitung ulang di server, selisih != 0 wajib catatan),
+  `list-tutup-kasir` (Kasir = miliknya, Owner/Manajer = semua). Tunai sistem = total - QRIS per transaksi Lunas.
 - `aktivitas-kapster`: tiap baris kini punya `lembur` (true bila transaksi di luar jam kerja). Rincian layanan = baris ber-`type` "Layanan"
   (`trx` = id invoice, `time` = jam, `item` = nama layanan, `comm` = komisi layanan).
 - `list-transaksi` kini juga mengirim `bayarTunai`, `bayarQris`, `gratis` (dipakai cetak ulang struk).
