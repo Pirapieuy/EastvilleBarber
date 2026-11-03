@@ -18,6 +18,7 @@ var SHEET_PRODUK_LOG = "ProdukLog";
 
 var SHEET_PENGATURAN = "Pengaturan";
 var SHEET_KOMISI_KAPSTER = "KomisiKapster";
+var SHEET_TUTUP_KASIR = "TutupKasir";
 
 // Nilai awal pengaturan (bisa diubah lewat action simpan-pengaturan / sheet Pengaturan).
 // Jam disimpan sebagai angka HHMM (1000 = 10:00) supaya Sheets tidak mengubahnya jadi format waktu.
@@ -27,7 +28,7 @@ var PENGATURAN_DEFAULT = {
   komisi_default: 40,   // % layanan untuk kapster di jam kerja
   komisi_lembur: 50     // % layanan untuk kapster di luar jam kerja
 };
-var SCHEMA_VERSION = "5";
+var SCHEMA_VERSION = "6";
 
 var HEADERS = {
   Layanan: ["id", "nama", "harga", "status", "kategori"],
@@ -52,7 +53,11 @@ var HEADERS = {
   StokMutasi: ["waktu", "kode", "delta", "stok_akhir", "alasan", "trx_id", "oleh"],
   ProdukLog: ["waktu", "kode", "produk", "perubahan", "oleh", "alasan"],
   Pengaturan: ["key", "value"],
-  KomisiKapster: ["user_id", "persen", "diubah_oleh", "waktu"]
+  KomisiKapster: ["user_id", "persen", "diubah_oleh", "waktu"],
+  TutupKasir: [
+    "id", "waktu", "tanggal", "kasir_id", "kasir", "dari_waktu", "jumlah_trx", "penjualan", "diskon",
+    "tunai_sistem", "qris_sistem", "uang_fisik", "selisih", "catatan"
+  ]
 };
 
 var STOK_MENIPIS = 3; // produk aktif dengan stok <= angka ini muncul di "Perlu perhatian"
@@ -80,6 +85,9 @@ var AKSES = {
   "list-komisi":         ["Owner", "Manajer", "Kapster"],
   "simpan-layanan":      ["Owner", "Manajer"],
   "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
+  "rekap-kasir":         ["Kasir"],
+  "tutup-kasir":         ["Kasir"],
+  "list-tutup-kasir":    ["Owner", "Manajer", "Kasir"],
   "verifikasi-pin-otorisasi": ["Kasir"],
   "laporan-keuangan":    ["Owner", "Manajer"],
   "laporan-produk":      ["Owner", "Manajer", "Kapster"],
@@ -158,6 +166,9 @@ function routeBisnis(action, body) {
       case "create-transaksi":     return createTransaksi_(body, user);
       case "create-transaksi-manual": return createTransaksi_(body, user, true);
       case "verifikasi-pin-otorisasi": return verifikasiPinOtorisasi_(body, user);
+      case "rekap-kasir":          return rekapKasir_(user);
+      case "tutup-kasir":          return tutupKasir_(body, user);
+      case "list-tutup-kasir":     return listTutupKasir_(body, user);
       case "list-transaksi":       return listTransaksi_(body, user);
       case "batalkan-transaksi":   return batalkanTransaksi_(body, user);
       case "pulihkan-transaksi":   return pulihkanTransaksi_(body, user);
@@ -844,12 +855,95 @@ function laporanProduk_(body, user) {
 }
 
 // ============================================================
+// TUTUP KASIR (per shift): Kasir mencocokkan uang tunai di laci dengan catatan sistem.
+// Cakupan = transaksi Lunas milik kasir sejak tutup kasir terakhirnya hari itu (atau awal hari).
+// Tunai sistem = total - QRIS per transaksi (kembalian sudah terpotong). Selisih = uang fisik - tunai sistem.
+// ============================================================
+function hitungShift_(user) {
+  var now = new Date();
+  var tgl = fmtTanggal_(now, "yyyy-MM-dd");
+  var dari = new Date(tgl + "T00:00:00+07:00");
+  readTable_(SHEET_TUTUP_KASIR).forEach(function (r) {
+    if (r.kasir_id === user.id && fmtTanggal_(new Date(r.waktu), "yyyy-MM-dd") === tgl) {
+      var w = new Date(r.waktu);
+      if (w > dari) dari = w;
+    }
+  });
+  var h = { tanggal: tgl, dari: dari, sampai: now, jumlahTrx: 0, penjualan: 0, diskon: 0, tunaiSistem: 0, qrisSistem: 0, gratis: 0 };
+  readTable_(SHEET_TRANSAKSI).forEach(function (t) {
+    if (t.status !== "Lunas" || t.dibuat_oleh_id !== user.id) return;
+    var w = new Date(t.waktu);
+    if (w <= dari || w > now) return;
+    var total = Number(t.total) || 0, qris = Number(t.bayar_qris) || 0;
+    h.jumlahTrx++;
+    h.penjualan += total;
+    h.diskon += Number(t.diskon) || 0;
+    h.qrisSistem += Math.min(qris, total);
+    h.tunaiSistem += Math.max(0, total - qris);
+    if (t.gratis) h.gratis++;
+  });
+  return h;
+}
+
+function bentukShift_(h) {
+  return {
+    tanggal: h.tanggal, dariJam: fmtTanggal_(h.dari, "HH.mm"), jumlahTrx: h.jumlahTrx, penjualan: h.penjualan,
+    diskon: h.diskon, tunaiSistem: h.tunaiSistem, qrisSistem: h.qrisSistem, gratis: h.gratis
+  };
+}
+
+/** Ringkasan sistem untuk shift berjalan milik Kasir yang login (belum menyimpan apa pun). */
+function rekapKasir_(user) {
+  return ok_(bentukShift_(hitungShift_(user)));
+}
+
+/** Body: { uangFisik, catatan? }. Selisih tidak nol -> catatan wajib. Angka sistem dihitung ulang di server. */
+function tutupKasir_(body, user) {
+  var fisikMentah = Number(body.uangFisik);
+  if (body.uangFisik === "" || body.uangFisik === null || body.uangFisik === undefined || isNaN(fisikMentah) || fisikMentah < 0) {
+    return fail_("Isi jumlah uang tunai di laci (angka, tidak boleh negatif).");
+  }
+  var fisik = toInt_(fisikMentah);
+  var h = hitungShift_(user);
+  if (h.jumlahTrx === 0) return fail_("Belum ada transaksi sejak tutup kasir terakhir.");
+  var selisih = fisik - h.tunaiSistem;
+  var catatan = (body.catatan || "").toString().trim();
+  if (selisih !== 0 && !catatan) return fail_("Uang di laci tidak sama dengan catatan sistem. Isi catatan penyebab selisih.");
+  var id = "TK-" + fmtTanggal_(h.sampai, "yyMMdd-HHmmss");
+  appendObj_(SHEET_TUTUP_KASIR, {
+    id: id, waktu: h.sampai, tanggal: h.tanggal, kasir_id: user.id, kasir: user.nama, dari_waktu: h.dari,
+    jumlah_trx: h.jumlahTrx, penjualan: h.penjualan, diskon: h.diskon,
+    tunai_sistem: h.tunaiSistem, qris_sistem: h.qrisSistem, uang_fisik: fisik, selisih: selisih, catatan: catatan
+  });
+  writeAuditLog(user.id, user.nama, "TUTUP_KASIR", id + " tunai sistem " + h.tunaiSistem + ", fisik " + fisik + ", selisih " + selisih + (catatan ? " · " + catatan : ""));
+  return ok_({ id: id, selisih: selisih, tunaiSistem: h.tunaiSistem, uangFisik: fisik });
+}
+
+/** Body: { dari?, sampai? } (yyyy-MM-dd). Kasir hanya melihat tutup kasirnya sendiri. */
+function listTutupKasir_(body, user) {
+  var rows = readTable_(SHEET_TUTUP_KASIR).filter(function (r) {
+    if (user.role === "Kasir" && r.kasir_id !== user.id) return false;
+    return dalamRentang_(fmtTanggal_(new Date(r.waktu), "yyyy-MM-dd"), body);
+  }).map(function (r) {
+    return {
+      id: r.id, tanggal: fmtTanggal_(new Date(r.waktu), "d MMM yyyy"),
+      dariJam: fmtTanggal_(new Date(r.dari_waktu), "HH.mm"), sampaiJam: fmtTanggal_(new Date(r.waktu), "HH.mm"),
+      waktu: new Date(r.waktu).getTime(), kasir: r.kasir, jumlahTrx: Number(r.jumlah_trx), penjualan: Number(r.penjualan),
+      diskon: Number(r.diskon), tunaiSistem: Number(r.tunai_sistem), qrisSistem: Number(r.qris_sistem),
+      uangFisik: Number(r.uang_fisik), selisih: Number(r.selisih), catatan: r.catatan || ""
+    };
+  });
+  rows.sort(function (a, b) { return b.waktu - a.waktu; });
+  return ok_(rows);
+}
+
+// ============================================================
 // BACKUP - salinan sheet bisnis di dalam spreadsheet yang sama (sheet tersembunyi "BAK_...").
 // Sengaja tanpa DriveApp: scope Drive baru memaksa otorisasi ulang dan bisa membuat seluruh web app gagal.
 // Melindungi dari salah edit/hapus lewat aplikasi; BUKAN pengganti salinan file di Drive.
 // Pemulihan lewat action backup-pulihkan (Owner): menyalin isi BAK_ kembali setelah membuat backup pengaman.
 // ============================================================
-var BACKUP_SHEETS = ["Layanan", "Produk", "Transaksi", "TransaksiItem", "Pengeluaran", "StokMutasi", "ProdukLog", "Pengaturan", "KomisiKapster"];
+var BACKUP_SHEETS = ["Layanan", "Produk", "Transaksi", "TransaksiItem", "Pengeluaran", "StokMutasi", "ProdukLog", "Pengaturan", "KomisiKapster", "TutupKasir"];
 var BACKUP_SIMPAN = 5; // jumlah backup terakhir yang dipertahankan
 
 function backupBuat_(user) {

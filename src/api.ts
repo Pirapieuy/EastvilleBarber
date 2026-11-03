@@ -163,6 +163,45 @@ export const apiKasir = {
   verifikasiPin: (pin: string) => api<{ valid: boolean }>("verifikasi-pin-otorisasi", { pin }),
 }
 
+export interface RekapShift {
+  tanggal: string
+  /** jam mulai cakupan shift (HH.mm) */
+  dariJam: string
+  jumlahTrx: number
+  penjualan: number
+  diskon: number
+  /** tunai yang seharusnya ada di laci (total - QRIS, kembalian sudah terpotong) */
+  tunaiSistem: number
+  qrisSistem: number
+  gratis: number
+}
+
+export interface TutupKasirRow {
+  id: string
+  tanggal: string
+  dariJam: string
+  sampaiJam: string
+  waktu: number
+  kasir: string
+  jumlahTrx: number
+  penjualan: number
+  diskon: number
+  tunaiSistem: number
+  qrisSistem: number
+  uangFisik: number
+  selisih: number
+  catatan: string
+}
+
+export const apiTutupKasir = {
+  /** Ringkasan sistem shift berjalan (Kasir). */
+  rekap: () => api<RekapShift>("rekap-kasir"),
+  tutup: (uangFisik: number, catatan: string) =>
+    api<{ id: string; selisih: number; tunaiSistem: number; uangFisik: number }>("tutup-kasir", { uangFisik, catatan }),
+  /** Kasir: miliknya sendiri; Owner/Manajer: semua kasir. */
+  list: (range: { dari?: string; sampai?: string } = {}) => api<TutupKasirRow[]>("list-tutup-kasir", range),
+}
+
 export const apiTransaksi = {
   list: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("list-transaksi", range),
