@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { CSSProperties, ReactNode } from "react"
 import { Icon } from "./Icon"
 import { IconName } from "../../types"
 
@@ -12,6 +12,7 @@ export function Button({
   onClick,
   type = "button",
   title,
+  style,
   "aria-label": ariaLabel,
 }: {
   children?: ReactNode
@@ -20,6 +21,7 @@ export function Button({
   onClick?: () => void
   type?: "button" | "submit"
   title?: string
+  style?: CSSProperties
   "aria-label"?: string
 }) {
   return (
@@ -29,6 +31,7 @@ export function Button({
       onClick={onClick}
       type={type}
       title={title}
+      style={style}
       aria-label={ariaLabel}
     >
       {children}

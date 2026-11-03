@@ -15,7 +15,7 @@ export const serviceRows: LayananRow[] = [
   { id: 6, nama: "Creambath", kategori: "Perawatan", harga: 75000, status: "Nonaktif" },
 ]
 
-const demoPengaturan: PengaturanKomisi = {
+const defaultPengaturan: PengaturanKomisi = {
   jamMulai: "10:00",
   jamSelesai: "21:00",
   komisiDefault: 40,
@@ -23,9 +23,9 @@ const demoPengaturan: PengaturanKomisi = {
   kapster: [],
 }
 
-export function ServicesPage() {
+export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [rows, setRows] = useState<LayananRow[]>(serviceRows)
-  const [pengaturan, setPengaturan] = useState<PengaturanKomisi>(demoPengaturan)
+  const [pengaturan, setPengaturan] = useState<PengaturanKomisi>(defaultPengaturan)
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
 
@@ -41,27 +41,14 @@ export function ServicesPage() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
 
-  const [jamMulai, setJamMulai] = useState(demoPengaturan.jamMulai)
-  const [jamSelesai, setJamSelesai] = useState(demoPengaturan.jamSelesai)
-  const [komisiDefault, setKomisiDefault] = useState(String(demoPengaturan.komisiDefault))
-  const [komisiLembur, setKomisiLembur] = useState(String(demoPengaturan.komisiLembur))
-  const [alasan, setAlasan] = useState("")
-  const [komisiMsg, setKomisiMsg] = useState("")
-  const [komisiSaving, setKomisiSaving] = useState(false)
-
-  function isiForm(p: PengaturanKomisi) {
-    setPengaturan(p)
-    setJamMulai(p.jamMulai)
-    setJamSelesai(p.jamSelesai)
-    setKomisiDefault(String(p.komisiDefault))
-    setKomisiLembur(String(p.komisiLembur))
-  }
-
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return Promise.all([apiLayanan.list(), apiPengaturan.get()]).then(([layanan, peng]) => {
+    return Promise.all([
+      apiLayanan.list(),
+      apiPengaturan.get().catch(() => null),
+    ]).then(([layanan, peng]) => {
       setRows(layanan)
-      isiForm(peng)
+      if (peng) setPengaturan(peng)
       setLive(true)
     })
   }
@@ -116,39 +103,6 @@ export function ServicesPage() {
     setFormOpen(false)
   }
 
-  async function handleSaveKomisi(event: FormEvent) {
-    event.preventDefault()
-    setKomisiMsg("")
-    const baru: PengaturanKomisi = {
-      ...pengaturan,
-      jamMulai,
-      jamSelesai,
-      komisiDefault: Number(komisiDefault),
-      komisiLembur: Number(komisiLembur),
-    }
-    if (!live) {
-      isiForm(baru)
-      return setKomisiMsg("Tersimpan sementara (mode demo).")
-    }
-    setKomisiSaving(true)
-    try {
-      const hasil = await apiPengaturan.simpan({
-        jamMulai,
-        jamSelesai,
-        komisiDefault: baru.komisiDefault,
-        komisiLembur: baru.komisiLembur,
-        alasan,
-      })
-      isiForm(hasil)
-      setAlasan("")
-      setKomisiMsg("Tersimpan. Berlaku untuk transaksi berikutnya.")
-    } catch (err) {
-      setKomisiMsg(err instanceof Error ? err.message : "Gagal menyimpan.")
-    } finally {
-      setKomisiSaving(false)
-    }
-  }
-
   const aktifCount = rows.filter((r) => r.status === "Aktif").length
   const filtered = rows.filter(
     (r) =>
@@ -167,7 +121,7 @@ export function ServicesPage() {
   }
 
   return (
-    <div className="content">
+    <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Data master"
@@ -189,65 +143,6 @@ export function ServicesPage() {
           Mengubah harga tidak mengubah transaksi lama.
         </div>
       </div>
-
-      <section className="panel" style={{ marginBottom: 16, padding: 16 }}>
-        <form onSubmit={handleSaveKomisi}>
-          <p className="eyebrow">Jam kerja &amp; komisi</p>
-          <p style={{ color: "var(--slate)", fontSize: 12, margin: "4px 0 12px" }}>
-            Transaksi di luar jam kerja otomatis memakai komisi lembur. Komisi per kapster
-            diatur di halaman Tim.
-          </p>
-          <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
-            <label style={{ display: "grid", gap: 6 }}>
-              <span>Jam mulai</span>
-              <input required type="time" value={jamMulai} onChange={(e) => setJamMulai(e.target.value)} />
-            </label>
-            <label style={{ display: "grid", gap: 6 }}>
-              <span>Jam selesai</span>
-              <input required type="time" value={jamSelesai} onChange={(e) => setJamSelesai(e.target.value)} />
-            </label>
-            <label style={{ display: "grid", gap: 6 }}>
-              <span>Komisi layanan (%)</span>
-              <input
-                max={100}
-                min={0}
-                required
-                type="number"
-                value={komisiDefault}
-                onChange={(e) => setKomisiDefault(e.target.value)}
-              />
-            </label>
-            <label style={{ display: "grid", gap: 6 }}>
-              <span>Komisi lembur (%)</span>
-              <input
-                max={100}
-                min={0}
-                required
-                type="number"
-                value={komisiLembur}
-                onChange={(e) => setKomisiLembur(e.target.value)}
-              />
-            </label>
-          </div>
-          {live && (
-            <label style={{ display: "grid", gap: 6, marginTop: 12 }}>
-              <span>Alasan perubahan</span>
-              <input
-                placeholder="Wajib diisi saat menyimpan"
-                required
-                value={alasan}
-                onChange={(e) => setAlasan(e.target.value)}
-              />
-            </label>
-          )}
-          <div style={{ alignItems: "center", display: "flex", gap: 12, marginTop: 12 }}>
-            <Button className="primary-button" disabled={komisiSaving} type="submit">
-              {komisiSaving ? "Menyimpan..." : "Simpan pengaturan"}
-            </Button>
-            {komisiMsg && <small>{komisiMsg}</small>}
-          </div>
-        </form>
-      </section>
 
       <section className="panel service-list">
         <div className="filters">

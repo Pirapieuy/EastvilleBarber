@@ -239,13 +239,34 @@ export function TeamPage({
                 </div>
               )}
             </dl>
-            {!isManager && (
-              <Button
-                className="secondary-button"
-                onClick={() => openEdit(x)}
-              >
-                <Icon name="pencil" /> Ubah data
-              </Button>
+            {!isManager && x.role !== "Owner" && (
+              <div style={{ display: "flex", gap: 8 }}>
+                <Button
+                  className="secondary-button"
+                  onClick={() => openEdit(x)}
+                >
+                  <Icon name="pencil" /> Ubah data
+                </Button>
+                <Button
+                  className="danger-button"
+                  onClick={async () => {
+                    const alasan = window.prompt("Alasan dihapus?")
+                    if (!alasan || alasan.trim().length < 3) return
+                    const yakin = window.confirm("Yakin dihapus?")
+                    if (!yakin) return
+                    try {
+                      if ((apiTim as any).hapus) {
+                        await (apiTim as any).hapus(x.id, alasan.trim())
+                      }
+                      loadData()
+                    } catch (err) {
+                      alert(err instanceof Error ? err.message : "Gagal menghapus.")
+                    }
+                  }}
+                >
+                  Hapus
+                </Button>
+              </div>
             )}
           </article>
         ))}
@@ -307,7 +328,7 @@ export function TeamPage({
 
               <span className="form-label">Pilih peran</span>
               <div className="role-options">
-                {(["Owner", "Manajer", "Kasir", "Kapster"] as Role[]).map((r) => (
+                {(["Manajer", "Kasir", "Kapster"] as Role[]).map((r) => (
                   <Button
                     className={selectedRole === r ? "active" : ""}
                     key={r}

@@ -69,7 +69,7 @@ export function ManagerDashboard({
               className="secondary-button"
               onClick={() => nav("RekapManual")}
             >
-              <Icon name="pencil" /> Rekap Manual
+              <Icon name="pencil" /> Input Nota Kertas
             </Button>
             <Button
               className="primary-button"

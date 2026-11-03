@@ -98,7 +98,7 @@ export function BackupPage() {
           <div>
             <small>Cara kerja</small>
             <h2>Backup manual</h2>
-            <p>Disimpan sebagai sheet tersembunyi di spreadsheet yang sama; 5 backup terakhir dipertahankan.</p>
+            <p>Cadangan tersimpan aman secara otomatis di sistem; 5 arsip data terakhir dipertahankan.</p>
           </div>
         </article>
         <article className="panel last-backup">

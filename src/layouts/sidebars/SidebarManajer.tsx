@@ -14,8 +14,8 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
     ],
   },
   {
-    id: "laporan-keuangan",
-    title: "LAPORAN & KEUANGAN",
+    id: "laporan",
+    title: "LAPORAN",
     items: [
       {
         page: "RiwayatTransaksi",
@@ -30,12 +30,6 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
         icon: "chart",
       },
       {
-        page: "LaporanProduk",
-        alias: "product-reports",
-        label: "Laporan Produk",
-        icon: "product",
-      },
-      {
         page: "Pengeluaran",
         alias: "expenses",
         label: "Pengeluaran",
@@ -44,7 +38,7 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
       {
         page: "RekapManual",
         alias: "manual",
-        label: "Rekap Manual",
+        label: "Input Nota Kertas",
         icon: "pencil",
       },
     ],
@@ -54,16 +48,10 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
     title: "KATALOG & KARYAWAN",
     items: [
       {
-        page: "LayananHarga",
-        alias: "services",
-        label: "Layanan & Harga",
+        page: "KatalogLayananProduk",
+        alias: "catalog",
+        label: "Layanan & Produk",
         icon: "settings",
-      },
-      {
-        page: "MasterProduk",
-        alias: "products",
-        label: "Master Produk",
-        icon: "product",
       },
       {
         page: "TimManajer",
@@ -80,7 +68,7 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
       {
         page: "AbsensiTim",
         alias: "attendance-admin",
-        label: "Absensi Tim",
+        label: "Absensi",
         icon: "calendar",
       },
     ],

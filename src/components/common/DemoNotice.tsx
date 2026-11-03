@@ -5,6 +5,23 @@
  */
 export function DemoNotice({ live, error }: { live: boolean; error?: string }) {
   if (live) return null
+
+  let helpText = ""
+  if (error) {
+    if (error.includes("token tidak ada") || error.includes("belum login")) {
+      helpText = "Mode latihan offline. Silakan login untuk menyimpan data ke sistem."
+    } else if (
+      error.includes("Gagal terhubung") ||
+      error.includes("Failed to fetch") ||
+      error.includes("NetworkError") ||
+      error.includes("gagal memuat data")
+    ) {
+      helpText = "Koneksi internet terputus. Gunakan menu 'Input Nota Kertas' untuk mencatat nota fisik."
+    } else {
+      helpText = `Status: ${error}`
+    }
+  }
+
   return (
     <div
       role="alert"
@@ -19,8 +36,8 @@ export function DemoNotice({ live, error }: { live: boolean; error?: string }) {
         lineHeight: 1.4,
       }}
     >
-      <strong>Mode demo</strong> — data ini <strong>tidak tersimpan</strong> ke server.
-      {error ? ` Penyebab: ${error}` : ""}
+      <strong>Mode demo</strong> — data transaksi pada sesi ini <strong>tidak tersimpan</strong> ke server.
+      {helpText && <span> {helpText}</span>}
     </div>
   )
 }

@@ -17,13 +17,10 @@ export interface AppLayoutProps {
   children?: ReactNode
 }
 
-const ROLES: Role[] = ["Owner", "Manajer", "Kasir", "Kapster"]
-
 export function AppLayout({
   currentRole,
   activePage,
   onNavigate,
-  onRoleChange,
   onLogout,
   userName,
   children,
@@ -93,65 +90,14 @@ export function AppLayout({
       </div>
 
       <main className="workspace">
-        <header className="app-header">
-          <div className="app-header-inner">
-            <div className="header-left">
-              <Button
-                className="mobile-menu"
-                onClick={() => setMobileNav(true)}
-                aria-label="Buka menu navigasi"
-                title="Buka Menu"
-              >
-                <Icon name="menu" />
-              </Button>
-              <div className="header-status-badge">
-                <span className="status-indicator-dot" />
-                <span className="status-badge-label">Mode Aktif:</span>
-                <strong className={`status-badge-role role-${roleKey}`}>
-                  {currentRole}
-                </strong>
-              </div>
-            </div>
-
-            {onRoleChange && (
-              <div className="header-role-controls">
-                <div
-                  className="segmented header-segmented-desktop"
-                  title="Ubah peran untuk pengetesan"
-                >
-                  {ROLES.map((role) => (
-                    <Button
-                      className={toRoleKey(role) === roleKey ? "active" : ""}
-                      key={role}
-                      onClick={() => onRoleChange(role)}
-                    >
-                      {role}
-                    </Button>
-                  ))}
-                </div>
-
-                <div className="header-role-mobile">
-                  <div className="header-select-shell">
-                    <select
-                      className="header-role-select"
-                      value={typeof currentRole === "string" ? currentRole : ""}
-                      onChange={(e) => onRoleChange(e.target.value as Role)}
-                      aria-label="Ubah peran aktif"
-                    >
-                      {ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
-                    <Icon name="chevron" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </header>
-
+        <Button
+          className="mobile-menu mobile-fab"
+          onClick={() => setMobileNav(true)}
+          aria-label="Buka menu navigasi"
+          title="Buka Menu"
+        >
+          <Icon name="menu" />
+        </Button>
         {children}
       </main>
     </div>

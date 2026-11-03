@@ -26,7 +26,7 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
       {
         page: "RekapManual",
         alias: "manual",
-        label: "Rekap Manual",
+        label: "Input Nota Kertas",
         icon: "pencil",
       },
     ],

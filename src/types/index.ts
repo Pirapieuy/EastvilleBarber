@@ -34,6 +34,8 @@ export type Page =
   | "LaporanKeuangan"
   | "LaporanProduk"
   | "Pengeluaran"
+  | "catalog"
+  | "KatalogLayananProduk"
   | "LayananHarga"
   | "MasterProduk"
   | "TimManajer"
@@ -109,8 +111,8 @@ export const DEMO_USERS: Record<Role, AppUser> = {
   },
   Kapster: {
     id: "u-kapster",
-    name: "Seva",
-    username: "seva.kapster",
+    name: "Budi Santoso",
+    username: "budi.kapster",
     role: "Kapster",
   },
 }

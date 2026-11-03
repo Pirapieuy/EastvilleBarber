@@ -46,9 +46,7 @@ export function Login({
       const targetPage: Page =
         user.role === "Kasir"
           ? "cashier"
-          : user.role === "Manajer"
-            ? "services"
-            : "dashboard"
+          : "dashboard"
       onLogin(appUser, targetPage)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Login gagal.")

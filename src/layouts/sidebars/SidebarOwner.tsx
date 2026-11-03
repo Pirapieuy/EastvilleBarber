@@ -14,8 +14,8 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
     ],
   },
   {
-    id: "laporan-keuangan",
-    title: "LAPORAN & KEUANGAN",
+    id: "laporan",
+    title: "LAPORAN",
     items: [
       {
         page: "RiwayatTransaksi",
@@ -31,21 +31,9 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
       },
       {
         page: "LaporanProduk",
-        alias: "product-reports",
+        alias: "product-report",
         label: "Laporan Produk",
-        icon: "product",
-      },
-      {
-        page: "Pengeluaran",
-        alias: "expenses",
-        label: "Pengeluaran",
-        icon: "expense",
-      },
-      {
-        page: "RekapManual",
-        alias: "manual",
-        label: "Rekap Manual",
-        icon: "pencil",
+        icon: "settings",
       },
     ],
   },
@@ -54,16 +42,10 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
     title: "KATALOG & KARYAWAN",
     items: [
       {
-        page: "LayananHarga",
-        alias: "services",
-        label: "Layanan & Harga",
+        page: "KatalogLayananProduk",
+        alias: "catalog",
+        label: "Layanan & Produk",
         icon: "settings",
-      },
-      {
-        page: "MasterProduk",
-        alias: "products",
-        label: "Master Produk",
-        icon: "product",
       },
       {
         page: "TimEastville",
@@ -80,7 +62,7 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
       {
         page: "AbsensiAdmin",
         alias: "attendance-admin",
-        label: "Absensi Admin",
+        label: "Absensi",
         icon: "calendar",
       },
     ],

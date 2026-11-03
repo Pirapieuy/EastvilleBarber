@@ -1851,6 +1851,13 @@ textarea {
   min-width: 0;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
 .header-status-badge {
   display: inline-flex;
   align-items: center;
@@ -1979,6 +1986,10 @@ textarea {
 
 .content.narrow {
   width: min(1060px, 100%);
+}
+
+.catalog-embedded-view {
+  width: 100%;
 }
 
 .page-title {
@@ -2638,6 +2649,30 @@ textarea {
 .cart-line-title small .icon {
   width: 10px;
   color: var(--brass-dark);
+}
+
+.cart-line-kapster {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cart-line-kapster .icon {
+  width: 10px;
+  color: var(--brass-dark);
+}
+
+.cart-line-kapster select {
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 11px;
+  color: var(--ink);
+  cursor: pointer;
 }
 
 .cart-lines article .button {
@@ -6346,6 +6381,14 @@ textarea {
     background: var(--paper);
     border: 1px solid var(--line);
     margin-right: 0;
+  }
+
+  .mobile-menu.mobile-fab {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 30;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   }
 
   .app-header-inner {

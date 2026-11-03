@@ -4,6 +4,7 @@ import { Button, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiKasir, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
+import { getPromoDiscounts, PromoDiscount } from "../../utils/promoStorage"
 
 export type CatalogItem = {
   id: number | string
@@ -57,6 +58,7 @@ export function ReceiptView({
   change,
   cashier,
   invoice = "INV-291026-0084",
+  backLabel = "Transaksi Baru (Selesai)",
   onClose,
 }: {
   cart: CartLine[]
@@ -69,14 +71,15 @@ export function ReceiptView({
   change: number
   cashier: string
   invoice?: string
+  backLabel?: string
   onClose: () => void
 }) {
   const [size, setSize] = useState<"58" | "80">("58")
   return (
     <div className="flow-page">
       <div className="flow-toolbar">
-        <Button onClick={onClose}>
-          <Icon name="back" /> Kembali
+        <Button className="primary-button" onClick={onClose}>
+          <Icon name="check" /> {backLabel}
         </Button>
         <div className="segmented">
           <Button
@@ -196,14 +199,14 @@ export function CashierPage({
 } = {}) {
   const [tab, setTab] = useState<"Layanan" | "Produk">("Layanan")
   const [cari, setCari] = useState("")
-  const [selectedBarber, setSelectedBarber] = useState("Seva")
+  const [selectedBarber, setSelectedBarber] = useState("Budi Santoso")
   const [cart, setCart] = useState<CartLine[]>([
-    { ...catalog[0], lineId: `${catalog[0].id}-Seva`, qty: 1, barber: "Seva" },
+    { ...catalog[0], lineId: `${catalog[0].id}-Budi Santoso`, qty: 1, barber: "Budi Santoso" },
     {
       ...catalog[2],
-      lineId: `${catalog[2].id}-Tata`,
+      lineId: `${catalog[2].id}-Zhefitra Ananda`,
       qty: 1,
-      barber: "Tata",
+      barber: "Zhefitra Ananda",
     },
   ])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
@@ -212,10 +215,14 @@ export function CashierPage({
   const [discount, setDiscount] = useState(0)
   const [discountMode, setDiscountMode] = useState<"Nominal" | "Persen">("Nominal")
   const [discountDraft, setDiscountDraft] = useState(0)
+  const [discountPin, setDiscountPin] = useState("123456")
+  const [discountPinError, setDiscountPinError] = useState("")
+  const [discountReason, setDiscountReason] = useState("")
+  const [discountReasonDraft, setDiscountReasonDraft] = useState("")
   const [appliedDiscountPercent, setAppliedDiscountPercent] = useState<number | null>(null)
+  const [discountTypeTab, setDiscountTypeTab] = useState<"event" | "manual">("event")
+  const [promosList, setPromosList] = useState<PromoDiscount[]>([])
   const [discountOpen, setDiscountOpen] = useState(false)
-  const [gratis, setGratis] = useState(false)
-  const [gratisAlasan, setGratisAlasan] = useState("")
   const [receipt, setReceipt] = useState(false)
 
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
@@ -223,7 +230,7 @@ export function CashierPage({
   const [live, setLive] = useState(false)
   const [catalogData, setCatalogData] = useState<CatalogItem[]>(catalog)
   const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
-    ["Seva", "Tata", "Faisal", "Fadhil", "Ferdi"].map((name) => ({ name })),
+    ["Budi Santoso", "Zhefitra Ananda", "Seva", "Tata Pratama", "Faisal Rahman", "Ferdi"].map((name) => ({ name })),
   )
   const [invoice, setInvoice] = useState<string | undefined>()
   const [paying, setPaying] = useState(false)
@@ -268,11 +275,12 @@ export function CashierPage({
     setPayError("")
     setPaying(true)
     try {
+      const isZero = payableTotal === 0
       const res = await apiKasir.checkout({
         metode: method,
         diskon: effectiveDiscount,
-        gratis,
-        alasan: gratis ? gratisAlasan : undefined,
+        gratis: isZero,
+        alasan: discountReason || undefined,
         bayarTunai: method === "QRIS" ? 0 : cash,
         bayarQris: method === "Tunai" ? 0 : qris,
         items: cart.map((l) => ({
@@ -304,9 +312,8 @@ export function CashierPage({
     (x) => x.type === tab && x.name.toLowerCase().includes(cari.trim().toLowerCase()),
   )
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
-  const effectiveDiscount = gratis
-    ? total
-    : appliedDiscountPercent === null
+  const effectiveDiscount =
+    appliedDiscountPercent === null
       ? discount
       : Math.round((total * appliedDiscountPercent) / 100)
   const payableTotal = Math.max(0, total - effectiveDiscount)
@@ -316,7 +323,25 @@ export function CashierPage({
   const change =
     method === "QRIS" ? 0 : Math.max(0, cash - (payableTotal - qris))
 
+  const payDisabledReason = ((): string | null => {
+    if (!cart.length) return null
+    if (paying) return "Sedang memproses pembayaran..."
+    if (shortage > 0) {
+      return `Pembayaran masih kurang ${rupiah(shortage)}.`
+    }
+    if (payableTotal === 0 && !discountReason.trim()) {
+      return "Tagihan Rp 0. Masukkan keterangan diskon di menu Beri Diskon."
+    }
+    return null
+  })()
+
   if (currentUser && currentUser.role !== "Kasir") {
+    const homePage =
+      currentUser.role === "Owner"
+        ? "BerandaOwner"
+        : currentUser.role === "Kapster"
+          ? "BerandaKapster"
+          : "BerandaManajer"
     return (
       <div className="content">
         <div className="role-denied-box">
@@ -330,7 +355,7 @@ export function CashierPage({
           {onNavigate && (
             <Button
               className="primary-button"
-              onClick={() => onNavigate("BerandaManajer")}
+              onClick={() => onNavigate(homePage)}
             >
               Kembali ke Beranda
             </Button>
@@ -365,15 +390,13 @@ export function CashierPage({
         invoice={invoice}
         onClose={() => {
           setReceipt(false)
-          if (live) {
-            setCart([])
-            setCash(0)
-            setQris(0)
-            setDiscount(0)
-            setAppliedDiscountPercent(null)
-            setGratis(false)
-            setGratisAlasan("")
-          }
+          setCart([])
+          setCash(0)
+          setQris(0)
+          setDiscount(0)
+          setAppliedDiscountPercent(null)
+          setDiscountReason("")
+          setDiscountReasonDraft("")
         }}
       />
     )
@@ -505,9 +528,33 @@ export function CashierPage({
                   <div>
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
-                      <small>
-                        <Icon name="user" /> Kapster: {line.barber}
-                      </small>
+                      <label className="cart-line-kapster">
+                        <Icon name="user" />
+                        <select
+                          aria-label={`Pilih kapster untuk ${line.name}`}
+                          onChange={(e) => {
+                            const newBarber = e.target.value
+                            setCart((c) =>
+                              c.map((x) =>
+                                x.lineId === line.lineId
+                                  ? {
+                                      ...x,
+                                      barber: newBarber,
+                                      lineId: `${x.id}-${newBarber}`,
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }}
+                          value={line.barber}
+                        >
+                          {barberList.map((b) => (
+                            <option key={b.name} value={b.name}>
+                              {b.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                     </span>
                     <Button
                       onClick={() =>
@@ -568,129 +615,281 @@ export function CashierPage({
                     ? (appliedDiscountPercent ?? 0)
                     : discount,
                 )
+                setDiscountReasonDraft(discountReason)
+                setPromosList(getPromoDiscounts())
                 setDiscountOpen(!discountOpen)
               }}
             >
-              <Icon name="lock" /> Beri diskon
+              <Icon name="coupon" /> {discount > 0 ? "Ubah diskon" : "Beri diskon"}
             </Button>
             {discountOpen && (
               <div className="cart-discount-panel">
-                <div className="discount-mode segmented">
-                  {(["Nominal", "Persen"] as const).map((mode) => (
-                    <Button
-                      className={discountMode === mode ? "active" : ""}
-                      key={mode}
-                      onClick={() => {
-                        setDiscountMode(mode)
-                        setDiscountDraft(
-                          mode === "Persen"
-                            ? (appliedDiscountPercent ?? 0)
-                            : discount,
-                        )
-                      }}
-                    >
-                      {mode === "Nominal" ? "Nominal (Rp)" : "Persen (%)"}
-                    </Button>
-                  ))}
-                </div>
-                <label>
-                  <span>PIN Owner/Manajer</span>
-                  <div className="input-shell">
-                    <Icon name="lock" />
-                    <input defaultValue="123456" type="password" />
-                  </div>
-                </label>
-                <label>
-                  <span>
-                    {discountMode === "Persen"
-                      ? "Persentase diskon"
-                      : "Nilai diskon"}
-                  </span>
-                  <div className="input-shell">
-                    <b>{discountMode === "Persen" ? "%" : "Rp"}</b>
-                    <input
-                      inputMode="numeric"
-                      onChange={(e) =>
-                        setDiscountDraft(
-                          Number(e.target.value.replace(/\D/g, "")),
-                        )
-                      }
-                      value={discountDraft}
-                    />
-                  </div>
-                </label>
-                <div>
+                <div className="segmented" style={{ width: "100%", marginBottom: 10 }}>
                   <Button
-                    className="text-button"
-                    onClick={() => setDiscountOpen(false)}
+                    className={discountTypeTab === "event" ? "active" : ""}
+                    onClick={() => setDiscountTypeTab("event")}
                   >
-                    Batal
+                    <Icon name="tag" /> Diskon Event
                   </Button>
                   <Button
-                    className="secondary-button"
-                    onClick={() => {
-                      const normalizedDiscount =
-                        discountMode === "Persen"
-                          ? Math.min(discountDraft, 100)
-                          : Math.min(discountDraft, total)
-                      const appliedDiscount =
-                        discountMode === "Persen"
-                          ? Math.round((total * normalizedDiscount) / 100)
-                          : normalizedDiscount
-                      const updatedTotal = Math.max(0, total - appliedDiscount)
-                      setDiscount(appliedDiscount)
-                      setAppliedDiscountPercent(
-                        discountMode === "Persen" ? normalizedDiscount : null,
-                      )
-                      if (method === "Tunai") {
-                        setCash(updatedTotal)
-                        setQris(0)
-                      } else if (method === "QRIS") {
-                        setCash(0)
-                        setQris(updatedTotal)
-                      } else {
-                        const cashPart = Math.min(cash, updatedTotal)
-                        setCash(cashPart)
-                        setQris(updatedTotal - cashPart)
-                      }
-                      setDiscountOpen(false)
-                    }}
+                    className={discountTypeTab === "manual" ? "active" : ""}
+                    onClick={() => setDiscountTypeTab("manual")}
                   >
-                    Terapkan
+                    <Icon name="lock" /> Diskon Manual
                   </Button>
                 </div>
+
+                {discountTypeTab === "event" ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <small style={{ color: "var(--muted)", fontSize: 11 }}>
+                      Pilih diskon event yang sedang aktif:
+                    </small>
+                    {promosList.filter((p) => p.status === "Aktif").length === 0 ? (
+                      <p style={{ color: "var(--slate)", fontSize: 12, padding: "8px 0" }}>
+                        Belum ada diskon event aktif. Atur di menu Layanan & Produk.
+                      </p>
+                    ) : (
+                      promosList
+                        .filter((p) => p.status === "Aktif")
+                        .map((p) => (
+                          <div
+                            key={p.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "8px 10px",
+                              borderRadius: 6,
+                              border: "1px solid var(--line)",
+                              background: "var(--paper)",
+                              gap: 8,
+                            }}
+                          >
+                            <div>
+                              <strong style={{ fontSize: 12, display: "block" }}>{p.nama}</strong>
+                              <small style={{ color: "var(--muted)", fontSize: 11 }}>
+                                Diskon {p.persen}% · s/d{" "}
+                                {new Date(p.berlakuSampai + "T00:00:00").toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </small>
+                            </div>
+                            <Button
+                              className="secondary-button"
+                              onClick={() => {
+                                const appliedDiscount = Math.round((total * p.persen) / 100)
+                                const updatedTotal = Math.max(0, total - appliedDiscount)
+                                setDiscount(appliedDiscount)
+                                setAppliedDiscountPercent(p.persen)
+                                setDiscountReason(p.nama)
+                                if (method === "Tunai") {
+                                  setCash(updatedTotal)
+                                  setQris(0)
+                                } else if (method === "QRIS") {
+                                  setCash(0)
+                                  setQris(updatedTotal)
+                                } else {
+                                  const cashPart = Math.min(cash, updatedTotal)
+                                  setCash(cashPart)
+                                  setQris(updatedTotal - cashPart)
+                                }
+                                setDiscountOpen(false)
+                              }}
+                              style={{ padding: "3px 8px", fontSize: 11, height: "auto" }}
+                            >
+                              Terapkan
+                            </Button>
+                          </div>
+                        ))
+                    )}
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                      <Button
+                        className="text-button"
+                        onClick={() => setDiscountOpen(false)}
+                        style={{ fontSize: 12 }}
+                      >
+                        Tutup
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="discount-mode segmented" style={{ marginBottom: 10 }}>
+                      {(["Nominal", "Persen"] as const).map((mode) => (
+                        <Button
+                          className={discountMode === mode ? "active" : ""}
+                          key={mode}
+                          onClick={() => {
+                            setDiscountMode(mode)
+                            setDiscountDraft(
+                              mode === "Persen"
+                                ? (appliedDiscountPercent ?? 0)
+                                : discount,
+                            )
+                          }}
+                        >
+                          {mode === "Nominal" ? "Nominal (Rp)" : "Persen (%)"}
+                        </Button>
+                      ))}
+                    </div>
+                    <label>
+                      <span>PIN Otorisasi Manajer/Owner</span>
+                      <div className="input-shell">
+                        <Icon name="lock" />
+                        <input
+                          inputMode="numeric"
+                          maxLength={6}
+                          onChange={(e) => {
+                            setDiscountPin(e.target.value.replace(/\D/g, ""))
+                            setDiscountPinError("")
+                          }}
+                          placeholder="6 digit PIN"
+                          type="password"
+                          value={discountPin}
+                        />
+                      </div>
+                      {discountPinError && (
+                        <small style={{ color: "#dc2626", fontSize: 11, marginTop: 4, display: "block" }}>
+                          {discountPinError}
+                        </small>
+                      )}
+                    </label>
+                    <label>
+                      <span>Keterangan / Alasan Diskon</span>
+                      <div className="input-shell">
+                        <Icon name="pencil" />
+                        <input
+                          placeholder="Mis. Diskon Pelajar, Teman Owner"
+                          value={discountReasonDraft}
+                          onChange={(e) => setDiscountReasonDraft(e.target.value)}
+                        />
+                      </div>
+                    </label>
+                    <label>
+                      <span>
+                        {discountMode === "Persen"
+                          ? "Persentase diskon"
+                          : "Nilai diskon"}
+                      </span>
+                      <div className="input-shell">
+                        <b>{discountMode === "Persen" ? "%" : "Rp"}</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => {
+                            setDiscountDraft(
+                              Number(e.target.value.replace(/\D/g, "")),
+                            )
+                            setDiscountPinError("")
+                          }}
+                          value={discountDraft}
+                        />
+                      </div>
+                    </label>
+                    <div>
+                      <Button
+                        className="text-button"
+                        onClick={() => {
+                          setDiscountPinError("")
+                          setDiscountOpen(false)
+                        }}
+                      >
+                        Batal
+                      </Button>
+                      <Button
+                        className="secondary-button"
+                        onClick={() => {
+                          const cleanPin = discountPin.trim()
+                          if (cleanPin.length !== 6 || !/^\d{6}$/.test(cleanPin)) {
+                            setDiscountPinError("PIN otorisasi harus 6 digit angka.")
+                            return
+                          }
+                          if (!live && cleanPin !== "123456") {
+                            setDiscountPinError("PIN otorisasi salah. Default demo: 123456")
+                            return
+                          }
+                          if (discountDraft <= 0) {
+                            setDiscountPinError("Nilai diskon harus lebih dari 0.")
+                            return
+                          }
+                          setDiscountPinError("")
+                          const normalizedDiscount =
+                            discountMode === "Persen"
+                              ? Math.min(discountDraft, 100)
+                              : Math.min(discountDraft, total)
+                          const appliedDiscount =
+                            discountMode === "Persen"
+                              ? Math.round((total * normalizedDiscount) / 100)
+                              : normalizedDiscount
+                          const updatedTotal = Math.max(0, total - appliedDiscount)
+                          setDiscount(appliedDiscount)
+                          setAppliedDiscountPercent(
+                            discountMode === "Persen" ? normalizedDiscount : null,
+                          )
+                          setDiscountReason(discountReasonDraft.trim() || "Diskon Manual Otorisasi")
+                          if (method === "Tunai") {
+                            setCash(updatedTotal)
+                            setQris(0)
+                          } else if (method === "QRIS") {
+                            setCash(0)
+                            setQris(updatedTotal)
+                          } else {
+                            const cashPart = Math.min(cash, updatedTotal)
+                            setCash(cashPart)
+                            setQris(updatedTotal - cashPart)
+                          }
+                          setDiscountOpen(false)
+                        }}
+                      >
+                        Terapkan
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-            <Button
-              className="discount-button"
-              onClick={() => {
-                setGratis(!gratis)
-                setCash(0)
-                setQris(0)
-              }}
-            >
-              <Icon name="check" /> {gratis ? "Batalkan gratis" : "Gratis (promo/traktiran)"}
-            </Button>
-            {gratis && (
-              <label className="cart-discount-panel">
-                <span>Alasan gratis (wajib)</span>
-                <div className="input-shell">
-                  <input
-                    onChange={(e) => setGratisAlasan(e.target.value)}
-                    placeholder="Mis. traktiran pelanggan setia"
-                    value={gratisAlasan}
-                  />
+            {discount > 0 && (
+              <div
+                className="discount-applied"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: 12 }}>
+                    Diskon: <strong>{discountReason || "Diskon Otorisasi"}</strong>
+                    {appliedDiscountPercent !== null && ` (${appliedDiscountPercent}%)`}
+                  </span>
+                  <strong style={{ display: "block", color: "var(--brass-dark, #b45309)" }}>
+                    − {rupiah(effectiveDiscount)}
+                  </strong>
                 </div>
-              </label>
-            )}
-            {discount > 0 && !gratis && (
-              <div className="discount-applied">
-                <span>
-                  Diskon terotorisasi
-                  {appliedDiscountPercent !== null &&
-                    ` (${appliedDiscountPercent}%)`}
-                </span>
-                <strong>− {rupiah(effectiveDiscount)}</strong>
+                <Button
+                  className="text-button"
+                  onClick={() => {
+                    setDiscount(0)
+                    setAppliedDiscountPercent(null)
+                    setDiscountReason("")
+                    if (method === "Tunai") {
+                      setCash(total)
+                      setQris(0)
+                    } else if (method === "QRIS") {
+                      setCash(0)
+                      setQris(total)
+                    } else {
+                      setCash(total)
+                      setQris(0)
+                    }
+                  }}
+                  style={{ fontSize: 11, color: "#dc2626", padding: "2px 6px" }}
+                  title="Batalkan diskon"
+                >
+                  <Icon name="trash" /> Hapus
+                </Button>
               </div>
             )}
             <div className="grand">
@@ -735,9 +934,13 @@ export function CashierPage({
                       <b>Rp</b>
                       <input
                         inputMode="numeric"
-                        onChange={(e) =>
-                          setCash(Number(e.target.value.replace(/\D/g, "")))
-                        }
+                        onChange={(e) => {
+                          const val = Number(e.target.value.replace(/\D/g, ""))
+                          setCash(val)
+                          if (method === "Gabungan") {
+                            setQris(Math.max(0, payableTotal - val))
+                          }
+                        }}
                         value={cash}
                       />
                     </div>
@@ -750,9 +953,13 @@ export function CashierPage({
                       <b>Rp</b>
                       <input
                         inputMode="numeric"
-                        onChange={(e) =>
-                          setQris(Number(e.target.value.replace(/\D/g, "")))
-                        }
+                        onChange={(e) => {
+                          const val = Number(e.target.value.replace(/\D/g, ""))
+                          setQris(val)
+                          if (method === "Gabungan") {
+                            setCash(Math.max(0, payableTotal - val))
+                          }
+                        }}
                         value={qris}
                       />
                     </div>
@@ -772,9 +979,28 @@ export function CashierPage({
                   {shortage ? `Kurang ${rupiah(shortage)}` : rupiah(change)}
                 </strong>
               </div>
+              {payDisabledReason && (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    background: "#fffbeb",
+                    border: "1px solid #fde68a",
+                    color: "#92400e",
+                    fontSize: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    margin: "8px 0",
+                  }}
+                >
+                  <Icon name="alert" />
+                  <span>{payDisabledReason}</span>
+                </div>
+              )}
               <Button
                 className="primary-button cart-submit"
-                disabled={!cart.length || shortage > 0 || paying || (gratis && !gratisAlasan.trim()) || (payableTotal === 0 && !gratis)}
+                disabled={Boolean(payDisabledReason) || !cart.length}
                 onClick={pay}
               >
                 {paying ? "Memproses..." : "Bayar"} <Icon name="cash" />

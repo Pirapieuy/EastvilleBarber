@@ -316,6 +316,7 @@ export function HistoryPage({
         change={0}
         cashier={selected.createdBy}
         invoice={selected.id}
+        backLabel="Kembali ke Riwayat"
         onClose={() => setShowReceipt(false)}
       />
     )
@@ -345,10 +346,10 @@ export function HistoryPage({
       <div className="master-detail">
         <section className="panel transaction-list">
           <div className="table-head">
-            <span>Nota & Waktu</span>
+            <span>Inv</span>
+            <span>Waktu</span>
             <span>Kapster</span>
-            <span>Total</span>
-            <span>Status</span>
+            <span>Item</span>
           </div>
           {visibleTx.map((tx) => (
             <Button
@@ -358,23 +359,15 @@ export function HistoryPage({
               key={tx.id}
               onClick={() => setSelectedId(tx.id)}
             >
-              <div className="tx-cell-nota">
-                <strong>{tx.id}</strong>
-                <small>{tx.time}</small>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <strong className="tx-cell-nota">{tx.id}</strong>
+                <small style={{ fontSize: "10px", color: "var(--slate)" }}>{tx.date}</small>
               </div>
+              <small className="tx-cell-nota">{tx.time}</small>
               <span className="tx-cell-kapster">{tx.barber}</span>
-              <strong className="tx-cell-total">{rupiah(tx.total)}</strong>
-              <i
-                className={`chip ${
-                  tx.status === "BATAL"
-                    ? "batal"
-                    : tx.status === "Manual"
-                      ? "manual"
-                      : "lunas"
-                }`}
-              >
-                {tx.status === "BATAL" ? "Batal" : tx.status}
-              </i>
+              <span className="tx-cell-kapster">
+                {tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}
+              </span>
             </Button>
           ))}
         </section>
@@ -449,76 +442,26 @@ export function HistoryPage({
                 <small>Rincian Komisi</small>
                 <strong>{rupiah(selected.commission)}</strong>
                 <span className="commission-hint">
-                  {selected.commissionNote}
+                  {(selected.commissionNote || "").replace("(lembur)", "").replace("50%", "").trim()}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="detail-section">
-            <h3>Log Jejak Audit</h3>
-            <div className="audit-timeline">
-              <div className="audit-entry">
-                <i className="audit-dot created" />
-                <div>
-                  <strong>Transaksi Dibuat</strong>
-                  <small>
-                    Dibuat oleh {selected.createdBy} · {selected.createdTime}
-                  </small>
-                </div>
-              </div>
-              {selected.status === "BATAL" && (
-                <div className="audit-entry voided">
-                  <i className="audit-dot voided" />
-                  <div>
-                    <strong>Transaksi Dibatalkan</strong>
-                    <small>
-                      Dibatalkan oleh {selected.voidBy} · {selected.voidTime}
-                    </small>
-                    {selected.voidReason && (
-                      <div className="audit-reason-box">
-                        Alasan: &ldquo;{selected.voidReason}&rdquo;
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
           <div className="detail-actions-group">
-            {selected.status !== "BATAL" ? (
-              <>
-                <Button
-                  className="danger-button"
-                  onClick={() => setAction("void")}
-                >
-                  <Icon name="close" /> Batalkan Transaksi
-                </Button>
-                <Button
-                  className="secondary-button"
-                  onClick={() => setShowReceipt(true)}
-                >
-                  <Icon name="print" /> Cetak Struk
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  className="secondary-button"
-                  onClick={() => setShowReceipt(true)}
-                >
-                  <Icon name="print" /> Cetak Struk
-                </Button>
-                {userRole !== "Kasir" && (
-                  <Button
-                    className="primary-button"
-                    onClick={() => setAction("restore")}
-                  >
-                    <Icon name="restore" /> Pulihkan Transaksi
-                  </Button>
-                )}
-              </>
+            <Button
+              className="secondary-button"
+              onClick={() => setShowReceipt(true)}
+            >
+              <Icon name="print" /> Cetak Struk
+            </Button>
+            {selected.status === "BATAL" && userRole !== "Kasir" && (
+              <Button
+                className="primary-button"
+                onClick={() => setAction("restore")}
+              >
+                <Icon name="restore" /> Pulihkan Transaksi
+              </Button>
             )}
           </div>
         </aside>

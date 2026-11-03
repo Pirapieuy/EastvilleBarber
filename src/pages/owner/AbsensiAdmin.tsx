@@ -10,9 +10,10 @@ export function AbsensiAdmin({
     <AttendanceAdminPage
       currentUser={currentUser}
       role="Owner"
-      title="Absensi Admin"
+      title="Absensi"
     />
   )
 }
 
+export const JadwalAbsensi = AbsensiAdmin
 export default AbsensiAdmin

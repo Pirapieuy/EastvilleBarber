@@ -141,7 +141,7 @@ export function ManualPage() {
   return (
     <form className="content narrow" onSubmit={handleSave}>
       <DemoNotice live={live} error={liveError} />
-      <PageTitle eyebrow="Transaksi dari buku" title="Input susulan" />
+      <PageTitle eyebrow="Transaksi dari buku fisik" title="Input Nota Kertas" />
       <section className="panel form-panel">
         <h3>Informasi transaksi</h3>
         <div className="form-grid manual-info-grid">
@@ -250,7 +250,7 @@ export function ManualPage() {
           {success && <small> {success}</small>}
         </span>
         <Button className="primary-button" disabled={!canSave} type="submit">
-          {saving ? "Menyimpan..." : "Simpan rekap manual"}
+          {saving ? "Menyimpan..." : "Simpan Nota Kertas"}
         </Button>
       </div>
     </form>

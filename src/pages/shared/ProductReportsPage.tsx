@@ -400,10 +400,10 @@ export function ProductReportsPage({
         />
         <Kpi
           icon="people"
-          label="Total Komisi Capster"
+          label="Total Komisi Kapster"
           tone="brass"
           value={rupiah(totalBarber)}
-          detail={`${totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0}% bagian capster`}
+          detail={`${totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0}% bagian kapster`}
         />
         <Kpi
           icon="home"
@@ -494,10 +494,10 @@ export function ProductReportsPage({
             <div className="product-tx-head">
               <span>Nota & Waktu</span>
               <span>Produk</span>
-              <span>Capster</span>
+              <span>Kapster</span>
               <span>Pemasok</span>
               <span>Total Omzet</span>
-              <span>Bagian Capster</span>
+              <span>Bagian Kapster</span>
               <span>Bagian Pemasok</span>
               <span>Bagian Eastville</span>
               <span>Status</span>
@@ -562,7 +562,7 @@ export function ProductReportsPage({
           <p className="correction-desc">
             Daftar transaksi produk yang dibatalkan oleh Owner atau Manajer.
             Transaksi yang dibatalkan dipastikan tidak masuk ke dalam
-            perhitungan omzet maupun komisi capster dan pemasok.
+            perhitungan omzet maupun komisi kapster dan pemasok.
           </p>
           <div className="correction-table">
             <div className="correction-head">
@@ -609,7 +609,7 @@ export function ProductReportsPage({
               <div className="legend">
                 <span>
                   <i className="sage-dot" />
-                  Capster{" "}
+                  Kapster{" "}
                   {totalOmzet > 0
                     ? ((totalBarber / totalOmzet) * 100).toFixed(1)
                     : 0}
@@ -672,7 +672,7 @@ export function ProductReportsPage({
         <WhatsAppDialog
           onClose={() => setWa(false)}
           title="Laporan Produk"
-          text={`Periode: ${rentang.dari === rentang.sampai ? rentang.dari : `${rentang.dari} s/d ${rentang.sampai}`}\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi capster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
+          text={`Periode: ${rentang.dari === rentang.sampai ? rentang.dari : `${rentang.dari} s/d ${rentang.sampai}`}\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi kapster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
         />
       )}
     </div>
