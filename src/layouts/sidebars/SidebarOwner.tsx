@@ -24,12 +24,6 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
         icon: "history",
       },
       {
-        page: "TutupKasir",
-        alias: "shift-close",
-        label: "Tutup Kasir",
-        icon: "wallet",
-      },
-      {
         page: "LaporanKeuangan",
         alias: "reports",
         label: "Laporan Keuangan",

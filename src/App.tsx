@@ -7,7 +7,6 @@ import { clearToken, getToken, restoreSession } from "./api"
 // Kasir Pages
 import { KasirPOS } from "./pages/kasir/KasirPOS"
 import { RiwayatTransaksi as RiwayatTransaksiKasir } from "./pages/kasir/RiwayatTransaksi"
-import { ShiftClosePage } from "./pages/shared/ShiftClosePage"
 import { RekapManual as RekapManualKasir } from "./pages/kasir/RekapManual"
 
 // Manajer Pages
@@ -116,9 +115,6 @@ export function App() {
       if (activePage === "RiwayatTransaksi" || activePage === "history") {
         return <RiwayatTransaksiKasir currentUser={currentUser} />
       }
-      if (activePage === "TutupKasir" || activePage === "shift-close") {
-        return <ShiftClosePage currentUser={currentUser} />
-      }
       if (activePage === "RekapManual" || activePage === "manual") {
         return <RekapManualKasir />
       }
@@ -146,9 +142,6 @@ export function App() {
     }
       if (activePage === "Pengeluaran" || activePage === "expenses") {
         return <PengeluaranManajer />
-      }
-      if (activePage === "TutupKasir" || activePage === "shift-close") {
-        return <ShiftClosePage currentUser={currentUser} />
       }
       if (activePage === "RekapManual" || activePage === "manual") {
         return <RekapManualManajer />
@@ -243,9 +236,6 @@ export function App() {
     }
     if (activePage === "Pengeluaran" || activePage === "expenses") {
       return <PengeluaranOwner />
-    }
-    if (activePage === "TutupKasir" || activePage === "shift-close") {
-      return <ShiftClosePage currentUser={currentUser} />
     }
     if (activePage === "RekapManual" || activePage === "manual") {
       return <RekapManualOwner />

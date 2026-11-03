@@ -24,12 +24,6 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
         icon: "history",
       },
       {
-        page: "TutupKasir",
-        alias: "shift-close",
-        label: "Tutup Kasir",
-        icon: "wallet",
-      },
-      {
         page: "RekapManual",
         alias: "manual",
         label: "Input Nota Kertas",
