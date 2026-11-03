@@ -80,6 +80,7 @@ var AKSES = {
   "list-komisi":         ["Owner", "Manajer", "Kapster"],
   "simpan-layanan":      ["Owner", "Manajer"],
   "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
+  "verifikasi-pin-otorisasi": ["Kasir"],
   "laporan-keuangan":    ["Owner", "Manajer"],
   "laporan-produk":      ["Owner", "Manajer", "Kapster"],
   "aktivitas-kapster":   ["Kapster"],
