@@ -59,6 +59,12 @@ export function WhatsAppDialog({
   )
 }
 
+// Dengan token (data asli) laporan dimulai dari nol, bukan angka contoh.
+const laporanKosong: LaporanKeuangan = {
+  pemasukan: 0, tunai: 0, qris: 0, pengeluaran: 0, komisi: 0, sisa: 0,
+  jumlahTransaksi: 0, perHari: [], perKapster: [], stokMenipis: [],
+}
+
 const demoLaporan: LaporanKeuangan = {
   pemasukan: 48750000,
   tunai: 31420000,
@@ -139,7 +145,7 @@ export function ReportsPage({
   const [reloadKey, setReloadKey] = useState(0)
   const [tanggal, setTanggal] = useState(() => isoDate(new Date()))
   const [bulan, setBulan] = useState(() => isoDate(new Date()).slice(0, 7))
-  const [data, setData] = useState<LaporanKeuangan>(demoLaporan)
+  const [data, setData] = useState<LaporanKeuangan>(getToken() ? laporanKosong : demoLaporan)
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   const [fetching, setFetching] = useState(false)
@@ -148,11 +154,11 @@ export function ReportsPage({
   // Interactive Tab: pemasukan | pengeluaran | komisi | sisa
   const [subTab, setSubTab] = useState<"pemasukan" | "pengeluaran" | "komisi" | "sisa">("pemasukan")
   const [productTab, setProductTab] = useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
-  const [productList, setProductList] = useState<ProductTransactionRecord[]>(INITIAL_PRODUCT_TRANSACTIONS)
+  const [productList, setProductList] = useState<ProductTransactionRecord[]>(getToken() ? [] : INITIAL_PRODUCT_TRANSACTIONS)
   const [productLive, setProductLive] = useState(false)
 
   // Expenses management state
-  const [expensesList, setExpensesList] = useState<ExpenseRecord[]>(initialExpenses)
+  const [expensesList, setExpensesList] = useState<ExpenseRecord[]>(getToken() ? [] : initialExpenses)
   const [expenseFormOpen, setExpenseFormOpen] = useState(false)
   const [expCategory, setExpCategory] = useState<string>("Lain-lain")
   const [expAmount, setExpAmount] = useState("")

@@ -21,8 +21,9 @@ export function TeamPage({
   role?: Role
   title?: string
 } = {}) {
-  const [users, setUsers] = useState<UserRow[]>(demoTeamData)
+  const [users, setUsers] = useState<UserRow[]>(getToken() ? [] : demoTeamData)
   const [loading, setLoading] = useState(false)
+  const [loadError, setLoadError] = useState("")
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState("Semua")
 
@@ -59,8 +60,9 @@ export function TeamPage({
         })
         setKomisiMap(km)
       }
-    } catch {
-      // Fallback tetap data demo
+      setLoadError("")
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Gagal memuat data tim.")
     } finally {
       setLoading(false)
     }
@@ -208,6 +210,14 @@ export function TeamPage({
       </div>
 
       {loading && <p style={{ color: "var(--muted)", margin: "10px 0" }}>Memuat data tim...</p>}
+      {loadError && (
+        <p role="alert" style={{ color: "#dc2626", margin: "10px 0" }}>
+          Data tim gagal dimuat: {loadError}{" "}
+          <Button className="secondary-button" onClick={() => loadData()}>
+            Coba lagi
+          </Button>
+        </p>
+      )}
 
       <div className="team-grid">
         {filtered.map((x) => (
