@@ -464,6 +464,18 @@ export function CashierPage({
     )
   }
 
+  // Pecahan cepat: pembulatan ke atas terdekat + pecahan lazim, hanya yang lebih besar dari tagihan.
+  const pecahanCepat = Array.from(
+    new Set(
+      [10000, 50000, 100000]
+        .map((k) => Math.ceil(payableTotal / k) * k)
+        .concat([70000, 80000, 100000, 150000, 200000]),
+    ),
+  )
+    .filter((n) => n > payableTotal)
+    .sort((a, b) => a - b)
+    .slice(0, 5)
+
   const pinLabel = (
     <label>
       <span>PIN Otorisasi Manajer/Owner</span>
@@ -1062,7 +1074,7 @@ export function CashierPage({
               {method === "Tunai" && payableTotal > 0 && (
                 <div className="quick-cash" style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "8px 0" }}>
                   <Button onClick={() => setCash(payableTotal)}>Uang pas</Button>
-                  {[50000, 100000, 200000].filter((n) => n > payableTotal).map((n) => (
+                  {pecahanCepat.map((n) => (
                     <Button key={n} onClick={() => setCash(n)}>
                       {rupiah(n)}
                     </Button>

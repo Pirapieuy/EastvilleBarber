@@ -1,39 +1,81 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle, rupiah } from "../../components/common/UI"
-import { apiGaji, getToken, HitungGajiResult } from "../../api"
+import { apiGaji, apiKapster, AktivitasKapster, getToken, HitungGajiResult } from "../../api"
+
+const isoHariIni = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
 
 export function MySalaryPage() {
-  const [data, setData] = useState<HitungGajiResult>({
-    userId: "",
-    totalKomisi: 2090000,
-    totalKasbon: 350000,
-    gajiBersih: 1740000,
-    transaksiSelesai: 47,
-    kasbonAktif: [],
-  })
+  const punyaToken = Boolean(getToken())
+  const [data, setData] = useState<HitungGajiResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [tanggal, setTanggal] = useState(isoHariIni)
+  const [layanan, setLayanan] = useState<AktivitasKapster[] | null>(null)
+  const [layananError, setLayananError] = useState("")
 
   function fetchData() {
     if (!getToken()) return
     setLoading(true)
+    setError("")
     apiGaji
       .hitung()
-      .then((res) => {
-        setData(res)
-      })
-      .catch(() => {
-        // Fallback demo data
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+      .then((res) => setData(res))
+      .catch((e) => setError(e instanceof Error ? e.message : "Gagal memuat data gaji."))
+      .finally(() => setLoading(false))
   }
 
   useEffect(() => {
     fetchData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Rincian nota layanan yang dikerjakan pada tanggal terpilih (dari aktivitas-kapster)
+  useEffect(() => {
+    if (!getToken()) return
+    let batal = false
+    setLayanan(null)
+    setLayananError("")
+    apiKapster
+      .aktivitas(tanggal)
+      .then((rows) => !batal && setLayanan(rows.filter((r) => r.type === "Layanan")))
+      .catch((e) => !batal && setLayananError(e instanceof Error ? e.message : "Gagal memuat rincian layanan."))
+    return () => {
+      batal = true
+    }
+  }, [tanggal])
+
+  if (!punyaToken) {
+    return (
+      <div className="mobile-content">
+        <PageTitle eyebrow="Pendapatan pribadi" title="Gaji Saya" />
+        <p>Silakan login untuk melihat gaji dan komisi Anda.</p>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="mobile-content">
+        <PageTitle eyebrow="Pendapatan pribadi" title="Gaji Saya" />
+        {error ? (
+          <>
+            <p>Data gaji gagal dimuat: {error}</p>
+            <Button className="primary-button" onClick={fetchData}>
+              Coba lagi
+            </Button>
+          </>
+        ) : (
+          <p>Memuat data gaji...</p>
+        )}
+      </div>
+    )
+  }
+
+  const totalKomisiLayanan = (layanan ?? []).reduce((n, r) => n + r.comm, 0)
 
   return (
     <div className="mobile-content">
@@ -97,6 +139,52 @@ export function MySalaryPage() {
           ))}
         </section>
       )}
+
+      <section className="panel customer-list" style={{ marginTop: 16 }}>
+        <PageTitle
+          eyebrow="Rincian nota layanan"
+          title="Layanan yang Anda kerjakan"
+          action={
+            <input
+              aria-label="Tanggal"
+              max={isoHariIni()}
+              type="date"
+              value={tanggal}
+              onChange={(e) => e.target.value && setTanggal(e.target.value)}
+            />
+          }
+        />
+        {layananError ? (
+          <p>{layananError}</p>
+        ) : layanan === null ? (
+          <p>Memuat rincian layanan...</p>
+        ) : layanan.length === 0 ? (
+          <p style={{ color: "var(--slate)" }}>Belum ada layanan yang Anda kerjakan pada tanggal ini.</p>
+        ) : (
+          <>
+            {layanan.map((r, idx) => (
+              <div key={`${r.trx}-${idx}`}>
+                <span>{r.time} WIB</span>
+                <i>
+                  <Icon name="cashier" />
+                </i>
+                <strong>
+                  {r.item}
+                  <small style={{ display: "block", color: "var(--slate)" }}>
+                    {r.trx}
+                    {r.lembur ? " · Lembur" : ""}
+                  </small>
+                </strong>
+                <b>{rupiah(r.comm)}</b>
+              </div>
+            ))}
+            <footer>
+              <span>Total komisi layanan ({layanan.length} pengerjaan)</span>
+              <strong>{rupiah(totalKomisiLayanan)}</strong>
+            </footer>
+          </>
+        )}
+      </section>
 
       <div className="privacy" style={{ marginTop: 20 }}>
         <Icon name="lock" /> Hanya data komisi dan transaksi milik akun Anda yang ditampilkan.
