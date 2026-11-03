@@ -60,7 +60,7 @@ var HEADERS = {
   ]
 };
 
-var STOK_MENIPIS = 3; // produk aktif dengan stok <= angka ini muncul di "Perlu perhatian"
+var STOK_MENIPIS = 1; // produk aktif dengan stok <= angka ini muncul di "Perlu perhatian"
 var KATEGORI_PENGELUARAN = ["Perlengkapan", "Listrik", "Air", "Sewa", "Lain-lain"];
 
 // ---- Hak akses per action ----
@@ -623,6 +623,9 @@ function mutasiStok_(kode, delta, alasan, trxId, user) {
   if (!p) return;
   var akhir = Number(p.stok) + delta;
   setCell_(SHEET_PRODUK, p._row, "stok", akhir);
+  // Stok habis -> produk otomatis Nonaktif; diisi lagi dari 0 -> otomatis Aktif.
+  if (akhir <= 0 && p.status === "Aktif") setCell_(SHEET_PRODUK, p._row, "status", "Nonaktif");
+  else if (delta > 0 && Number(p.stok) <= 0 && akhir > 0 && p.status === "Nonaktif") setCell_(SHEET_PRODUK, p._row, "status", "Aktif");
   appendObj_(SHEET_STOK_MUTASI, {
     waktu: new Date(), kode: kode, delta: delta, stok_akhir: akhir,
     alasan: alasan, trx_id: trxId || "", oleh: user.nama + " · " + user.role

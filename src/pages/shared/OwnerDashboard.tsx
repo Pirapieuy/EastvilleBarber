@@ -119,7 +119,7 @@ export function OwnerDashboard({
       id: k.id,
       nama: k.nama,
       jamMasuk: masuk?.jam ?? "-",
-      status: pulang ? "Sudah pulang" : (masuk?.status ?? "Belum check-in"),
+      status: pulang ? "Sudah pulang" : (masuk?.status ?? ""),
       layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
@@ -190,11 +190,6 @@ export function OwnerDashboard({
         title="Ringkasan Operasional Hari Ini"
         action={
           <div className="page-actions" style={{ position: "relative" }}>
-            {punyaToken && (
-              <Button className="secondary-button" disabled={loading} onClick={() => setReloadKey((k) => k + 1)}>
-                {loading ? "Memuat..." : "Muat ulang"}
-              </Button>
-            )}
             <Button
               className="secondary-button"
               onClick={() => setShowDatePicker((v) => !v)}
@@ -322,7 +317,7 @@ export function OwnerDashboard({
                 <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Kehadiran Tim</h3>
               </div>
               <span className="chip active">
-                {liveAbsensi ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir` : "Absensi tidak tersedia"}
+                {kapsterList.filter((k) => k.jamMasuk !== "-").length} Aktif Hadir
               </span>
             </div>
 
@@ -363,7 +358,7 @@ export function OwnerDashboard({
                       <div>
                         <strong style={{ fontSize: 14, color: "var(--ink)", display: "block" }}>{k.nama}</strong>
                         <small style={{ color: "var(--muted)", fontSize: 12 }}>
-                          Masuk: {k.jamMasuk === "-" ? "belum check-in" : `${k.jamMasuk} WIB`}
+                          Masuk: {k.jamMasuk === "-" ? "-" : `${k.jamMasuk} WIB`}
                         </small>
                       </div>
                     </div>

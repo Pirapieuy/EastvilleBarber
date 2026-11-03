@@ -122,7 +122,7 @@ export function ManagerDashboard({
       id: k.id,
       nama: k.nama,
       jamMasuk: masuk?.jam ?? "-",
-      status: pulang ? "Sudah pulang" : (masuk?.status ?? "Belum check-in"),
+      status: pulang ? "Sudah pulang" : (masuk?.status ?? ""),
       layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
@@ -188,11 +188,6 @@ export function ManagerDashboard({
             >
               <Icon name="expense" /> Catat Pengeluaran
             </Button>
-            {punyaToken && (
-              <Button className="secondary-button" disabled={loading} onClick={() => setReloadKey((k) => k + 1)}>
-                {loading ? "Memuat..." : "Muat ulang"}
-              </Button>
-            )}
             <Button
               className="secondary-button"
               onClick={() => setShowDatePicker((v) => !v)}
@@ -309,7 +304,7 @@ export function ManagerDashboard({
                 <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Status Absensi Hari Ini</h3>
               </div>
               <span className="chip active">
-                {liveAbsensi ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir` : "Absensi tidak tersedia"}
+                {kapsterList.filter((k) => k.jamMasuk !== "-").length} Aktif Hadir
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -337,7 +332,7 @@ export function ManagerDashboard({
                       <div>
                         <strong style={{ fontSize: 14, color: "var(--ink)", display: "block" }}>{k.nama}</strong>
                         <small style={{ color: "var(--muted)", fontSize: 12 }}>
-                          Masuk: {k.jamMasuk === "-" ? "belum check-in" : `${k.jamMasuk} WIB`}
+                          Masuk: {k.jamMasuk === "-" ? "-" : `${k.jamMasuk} WIB`}
                         </small>
                       </div>
                     </div>
@@ -347,7 +342,7 @@ export function ManagerDashboard({
                           {k.layananCount} layanan
                         </span>
                       )}
-                      <i className={`chip ${isLibur ? "inactive" : "lunas"}`}>{k.status}</i>
+                      {k.status && <i className={`chip ${isLibur ? "inactive" : "lunas"}`}>{k.status}</i>}
                     </div>
                   </div>
                 )
