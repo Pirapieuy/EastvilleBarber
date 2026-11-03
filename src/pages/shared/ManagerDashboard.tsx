@@ -126,7 +126,7 @@ export function ManagerDashboard({
       layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
-  const servicesList = liveServices
+  const servicesList = liveServices.filter((s) => s.status !== "Dibatalkan")
 
   const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay()
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
@@ -355,7 +355,7 @@ export function ManagerDashboard({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <div>
                 <p className="eyebrow">Aktivitas Pelayanan</p>
-                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Aktivitas Hari Ini</h3>
+                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Riwayat Transaksi</h3>
               </div>
               <span style={{ fontSize: 13, color: "var(--muted)" }}>{servicesList.length} transaksi</span>
             </div>
@@ -365,7 +365,7 @@ export function ManagerDashboard({
                   Belum ada transaksi layanan pada tanggal ini.
                 </div>
               ) : (
-                servicesList.map((s) => (
+                servicesList.slice(0, 5).map((s) => (
                   <div
                     key={s.id}
                     style={{
@@ -386,7 +386,6 @@ export function ManagerDashboard({
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <b style={{ fontSize: 13, color: "var(--ink)" }}>{rupiah(s.price)}</b>
-                      <span className={`chip ${s.status === "Dibatalkan" ? "inactive" : "active"}`} style={{ fontSize: 11, padding: "2px 8px" }}>{s.status}</span>
                     </div>
                   </div>
                 ))
@@ -395,65 +394,6 @@ export function ManagerDashboard({
           </section>
         </div>
 
-        {/* Kalender Interaktif */}
-        <div>
-          <section className="panel" style={{ padding: 18, position: "sticky", top: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <div>
-                <p className="eyebrow">Navigasi Tanggal</p>
-                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{NAMA_BULAN[calMonth]} {calYear}</h3>
-              </div>
-              <div style={{ display: "flex", gap: 4 }}>
-                <button type="button" className="secondary-button" style={{ padding: "6px 10px", minWidth: 32 }} onClick={handlePrevMonth} aria-label="Bulan sebelumnya">
-                  <Icon name="chevron" />
-                </button>
-                <button type="button" className="secondary-button" style={{ padding: "6px 10px", minWidth: 32, transform: "rotate(180deg)" }} onClick={handleNextMonth} aria-label="Bulan berikutnya">
-                  <Icon name="chevron" />
-                </button>
-              </div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", textAlign: "center", fontWeight: 700, fontSize: 11, color: "var(--slate)", marginBottom: 8 }}>
-              {HARI_SINGKAT.map((h) => <div key={h} style={{ padding: "4px 0" }}>{h}</div>)}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
-              {Array.from({ length: startOffset }).map((_, i) => <div key={`empty-${i}`} />)}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1
-                const curIso = `${calYear}-${pad(calMonth + 1)}-${pad(day)}`
-                const isCurSelected = curIso === selectedDate
-                const isCurToday = curIso === todayIso
-                return (
-                  <button
-                    key={day}
-                    onClick={() => handleSelectDate(day)}
-                    type="button"
-                    style={{
-                      height: 38, borderRadius: 8,
-                      border: isCurSelected ? "2px solid var(--ink)" : isCurToday ? "1px solid var(--brass)" : "1px solid transparent",
-                      background: isCurSelected ? "var(--ink)" : isCurToday ? "rgba(200, 150, 62, 0.12)" : "transparent",
-                      color: isCurSelected ? "#fff" : "var(--ink)",
-                      fontWeight: isCurSelected || isCurToday ? 700 : 500,
-                      fontSize: 13, cursor: "pointer",
-                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    <span>{day}</span>
-                    {isCurToday && !isCurSelected && (
-                      <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--brass)", marginTop: 2 }} />
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12 }}>
-              <span style={{ color: "var(--slate)" }}>Dipilih: <strong>{selectedDate}</strong></span>
-              <button type="button" className="secondary-button" style={{ padding: "4px 10px", fontSize: 11 }} onClick={handleJumpToday}>
-                Hari Ini
-              </button>
-            </div>
-          </section>
-        </div>
       </div>
     </div>
   )
