@@ -208,7 +208,7 @@ agar `Bisnis.js` dan `Kode.js` di branch-nya sama dengan server.
 
 ## 10. Pembagian tugas terbaru (3 Nov 2026)
 
-- **Pita:** membuat **fitur baru**.
+- **Pita (= Sevia):** membuat **fitur baru**.
 - **Raga:** **membenahi bug** (perbaikan yang sudah ada, termasuk tampilan).
 - **Rania:** backend `Bisnis.js` (menyesuaikan data dengan tampilan) dan merge/deploy via `mergebackend`.
 - **Fitra:** backend `Kode.js` (akun, absensi, gaji, audit).

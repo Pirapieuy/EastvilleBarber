@@ -473,6 +473,14 @@ export function HistoryPage({
             >
               <Icon name="print" /> Cetak Struk
             </Button>
+            {selected.status !== "BATAL" && (
+              <Button
+                className="danger-button"
+                onClick={() => setAction("void")}
+              >
+                <Icon name="trash" /> Batalkan Transaksi
+              </Button>
+            )}
             {selected.status === "BATAL" && userRole !== "Kasir" && (
               <Button
                 className="primary-button"
