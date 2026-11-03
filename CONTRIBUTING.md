@@ -205,3 +205,12 @@ agar `Bisnis.js` dan `Kode.js` di branch-nya sama dengan server.
 - Fitur tampilan baru (cari, filter, Excel/PDF, tab Mingguan, dll.) diusulkan ke FE dulu supaya masuk ke desain mereka.
 - Pemilih tanggal tidak boleh melewati hari ini maupun sebelum `TANGGAL_MULAI` (`src/utils/tanggal.ts`).
 - Daftar panjang di Beranda: tampilkan beberapa baris + tombol "Selengkapnya" ke halaman lengkapnya.
+
+## 10. Pembagian tugas terbaru (3 Nov 2026)
+
+- **Pita:** membuat **fitur baru**.
+- **Raga:** **membenahi bug** (perbaikan yang sudah ada, termasuk tampilan).
+- **Rania:** backend `Bisnis.js` (menyesuaikan data dengan tampilan) dan merge/deploy via `mergebackend`.
+- **Fitra:** backend `Kode.js` (akun, absensi, gaji, audit).
+- Fitur tambahan yang ditunda dan menunggu diusulkan ke desain: pencarian/filter/Excel/PDF di Riwayat, Pengeluaran, Layanan & Produk;
+  tab Mingguan di Laporan Keuangan; unduh/hapus di Backup; rincian layanan di Gaji Saya (versi lama ada di tag `ui-sebelum-samain-raga`).

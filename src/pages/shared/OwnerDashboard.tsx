@@ -24,7 +24,7 @@ interface DailyServiceItem {
   kapsterName: string
   price: number
   method: "Tunai" | "QRIS"
-  status: "Selesai" | "Dibatalkan"
+  status: "Selesai" | "Batal"
 }
 
 const NAMA_BULAN = [
@@ -88,7 +88,7 @@ export function OwnerDashboard({
           kapsterName: t.barber || "-",
           price: Number(t.total) || 0,
           method: t.method === "QRIS" ? "QRIS" : "Tunai",
-          status: t.status === "BATAL" ? "Dibatalkan" : "Selesai",
+          status: t.status === "BATAL" ? "Batal" : "Selesai",
         })))
       })
       .catch((e) => {
@@ -124,7 +124,7 @@ export function OwnerDashboard({
       layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
-  const servicesList = liveServices.filter((s) => s.status !== "Dibatalkan")
+  const servicesList = liveServices
 
   // Interactive Calendar Grid Generation
   const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay()
@@ -433,6 +433,9 @@ export function OwnerDashboard({
 
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <b style={{ fontSize: 13, color: "var(--ink)" }}>{rupiah(s.price)}</b>
+                      <span className={`chip ${s.status === "Batal" ? "batal" : "active"}`} style={{ fontSize: 11, padding: "2px 8px" }}>
+                        {s.status}
+                      </span>
                     </div>
                   </div>
                 ))

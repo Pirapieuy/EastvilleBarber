@@ -24,7 +24,7 @@ interface DailyServiceItem {
   kapsterName: string
   price: number
   method: "Tunai" | "QRIS"
-  status: "Selesai" | "Dibatalkan"
+  status: "Selesai" | "Batal"
 }
 
 const NAMA_BULAN = [
@@ -91,7 +91,7 @@ export function ManagerDashboard({
           kapsterName: t.barber || "-",
           price: Number(t.total) || 0,
           method: t.method === "QRIS" ? "QRIS" : "Tunai",
-          status: t.status === "BATAL" ? "Dibatalkan" : "Selesai",
+          status: t.status === "BATAL" ? "Batal" : "Selesai",
         })))
       })
       .catch((e) => {
@@ -127,7 +127,7 @@ export function ManagerDashboard({
       layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
-  const servicesList = liveServices.filter((s) => s.status !== "Dibatalkan")
+  const servicesList = liveServices
 
   const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay()
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
@@ -388,6 +388,9 @@ export function ManagerDashboard({
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <b style={{ fontSize: 13, color: "var(--ink)" }}>{rupiah(s.price)}</b>
+                      <span className={`chip ${s.status === "Batal" ? "batal" : "active"}`} style={{ fontSize: 11, padding: "2px 8px" }}>
+                        {s.status}
+                      </span>
                     </div>
                   </div>
                 ))
