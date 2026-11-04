@@ -1,7 +1,7 @@
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
@@ -293,7 +293,7 @@ export function HistoryPage({
   if (loading) {
     return (
       <div className="content">
-        <p>Memuat riwayat transaksi...</p>
+        <LoadingState message="Memuat riwayat transaksi..." />
       </div>
     )
   }
@@ -362,7 +362,6 @@ export function HistoryPage({
         <section className="panel transaction-list">
           <div className="table-head">
             <span>Inv</span>
-            <span>Waktu</span>
             <span>Kapster</span>
             <span>Item</span>
           </div>
@@ -376,9 +375,10 @@ export function HistoryPage({
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <strong className="tx-cell-nota">{tx.id}</strong>
-                <small style={{ fontSize: "10px", color: "var(--slate)" }}>{tx.date}</small>
+                <small style={{ fontSize: "10px", color: "var(--slate)" }}>
+                  {tx.date} · {tx.time}
+                </small>
               </div>
-              <small className="tx-cell-nota">{tx.time}</small>
               <span className="tx-cell-kapster">{tx.barber}</span>
               <span className="tx-cell-kapster">
                 {tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}

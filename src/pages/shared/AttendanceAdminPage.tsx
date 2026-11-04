@@ -331,12 +331,6 @@ export function AttendanceAdminPage({
                   Jadwal Masuk Kapster · {new Date(filterTanggal + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </h3>
               </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Button className="secondary-button" onClick={() => setTab("Pengaturan")}>
-                  <Icon name="clock" /> Atur Jam Kerja & Komisi
-                </Button>
-              </div>
             </div>
 
             <div className="filters">
@@ -537,7 +531,7 @@ export function AttendanceAdminPage({
               Tentukan batas jam mulai dan jam selesai operasional barbershop.
             </p>
             <form onSubmit={handleSaveJamKerja} style={{ maxWidth: 520, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="attendance-setting-pair">
                 <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>Jam Mulai Operasional</span>
                   <input required type="time" value={jamMulai} onChange={(e) => setJamMulai(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
@@ -566,7 +560,7 @@ export function AttendanceAdminPage({
               Atur persentase komisi reguler dan lembur untuk layanan.
             </p>
             <form onSubmit={handleSaveKomisi} style={{ maxWidth: 520, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="attendance-setting-pair">
                 <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>Komisi Layanan Reguler (%)</span>
                   <input max={100} min={0} required type="number" value={komisiDefault} onChange={(e) => setKomisiDefault(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />

@@ -466,6 +466,9 @@ export function ReportsPage({
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20 }}>
             <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
+            <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
+              Rincian pemasukan berdasarkan metode pembayaran.
+            </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginTop: 14 }}>
               <div style={{ padding: 16, borderRadius: 8, border: "1px solid var(--line)", background: "var(--paper)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -508,10 +511,12 @@ export function ReportsPage({
       {subTab === "pengeluaran" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div className="page-title expense-page-title">
               <div>
-                <p className="eyebrow">Operasional</p>
-                <h3 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>Detail Pengeluaran Toko</h3>
+                <h2>Detail Pengeluaran Toko</h2>
+                <p className="expense-page-description">
+                  Daftar biaya operasional yang tercatat.
+                </p>
               </div>
               <Button className="primary-button" onClick={() => setExpenseFormOpen(true)}>
                 <Icon name="plus" /> Catat Pengeluaran
@@ -529,51 +534,53 @@ export function ReportsPage({
               </div>
             </div>
 
-            <div className="expense-head">
-              <span>Tanggal</span>
-              <span>Keterangan</span>
-              <span>Jumlah</span>
-              <span>Aksi</span>
-            </div>
-
-            {filteredExpenses.map((row) => (
-              <div
-                className={`expense-row ${row.status === "BATAL" ? "voided" : ""}`}
-                key={row.id}
-              >
-                <span>{row.date}</span>
-                <span>
-                  {row.description}
-                  {row.status === "BATAL" && (
-                    <small>{row.cancelReason || "Dibatalkan"}</small>
-                  )}
-                </span>
-                <strong>{rupiah(row.amount)}</strong>
-                {row.status === "BATAL" ? (
-                  <Button
-                    className="secondary-button"
-                    onClick={() => handleToggleExpenseStatus(row.id)}
-                    title="Pulihkan pengeluaran"
-                  >
-                    <Icon name="restore" /> Pulihkan
-                  </Button>
-                ) : (
-                  <Button
-                    className="danger-button"
-                    onClick={() => handleToggleExpenseStatus(row.id)}
-                    title="Batalkan pengeluaran"
-                  >
-                    Batalkan
-                  </Button>
-                )}
+            <div className="expense-table-scroll">
+              <div className="expense-head">
+                <span>Tanggal</span>
+                <span>Keterangan</span>
+                <span>Jumlah</span>
+                <span>Aksi</span>
               </div>
-            ))}
 
-          {filteredExpenses.length === 0 && (
-            <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--slate)" }}>
-              Tidak ada data pengeluaran yang cocok dengan pencarian.
+              {filteredExpenses.map((row) => (
+                <div
+                  className={`expense-row ${row.status === "BATAL" ? "voided" : ""}`}
+                  key={row.id}
+                >
+                  <span>{row.date}</span>
+                  <span>
+                    {row.description}
+                    {row.status === "BATAL" && (
+                      <small>{row.cancelReason || "Dibatalkan"}</small>
+                    )}
+                  </span>
+                  <strong>{rupiah(row.amount)}</strong>
+                  {row.status === "BATAL" ? (
+                    <Button
+                      className="secondary-button"
+                      onClick={() => handleToggleExpenseStatus(row.id)}
+                      title="Pulihkan pengeluaran"
+                    >
+                      <Icon name="restore" /> Pulihkan
+                    </Button>
+                  ) : (
+                    <Button
+                      className="danger-button"
+                      onClick={() => handleToggleExpenseStatus(row.id)}
+                      title="Batalkan pengeluaran"
+                    >
+                      Batalkan
+                    </Button>
+                  )}
+                </div>
+              ))}
+
+              {filteredExpenses.length === 0 && (
+                <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--slate)" }}>
+                  Tidak ada data pengeluaran yang cocok dengan pencarian.
+                </div>
+              )}
             </div>
-          )}
         </section>
         </div>
       )}
@@ -584,17 +591,18 @@ export function ReportsPage({
           <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
           <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
           <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
-            Rincian akumulasi omzet dan bagian komisi yang berhak diterima setiap kapster pada periode {periode}.
+            Rincian akumulasi omzet dan bagian komisi yang berhak diterima setiap kapster.
           </p>
 
-          <div className="report-head">
-            <span>Kapster</span>
-            <span>Pelanggan</span>
-            <span>Omzet Dihasilkan</span>
-            <span>Total Komisi</span>
-          </div>
+          <div className="commission-table-scroll">
+            <div className="report-head">
+              <span>Kapster</span>
+              <span>Pelanggan</span>
+              <span>Omzet Dihasilkan</span>
+              <span>Total Komisi</span>
+            </div>
 
-          {data.perKapster.map((k) => {
+            {data.perKapster.map((k) => {
             const pct = k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : "40"
             return (
               <div className="report-row" key={k.kapsterId + k.kapster}>
@@ -607,13 +615,14 @@ export function ReportsPage({
                 <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
               </div>
             )
-          })}
+            })}
 
-          {data.perKapster.length === 0 && (
-            <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
-              Belum ada data komisi kapster pada periode ini.
-            </div>
-          )}
+            {data.perKapster.length === 0 && (
+              <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
+                Belum ada data komisi kapster pada periode ini.
+              </div>
+            )}
+          </div>
         </section>
         </div>
       )}

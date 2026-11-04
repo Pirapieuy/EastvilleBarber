@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 import { apiGaji, getToken, HitungGajiResult } from "../../api"
 
 
@@ -35,20 +35,22 @@ export function MySalaryPage() {
     )
   }
 
+  if (!data && !error) {
+    return (
+      <div className="loading-state-screen">
+        <LoadingState message="Memuat data gaji..." />
+      </div>
+    )
+  }
+
   if (!data) {
     return (
       <div className="mobile-content">
         <PageTitle eyebrow="Pendapatan pribadi" title="Gaji Saya" />
-        {error ? (
-          <>
-            <p>Data gaji gagal dimuat: {error}</p>
-            <Button className="primary-button" onClick={fetchData}>
-              Coba lagi
-            </Button>
-          </>
-        ) : (
-          <p>Memuat data gaji...</p>
-        )}
+        <p>Data gaji gagal dimuat: {error}</p>
+        <Button className="primary-button" onClick={fetchData}>
+          Coba lagi
+        </Button>
       </div>
     )
   }

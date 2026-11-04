@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { apiBackup, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle } from "../../components/common/UI"
 
 interface BackupRow {
   nama: string
@@ -118,7 +118,7 @@ export function BackupPage() {
   if (Boolean(getToken()) && !live && !liveError) {
     return (
       <div className="content">
-        <p>Memuat backup...</p>
+        <LoadingState message="Memuat backup..." />
       </div>
     )
   }

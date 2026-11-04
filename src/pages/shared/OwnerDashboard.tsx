@@ -187,7 +187,6 @@ export function OwnerDashboard({
       <DemoNotice live={Boolean(liveData)} error={liveError} />
 
       <PageTitle
-        eyebrow={`Aktivitas 1 Hari · ${formattedSelectedDate}`}
         title="Ringkasan Operasional Hari Ini"
         action={
           <div className="page-actions" style={{ position: "relative" }}>
@@ -310,7 +309,7 @@ export function OwnerDashboard({
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 16, marginTop: 16 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, alignItems: "start" }}>
+        <div className="dashboard-lower-grid">
           {/* Status & Daftar Kapster Hari Ini */}
           <section className="panel" style={{ padding: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>

@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react"
 import { apiLayanan, apiPengaturan, getToken, LayananRow, PengaturanKomisi } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 
 export const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
 
@@ -141,7 +141,7 @@ export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) 
   if (Boolean(getToken()) && !live && !liveError) {
     return (
       <div className="content">
-        <p>Memuat layanan...</p>
+        <LoadingState message="Memuat layanan..." />
       </div>
     )
   }
@@ -151,7 +151,7 @@ export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) 
       <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Data master"
-        title="Layanan dan harga"
+        title="Layanan & Harga"
         action={
           <Button className="primary-button" onClick={() => openForm(null)}>
             <Icon name="plus" /> Tambah layanan

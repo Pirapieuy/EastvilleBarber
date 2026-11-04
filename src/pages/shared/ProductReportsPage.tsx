@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { apiLaporan, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, Kpi, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
 import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { WhatsAppDialog } from "./ReportsPage"
@@ -280,20 +280,22 @@ export function ProductReportsPage({
   )
 
   // Dengan token: jangan tampilkan angka demo saat memuat atau gagal memuat.
-  if (getToken() && !live) {
+  if (getToken() && !live && liveError) {
     return (
       <div className="content">
-        {liveError ? (
-          <>
-            <DemoNotice live={live} error={liveError} />
-            <p>Laporan produk gagal dimuat: {liveError}</p>
-            <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
-              Coba lagi
-            </Button>
-          </>
-        ) : (
-          <p>Memuat laporan produk...</p>
-        )}
+        <DemoNotice live={live} error={liveError} />
+        <p>Laporan produk gagal dimuat: {liveError}</p>
+        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+          Coba lagi
+        </Button>
+      </div>
+    )
+  }
+
+  if (getToken() && !live) {
+    return (
+      <div className="loading-state-screen">
+        <LoadingState message="Memuat komisi produk..." />
       </div>
     )
   }
