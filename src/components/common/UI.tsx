@@ -137,4 +137,4 @@ export function Kpi({
   )
 }
 
-export { CalendarPicker } from "./CalendarPicker"
+export { CalendarPicker, MonthPicker } from "./CalendarPicker"

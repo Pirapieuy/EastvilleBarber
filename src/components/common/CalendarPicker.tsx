@@ -119,44 +119,36 @@ export function CalendarPicker({
 
   let formatted = placeholder
   if (value) {
-    const d = new Date(value + "T00:00:00")
+    const d = new Date(value.includes("T") ? value : `${value}T00:00:00`)
     if (!isNaN(d.getTime())) {
-      formatted = compact
-        ? d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
-        : d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+      formatted = d.toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
     }
   }
 
   return (
-    <div ref={containerRef} style={{ position: "relative", display: "inline-block", ...style }}>
+    <div
+      ref={containerRef}
+      className="calendar-picker-wrapper"
+      style={{ position: "relative", ...style }}
+    >
       <button
         type="button"
-        className="secondary-button"
+        className="secondary-button calendar-picker-btn"
         onClick={() => setOpen((o) => !o)}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          cursor: "pointer",
-          whiteSpace: "nowrap",
-        }}
         title="Pilih tanggal"
       >
         <Icon name="calendar" />
-        <span>{formatted}</span>
+        <span className="calendar-picker-text">{formatted}</span>
       </button>
 
       {open && (
         <div
-          style={{
-            position: "absolute",
-            left: align === "left" ? 0 : "auto",
-            right: align === "right" ? 0 : "auto",
-            top: "calc(100% + 6px)",
-            zIndex: 50,
-            width: 280,
-            maxWidth: "calc(100vw - 32px)",
-          }}
+          className={`calendar-picker-popup align-${align}`}
         >
           <section className="panel" style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -227,6 +219,134 @@ export function CalendarPicker({
               <button type="button" className="secondary-button" style={{ padding: "4px 8px", fontSize: 11 }} onClick={handleJumpToday}>
                 Hari Ini
               </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function MonthPicker({
+  value,
+  onChange,
+  min,
+  max,
+  style,
+}: {
+  value: string
+  onChange: (val: string) => void
+  min?: string
+  max?: string
+  style?: React.CSSProperties
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+
+  const [year, setYear] = useState(() => {
+    const y = parseInt(value?.slice(0, 4) || "", 10)
+    return isNaN(y) ? new Date().getFullYear() : y
+  })
+
+  const currentMonthIdx = parseInt(value?.slice(5, 7) || "", 10) - 1
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [open])
+
+  const formatted =
+    !isNaN(currentMonthIdx) && currentMonthIdx >= 0 && currentMonthIdx < 12
+      ? `${NAMA_BULAN[currentMonthIdx]} ${year}`
+      : value || "Pilih bulan"
+
+  return (
+    <div
+      ref={containerRef}
+      className="calendar-picker-wrapper"
+      style={{ position: "relative", ...style }}
+    >
+      <button
+        type="button"
+        className="secondary-button calendar-picker-btn"
+        onClick={() => setOpen((o) => !o)}
+        title="Pilih bulan"
+      >
+        <Icon name="calendar" />
+        <span className="calendar-picker-text">{formatted}</span>
+      </button>
+
+      {open && (
+        <div className="calendar-picker-popup align-left">
+          <section className="panel" style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <strong style={{ fontSize: 13 }}>Tahun {year}</strong>
+              <div style={{ display: "flex", gap: 4 }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "4px 8px" }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setYear((y) => y - 1)
+                  }}
+                >
+                  <Icon name="chevron" />
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "4px 8px", transform: "rotate(180deg)" }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setYear((y) => y + 1)
+                  }}
+                >
+                  <Icon name="chevron" />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+              {NAMA_BULAN.map((nama, idx) => {
+                const isoMonth = `${year}-${pad(idx + 1)}`
+                const isSelected = isoMonth === value
+                const isDisabled =
+                  Boolean((max && isoMonth > max.slice(0, 7)) || (min && isoMonth < min.slice(0, 7)))
+                return (
+                  <button
+                    key={nama}
+                    type="button"
+                    disabled={isDisabled}
+                    onClick={() => {
+                      onChange(isoMonth)
+                      setOpen(false)
+                    }}
+                    style={{
+                      height: 34,
+                      borderRadius: 6,
+                      border: isSelected ? "1px solid var(--ink)" : "1px solid var(--line)",
+                      background: isSelected ? "var(--ink)" : "transparent",
+                      color: isSelected ? "#fff" : "var(--ink)",
+                      fontSize: 12,
+                      fontWeight: isSelected ? 700 : 500,
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+                      opacity: isDisabled ? 0.35 : 1,
+                    }}
+                  >
+                    {nama.slice(0, 3)}
+                  </button>
+                )
+              })}
             </div>
           </section>
         </div>

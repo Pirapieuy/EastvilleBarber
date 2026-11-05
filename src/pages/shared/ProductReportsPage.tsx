@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { apiLaporan, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, CalendarPicker, Kpi, LoadingState, MonthPicker, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
 import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
 import { WhatsAppDialog } from "./ReportsPage"
@@ -326,7 +326,7 @@ export function ProductReportsPage({
         {mode === "Bulanan" ? (
           <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
         ) : (
-          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
+          <CalendarPicker max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(d) => d && setTanggal(d)} />
         )}
         {(() => {
           const lunas = live ? txList.filter((t) => t.status === "Lunas") : null
@@ -391,18 +391,30 @@ export function ProductReportsPage({
     <div className="content">
       <DemoNotice live={live} error={liveError} />
       <div className="report-toolbar">
-        <div className="segmented">
-          {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
-            <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
-              {m}
-            </Button>
-          ))}
+        <div className="report-filter-row">
+          <div className="segmented">
+            {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+              <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
+                {m}
+              </Button>
+            ))}
+          </div>
+          {mode === "Bulanan" ? (
+            <MonthPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={bulan}
+              onChange={(b) => b && setBulan(b)}
+            />
+          ) : (
+            <CalendarPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={tanggal}
+              onChange={(d) => d && setTanggal(d)}
+            />
+          )}
         </div>
-        {mode === "Bulanan" ? (
-          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
-        ) : (
-          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
-        )}
         {!forcedRole && !getToken() && (
           <div className="role-preview">
             <span>Peran</span>
@@ -415,7 +427,7 @@ export function ProductReportsPage({
             </select>
           </div>
         )}
-        <div>
+        <div className="report-export-buttons">
           <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>Excel</Button>
           <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>PDF</Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>

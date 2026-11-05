@@ -5,7 +5,7 @@ import { BarChart } from "../../components/common/BarChart"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
-import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, CalendarPicker, Kpi, MonthPicker, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { ProductDetail, CompactDetail, ProductTransactionRecord, INITIAL_PRODUCT_TRANSACTIONS } from "./ProductReportsPage"
 
@@ -351,20 +351,32 @@ export function ReportsPage({
       <DemoNotice live={live} error={liveError} />
 
       <div className="report-toolbar">
-        <div className="segmented">
-          <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
-            Harian
-          </Button>
-          <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
-            Bulanan
-          </Button>
+        <div className="report-filter-row">
+          <div className="segmented">
+            <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
+              Harian
+            </Button>
+            <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
+              Bulanan
+            </Button>
+          </div>
+          {mode !== "Bulanan" ? (
+            <CalendarPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={tanggal}
+              onChange={(d) => d && setTanggal(d)}
+            />
+          ) : (
+            <MonthPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={bulan}
+              onChange={(b) => b && setBulan(b)}
+            />
+          )}
         </div>
-        {mode !== "Bulanan" ? (
-          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
-        ) : (
-          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
-        )}
-        <div>
+        <div className="report-export-buttons">
           <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
             Excel
           </Button>
@@ -534,7 +546,7 @@ export function ReportsPage({
               </div>
             </div>
 
-            <div className="expense-table-scroll">
+            <div className="expense-table-scroll expense-table-compact">
               <div className="expense-head">
                 <span>Tanggal</span>
                 <span>Keterangan</span>
@@ -740,7 +752,7 @@ export function ReportsPage({
             </label>
             <label>
               <span>Tanggal</span>
-              <input type="date" value={expDate} onChange={(e) => setExpDate(e.target.value)} required />
+              <CalendarPicker value={expDate} onChange={setExpDate} />
             </label>
             <label>
               <span>Keterangan</span>

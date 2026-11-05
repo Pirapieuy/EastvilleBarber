@@ -388,10 +388,7 @@ export function AttendanceAdminPage({
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <span style={{ fontSize: 11, color: "var(--slate)" }}>
-                      Libur: <strong>{row.leavesThisMonth}/4</strong>
-                    </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                     <Button
                       className="secondary-button"
                       style={{ padding: "6px 10px" }}

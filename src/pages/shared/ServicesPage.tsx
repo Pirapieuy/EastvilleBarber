@@ -149,25 +149,23 @@ export function ServicesPage({ embedded = false }: { embedded?: boolean } = {}) 
   return (
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        eyebrow="Data master"
-        title="Layanan & Harga"
-        action={
-          <Button className="primary-button" onClick={() => openForm(null)}>
-            <Icon name="plus" /> Tambah layanan
-          </Button>
-        }
-      />
-      <div className="master-summary">
-        <span>
-          <Icon name="cashier" />
-          <strong>{aktifCount} layanan aktif</strong>
-          <small>{rows.length - aktifCount} layanan nonaktif</small>
-        </span>
-        <div className="info-banner">
-          <Icon name="history" />
-          Mengubah harga tidak mengubah transaksi lama.
+      {!embedded && (
+        <PageTitle
+          eyebrow="Data master"
+          title="Layanan & Harga"
+        />
+      )}
+      <div className="services-status-bar">
+        <div className="master-summary">
+          <span>
+            <Icon name="cashier" />
+            <strong>{aktifCount} layanan aktif</strong>
+            <small>{rows.length - aktifCount} nonaktif</small>
+          </span>
         </div>
+        <Button className="primary-button" onClick={() => openForm(null)}>
+          <Icon name="plus" /> Tambah layanan
+        </Button>
       </div>
 
       <section className="panel service-list">

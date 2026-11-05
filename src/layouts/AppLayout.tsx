@@ -17,6 +17,59 @@ export interface AppLayoutProps {
   children?: ReactNode
 }
 
+const PAGE_TITLE_MAP: Record<string, string> = {
+  BerandaOwner: "Beranda",
+  BerandaManajer: "Beranda",
+  BerandaKapster: "Beranda",
+  KasirPOS: "Kasir POS",
+  cashier: "Kasir POS",
+  dashboard: "Beranda",
+  RiwayatTransaksi: "Riwayat Transaksi",
+  history: "Riwayat Transaksi",
+  LaporanKeuangan: "Laporan Keuangan",
+  reports: "Laporan Keuangan",
+  LaporanProduk: "Laporan Produk",
+  "product-reports": "Laporan Produk",
+  "laporan-produk": "Laporan Produk",
+  "product-report": "Laporan Produk",
+  Pengeluaran: "Pengeluaran",
+  expenses: "Pengeluaran",
+  RekapManual: "Input Nota Kertas",
+  manual: "Input Nota Kertas",
+  KatalogLayananProduk: "Layanan & Produk",
+  catalog: "Layanan & Produk",
+  LayananHarga: "Layanan & Produk",
+  services: "Layanan & Produk",
+  MasterProduk: "Layanan & Produk",
+  products: "Layanan & Produk",
+  TimEastville: "Tim Eastville",
+  TimManajer: "Tim Manajer",
+  team: "Tim",
+  GajiKasbon: "Gaji & Kasbon",
+  payroll: "Gaji & Kasbon",
+  GajiKomisiSaya: "Gaji & Komisi Saya",
+  "my-salary": "Gaji & Komisi Saya",
+  KomisiProdukSaya: "Komisi Produk Saya",
+  "komisi-produk": "Komisi Produk Saya",
+  AbsensiAdmin: "Jam Kerja",
+  AbsensiTim: "Jam Kerja",
+  AbsensiJadwalSaya: "Absensi & Jadwal Saya",
+  attendance: "Absensi & Jadwal Saya",
+  "attendance-admin": "Jam Kerja",
+  "attendance-tim": "Jam Kerja",
+  JadwalAbsensi: "Jam Kerja",
+  "jadwal-absensi": "Jam Kerja",
+  JejakAudit: "Jejak Audit",
+  audit: "Jejak Audit",
+  BackupData: "Backup Data",
+  backup: "Backup Data",
+}
+
+function getSapaan() {
+  const jam = new Date().getHours()
+  return jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
+}
+
 export function AppLayout({
   currentRole,
   activePage,
@@ -29,6 +82,9 @@ export function AppLayout({
   const [mobileNav, setMobileNav] = useState(false)
 
   const roleKey = toRoleKey(currentRole)
+  const pageTitle = PAGE_TITLE_MAP[activePage] || "Eastville"
+  const firstName = userName ? userName.split(" ")[0] : ""
+  const greeting = firstName ? `Selamat ${getSapaan()}, ${firstName}` : pageTitle
 
   function handleNavigate(page: string) {
     onNavigate(page)
@@ -90,14 +146,20 @@ export function AppLayout({
       </div>
 
       <main className="workspace">
-        <Button
-          className="mobile-menu mobile-fab"
-          onClick={() => setMobileNav(true)}
-          aria-label="Buka menu navigasi"
-          title="Buka Menu"
-        >
-          <Icon name="menu" />
-        </Button>
+        <header className="mobile-top-navbar">
+          <Button
+            className="mobile-burger-btn"
+            onClick={() => setMobileNav(true)}
+            aria-label="Buka menu navigasi"
+            title="Buka Menu"
+          >
+            <Icon name="menu" />
+          </Button>
+          <div className="mobile-navbar-brand">
+            <span className="mobile-navbar-title">{pageTitle}</span>
+          </div>
+          <div className="mobile-navbar-spacer" />
+        </header>
         {children}
       </main>
     </div>

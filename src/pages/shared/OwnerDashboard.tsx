@@ -148,7 +148,7 @@ export function OwnerDashboard({
               onChange={setSelectedDate}
               max={todayIso}
               min={TANGGAL_MULAI}
-              align="right"
+              align="left"
             />
           </div>
         }
