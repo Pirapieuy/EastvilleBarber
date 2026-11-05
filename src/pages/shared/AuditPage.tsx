@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { LoadingState, PageTitle } from "../../components/common/UI"
+import { CalendarPicker, LoadingState, PageTitle } from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
 
 const DEMO_LOGS: string[][] = [
@@ -233,14 +233,13 @@ export function AuditPage() {
       </div>
       <section className="panel audit-list">
         <div className="filters">
-          <div className="input-shell">
-            <Icon name="calendar" />
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-            />
-          </div>
+          <CalendarPicker
+            value={filterDate}
+            onChange={setFilterDate}
+            allowClear
+            clearLabel="Semua Tanggal"
+            placeholder="Semua Tanggal"
+          />
           <select
             value={filterAksi}
             onChange={(e) => setFilterAksi(e.target.value)}

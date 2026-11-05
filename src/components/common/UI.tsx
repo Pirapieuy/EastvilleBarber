@@ -136,3 +136,5 @@ export function Kpi({
     </article>
   )
 }
+
+export { CalendarPicker } from "./CalendarPicker"

@@ -10,7 +10,7 @@ export function AbsensiAdmin({
     <AttendanceAdminPage
       currentUser={currentUser}
       role="Owner"
-      title="Absensi"
+      title="Jam Kerja"
     />
   )
 }
