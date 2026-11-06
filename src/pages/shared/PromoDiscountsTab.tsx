@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle } from "../../components/common/UI"
+import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
 import {
   getPromoDiscounts,
   PromoDiscount,
@@ -109,15 +109,11 @@ export function PromoDiscountsTab() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <PageTitle
-        action={
-          <Button className="primary-button" onClick={openCreate}>
-            <Icon name="plus" /> Tambah Diskon Event
-          </Button>
-        }
-        eyebrow="Manajemen Promosi"
-        title="Pengaturan Diskon & Promo Event"
-      />
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button className="primary-button" onClick={openCreate}>
+          <Icon name="plus" /> Tambah Diskon Event
+        </Button>
+      </div>
 
       <div
         style={{
@@ -255,16 +251,11 @@ export function PromoDiscountsTab() {
             )}
 
             <label>
-              <span>Keterangan / Alasan Diskon</span>
-              <div className="input-shell">
-                <Icon name="pencil" />
-                <input
-                  placeholder="Mis. Promo Jumat Berkah / Diskon Pelajar"
-                  required
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                />
-              </div>
+              <span>Masa Berlaku Sampai</span>
+              <CalendarPicker
+                value={berlakuSampai}
+                onChange={setBerlakuSampai}
+              />
             </label>
 
             <label>
@@ -284,15 +275,10 @@ export function PromoDiscountsTab() {
 
             <label>
               <span>Masa Berlaku Sampai</span>
-              <div className="input-shell">
-                <Icon name="calendar" />
-                <input
-                  required
-                  type="date"
-                  value={berlakuSampai}
-                  onChange={(e) => setBerlakuSampai(e.target.value)}
-                />
-              </div>
+              <CalendarPicker
+                value={berlakuSampai}
+                onChange={(d) => d && setBerlakuSampai(d)}
+              />
             </label>
 
             <label>

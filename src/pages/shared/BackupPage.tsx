@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { apiBackup, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle } from "../../components/common/UI"
 
 interface BackupRow {
   nama: string
@@ -118,7 +118,7 @@ export function BackupPage() {
   if (Boolean(getToken()) && !live && !liveError) {
     return (
       <div className="content">
-        <p>Memuat backup...</p>
+        <LoadingState message="Memuat backup..." />
       </div>
     )
   }
@@ -181,23 +181,30 @@ export function BackupPage() {
         <PageTitle eyebrow="Arsip tersimpan" title="Daftar backup" />
         <div className="backup-head">
           <span>Nama backup</span>
-          <span>Dibuat</span>
-          <span>Isi</span>
-          <span>Status</span>
-          <span />
+          <span className="desktop-col">Dibuat</span>
+          <span className="desktop-col">Isi</span>
+          <span className="desktop-col">Status</span>
+          <span style={{ textAlign: "right" }}>Aksi</span>
         </div>
         {backups.map((row) => (
           <article className="backup-row" key={row.nama}>
-            <span>
-              <Icon name="file" />
-              <strong>{row.nama}</strong>
-            </span>
-            <span>{row.dibuat}</span>
-            <span>{row.baris} baris</span>
-            <i className="chip lunas">Siap</i>
-            <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
-              <Icon name="restore" /> Pulihkan
-            </Button>
+            <div className="backup-info-cell">
+              <span className="backup-file-name">
+                <Icon name="file" />
+                <strong>{row.nama}</strong>
+              </span>
+              <small className="backup-date-sub">
+                {row.dibuat} · {row.baris} baris
+              </small>
+            </div>
+            <span className="desktop-col">{row.dibuat}</span>
+            <span className="desktop-col">{row.baris} baris</span>
+            <i className="chip lunas desktop-col">Siap</i>
+            <div className="backup-action-cell">
+              <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
+                <Icon name="restore" /> Pulihkan
+              </Button>
+            </div>
           </article>
         ))}
         {backups.length === 0 && (

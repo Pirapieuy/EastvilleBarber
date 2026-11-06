@@ -5,7 +5,7 @@ import { BarChart } from "../../components/common/BarChart"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
-import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, CalendarPicker, Kpi, MonthPicker, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { ProductDetail, CompactDetail, ProductTransactionRecord, INITIAL_PRODUCT_TRANSACTIONS } from "./ProductReportsPage"
 
@@ -351,20 +351,32 @@ export function ReportsPage({
       <DemoNotice live={live} error={liveError} />
 
       <div className="report-toolbar">
-        <div className="segmented">
-          <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
-            Harian
-          </Button>
-          <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
-            Bulanan
-          </Button>
+        <div className="report-filter-row">
+          <div className="segmented">
+            <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
+              Harian
+            </Button>
+            <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
+              Bulanan
+            </Button>
+          </div>
+          {mode !== "Bulanan" ? (
+            <CalendarPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={tanggal}
+              onChange={(d) => d && setTanggal(d)}
+            />
+          ) : (
+            <MonthPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={bulan}
+              onChange={(b) => b && setBulan(b)}
+            />
+          )}
         </div>
-        {mode !== "Bulanan" ? (
-          <input type="date" max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(e) => e.target.value && setTanggal(e.target.value)} />
-        ) : (
-          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
-        )}
-        <div>
+        <div className="report-export-buttons">
           <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
             Excel
           </Button>
@@ -466,6 +478,9 @@ export function ReportsPage({
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20 }}>
             <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
+            <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
+              Rincian pemasukan berdasarkan metode pembayaran.
+            </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginTop: 14 }}>
               <div style={{ padding: 16, borderRadius: 8, border: "1px solid var(--line)", background: "var(--paper)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -508,10 +523,12 @@ export function ReportsPage({
       {subTab === "pengeluaran" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div className="page-title expense-page-title">
               <div>
-                <p className="eyebrow">Operasional</p>
-                <h3 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>Detail Pengeluaran Toko</h3>
+                <h2>Detail Pengeluaran Toko</h2>
+                <p className="expense-page-description">
+                  Daftar biaya operasional yang tercatat.
+                </p>
               </div>
               <Button className="primary-button" onClick={() => setExpenseFormOpen(true)}>
                 <Icon name="plus" /> Catat Pengeluaran
@@ -529,51 +546,53 @@ export function ReportsPage({
               </div>
             </div>
 
-            <div className="expense-head">
-              <span>Tanggal</span>
-              <span>Keterangan</span>
-              <span>Jumlah</span>
-              <span>Aksi</span>
-            </div>
-
-            {filteredExpenses.map((row) => (
-              <div
-                className={`expense-row ${row.status === "BATAL" ? "voided" : ""}`}
-                key={row.id}
-              >
-                <span>{row.date}</span>
-                <span>
-                  {row.description}
-                  {row.status === "BATAL" && (
-                    <small>{row.cancelReason || "Dibatalkan"}</small>
-                  )}
-                </span>
-                <strong>{rupiah(row.amount)}</strong>
-                {row.status === "BATAL" ? (
-                  <Button
-                    className="secondary-button"
-                    onClick={() => handleToggleExpenseStatus(row.id)}
-                    title="Pulihkan pengeluaran"
-                  >
-                    <Icon name="restore" /> Pulihkan
-                  </Button>
-                ) : (
-                  <Button
-                    className="danger-button"
-                    onClick={() => handleToggleExpenseStatus(row.id)}
-                    title="Batalkan pengeluaran"
-                  >
-                    Batalkan
-                  </Button>
-                )}
+            <div className="expense-table-scroll expense-table-compact">
+              <div className="expense-head">
+                <span>Tanggal</span>
+                <span>Keterangan</span>
+                <span>Jumlah</span>
+                <span>Aksi</span>
               </div>
-            ))}
 
-          {filteredExpenses.length === 0 && (
-            <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--slate)" }}>
-              Tidak ada data pengeluaran yang cocok dengan pencarian.
+              {filteredExpenses.map((row) => (
+                <div
+                  className={`expense-row ${row.status === "BATAL" ? "voided" : ""}`}
+                  key={row.id}
+                >
+                  <span>{row.date}</span>
+                  <span>
+                    {row.description}
+                    {row.status === "BATAL" && (
+                      <small>{row.cancelReason || "Dibatalkan"}</small>
+                    )}
+                  </span>
+                  <strong>{rupiah(row.amount)}</strong>
+                  {row.status === "BATAL" ? (
+                    <Button
+                      className="secondary-button"
+                      onClick={() => handleToggleExpenseStatus(row.id)}
+                      title="Pulihkan pengeluaran"
+                    >
+                      <Icon name="restore" /> Pulihkan
+                    </Button>
+                  ) : (
+                    <Button
+                      className="danger-button"
+                      onClick={() => handleToggleExpenseStatus(row.id)}
+                      title="Batalkan pengeluaran"
+                    >
+                      Batalkan
+                    </Button>
+                  )}
+                </div>
+              ))}
+
+              {filteredExpenses.length === 0 && (
+                <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--slate)" }}>
+                  Tidak ada data pengeluaran yang cocok dengan pencarian.
+                </div>
+              )}
             </div>
-          )}
         </section>
         </div>
       )}
@@ -584,17 +603,18 @@ export function ReportsPage({
           <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
           <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
           <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
-            Rincian akumulasi omzet dan bagian komisi yang berhak diterima setiap kapster pada periode {periode}.
+            Rincian akumulasi omzet dan bagian komisi yang berhak diterima setiap kapster.
           </p>
 
-          <div className="report-head">
-            <span>Kapster</span>
-            <span>Pelanggan</span>
-            <span>Omzet Dihasilkan</span>
-            <span>Total Komisi</span>
-          </div>
+          <div className="commission-table-scroll">
+            <div className="report-head">
+              <span>Kapster</span>
+              <span>Pelanggan</span>
+              <span>Omzet Dihasilkan</span>
+              <span>Total Komisi</span>
+            </div>
 
-          {data.perKapster.map((k) => {
+            {data.perKapster.map((k) => {
             const pct = k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : "40"
             return (
               <div className="report-row" key={k.kapsterId + k.kapster}>
@@ -607,13 +627,14 @@ export function ReportsPage({
                 <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
               </div>
             )
-          })}
+            })}
 
-          {data.perKapster.length === 0 && (
-            <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
-              Belum ada data komisi kapster pada periode ini.
-            </div>
-          )}
+            {data.perKapster.length === 0 && (
+              <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
+                Belum ada data komisi kapster pada periode ini.
+              </div>
+            )}
+          </div>
         </section>
         </div>
       )}
@@ -731,7 +752,7 @@ export function ReportsPage({
             </label>
             <label>
               <span>Tanggal</span>
-              <input type="date" value={expDate} onChange={(e) => setExpDate(e.target.value)} required />
+              <CalendarPicker value={expDate} onChange={setExpDate} />
             </label>
             <label>
               <span>Keterangan</span>
