@@ -2680,6 +2680,24 @@ textarea {
   font-weight: 700;
 }
 
+.cart-clear-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--oxblood-soft);
+  border-radius: 7px;
+  color: var(--oxblood);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cart-clear-button .icon {
+  width: 13px;
+}
+
 .cart-lines {
   min-height: 0;
   overflow-y: auto;
@@ -2698,8 +2716,30 @@ textarea {
 }
 
 .cart-line-swipe {
+  position: relative;
+  overflow: hidden;
   touch-action: pan-y;
   user-select: none;
+}
+
+.cart-swipe-delete {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 120px;
+  display: none;
+}
+
+.cart-lines article .cart-line-row {
+  position: relative;
+  z-index: 1;
+  min-height: 42px;
+  padding: 0 2px;
+  background: var(--paper);
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.cart-lines article .cart-line-row.removing {
+  opacity: 0;
 }
 
 .cart-lines article > div {
@@ -2718,12 +2758,17 @@ textarea {
 }
 
 .cart-line-title {
+  flex: 1;
+  width: auto;
   min-width: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   flex-wrap: wrap;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .cart-line-title small {
@@ -2797,6 +2842,29 @@ textarea {
   min-width: 22px;
   font-size: 13px;
   text-align: center;
+}
+
+.cart-line-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.cart-lines article .cart-remove-button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--oxblood-soft);
+  border-radius: 7px;
+  color: var(--oxblood);
+  background: transparent;
+}
+
+.cart-lines article .cart-remove-button:hover {
+  background: var(--oxblood-soft);
 }
 
 .cart-lines article b {
@@ -6873,7 +6941,25 @@ textarea {
   }
 
   .cart-panel {
-    min-height: 500px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  /* Let the cashier page scroll as one document on small screens. Keeping the
+     payment summary at a viewport-based fixed height clipped its upper rows
+     when the cart panel had to fit inside a short mobile viewport. */
+  .cart-lines {
+    flex: 0 0 auto;
+    max-height: 45svh;
+  }
+
+  .cart-total {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    flex: 0 0 auto;
+    overflow: visible;
   }
 
   .cart-total {
@@ -8088,6 +8174,43 @@ textarea {
     display: block;
   }
 
+  .flow-toolbar {
+    position: sticky;
+    top: 54px;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .flow-toolbar > .button:first-child {
+    grid-column: 1;
+    justify-self: start;
+    width: auto;
+    min-height: 38px;
+    padding: 0 8px;
+    white-space: nowrap;
+  }
+
+  .flow-toolbar > .segmented {
+    grid-column: 2;
+    justify-self: center;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .flow-toolbar > div:last-child {
+    grid-column: 3;
+    justify-self: end;
+    width: auto;
+  }
+
+  .flow-toolbar > div:last-child .button {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+
   .workspace {
     grid-column: auto;
     min-width: 0;
@@ -8104,7 +8227,8 @@ textarea {
     transition: transform 180ms ease;
   }
 
-  .sidebar-wrap.open {
+  .sidebar-wrap.open,
+  .app-shell.sidebar-expanded .sidebar-wrap.open {
     transform: translateX(0);
   }
 
@@ -8283,6 +8407,35 @@ textarea {
 
   .catalog {
     padding-top: 66px;
+  }
+}
+
+@media (max-width: 700px) {
+  .flow-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flow-toolbar > .button:first-child,
+  .flow-toolbar > .segmented,
+  .flow-toolbar > div:last-child {
+    grid-column: 1;
+  }
+
+  .flow-toolbar > .button:first-child {
+    width: 100%;
+  }
+
+  .flow-toolbar > .segmented {
+    justify-self: center;
+  }
+
+  .flow-toolbar > div:last-child {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .flow-toolbar > div:last-child .button {
+    flex: 1;
   }
 }
 

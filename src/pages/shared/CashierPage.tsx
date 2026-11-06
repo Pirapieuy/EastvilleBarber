@@ -47,6 +47,23 @@ export type CartLine = CatalogItem & {
   barber: string
 }
 
+function assignCartToBarber(lines: CartLine[], barber: string): CartLine[] {
+  const byItem = new Map<string | number, CartLine>()
+  lines.forEach((line) => {
+    const existing = byItem.get(line.id)
+    if (existing) {
+      existing.qty += line.qty
+      return
+    }
+    byItem.set(line.id, {
+      ...line,
+      lineId: `${line.id}-${barber}`,
+      barber,
+    })
+  })
+  return [...byItem.values()]
+}
+
 export function ReceiptView({
   cart,
   subtotal,
@@ -81,16 +98,6 @@ export function ReceiptView({
   onClose: () => void
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
-  const teksWa = [
-    `*EASTVILLE BARBERSHOP*`,
-    `Nota: ${invoice}`,
-    ...cart.map((l) => `${l.name} (${l.barber}) ${l.qty} x ${fmt(l.price)} = ${fmt(l.price * l.qty)}`),
-    discount > 0 ? `Diskon: -${fmt(discount)}` : "",
-    `*TOTAL: Rp ${fmt(total)}* (${method})`,
-    `Terima kasih sudah mempercayakan gaya Anda kepada Eastville.`,
-  ]
-    .filter(Boolean)
-    .join("\n")
   const [size, setSize] = useState<"58" | "80">("58")
   return (
     <div className="flow-page">
@@ -112,11 +119,6 @@ export function ReceiptView({
             80 mm
           </Button>
         </div>
-        <Button
-          onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(teksWa)}`, "_blank")}
-        >
-          Kirim WhatsApp
-        </Button>
         <div style={{ display: "flex", gap: 8 }}>
           <Button className="primary-button" onClick={() => window.print()}>
             <Icon name="print" /> Cetak
@@ -233,14 +235,13 @@ export function CashierPage({
     { ...catalog[0], lineId: `${catalog[0].id}-Budi Santoso`, qty: 1, barber: "Budi Santoso" },
     {
       ...catalog[2],
-      lineId: `${catalog[2].id}-Zhefitra Ananda`,
+      lineId: `${catalog[2].id}-Budi Santoso`,
       qty: 1,
-      barber: "Zhefitra Ananda",
+      barber: "Budi Santoso",
     },
   ])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState(catalog[0].price + catalog[2].price)
-  const [qris, setQris] = useState(0)
   const [discount, setDiscount] = useState(0)
   const [discountMode, setDiscountMode] = useState<"Nominal" | "Persen">("Nominal")
   const [discountDraft, setDiscountDraft] = useState(0)
@@ -253,13 +254,18 @@ export function CashierPage({
   const [promosList, setPromosList] = useState<PromoDiscount[]>([])
   const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
+  const [cartSwipe, setCartSwipe] = useState<{
+    lineId: string
+    offset: number
+    removing?: boolean
+  } | null>(null)
 
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
   const [catalogData, setCatalogData] = useState<CatalogItem[]>(catalog)
   const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
-    ["Budi Santoso", "Zhefitra Ananda", "Seva", "Tata Pratama", "Faisal Rahman", "Ferdi"].map((name) => ({ name })),
+    ["Budi Santoso", "Zhefitra Ananda"].map((name) => ({ name })),
   )
   const [invoice, setInvoice] = useState<string | undefined>()
   const [paying, setPaying] = useState(false)
@@ -325,7 +331,7 @@ export function CashierPage({
         pinOtorisasi: effectiveDiscount > 0 ? pinAtasan : undefined,
         clientRequestId: requestId.current,
         bayarTunai: method === "QRIS" ? 0 : cash,
-        bayarQris: method === "Tunai" ? 0 : qris,
+        bayarQris: qris,
         items: cart.map((l) => ({
           tipe: l.type,
           refId: l.id,
@@ -397,6 +403,12 @@ export function CashierPage({
     total > 0 &&
     (discountMode === "Persen" ? discountDraft >= 100 : discountDraft >= total)
   const payableTotal = Math.max(0, total - effectiveDiscount)
+  const qris =
+    method === "Tunai"
+      ? 0
+      : method === "QRIS"
+        ? payableTotal
+        : Math.max(0, payableTotal - cash)
   const paid =
     method === "Tunai" ? cash : method === "QRIS" ? qris : cash + qris
   const shortage = Math.max(0, payableTotal - paid)
@@ -512,7 +524,6 @@ export function CashierPage({
           setReceipt(false)
           setCart([])
           setCash(0)
-          setQris(0)
           setDiscount(0)
           setAppliedDiscountPercent(null)
           setDiscountReason("")
@@ -521,6 +532,25 @@ export function CashierPage({
         }}
       />
     )
+  }
+
+  function clearCart() {
+    setCart([])
+    setCash(0)
+    setDiscount(0)
+    setAppliedDiscountPercent(null)
+    setDiscountReason("")
+    setDiscountReasonDraft("")
+    setPinAtasan("")
+    setDiscountPinError("")
+  }
+
+  function removeCartLineWithAnimation(lineId: string) {
+    setCartSwipe({ lineId, offset: -120, removing: true })
+    window.setTimeout(() => {
+      setCart((items) => items.filter((item) => item.lineId !== lineId))
+      setCartSwipe((current) => current?.lineId === lineId ? null : current)
+    }, 180)
   }
 
   return (
@@ -542,7 +572,10 @@ export function CashierPage({
               <Button
                 className={`barber-btn ${selectedBarber === barber ? "active" : ""}`}
                 key={barber}
-                onClick={() => setSelectedBarber(barber)}
+                onClick={() => {
+                  setSelectedBarber(barber)
+                  setCart((items) => assignCartToBarber(items, barber))
+                }}
               >
                 <i>{barber.charAt(0)}</i>
                 <span>{barber}</span>
@@ -632,6 +665,16 @@ export function CashierPage({
             <span className="cart-tab-active">
               <Icon name="receipt" /> Pesanan saat ini
             </span>
+            {cart.length > 0 && (
+              <Button
+                className="cart-clear-button"
+                onClick={clearCart}
+                title="Hapus semua produk dan layanan"
+                aria-label="Hapus semua produk dan layanan"
+              >
+                <Icon name="trash" /> Kosongkan
+              </Button>
+            )}
             <b className="cart-tab-count">
               {cart.reduce((sum, line) => sum + line.qty, 0)} item
             </b>
@@ -648,7 +691,7 @@ export function CashierPage({
                 <article
                   className="cart-line-swipe"
                   key={line.lineId}
-                  title="Geser ke kiri atau seret dengan mouse untuk menghapus item"
+                  title="Gunakan tombol sampah atau geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -667,7 +710,7 @@ export function CashierPage({
                     if (next.deltaX <= -100) {
                       window.clearTimeout(next.timer)
                       cartWheelSwipe.current = null
-                      setCart((items) => items.filter((item) => item.lineId !== line.lineId))
+                      removeCartLineWithAnimation(line.lineId)
                     }
                   }}
                   onPointerDown={(event) => {
@@ -690,83 +733,84 @@ export function CashierPage({
                     const dx = event.clientX - start.x
                     const dy = event.clientY - start.y
                     if (dx < -60 && Math.abs(dx) > Math.abs(dy)) {
-                      setCart((items) => items.filter((item) => item.lineId !== line.lineId))
+                      removeCartLineWithAnimation(line.lineId)
+                    } else {
+                      setCartSwipe((current) => current?.lineId === line.lineId ? null : current)
+                    }
+                  }}
+                  onPointerMove={(event) => {
+                    const start = cartSwipeStart.current
+                    if (!start || start.lineId !== line.lineId) return
+                    const dx = event.clientX - start.x
+                    if (dx < 0) {
+                      setCartSwipe({ lineId: line.lineId, offset: Math.max(dx, -120) })
                     }
                   }}
                   onPointerCancel={() => {
                     cartSwipeStart.current = null
+                    setCartSwipe((current) => current?.lineId === line.lineId ? null : current)
                   }}
                 >
-                  <div>
+                  <span className="cart-swipe-delete" aria-hidden="true">
+                    <Icon name="trash" /> Hapus
+                  </span>
+                  <div
+                    className={`cart-line-row ${cartSwipe?.lineId === line.lineId && cartSwipe.removing ? "removing" : ""}`}
+                    style={{
+                      transform: `translateX(${cartSwipe?.lineId === line.lineId ? cartSwipe.offset : 0}px)`,
+                      transition: cartSwipe?.lineId === line.lineId && !cartSwipe.removing ? "none" : undefined,
+                    }}
+                  >
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
                     </span>
-                  </div>
-                  <div>
-                    <label className="cart-line-kapster">
-                      <Icon name="user" />
-                      <select
-                        aria-label={`Pilih kapster untuk ${line.name}`}
-                        onChange={(e) => {
-                          const newBarber = e.target.value
-                          setCart((c) =>
-                            c.map((x) =>
-                              x.lineId === line.lineId
-                                ? {
-                                    ...x,
-                                    barber: newBarber,
-                                    lineId: `${x.id}-${newBarber}`,
-                                  }
-                                : x,
-                            ),
-                          )
-                        }}
-                        value={line.barber}
-                      >
-                        {barberList.map((b) => (
-                          <option key={b.name} value={b.name}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <div className="stepper">
+                    <div className="cart-line-controls">
+                      <div className="stepper">
+                        <Button
+                          onClick={() =>
+                            setCart((c) =>
+                              c.map((x) =>
+                                x.lineId === line.lineId
+                                  ? { ...x, qty: Math.max(1, x.qty - 1) }
+                                  : x,
+                              ),
+                            )
+                          }
+                        >
+                          <Icon name="minus" />
+                        </Button>
+                        <span>{line.qty}</span>
+                        <Button
+                          disabled={
+                            line.type === "Produk" &&
+                            stokHabis(
+                              line.id,
+                              catalogData.find((c) => c.id === line.id)?.stock,
+                            )
+                          }
+                          onClick={() =>
+                            setCart((c) =>
+                              c.map((x) =>
+                                x.lineId === line.lineId
+                                  ? { ...x, qty: x.qty + 1 }
+                                  : x,
+                              ),
+                            )
+                          }
+                        >
+                          <Icon name="plus" />
+                        </Button>
+                      </div>
+                      <b>{rupiah(line.price * line.qty)}</b>
                       <Button
-                        onClick={() =>
-                          setCart((c) =>
-                            c.map((x) =>
-                              x.lineId === line.lineId
-                                ? { ...x, qty: Math.max(1, x.qty - 1) }
-                                : x,
-                            ),
-                          )
-                        }
+                        className="cart-remove-button"
+                        onClick={() => removeCartLineWithAnimation(line.lineId)}
+                        title={`Hapus ${line.name}`}
+                        aria-label={`Hapus ${line.name}`}
                       >
-                        <Icon name="minus" />
-                      </Button>
-                      <span>{line.qty}</span>
-                      <Button
-                        disabled={
-                          line.type === "Produk" &&
-                          stokHabis(
-                            line.id,
-                            catalogData.find((c) => c.id === line.id)?.stock,
-                          )
-                        }
-                        onClick={() =>
-                          setCart((c) =>
-                            c.map((x) =>
-                              x.lineId === line.lineId
-                                ? { ...x, qty: x.qty + 1 }
-                                : x,
-                            ),
-                          )
-                        }
-                      >
-                        <Icon name="plus" />
+                        <Icon name="trash" />
                       </Button>
                     </div>
-                    <b>{rupiah(line.price * line.qty)}</b>
                   </div>
                 </article>
               ))
@@ -860,14 +904,11 @@ export function CashierPage({
                                 setDiscountReason(p.nama)
                                 if (method === "Tunai") {
                                   setCash(updatedTotal)
-                                  setQris(0)
                                 } else if (method === "QRIS") {
                                   setCash(0)
-                                  setQris(updatedTotal)
                                 } else {
                                   const cashPart = Math.min(cash, updatedTotal)
                                   setCash(cashPart)
-                                  setQris(updatedTotal - cashPart)
                                 }
                                 setDiscountOpen(false)
                               }}
@@ -980,14 +1021,11 @@ export function CashierPage({
                           setDiscountReason(discountReasonDraft.trim() || "Diskon Manual Otorisasi")
                           if (method === "Tunai") {
                             setCash(updatedTotal)
-                            setQris(0)
                           } else if (method === "QRIS") {
                             setCash(0)
-                            setQris(updatedTotal)
                           } else {
                             const cashPart = Math.min(cash, updatedTotal)
                             setCash(cashPart)
-                            setQris(updatedTotal - cashPart)
                           }
                           setDiscountOpen(false)
                         }}
@@ -1027,13 +1065,10 @@ export function CashierPage({
                     setPinAtasan("")
                     if (method === "Tunai") {
                       setCash(total)
-                      setQris(0)
                     } else if (method === "QRIS") {
                       setCash(0)
-                      setQris(total)
                     } else {
                       setCash(total)
-                      setQris(0)
                     }
                   }}
                   style={{ fontSize: 11, color: "#dc2626", padding: "2px 6px" }}
@@ -1062,14 +1097,11 @@ export function CashierPage({
                       setMethod(value)
                       if (value === "Tunai") {
                         setCash(payableTotal)
-                        setQris(0)
                       } else if (value === "QRIS") {
                         setCash(0)
-                        setQris(payableTotal)
                       } else {
                         const cashPart = Math.round(payableTotal / 2 / 1000) * 1000
                         setCash(cashPart)
-                        setQris(Math.max(0, payableTotal - cashPart))
                       }
                     }}
                   >
@@ -1089,30 +1121,8 @@ export function CashierPage({
                         onChange={(e) => {
                           const val = Number(e.target.value.replace(/\D/g, ""))
                           setCash(val)
-                          if (method === "Gabungan") {
-                            setQris(Math.max(0, payableTotal - val))
-                          }
                         }}
                         value={cash}
-                      />
-                    </div>
-                  </label>
-                )}
-                {method !== "Tunai" && (
-                  <label>
-                    <span>Jumlah QRIS</span>
-                    <div className="input-shell">
-                      <b>Rp</b>
-                      <input
-                        inputMode="numeric"
-                        onChange={(e) => {
-                          const val = Number(e.target.value.replace(/\D/g, ""))
-                          setQris(val)
-                          if (method === "Gabungan") {
-                            setCash(Math.max(0, payableTotal - val))
-                          }
-                        }}
-                        value={qris}
                       />
                     </div>
                   </label>

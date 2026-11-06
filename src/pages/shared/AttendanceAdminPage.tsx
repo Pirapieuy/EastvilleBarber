@@ -21,16 +21,13 @@ interface LeaveRecord {
 }
 
 const DEFAULT_KAPSTERS = [
-  { id: "u-kapster-1", nama: "Budi Santoso" },
-  { id: "u-kapster-2", nama: "Zhefitra Ananda" },
-  { id: "u-kapster-3", nama: "Tata Pratama" },
-  { id: "u-kapster-4", nama: "Faisal Rahman" },
+  { id: "u-kapster", nama: "Budi Santoso" },
+  { id: "u-kapster2", nama: "Zhefitra Ananda" },
 ]
 
 const DEFAULT_LEAVE_RECORDS: LeaveRecord[] = [
-  { id: "lv-1", kapsterId: "u-kapster-1", kapsterNama: "Budi Santoso", tanggal: "2026-11-06", tipe: "Libur Mingguan", alasan: "Jadwal libur rutin Jumat" },
-  { id: "lv-2", kapsterId: "u-kapster-2", kapsterNama: "Zhefitra Ananda", tanggal: "2026-11-04", tipe: "Libur Mingguan", alasan: "Jadwal libur rutin Rabu" },
-  { id: "lv-3", kapsterId: "u-kapster-4", kapsterNama: "Faisal Rahman", tanggal: "2026-11-02", tipe: "Libur Mingguan", alasan: "Jadwal libur rutin Senin" },
+  { id: "lv-1", kapsterId: "u-kapster", kapsterNama: "Budi Santoso", tanggal: "2026-11-06", tipe: "Libur Mingguan", alasan: "Jadwal libur rutin Jumat" },
+  { id: "lv-2", kapsterId: "u-kapster2", kapsterNama: "Zhefitra Ananda", tanggal: "2026-11-04", tipe: "Libur Mingguan", alasan: "Jadwal libur rutin Rabu" },
 ]
 
 const demoPengaturan: PengaturanKomisi = {
@@ -64,7 +61,7 @@ export function AttendanceAdminPage({
       waktu: new Date().toISOString(),
       tanggal: today,
       jam: "08.54",
-      userId: "u-kapster-1",
+      userId: "u-kapster",
       nama: "Budi Santoso",
       role: "Kapster",
       tipe: "Masuk",
@@ -75,22 +72,11 @@ export function AttendanceAdminPage({
       waktu: new Date().toISOString(),
       tanggal: today,
       jam: "08.58",
-      userId: "u-kapster-2",
+      userId: "u-kapster2",
       nama: "Zhefitra Ananda",
       role: "Kapster",
       tipe: "Masuk",
       status: "Tepat Waktu",
-    },
-    {
-      id: "a-03",
-      waktu: new Date().toISOString(),
-      tanggal: today,
-      jam: "11.50",
-      userId: "u-kapster-3",
-      nama: "Tata Pratama",
-      role: "Kapster",
-      tipe: "Masuk",
-      status: "Terlambat",
     },
   ])
   const [leaveRecords, setLeaveRecords] = useState<LeaveRecord[]>(DEFAULT_LEAVE_RECORDS)
