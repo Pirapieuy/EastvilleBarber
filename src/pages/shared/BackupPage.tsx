@@ -12,11 +12,18 @@ interface BackupRow {
 }
 
 const demoBackups: BackupRow[] = [
-  { nama: "BAK_20261029_0200", dibuat: "29/10/2026 · 02.00", sheet: 9, baris: 480 },
+  {
+    nama: "BAK_20261029_0200",
+    dibuat: "29/10/2026 · 02.00",
+    sheet: 9,
+    baris: 480,
+  },
 ]
 
 export function BackupPage() {
-  const [backups, setBackups] = useState<BackupRow[]>(getToken() ? [] : demoBackups)
+  const [backups, setBackups] = useState<BackupRow[]>(
+    getToken() ? [] : demoBackups,
+  )
   const [reloadKey, setReloadKey] = useState(0)
   const [busyNama, setBusyNama] = useState("")
   const [live, setLive] = useState(false)
@@ -37,7 +44,9 @@ export function BackupPage() {
     try {
       const res = await apiBackup.pulihkan(target)
       await loadLive()
-      setMessage(`Data dipulihkan dari ${res.nama} (${res.sheet} sheet). Kondisi sebelumnya disimpan di ${res.pengaman}.`)
+      setMessage(
+        `Data dipulihkan dari ${res.nama} (${res.sheet} sheet). Kondisi sebelumnya disimpan di ${res.pengaman}.`,
+      )
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Pemulihan gagal.")
     } finally {
@@ -65,7 +74,12 @@ export function BackupPage() {
   }, [reloadKey])
 
   async function hapus(nama: string) {
-    if (!window.confirm(`Hapus ${nama}? Backup yang dihapus tidak bisa dikembalikan.`)) return
+    if (
+      !window.confirm(
+        `Hapus ${nama}? Backup yang dihapus tidak bisa dikembalikan.`,
+      )
+    )
+      return
     setMessage("")
     setBusyNama(nama)
     try {
@@ -84,7 +98,9 @@ export function BackupPage() {
     setBusyNama(nama)
     try {
       const res = await apiBackup.unduh(nama)
-      const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json" })
+      const blob = new Blob([JSON.stringify(res, null, 2)], {
+        type: "application/json",
+      })
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
@@ -128,7 +144,10 @@ export function BackupPage() {
       <div className="content">
         <DemoNotice live={false} error={liveError} />
         <p>Daftar backup gagal dimuat: {liveError}</p>
-        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+        <Button
+          className="primary-button"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
           Coba lagi
         </Button>
       </div>
@@ -149,7 +168,10 @@ export function BackupPage() {
           <div>
             <small>Cara kerja</small>
             <h2>Backup manual</h2>
-            <p>Cadangan tersimpan aman secara otomatis di sistem; 5 arsip data terakhir dipertahankan.</p>
+            <p>
+              Cadangan tersimpan aman secara otomatis di sistem; 5 arsip data
+              terakhir dipertahankan.
+            </p>
           </div>
         </article>
         <article className="panel last-backup">
@@ -157,7 +179,8 @@ export function BackupPage() {
           <strong>{terakhir ? terakhir.dibuat : "Belum ada"}</strong>
           {terakhir && (
             <span>
-              <Icon name="check" /> {terakhir.sheet} sheet · {terakhir.baris} baris
+              <Icon name="check" /> {terakhir.sheet} sheet · {terakhir.baris}{" "}
+              baris
             </span>
           )}
         </article>
@@ -167,12 +190,16 @@ export function BackupPage() {
           <p className="eyebrow">Backup manual</p>
           <h2>Buat salinan terbaru</h2>
           <p>
-            Menyalin data layanan, produk, transaksi, pengeluaran, stok, dan pengaturan komisi. Data akun
-            tidak ikut.
+            Menyalin data layanan, produk, transaksi, pengeluaran, stok, dan
+            pengaturan komisi. Data akun tidak ikut.
           </p>
           {message && <small>{message}</small>}
         </div>
-        <Button className="primary-button" onClick={startBackup} disabled={backingUp}>
+        <Button
+          className="primary-button"
+          onClick={startBackup}
+          disabled={backingUp}
+        >
           <Icon name={backingUp ? "clock" : "plus"} />
           {backingUp ? "Membuat backup..." : "Backup sekarang"}
         </Button>
@@ -201,22 +228,35 @@ export function BackupPage() {
             <span className="desktop-col">{row.baris} baris</span>
             <i className="chip lunas desktop-col">Siap</i>
             <div className="backup-action-cell">
-              <Button className="restore-danger-button" onClick={() => { setTarget(row.nama); setRestore(1) }}>
+              <Button
+                className="restore-danger-button"
+                onClick={() => {
+                  setTarget(row.nama)
+                  setRestore(1)
+                }}
+              >
                 <Icon name="restore" /> Pulihkan
               </Button>
             </div>
           </article>
         ))}
         {backups.length === 0 && (
-          <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
+          <div
+            style={{
+              padding: "24px 16px",
+              textAlign: "center",
+              color: "var(--slate)",
+            }}
+          >
             Belum ada backup.
           </div>
         )}
       </section>
       <div className="info-banner">
-        <Icon name="alert" /> Pulihkan mengganti data layanan, produk, transaksi, pengeluaran, stok, dan pengaturan
-        komisi dengan isi backup. Sebelumnya sistem otomatis membuat backup baru dari kondisi saat ini sebagai
-        pengaman. Data akun tidak ikut.
+        <Icon name="alert" /> Pulihkan mengganti data layanan, produk,
+        transaksi, pengeluaran, stok, dan pengaturan komisi dengan isi backup.
+        Sebelumnya sistem otomatis membuat backup baru dari kondisi saat ini
+        sebagai pengaman. Data akun tidak ikut.
       </div>
       {restore > 0 && (
         <div className="modal-overlay">
@@ -225,14 +265,20 @@ export function BackupPage() {
               <Icon name="alert" />
             </span>
             <p className="eyebrow">Konfirmasi {restore} dari 2</p>
-            <h2>{restore === 1 ? "Pulihkan dari backup?" : `Pulihkan ${target}?`}</h2>
+            <h2>
+              {restore === 1 ? "Pulihkan dari backup?" : `Pulihkan ${target}?`}
+            </h2>
             <p>
               {restore === 1
                 ? "Data saat ini akan diganti dengan isi backup terpilih."
                 : "Ini tindakan terakhir. Kondisi saat ini disimpan dulu sebagai backup baru, jadi masih bisa dikembalikan."}
             </p>
             <div>
-              <Button className="secondary-button" disabled={restoring} onClick={() => setRestore(0)}>
+              <Button
+                className="secondary-button"
+                disabled={restoring}
+                onClick={() => setRestore(0)}
+              >
                 Batal
               </Button>
               <Button
@@ -240,7 +286,11 @@ export function BackupPage() {
                 disabled={restoring}
                 onClick={() => (restore === 1 ? setRestore(2) : doRestore())}
               >
-                {restoring ? "Memulihkan..." : restore === 1 ? "Lanjutkan" : "Ya, pulihkan"}
+                {restoring
+                  ? "Memulihkan..."
+                  : restore === 1
+                    ? "Lanjutkan"
+                    : "Ya, pulihkan"}
               </Button>
             </div>
           </section>

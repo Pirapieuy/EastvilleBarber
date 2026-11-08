@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react"
-import { apiAbsensi, apiKapster, apiKomisi, AktivitasKapster, getToken, KomisiKapsterRow } from "../../api"
+import {
+  apiAbsensi,
+  apiKapster,
+  apiKomisi,
+  AktivitasKapster,
+  getToken,
+  KomisiKapsterRow,
+} from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  Kpi,
+  LoadingState,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import { AppUser } from "../../types"
 
-export function KapsterDashboard({
-  user,
-  onNavigate,
-  navigate,
-}: {
+export function KapsterDashboard({ user, onNavigate, navigate }: {
   user?: AppUser
   onNavigate?: (page: string) => void
   navigate?: (page: string) => void
@@ -55,7 +64,10 @@ export function KapsterDashboard({
       <div className="content">
         <DemoNotice live={false} error={liveError} />
         <p>Beranda gagal dimuat: {liveError}</p>
-        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+        <Button
+          className="primary-button"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
           Coba lagi
         </Button>
       </div>
@@ -71,17 +83,34 @@ export function KapsterDashboard({
   }
 
   const jam = now.getHours()
-  const sapaan = jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
-  const hari = now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+  const sapaan =
+    jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
+  const hari = now.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
   const layananRows = (aktivitas ?? []).filter((r) => r.type === "Layanan")
   const produkRows = (aktivitas ?? []).filter((r) => r.type === "Produk")
-  const jumlahPelanggan = live ? komisi?.jumlahTransaksi ?? 0 : 5
+  const jumlahPelanggan = live ? (komisi?.jumlahTransaksi ?? 0) : 5
   const targetShift = 6
-  const persen = Math.min(100, Math.round((jumlahPelanggan / targetShift) * 100))
-  const komisiLayanan = live ? (komisi?.komisiLayanan ?? 0) + (komisi?.komisiLembur ?? 0) : 140000
-  const komisiProduk = live ? komisi?.komisiProduk ?? 0 : 30000
+  const persen = Math.min(
+    100,
+    Math.round((jumlahPelanggan / targetShift) * 100),
+  )
+  const komisiLayanan = live
+    ? (komisi?.komisiLayanan ?? 0) + (komisi?.komisiLembur ?? 0)
+    : 140000
+  const komisiProduk = live ? (komisi?.komisiProduk ?? 0) : 30000
   const rows = live
-    ? (aktivitas ?? []).map((r) => ({ item: r.item, time: r.time, fee: r.fee, comm: r.comm, type: r.type }))
+    ? (aktivitas ?? []).map((r) => ({
+        item: r.item,
+        time: r.time,
+        fee: r.fee,
+        comm: r.comm,
+        type: r.type,
+      }))
     : null
 
   return (
@@ -120,21 +149,37 @@ export function KapsterDashboard({
           label="Komisi Layanan"
           tone="brass"
           value={rupiah(komisiLayanan)}
-          detail={live ? `${layananRows.length} pengerjaan layanan hari ini` : "40% dari 5 pengerjaan"}
+          detail={
+            live
+              ? `${layananRows.length} pengerjaan layanan hari ini`
+              : "40% dari 5 pengerjaan"
+          }
         />
         <Kpi
           icon="product"
           label="Komisi Produk"
           tone="amber"
           value={rupiah(komisiProduk)}
-          detail={live ? `${produkRows.reduce((n, r) => n + r.qty, 0)} produk terjual hari ini` : "3 produk terjual hari ini"}
+          detail={
+            live
+              ? `${produkRows.reduce((n, r) => n + r.qty, 0)} produk terjual hari ini`
+              : "3 produk terjual hari ini"
+          }
         />
         <Kpi
           icon="check"
           label="Status Kehadiran"
           tone="dark"
-          value={live ? (masuk ? "Sudah check-in" : "Belum check-in") : "Tepat Waktu"}
-          detail={live ? (masuk ? `Check-in ${masuk} WIB` : "Belum ada check-in hari ini") : "Check-in 09.52 WIB · Foto selfie OK"}
+          value={
+            live ? (masuk ? "Sudah check-in" : "Belum check-in") : "Tepat Waktu"
+          }
+          detail={
+            live
+              ? masuk
+                ? `Check-in ${masuk} WIB`
+                : "Belum ada check-in hari ini"
+              : "Check-in 09.52 WIB · Foto selfie OK"
+          }
         />
       </div>
 
@@ -166,10 +211,15 @@ export function KapsterDashboard({
           </div>
           <div className="shift-progress">
             <div className="progress-bar-shell">
-              <div className="progress-bar-fill" style={{ width: `${persen}%` }} />
+              <div
+                className="progress-bar-fill"
+                style={{ width: `${persen}%` }}
+              />
             </div>
             <div className="progress-meta">
-              <span>{jumlahPelanggan} dari {targetShift} pelanggan</span>
+              <span>
+                {jumlahPelanggan} dari {targetShift} pelanggan
+              </span>
               <strong>{persen}%</strong>
             </div>
           </div>
@@ -181,43 +231,45 @@ export function KapsterDashboard({
             title="Aktivitas Layanan & Produk"
           />
           <div className="recent-list">
-            {(rows ?? [
-              {
-                item: "Haircut Classic",
-                time: "10.15",
-                fee: 50000,
-                comm: 20000,
-                type: "Layanan",
-              },
-              {
-                item: "Haircut + Wash + Tonic",
-                time: "11.30",
-                fee: 70000,
-                comm: 28000,
-                type: "Layanan",
-              },
-              {
-                item: "Beard Trim",
-                time: "13.20",
-                fee: 35000,
-                comm: 14000,
-                type: "Layanan",
-              },
-              {
-                item: "Free Style Dust",
-                time: "14.05",
-                fee: 80000,
-                comm: 10000,
-                type: "Produk",
-              },
-              {
-                item: "Haircut Classic",
-                time: "15.40",
-                fee: 50000,
-                comm: 20000,
-                type: "Layanan",
-              },
-            ]).map((row, idx) => (
+            {(
+              rows ?? [
+                {
+                  item: "Haircut Classic",
+                  time: "10.15",
+                  fee: 50000,
+                  comm: 20000,
+                  type: "Layanan",
+                },
+                {
+                  item: "Haircut + Wash + Tonic",
+                  time: "11.30",
+                  fee: 70000,
+                  comm: 28000,
+                  type: "Layanan",
+                },
+                {
+                  item: "Beard Trim",
+                  time: "13.20",
+                  fee: 35000,
+                  comm: 14000,
+                  type: "Layanan",
+                },
+                {
+                  item: "Free Style Dust",
+                  time: "14.05",
+                  fee: 80000,
+                  comm: 10000,
+                  type: "Produk",
+                },
+                {
+                  item: "Haircut Classic",
+                  time: "15.40",
+                  fee: 50000,
+                  comm: 20000,
+                  type: "Layanan",
+                },
+              ]
+            ).map((row, idx) => (
               <div key={idx} className="recent-row">
                 <div className="recent-icon">
                   <Icon name={row.type === "Produk" ? "product" : "cashier"} />
@@ -235,7 +287,9 @@ export function KapsterDashboard({
               </div>
             ))}
             {rows && rows.length === 0 && (
-              <p style={{ color: "var(--slate)", padding: "12px 0" }}>Belum ada pengerjaan hari ini.</p>
+              <p style={{ color: "var(--slate)", padding: "12px 0" }}>
+                Belum ada pengerjaan hari ini.
+              </p>
             )}
           </div>
         </section>

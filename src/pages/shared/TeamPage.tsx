@@ -2,21 +2,68 @@ import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, LoadingState, PageTitle } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
-import { apiTim, apiPengaturan, getToken, UserRow, PengaturanKomisi } from "../../api"
+import {
+  apiTim,
+  apiPengaturan,
+  getToken,
+  UserRow,
+  PengaturanKomisi,
+} from "../../api"
 
 export const demoTeamData: UserRow[] = [
-  { id: "u-owner", nama: "Ardi Pradana", username: "ardi.owner", role: "Owner", cabang: "Semua cabang", email: "ardi@eastville.id", status: "Aktif", dibuat: "2026-11-01" },
-  { id: "u-manajer", nama: "Dian Setiawan", username: "dian.manajer", role: "Manajer", cabang: "Patihan", email: "dian@eastville.id", status: "Aktif", dibuat: "2026-11-01" },
-  { id: "u-kasir", nama: "Siti Rahma", username: "siti.kasir", role: "Kasir", cabang: "Patihan", email: "siti@eastville.id", status: "Aktif", dibuat: "2026-11-01" },
-  { id: "u-kapster", nama: "Budi Santoso", username: "budi.kapster", role: "Kapster", cabang: "Patihan", email: "budi@eastville.id", status: "Aktif", dibuat: "2026-11-01" },
-  { id: "u-kapster2", nama: "Zhefitra Ananda", username: "zhefitra.ananda", role: "Kapster", cabang: "Patihan", email: "zhefitra@eastville.id", status: "Aktif", dibuat: "2026-11-01" },
+  {
+    id: "u-owner",
+    nama: "Ardi Pradana",
+    username: "ardi.owner",
+    role: "Owner",
+    cabang: "Semua cabang",
+    email: "ardi@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-manajer",
+    nama: "Dian Setiawan",
+    username: "dian.manajer",
+    role: "Manajer",
+    cabang: "Patihan",
+    email: "dian@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kasir",
+    nama: "Siti Rahma",
+    username: "siti.kasir",
+    role: "Kasir",
+    cabang: "Patihan",
+    email: "siti@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kapster",
+    nama: "Budi Santoso",
+    username: "budi.kapster",
+    role: "Kapster",
+    cabang: "Patihan",
+    email: "budi@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kapster2",
+    nama: "Zhefitra Ananda",
+    username: "zhefitra.ananda",
+    role: "Kapster",
+    cabang: "Patihan",
+    email: "zhefitra@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
 ]
 
-export function TeamPage({
-  currentUser,
-  role,
-  title,
-}: {
+export function TeamPage({ currentUser, role, title }: {
   currentUser?: AppUser
   role?: Role
   title?: string
@@ -116,7 +163,11 @@ export function TeamPage({
           newPin: pin.trim() ? pin.trim() : undefined,
         })
         if (selectedRole === "Kapster" && commissionReason.trim()) {
-          await apiPengaturan.setKomisiKapster(editingId, commission, commissionReason.trim())
+          await apiPengaturan.setKomisiKapster(
+            editingId,
+            commission,
+            commissionReason.trim(),
+          )
         }
         alert("Data anggota tim berhasil diperbarui.")
       } else {
@@ -131,8 +182,16 @@ export function TeamPage({
           email: email.trim(),
           role: selectedRole,
         })
-        if (selectedRole === "Kapster" && commission !== 40 && commissionReason.trim()) {
-          await apiPengaturan.setKomisiKapster(created.id, commission, commissionReason.trim())
+        if (
+          selectedRole === "Kapster" &&
+          commission !== 40 &&
+          commissionReason.trim()
+        ) {
+          await apiPengaturan.setKomisiKapster(
+            created.id,
+            commission,
+            commissionReason.trim(),
+          )
         }
         alert("Anggota tim berhasil ditambahkan.")
       }
@@ -200,7 +259,10 @@ export function TeamPage({
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        >
           <option value="Semua">Semua peran</option>
           <option value="Owner">Owner</option>
           <option value="Manajer">Manajer</option>
@@ -270,7 +332,9 @@ export function TeamPage({
                       }
                       loadData()
                     } catch (err) {
-                      alert(err instanceof Error ? err.message : "Gagal menghapus.")
+                      alert(
+                        err instanceof Error ? err.message : "Gagal menghapus.",
+                      )
                     }
                   }}
                 >
@@ -325,13 +389,19 @@ export function TeamPage({
                   />
                 </label>
                 <label>
-                  <span>{editingId ? "Ganti PIN 6 digit (opsional)" : "PIN awal 6 digit"}</span>
+                  <span>
+                    {editingId
+                      ? "Ganti PIN 6 digit (opsional)"
+                      : "PIN awal 6 digit"}
+                  </span>
                   <input
                     placeholder="••••••"
                     type="password"
                     maxLength={6}
                     value={pin}
-                    onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onChange={(e) =>
+                      setPin(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
                   />
                 </label>
               </div>
@@ -380,10 +450,18 @@ export function TeamPage({
                 </>
               )}
 
-              <div className="toggle-row" style={{ cursor: "pointer" }} onClick={() => setStatus((s) => (s === "Aktif" ? "Nonaktif" : "Aktif"))}>
+              <div
+                className="toggle-row"
+                style={{ cursor: "pointer" }}
+                onClick={() =>
+                  setStatus((s) => (s === "Aktif" ? "Nonaktif" : "Aktif"))
+                }
+              >
                 <span>
                   <strong>Status akun: {status}</strong>
-                  <small>Pengguna dapat masuk ke sistem bila status aktif</small>
+                  <small>
+                    Pengguna dapat masuk ke sistem bila status aktif
+                  </small>
                 </span>
                 <i className={`toggle ${status === "Aktif" ? "on" : ""}`}>
                   <b />

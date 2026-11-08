@@ -29,12 +29,6 @@ const KAPSTER_GROUPS: SidebarNavGroup[] = [
         label: "Komisi Produk Saya",
         icon: "product",
       },
-      {
-        page: "AbsensiJadwalSaya",
-        alias: "attendance",
-        label: "Absensi & Jadwal Saya",
-        icon: "camera",
-      },
     ],
   },
 ]

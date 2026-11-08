@@ -1,9 +1,7 @@
 import { AttendanceAdminPage } from "../shared/AttendanceAdminPage"
 import { AppUser } from "../../types"
 
-export function AbsensiTim({
-  currentUser,
-}: {
+export function AbsensiTim({ currentUser }: {
   currentUser?: AppUser
 } = {}) {
   return (

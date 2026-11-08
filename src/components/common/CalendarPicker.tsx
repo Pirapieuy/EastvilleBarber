@@ -2,8 +2,18 @@ import { useEffect, useRef, useState } from "react"
 import { Icon } from "./Icon"
 
 const NAMA_BULAN = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ]
 const HARI_SINGKAT = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
 const pad = (n: number) => String(n).padStart(2, "0")
@@ -60,7 +70,10 @@ export function CalendarPicker({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false)
       }
     }
@@ -147,16 +160,29 @@ export function CalendarPicker({
       </button>
 
       {open && (
-        <div
-          className={`calendar-picker-popup align-${align}`}
-        >
-          <section className="panel" style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <div className={`calendar-picker-popup align-${align}`}>
+          <section
+            className="panel"
+            style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
               <strong style={{ fontSize: 13 }}>
                 {NAMA_BULAN[calMonth]} {calYear}
               </strong>
               <div style={{ display: "flex", gap: 4 }}>
-                <button type="button" className="secondary-button" style={{ padding: "4px 8px" }} onClick={handlePrevMonth}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "4px 8px" }}
+                  onClick={handlePrevMonth}
+                >
                   <Icon name="chevron" />
                 </button>
                 <button
@@ -170,13 +196,28 @@ export function CalendarPicker({
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2, textAlign: "center", fontSize: 10, marginBottom: 6 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(7,1fr)",
+                gap: 2,
+                textAlign: "center",
+                fontSize: 10,
+                marginBottom: 6,
+              }}
+            >
               {HARI_SINGKAT.map((h) => (
                 <div key={h}>{h}</div>
               ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(7,1fr)",
+                gap: 2,
+              }}
+            >
               {Array.from({ length: startOffset }).map((_, i) => (
                 <div key={`e-${i}`} />
               ))}
@@ -185,7 +226,9 @@ export function CalendarPicker({
                 const curIso = `${calYear}-${pad(calMonth + 1)}-${pad(day)}`
                 const sel = curIso === value
                 const tod = curIso === todayIso
-                const disabled = Boolean((max && curIso > max) || (min && curIso < min))
+                const disabled = Boolean(
+                  (max && curIso > max) || (min && curIso < min),
+                )
                 return (
                   <button
                     key={day}
@@ -195,9 +238,19 @@ export function CalendarPicker({
                     style={{
                       height: 30,
                       borderRadius: 6,
-                      border: sel ? "1px solid var(--ink)" : "1px solid transparent",
-                      background: sel ? "var(--ink)" : tod ? "rgba(200,150,62,0.12)" : "transparent",
-                      color: sel ? "#fff" : disabled ? "var(--muted)" : "var(--ink)",
+                      border: sel
+                        ? "1px solid var(--ink)"
+                        : "1px solid transparent",
+                      background: sel
+                        ? "var(--ink)"
+                        : tod
+                          ? "rgba(200,150,62,0.12)"
+                          : "transparent",
+                      color: sel
+                        ? "#fff"
+                        : disabled
+                          ? "var(--muted)"
+                          : "var(--ink)",
                       fontSize: 11,
                       fontWeight: sel || tod ? 700 : 500,
                       cursor: disabled ? "not-allowed" : "pointer",
@@ -210,13 +263,33 @@ export function CalendarPicker({
               })}
             </div>
 
-            <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
+            <div
+              style={{
+                marginTop: 10,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
               {allowClear ? (
-                <button type="button" className="secondary-button" style={{ padding: "4px 8px", fontSize: 11 }} onClick={handleClear}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "4px 8px", fontSize: 11 }}
+                  onClick={handleClear}
+                >
                   {clearLabel}
                 </button>
-              ) : <div />}
-              <button type="button" className="secondary-button" style={{ padding: "4px 8px", fontSize: 11 }} onClick={handleJumpToday}>
+              ) : (
+                <div />
+              )}
+              <button
+                type="button"
+                className="secondary-button"
+                style={{ padding: "4px 8px", fontSize: 11 }}
+                onClick={handleJumpToday}
+              >
                 Hari Ini
               </button>
             </div>
@@ -252,7 +325,10 @@ export function MonthPicker({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false)
       }
     }
@@ -287,8 +363,18 @@ export function MonthPicker({
 
       {open && (
         <div className="calendar-picker-popup align-left">
-          <section className="panel" style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <section
+            className="panel"
+            style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
               <strong style={{ fontSize: 13 }}>Tahun {year}</strong>
               <div style={{ display: "flex", gap: 4 }}>
                 <button
@@ -316,12 +402,20 @@ export function MonthPicker({
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 6,
+              }}
+            >
               {NAMA_BULAN.map((nama, idx) => {
                 const isoMonth = `${year}-${pad(idx + 1)}`
                 const isSelected = isoMonth === value
-                const isDisabled =
-                  Boolean((max && isoMonth > max.slice(0, 7)) || (min && isoMonth < min.slice(0, 7)))
+                const isDisabled = Boolean(
+                  (max && isoMonth > max.slice(0, 7)) ||
+                    (min && isoMonth < min.slice(0, 7)),
+                )
                 return (
                   <button
                     key={nama}
@@ -334,7 +428,9 @@ export function MonthPicker({
                     style={{
                       height: 34,
                       borderRadius: 6,
-                      border: isSelected ? "1px solid var(--ink)" : "1px solid var(--line)",
+                      border: isSelected
+                        ? "1px solid var(--ink)"
+                        : "1px solid var(--line)",
                       background: isSelected ? "var(--ink)" : "transparent",
                       color: isSelected ? "#fff" : "var(--ink)",
                       fontSize: 12,

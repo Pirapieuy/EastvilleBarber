@@ -12,10 +12,17 @@ import {
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { TANGGAL_MULAI } from "../../utils/tanggal"
-import { Button, CalendarPicker, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  Kpi,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 
 const pad = (n: number) => String(n).padStart(2, "0")
-const toIso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const toIso = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 
 interface DailyServiceItem {
   id: string
@@ -27,10 +34,7 @@ interface DailyServiceItem {
   status: "Selesai" | "Batal"
 }
 
-export function OwnerDashboard({
-  onNavigate,
-  navigate,
-}: {
+export function OwnerDashboard({ onNavigate, navigate }: {
   onNavigate?: (page: string) => void
   navigate?: (page: string) => void
 } = {}) {
@@ -42,7 +46,9 @@ export function OwnerDashboard({
   const [liveData, setLiveData] = useState<LaporanKeuangan | null>(null)
   // null = data absensi tidak tersedia (modul lain gagal), bukan "tidak ada yang hadir"
   const [liveAbsensi, setLiveAbsensi] = useState<AbsensiRow[] | null>(null)
-  const [kapsterAll, setKapsterAll] = useState<{ id: string; nama: string }[]>([])
+  const [kapsterAll, setKapsterAll] = useState<{ id: string nama: string }[]>(
+    [],
+  )
   const [liveServices, setLiveServices] = useState<DailyServiceItem[]>([])
   const [liveError, setLiveError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -72,15 +78,19 @@ export function OwnerDashboard({
         setLiveAbsensi(abs)
         setKapsterAll(kap)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setLiveServices((trx as any[]).map((t, idx) => ({
-          id: t.id || `trx-${idx}`,
-          time: t.time || "-",
-          serviceName: (t.items ?? []).map((i: { name: string }) => i.name).join(", ") || "-",
-          kapsterName: t.barber || "-",
-          price: Number(t.total) || 0,
-          method: t.method === "QRIS" ? "QRIS" : "Tunai",
-          status: t.status === "BATAL" ? "Batal" : "Selesai",
-        })))
+        setLiveServices(
+          (trx as any[]).map((t, idx) => ({
+            id: t.id || `trx-${idx}`,
+            time: t.time || "-",
+            serviceName:
+              (t.items ?? []).map((i: { name: string }) => i.name).join(", ") ||
+              "-",
+            kapsterName: t.barber || "-",
+            price: Number(t.total) || 0,
+            method: t.method === "QRIS" ? "QRIS" : "Tunai",
+            status: t.status === "BATAL" ? "Batal" : "Selesai",
+          })),
+        )
       })
       .catch((e) => {
         console.error("Gagal memuat beranda:", e)
@@ -118,7 +128,8 @@ export function OwnerDashboard({
       nama: k.nama,
       jamMasuk: masuk?.jam ?? "-",
       status: statusText,
-      layananCount: liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
+      layananCount:
+        liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
   const servicesList = liveServices
@@ -128,7 +139,10 @@ export function OwnerDashboard({
       <div className="content">
         <DemoNotice live={false} error={liveError} />
         <p>Beranda gagal dimuat: {liveError}</p>
-        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+        <Button
+          className="primary-button"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
           Coba lagi
         </Button>
       </div>
@@ -185,14 +199,32 @@ export function OwnerDashboard({
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 16, marginTop: 16 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1fr)",
+          gap: 16,
+          marginTop: 16,
+        }}
+      >
         <div className="dashboard-lower-grid">
           {/* Status & Daftar Kapster Hari Ini */}
           <section className="panel" style={{ padding: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Kehadiran Tim</h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 14,
+              }}
+            >
+              <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
+                Kehadiran Tim
+              </h3>
               <span className="chip active">
-                {liveAbsensi ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir` : ""}
+                {liveAbsensi
+                  ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir`
+                  : ""}
               </span>
             </div>
 
@@ -213,7 +245,9 @@ export function OwnerDashboard({
                       opacity: isLibur ? 0.75 : 1,
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    >
                       <div
                         style={{
                           width: 36,
@@ -223,14 +257,14 @@ export function OwnerDashboard({
                             k.status === "Tepat Waktu"
                               ? "rgba(34, 197, 94, 0.15)"
                               : k.status === "Terlambat"
-                              ? "rgba(234, 179, 8, 0.15)"
-                              : "var(--line)",
+                                ? "rgba(234, 179, 8, 0.15)"
+                                : "var(--line)",
                           color:
                             k.status === "Tepat Waktu"
                               ? "#15803d"
                               : k.status === "Terlambat"
-                              ? "#b45309"
-                              : "var(--muted)",
+                                ? "#b45309"
+                                : "var(--muted)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -241,16 +275,32 @@ export function OwnerDashboard({
                         {k.nama.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <strong style={{ fontSize: 14, color: "var(--ink)", display: "block" }}>{k.nama}</strong>
+                        <strong
+                          style={{
+                            fontSize: 14,
+                            color: "var(--ink)",
+                            display: "block",
+                          }}
+                        >
+                          {k.nama}
+                        </strong>
                         <small style={{ color: "var(--muted)", fontSize: 12 }}>
                           {k.jamMasuk !== "-" && `Masuk: ${k.jamMasuk} WIB`}
                         </small>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 14 }}
+                    >
                       {!isLibur && (
-                        <span style={{ fontSize: 12, color: "var(--slate)", fontWeight: 600 }}>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: "var(--slate)",
+                            fontWeight: 600,
+                          }}
+                        >
                           {k.layananCount} layanan
                         </span>
                       )}
@@ -259,8 +309,8 @@ export function OwnerDashboard({
                           k.status === "Tepat Waktu"
                             ? "lunas"
                             : k.status === "Terlambat"
-                            ? "pending"
-                            : "batal"
+                              ? "pending"
+                              : "batal"
                         }`}
                       >
                         {k.status}
@@ -274,10 +324,19 @@ export function OwnerDashboard({
 
           {/* Layanan yang Berjalan Hari Ini */}
           <section className="panel" style={{ padding: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 14,
+              }}
+            >
               <div>
                 <p className="eyebrow">Aktivitas Pelayanan</p>
-                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Riwayat Transaksi</h3>
+                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
+                  Riwayat Transaksi
+                </h3>
               </div>
               <span style={{ fontSize: 13, color: "var(--muted)" }}>
                 {servicesList.length} transaksi
@@ -286,7 +345,13 @@ export function OwnerDashboard({
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {servicesList.length === 0 ? (
-                <div style={{ textAlign: "center", padding: 24, color: "var(--muted)" }}>
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: 24,
+                    color: "var(--muted)",
+                  }}
+                >
                   Belum ada transaksi layanan pada tanggal ini.
                 </div>
               ) : (
@@ -303,7 +368,9 @@ export function OwnerDashboard({
                       background: "var(--paper)",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 14 }}
+                    >
                       <span
                         style={{
                           fontWeight: 700,
@@ -315,16 +382,33 @@ export function OwnerDashboard({
                         {s.time}
                       </span>
                       <div>
-                        <strong style={{ fontSize: 13, color: "var(--ink)", display: "block" }}>{s.serviceName}</strong>
+                        <strong
+                          style={{
+                            fontSize: 13,
+                            color: "var(--ink)",
+                            display: "block",
+                          }}
+                        >
+                          {s.serviceName}
+                        </strong>
                         <small style={{ color: "var(--slate)", fontSize: 12 }}>
                           Kapster: {s.kapsterName} · Metode: {s.method}
                         </small>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <b style={{ fontSize: 13, color: "var(--ink)" }}>{rupiah(s.price)}</b>
-                      <span className={`chip ${s.status === "Batal" ? "batal" : "active"}`} style={{ fontSize: 11, padding: "2px 8px" }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    >
+                      <b style={{ fontSize: 13, color: "var(--ink)" }}>
+                        {rupiah(s.price)}
+                      </b>
+                      <span
+                        className={`chip ${
+                          s.status === "Batal" ? "batal" : "active"
+                        }`}
+                        style={{ fontSize: 11, padding: "2px 8px" }}
+                      >
                         {s.status}
                       </span>
                     </div>
@@ -332,12 +416,14 @@ export function OwnerDashboard({
                 ))
               )}
             </div>
-            <Button className="text-button" onClick={() => nav("RiwayatTransaksi")}>
+            <Button
+              className="text-button"
+              onClick={() => nav("RiwayatTransaksi")}
+            >
               Selengkapnya <Icon name="arrow" />
             </Button>
           </section>
         </div>
-
       </div>
     </div>
   )

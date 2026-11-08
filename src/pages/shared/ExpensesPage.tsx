@@ -3,7 +3,13 @@ import { ReasonDialog } from "./HistoryPage"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  Kpi,
+  LoadingState,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 
 export interface ExpenseRecord {
   id: string
@@ -17,8 +23,34 @@ export interface ExpenseRecord {
   dateIso?: string
 }
 
-const BULAN_PENDEK = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
-const BULAN_PANJANG = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+const BULAN_PENDEK = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
+]
+const BULAN_PANJANG = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+]
 
 function isoLokal(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
@@ -36,12 +68,17 @@ function hitungKpi(records: ExpenseRecord[]) {
 
   const aktif = records.filter((r) => r.status === "Aktif" && r.dateIso)
   const bulan = aktif.filter((r) => r.dateIso!.startsWith(bulanIni))
-  const minggu = aktif.filter((r) => r.dateIso! >= batasMinggu && r.dateIso! <= hariIni)
+  const minggu = aktif.filter(
+    (r) => r.dateIso! >= batasMinggu && r.dateIso! <= hariIni,
+  )
   const tahun = aktif.filter((r) => r.dateIso!.startsWith(tahunIni))
   const jumlah = (rs: ExpenseRecord[]) => rs.reduce((a, r) => a + r.amount, 0)
 
   const perKategori: Record<string, number> = {}
-  bulan.forEach((r) => (perKategori[r.category] = (perKategori[r.category] ?? 0) + r.amount))
+  bulan.forEach(
+    (r) =>
+      (perKategori[r.category] = (perKategori[r.category] ?? 0) + r.amount),
+  )
   const teratas = Object.entries(perKategori).sort((a, b) => b[1] - a[1])[0]
   const totalBulan = jumlah(bulan)
 
@@ -51,7 +88,9 @@ function hitungKpi(records: ExpenseRecord[]) {
     totalMinggu: jumlah(minggu),
     detailMinggu: `${mulaiMinggu.getDate()} ${BULAN_PENDEK[mulaiMinggu.getMonth()]} - ${now.getDate()} ${BULAN_PENDEK[now.getMonth()]} · ${minggu.length} transaksi`,
     kategori: teratas ? teratas[0] : "-",
-    detailKategori: teratas ? `${rupiah(teratas[1])} (${((teratas[1] / totalBulan) * 100).toFixed(1).replace(".", ",")}%)` : "Belum ada pengeluaran bulan ini",
+    detailKategori: teratas
+      ? `${rupiah(teratas[1])} (${((teratas[1] / totalBulan) * 100).toFixed(1).replace(".", ",")}%)`
+      : "Belum ada pengeluaran bulan ini",
     totalTahun: jumlah(tahun),
     detailTahun: `Jan - ${BULAN_PENDEK[now.getMonth()]} ${now.getFullYear()} · ${tahun.length} transaksi`,
   }
@@ -118,7 +157,8 @@ export function ExpensesPage() {
   const [formError, setFormError] = useState("")
   const [batalId, setBatalId] = useState<string | null>(null)
 
-  const [newCategory, setNewCategory] = useState<ExpenseRecord["category"]>("Listrik")
+  const [newCategory, setNewCategory] =
+    useState<ExpenseRecord["category"]>("Listrik")
   const [newAmount, setNewAmount] = useState("")
   const [newDescription, setNewDescription] = useState("")
   const [newDate, setNewDate] = useState(() => {
@@ -165,7 +205,8 @@ export function ExpensesPage() {
     if (saving) return
     setFormError("")
     const parsedAmount = Math.round(Number(newAmount))
-    if (!parsedAmount || parsedAmount < 1) return setFormError("Jumlah harus lebih dari 0.")
+    if (!parsedAmount || parsedAmount < 1)
+      return setFormError("Jumlah harus lebih dari 0.")
     if (!newDescription.trim()) return setFormError("Keterangan wajib diisi.")
     if (live) {
       setSaving(true)
@@ -217,7 +258,12 @@ export function ExpensesPage() {
         setBatalId(id) // alasan diminta lewat dialog
         return
       }
-      if (!window.confirm(`Pulihkan pengeluaran "${item.description}" (${rupiah(item.amount)})?`)) return
+      if (
+        !window.confirm(
+          `Pulihkan pengeluaran "${item.description}" (${rupiah(item.amount)})?`,
+        )
+      )
+        return
       try {
         await apiPengeluaran.aktifkan(id)
         await loadLive()
@@ -234,9 +280,7 @@ export function ExpensesPage() {
             ...item,
             status: nextStatus,
             cancelReason:
-              nextStatus === "BATAL"
-                ? "Dibatalkan secara manual"
-                : undefined,
+              nextStatus === "BATAL" ? "Dibatalkan secara manual" : undefined,
           }
         }
         return item
@@ -278,29 +322,59 @@ export function ExpensesPage() {
           icon="expense"
           label="Total bulan ini"
           tone="brass"
-          value={kpi ? rupiah(kpi.totalBulan) : gagalMuat ? "-" : "Rp 5.840.000"}
-          detail={kpi ? kpi.detailBulan : gagalMuat ? "Data gagal dimuat" : "Oktober 2026 · 14 transaksi"}
+          value={
+            kpi ? rupiah(kpi.totalBulan) : gagalMuat ? "-" : "Rp 5.840.000"
+          }
+          detail={
+            kpi
+              ? kpi.detailBulan
+              : gagalMuat
+                ? "Data gagal dimuat"
+                : "Oktober 2026 · 14 transaksi"
+          }
         />
         <Kpi
           icon="calendar"
           label="Total 7 hari terakhir"
           tone="sage"
-          value={kpi ? rupiah(kpi.totalMinggu) : gagalMuat ? "-" : "Rp 1.450.000"}
-          detail={kpi ? kpi.detailMinggu : gagalMuat ? "Data gagal dimuat" : "23 - 29 Okt · 4 transaksi"}
+          value={
+            kpi ? rupiah(kpi.totalMinggu) : gagalMuat ? "-" : "Rp 1.450.000"
+          }
+          detail={
+            kpi
+              ? kpi.detailMinggu
+              : gagalMuat
+                ? "Data gagal dimuat"
+                : "23 - 29 Okt · 4 transaksi"
+          }
         />
         <Kpi
           icon="wallet"
           label="Kategori terbesar"
           tone="dark"
           value={kpi ? kpi.kategori : gagalMuat ? "-" : "Sewa Tempat"}
-          detail={kpi ? kpi.detailKategori : gagalMuat ? "Data gagal dimuat" : "Rp 3.500.000 (59,9%)"}
+          detail={
+            kpi
+              ? kpi.detailKategori
+              : gagalMuat
+                ? "Data gagal dimuat"
+                : "Rp 3.500.000 (59,9%)"
+          }
         />
         <Kpi
           icon="chart"
           label="Total tahun ini"
           tone="amber"
-          value={kpi ? rupiah(kpi.totalTahun) : gagalMuat ? "-" : "Rp 62.450.000"}
-          detail={kpi ? kpi.detailTahun : gagalMuat ? "Data gagal dimuat" : "Jan - Okt 2026 · 10 bulan"}
+          value={
+            kpi ? rupiah(kpi.totalTahun) : gagalMuat ? "-" : "Rp 62.450.000"
+          }
+          detail={
+            kpi
+              ? kpi.detailTahun
+              : gagalMuat
+                ? "Data gagal dimuat"
+                : "Jan - Okt 2026 · 10 bulan"
+          }
         />
       </div>
 
@@ -314,7 +388,10 @@ export function ExpensesPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
             <option value="Semua">Semua kategori</option>
             <option value="Perlengkapan">Perlengkapan</option>
             <option value="Listrik">Listrik</option>
@@ -343,7 +420,9 @@ export function ExpensesPage() {
             <span>
               {row.description}
               {row.status === "BATAL" && (
-                <small>{row.cancelReason || "Transaksi pengeluaran dibatalkan"}</small>
+                <small>
+                  {row.cancelReason || "Transaksi pengeluaran dibatalkan"}
+                </small>
               )}
             </span>
             <strong>{rupiah(row.amount)}</strong>
@@ -368,7 +447,13 @@ export function ExpensesPage() {
         ))}
 
         {filteredRecords.length === 0 && (
-          <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--slate)" }}>
+          <div
+            style={{
+              padding: "32px 16px",
+              textAlign: "center",
+              color: "var(--slate)",
+            }}
+          >
             Tidak ada data pengeluaran yang cocok dengan pencarian.
           </div>
         )}
@@ -452,7 +537,11 @@ export function ExpensesPage() {
               >
                 Batal
               </Button>
-              <Button className="primary-button" disabled={saving} type="submit">
+              <Button
+                className="primary-button"
+                disabled={saving}
+                type="submit"
+              >
                 Simpan
               </Button>
             </footer>

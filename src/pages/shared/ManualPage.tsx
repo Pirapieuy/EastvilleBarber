@@ -61,10 +61,24 @@ export function ManualPage() {
         setItems([
           ...layanan
             .filter((l) => l.status === "Aktif")
-            .map((l): ManualItem => ({ tipe: "Layanan", id: String(l.id), name: l.nama, price: l.harga })),
+            .map(
+              (l): ManualItem => ({
+                tipe: "Layanan",
+                id: String(l.id),
+                name: l.nama,
+                price: l.harga,
+              }),
+            ),
           ...produk
             .filter((p) => p.status === "Aktif")
-            .map((p): ManualItem => ({ tipe: "Produk", id: p.kode, name: p.nama, price: p.harga })),
+            .map(
+              (p): ManualItem => ({
+                tipe: "Produk",
+                id: p.kode,
+                name: p.nama,
+                price: p.harga,
+              }),
+            ),
         ])
         setKapster(kap)
         setLive(true)
@@ -78,13 +92,15 @@ export function ManualPage() {
   // Tidak blocking — form langsung tampil dengan data sementara (demo/cache),
   // data server akan otomatis menggantikan saat selesai dimuat.
 
-  const priceOf = (l: ManualLine) => (items.find((i) => i.id === l.itemId)?.price ?? 0) * l.qty
+  const priceOf = (l: ManualLine) =>
+    (items.find((i) => i.id === l.itemId)?.price ?? 0) * l.qty
   const subtotal = lines.reduce((s, l) => s + priceOf(l), 0)
   const diskonNum = 0
   const total = subtotal - diskonNum
   const cashNum = Number(cash.replace(/\D/g, "")) || 0
   const qrisNum = Number(qris.replace(/\D/g, "")) || 0
-  const paid = method === "Tunai" ? cashNum : method === "QRIS" ? total : cashNum + qrisNum
+  const paid =
+    method === "Tunai" ? cashNum : method === "QRIS" ? total : cashNum + qrisNum
   const cleanNote = note.trim()
   const gagalMuat = Boolean(getToken()) && !live
   const qrisBerlebih = method === "Gabungan" && qrisNum > total
@@ -101,11 +117,18 @@ export function ManualPage() {
   function addLine() {
     setLines((prev) => [
       ...prev,
-      { key: Date.now() + prev.length, itemId: items[0]?.id ?? "", kapsterId: kapster[0]?.id ?? "", qty: 1 },
+      {
+        key: Date.now() + prev.length,
+        itemId: items[0]?.id ?? "",
+        kapsterId: kapster[0]?.id ?? "",
+        qty: 1,
+      },
     ])
   }
   function patchLine(key: number, patch: Partial<ManualLine>) {
-    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)))
+    setLines((prev) =>
+      prev.map((l) => (l.key === key ? { ...l, ...patch } : l)),
+    )
   }
 
   async function handleSave(e: FormEvent) {
@@ -116,7 +139,12 @@ export function ManualPage() {
       setSuccess("Mode demo: tidak disimpan ke server.")
       return
     }
-    if (!window.confirm(`Simpan rekap manual ${cleanNote} senilai ${rupiah(total)}? Stok produk akan dipotong.`)) return
+    if (
+      !window.confirm(
+        `Simpan rekap manual ${cleanNote} senilai ${rupiah(total)}? Stok produk akan dipotong.`,
+      )
+    )
+      return
     setSaving(true)
     try {
       const res = await apiTransaksi.manual({
@@ -129,13 +157,18 @@ export function ManualPage() {
         bayarQris: method === "Tunai" ? 0 : qrisNum,
         items: lines.map((l) => ({
           tipe: items.find((i) => i.id === l.itemId)?.tipe ?? "Layanan",
-          refId: items.find((i) => i.id === l.itemId)?.tipe === "Layanan" ? Number(l.itemId) : l.itemId,
+          refId:
+            items.find((i) => i.id === l.itemId)?.tipe === "Layanan"
+              ? Number(l.itemId)
+              : l.itemId,
           qty: l.qty,
           kapsterId: l.kapsterId,
         })),
       })
       setSuccess(
-        `Tersimpan sebagai ${res.id} (${rupiah(res.total)})${res.lembur ? ", dihitung LEMBUR (komisi 50%)" : ""}. Tandanya MANUAL di Riwayat.`,
+        `Tersimpan sebagai ${res.id} (${rupiah(res.total)})${
+          res.lembur ? ", dihitung LEMBUR (komisi 50%)" : ""
+        }. Tandanya MANUAL di Riwayat.`,
       )
       setLines([])
       setNote("")
@@ -151,18 +184,33 @@ export function ManualPage() {
   return (
     <form className="content narrow" onSubmit={handleSave}>
       <DemoNotice live={live} error={liveError} />
-      <PageTitle eyebrow="Transaksi dari buku fisik" title="Input Nota Kertas" />
+      <PageTitle
+        eyebrow="Transaksi dari buku fisik"
+        title="Input Nota Kertas"
+      />
       <section className="panel form-panel">
         <h3>Informasi transaksi</h3>
         <div className="form-grid manual-info-grid">
           <label>
             <span>Tanggal transaksi</span>
-            <input max={today()} min={TANGGAL_MULAI} onChange={(e) => setTanggal(e.target.value)} required type="date" value={tanggal} />
+            <input
+              max={today()}
+              min={TANGGAL_MULAI}
+              onChange={(e) => setTanggal(e.target.value)}
+              required
+              type="date"
+              value={tanggal}
+            />
             <small>Tanggal masa depan dinonaktifkan.</small>
           </label>
           <label>
             <span>Jam (perkiraan)</span>
-            <input onChange={(e) => setJam(e.target.value)} required type="time" value={jam} />
+            <input
+              onChange={(e) => setJam(e.target.value)}
+              required
+              type="time"
+              value={jam}
+            />
             <small>Di luar jam kerja dihitung lembur.</small>
           </label>
           <label>
@@ -184,11 +232,18 @@ export function ManualPage() {
             <Icon name="plus" /> Tambah baris
           </Button>
         </div>
-        {lines.length === 0 && <p style={{ color: "var(--slate)" }}>Belum ada baris. Klik "Tambah baris".</p>}
+        {lines.length === 0 && (
+          <p style={{ color: "var(--slate)" }}>
+            Belum ada baris. Klik "Tambah baris".
+          </p>
+        )}
         {lines.map((l, i) => (
           <div className="manual-row" key={l.key}>
             <span>{i + 1}</span>
-            <select value={l.itemId} onChange={(e) => patchLine(l.key, { itemId: e.target.value })}>
+            <select
+              value={l.itemId}
+              onChange={(e) => patchLine(l.key, { itemId: e.target.value })}
+            >
               {items.map((it) => (
                 <option key={it.id} value={it.id}>
                   {it.name}
@@ -196,7 +251,10 @@ export function ManualPage() {
                 </option>
               ))}
             </select>
-            <select value={l.kapsterId} onChange={(e) => patchLine(l.key, { kapsterId: e.target.value })}>
+            <select
+              value={l.kapsterId}
+              onChange={(e) => patchLine(l.key, { kapsterId: e.target.value })}
+            >
               {kapster.map((k) => (
                 <option key={k.id + k.nama} value={k.id}>
                   {k.nama}
@@ -205,12 +263,20 @@ export function ManualPage() {
             </select>
             <input
               min={1}
-              onChange={(e) => patchLine(l.key, { qty: Math.max(1, Number(e.target.value) || 1) })}
+              onChange={(e) =>
+                patchLine(l.key, {
+                  qty: Math.max(1, Number(e.target.value) || 1),
+                })
+              }
               type="number"
               value={l.qty}
             />
             <strong>{rupiah(priceOf(l))}</strong>
-            <Button onClick={() => setLines((prev) => prev.filter((x) => x.key !== l.key))}>
+            <Button
+              onClick={() =>
+                setLines((prev) => prev.filter((x) => x.key !== l.key))
+              }
+            >
               <Icon name="trash" />
             </Button>
           </div>
@@ -221,7 +287,11 @@ export function ManualPage() {
         <div className="payment-form-row">
           <div className="segmented">
             {(["Tunai", "QRIS", "Gabungan"] as const).map((m) => (
-              <Button className={method === m ? "active" : ""} key={m} onClick={() => setMethod(m)}>
+              <Button
+                className={method === m ? "active" : ""}
+                key={m}
+                onClick={() => setMethod(m)}
+              >
                 {m}
               </Button>
             ))}

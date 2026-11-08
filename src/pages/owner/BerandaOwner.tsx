@@ -1,9 +1,6 @@
 import { OwnerDashboard } from "../shared/OwnerDashboard"
 
-export function BerandaOwner({
-  onNavigate,
-  navigate,
-}: {
+export function BerandaOwner({ onNavigate, navigate }: {
   onNavigate?: (page: string) => void
   navigate?: (page: string) => void
 } = {}) {

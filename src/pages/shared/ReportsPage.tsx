@@ -1,13 +1,34 @@
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useMemo, useState } from "react"
-import { apiLaporan, apiPengeluaran, getToken, LaporanKeuangan } from "../../api"
+import {
+  apiLaporan,
+  apiPengeluaran,
+  getToken,
+  LaporanKeuangan,
+} from "../../api"
 import { BarChart } from "../../components/common/BarChart"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
-import { Button, CalendarPicker, Kpi, MonthPicker, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  eksporExcel,
+  eksporPdf,
+  TabelEkspor,
+} from "../../components/common/exportTable"
+import {
+  Button,
+  CalendarPicker,
+  Kpi,
+  MonthPicker,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
-import { ProductDetail, CompactDetail, ProductTransactionRecord, INITIAL_PRODUCT_TRANSACTIONS } from "./ProductReportsPage"
+import {
+  ProductDetail,
+  CompactDetail,
+  ProductTransactionRecord,
+  INITIAL_PRODUCT_TRANSACTIONS,
+} from "./ProductReportsPage"
 
 export const barberReport = [
   ["Seva", 124, 12480000, 4992000],
@@ -48,7 +69,11 @@ export function WhatsAppDialog({
             className="whatsapp-button"
             onClick={() => {
               const pesan = `*Eastville Barbershop*\n${text}\n\nPenjualan batal tidak dihitung.`
-              window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, "_blank", "noopener")
+              window.open(
+                `https://wa.me/?text=${encodeURIComponent(pesan)}`,
+                "_blank",
+                "noopener",
+              )
               onClose()
             }}
           >
@@ -62,8 +87,16 @@ export function WhatsAppDialog({
 
 // Dengan token (data asli) laporan dimulai dari nol, bukan angka contoh.
 const laporanKosong: LaporanKeuangan = {
-  pemasukan: 0, tunai: 0, qris: 0, pengeluaran: 0, komisi: 0, sisa: 0,
-  jumlahTransaksi: 0, perHari: [], perKapster: [], stokMenipis: [],
+  pemasukan: 0,
+  tunai: 0,
+  qris: 0,
+  pengeluaran: 0,
+  komisi: 0,
+  sisa: 0,
+  jumlahTransaksi: 0,
+  perHari: [],
+  perKapster: [],
+  stokMenipis: [],
 }
 
 const demoLaporan: LaporanKeuangan = {
@@ -105,19 +138,67 @@ interface ExpenseRecord {
 }
 
 const initialExpenses: ExpenseRecord[] = [
-  { id: "exp-1", date: "29 Okt", category: "Perlengkapan", description: "Pisau cukur dan sarung tangan", amount: 485000, status: "Aktif" },
-  { id: "exp-2", date: "28 Okt", category: "Listrik", description: "Token listrik Oktober", amount: 750000, status: "Aktif" },
-  { id: "exp-3", date: "26 Okt", category: "Air", description: "Tagihan PDAM Oktober", amount: 215000, status: "Aktif" },
-  { id: "exp-4", date: "24 Okt", category: "Sewa", description: "Sewa tempat bulan November", amount: 3500000, status: "Aktif" },
-  { id: "exp-5", date: "22 Okt", category: "Lain-lain", description: "Konsumsi rapat tim", amount: 280000, status: "BATAL", cancelReason: "Salah nominal" },
-  { id: "exp-6", date: "15 Okt", category: "Perlengkapan", description: "Handuk dan shampoo salon", amount: 640000, status: "Aktif" },
+  {
+    id: "exp-1",
+    date: "29 Okt",
+    category: "Perlengkapan",
+    description: "Pisau cukur dan sarung tangan",
+    amount: 485000,
+    status: "Aktif",
+  },
+  {
+    id: "exp-2",
+    date: "28 Okt",
+    category: "Listrik",
+    description: "Token listrik Oktober",
+    amount: 750000,
+    status: "Aktif",
+  },
+  {
+    id: "exp-3",
+    date: "26 Okt",
+    category: "Air",
+    description: "Tagihan PDAM Oktober",
+    amount: 215000,
+    status: "Aktif",
+  },
+  {
+    id: "exp-4",
+    date: "24 Okt",
+    category: "Sewa",
+    description: "Sewa tempat bulan November",
+    amount: 3500000,
+    status: "Aktif",
+  },
+  {
+    id: "exp-5",
+    date: "22 Okt",
+    category: "Lain-lain",
+    description: "Konsumsi rapat tim",
+    amount: 280000,
+    status: "BATAL",
+    cancelReason: "Salah nominal",
+  },
+  {
+    id: "exp-6",
+    date: "15 Okt",
+    category: "Perlengkapan",
+    description: "Handuk dan shampoo salon",
+    amount: 640000,
+    status: "Aktif",
+  },
 ]
 
 const pad = (n: number) => String(n).padStart(2, "0")
-const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const isoDate = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 
 /** Rentang yyyy-MM-dd untuk mode harian (tanggal) atau bulanan (yyyy-MM). */
-export function rentangLaporan(mode: "Harian" | "Mingguan" | "Bulanan", tanggal: string, bulan: string) {
+export function rentangLaporan(
+  mode: "Harian" | "Mingguan" | "Bulanan",
+  tanggal: string,
+  bulan: string,
+) {
   if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
   if (mode === "Mingguan") {
     // Senin-Minggu pada pekan yang memuat `tanggal`
@@ -133,10 +214,7 @@ export function rentangLaporan(mode: "Harian" | "Mingguan" | "Bulanan", tanggal:
   return { dari: `${bulan}-01`, sampai: `${bulan}-${pad(akhir)}` }
 }
 
-export function ReportsPage({
-  currentUser,
-  role,
-}: {
+export function ReportsPage({ currentUser, role }: {
   currentUser?: AppUser
   role?: Role
 } = {}) {
@@ -146,20 +224,28 @@ export function ReportsPage({
   const [reloadKey, setReloadKey] = useState(0)
   const [tanggal, setTanggal] = useState(() => isoDate(new Date()))
   const [bulan, setBulan] = useState(() => isoDate(new Date()).slice(0, 7))
-  const [data, setData] = useState<LaporanKeuangan>(getToken() ? laporanKosong : demoLaporan)
+  const [data, setData] = useState<LaporanKeuangan>(
+    getToken() ? laporanKosong : demoLaporan,
+  )
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   const [fetching, setFetching] = useState(false)
   const [productLiveError, setProductLiveError] = useState("")
 
   // Interactive Tab: pemasukan | pengeluaran | komisi | sisa
-  const [subTab, setSubTab] = useState<"pemasukan" | "pengeluaran" | "komisi" | "sisa">("pemasukan")
-  const [productTab, setProductTab] = useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
-  const [productList, setProductList] = useState<ProductTransactionRecord[]>(getToken() ? [] : INITIAL_PRODUCT_TRANSACTIONS)
+  const [subTab, setSubTab] =
+    useState<"pemasukan" | "pengeluaran" | "komisi" | "sisa">("pemasukan")
+  const [productTab, setProductTab] =
+    useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
+  const [productList, setProductList] = useState<ProductTransactionRecord[]>(
+    getToken() ? [] : INITIAL_PRODUCT_TRANSACTIONS,
+  )
   const [productLive, setProductLive] = useState(false)
 
   // Expenses management state
-  const [expensesList, setExpensesList] = useState<ExpenseRecord[]>(getToken() ? [] : initialExpenses)
+  const [expensesList, setExpensesList] = useState<ExpenseRecord[]>(
+    getToken() ? [] : initialExpenses,
+  )
   const [expenseFormOpen, setExpenseFormOpen] = useState(false)
   const [expCategory, setExpCategory] = useState<string>("Lain-lain")
   const [expAmount, setExpAmount] = useState("")
@@ -205,7 +291,10 @@ export function ReportsPage({
     }
     let batal = false
     apiLaporan
-      .produk({ dari: rentangLaporan(mode, tanggal, bulan).dari, sampai: rentangLaporan(mode, tanggal, bulan).sampai })
+      .produk({
+        dari: rentangLaporan(mode, tanggal, bulan).dari,
+        sampai: rentangLaporan(mode, tanggal, bulan).sampai,
+      })
       .then((rows) => {
         if (batal) return
         setProductList(rows as ProductTransactionRecord[])
@@ -214,7 +303,10 @@ export function ReportsPage({
       })
       .catch((e) => {
         console.error("Gagal memuat laporan produk:", e)
-        if (!batal) setProductLiveError(e instanceof Error ? e.message : "gagal memuat data")
+        if (!batal)
+          setProductLiveError(
+            e instanceof Error ? e.message : "gagal memuat data",
+          )
       })
     return () => {
       batal = true
@@ -226,7 +318,10 @@ export function ReportsPage({
       <div className="content">
         <DemoNotice live={live} error={liveError} />
         <p>Laporan gagal dimuat: {liveError}</p>
-        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+        <Button
+          className="primary-button"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
           Coba lagi
         </Button>
       </div>
@@ -236,17 +331,33 @@ export function ReportsPage({
   const juta = (n: number) => rupiah(n)
   const rentang = rentangLaporan(mode, tanggal, bulan)
   const periode =
-    mode === "Harian" ? tanggal : mode === "Mingguan" ? `${rentang.dari} s/d ${rentang.sampai}` : bulan
-  const chart = data.perHari.map((h) => ({ label: h.tanggal.slice(8), value: h.total }))
-  const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${isManager ? "Laba Bersih" : "Sisa Owner"}: ${juta(data.sisa)}`
+    mode === "Harian"
+      ? tanggal
+      : mode === "Mingguan"
+        ? `${rentang.dari} s/d ${rentang.sampai}`
+        : bulan
+  const chart = data.perHari.map((h) => ({
+    label: h.tanggal.slice(8),
+    value: h.total,
+  }))
+  const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${
+    isManager ? "Laba Bersih" : "Sisa Owner"
+  }: ${juta(data.sisa)}`
 
   const tabelEkspor = (): TabelEkspor => ({
     berkas: `laporan-keuangan-${periode}`,
     judul: "Laporan Keuangan",
-    keterangan: `Periode ${periode} · ${data.jumlahTransaksi} transaksi · Pemasukan ${data.pemasukan} · Pengeluaran ${data.pengeluaran} · Komisi ${data.komisi} · ${isManager ? "Laba Bersih" : "Sisa Owner"} ${data.sisa}`,
+    keterangan: `Periode ${periode} · ${data.jumlahTransaksi} transaksi · Pemasukan ${data.pemasukan} · Pengeluaran ${data.pengeluaran} · Komisi ${data.komisi} · ${
+      isManager ? "Laba Bersih" : "Sisa Owner"
+    } ${data.sisa}`,
     kolom: ["Kapster", "Transaksi", "Omzet", "Komisi"],
     baris: [
-      ...data.perKapster.map((k): (string | number)[] => [k.kapster, k.pelanggan, k.omzet, k.komisi]),
+      ...data.perKapster.map((k): (string | number)[] => [
+        k.kapster,
+        k.pelanggan,
+        k.omzet,
+        k.komisi,
+      ]),
       ["", "", "", ""],
       ["Ringkasan", "Tunai", "QRIS", "Total"],
       ["Pemasukan", data.tunai, data.qris, data.pemasukan],
@@ -255,7 +366,12 @@ export function ReportsPage({
       [isManager ? "Laba Bersih" : "Sisa Owner", "", "", data.sisa],
       ["", "", "", ""],
       ["Tanggal", "Pemasukan", "", ""],
-      ...data.perHari.map((h): (string | number)[] => [h.tanggal, h.total, "", ""]),
+      ...data.perHari.map((h): (string | number)[] => [
+        h.tanggal,
+        h.total,
+        "",
+        "",
+      ]),
     ],
   })
 
@@ -267,7 +383,7 @@ export function ReportsPage({
 
     if (live) {
       try {
-        await         apiPengeluaran.create({
+        await apiPengeluaran.create({
           tanggal: expDate,
           kategori: expCategory as any,
           deskripsi: expDescription.trim(),
@@ -279,7 +395,9 @@ export function ReportsPage({
         setExpDescription("")
         setExpenseFormOpen(false)
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : "Gagal menyimpan pengeluaran.")
+        window.alert(
+          err instanceof Error ? err.message : "Gagal menyimpan pengeluaran.",
+        )
       }
       return
     }
@@ -287,7 +405,7 @@ export function ReportsPage({
     const newRec: ExpenseRecord = {
       id: `exp-${Date.now()}`,
       date: expDate.slice(5),
-      category: (expCategory as ExpenseRecord["category"]) || "Lain-lain",
+      category: expCategory as ExpenseRecord["category"] || "Lain-lain",
       description: expDescription.trim(),
       amount: parsedAmount,
       status: "Aktif",
@@ -324,10 +442,13 @@ export function ReportsPage({
           ? {
               ...item,
               status: item.status === "Aktif" ? "BATAL" : "Aktif",
-              cancelReason: item.status === "Aktif" ? "Dibatalkan secara manual" : undefined,
+              cancelReason:
+                item.status === "Aktif"
+                  ? "Dibatalkan secara manual"
+                  : undefined,
             }
-          : item
-      )
+          : item,
+      ),
     )
   }
 
@@ -353,10 +474,16 @@ export function ReportsPage({
       <div className="report-toolbar">
         <div className="report-filter-row">
           <div className="segmented">
-            <Button className={mode === "Harian" ? "active" : ""} onClick={() => setMode("Harian")}>
+            <Button
+              className={mode === "Harian" ? "active" : ""}
+              onClick={() => setMode("Harian")}
+            >
               Harian
             </Button>
-            <Button className={mode === "Bulanan" ? "active" : ""} onClick={() => setMode("Bulanan")}>
+            <Button
+              className={mode === "Bulanan" ? "active" : ""}
+              onClick={() => setMode("Bulanan")}
+            >
               Bulanan
             </Button>
           </div>
@@ -377,10 +504,16 @@ export function ReportsPage({
           )}
         </div>
         <div className="report-export-buttons">
-          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
+          <Button
+            className="secondary-button"
+            onClick={() => eksporExcel(tabelEkspor())}
+          >
             Excel
           </Button>
-          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>
+          <Button
+            className="secondary-button"
+            onClick={() => eksporPdf(tabelEkspor())}
+          >
             PDF
           </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
@@ -390,14 +523,20 @@ export function ReportsPage({
       </div>
 
       {/* Interactive KPI Cards acting as direct Sub-view Tabs */}
-      <div className="kpi-grid" style={{ marginBottom: 14, ...(fetching ? { opacity: 0.6 } : {}) }}>
+      <div
+        className="kpi-grid"
+        style={{ marginBottom: 14, ...(fetching ? { opacity: 0.6 } : {}) }}
+      >
         <div
           onClick={() => setSubTab("pemasukan")}
           style={{
             cursor: "pointer",
             borderRadius: 12,
             transition: "all 0.15s ease",
-            boxShadow: subTab === "pemasukan" ? "0 0 0 2px var(--sage), 0 4px 12px rgba(0,0,0,0.08)" : "none",
+            boxShadow:
+              subTab === "pemasukan"
+                ? "0 0 0 2px var(--sage), 0 4px 12px rgba(0,0,0,0.08)"
+                : "none",
             transform: subTab === "pemasukan" ? "translateY(-2px)" : "none",
           }}
           title="Klik untuk melihat rincian sumber pemasukan"
@@ -417,7 +556,10 @@ export function ReportsPage({
             cursor: "pointer",
             borderRadius: 12,
             transition: "all 0.15s ease",
-            boxShadow: subTab === "pengeluaran" ? "0 0 0 2px var(--amber), 0 4px 12px rgba(0,0,0,0.08)" : "none",
+            boxShadow:
+              subTab === "pengeluaran"
+                ? "0 0 0 2px var(--amber), 0 4px 12px rgba(0,0,0,0.08)"
+                : "none",
             transform: subTab === "pengeluaran" ? "translateY(-2px)" : "none",
           }}
           title="Klik untuk mengelola & melihat rincian pengeluaran"
@@ -437,7 +579,10 @@ export function ReportsPage({
             cursor: "pointer",
             borderRadius: 12,
             transition: "all 0.15s ease",
-            boxShadow: subTab === "komisi" ? "0 0 0 2px var(--brass), 0 4px 12px rgba(0,0,0,0.08)" : "none",
+            boxShadow:
+              subTab === "komisi"
+                ? "0 0 0 2px var(--brass), 0 4px 12px rgba(0,0,0,0.08)"
+                : "none",
             transform: subTab === "komisi" ? "translateY(-2px)" : "none",
           }}
           title="Klik untuk melihat detail komisi per kapster"
@@ -457,20 +602,24 @@ export function ReportsPage({
             cursor: "pointer",
             borderRadius: 12,
             transition: "all 0.15s ease",
-            boxShadow: subTab === "sisa" ? "0 0 0 2px var(--ink), 0 4px 12px rgba(0,0,0,0.08)" : "none",
+            boxShadow:
+              subTab === "sisa"
+                ? "0 0 0 2px var(--ink), 0 4px 12px rgba(0,0,0,0.08)"
+                : "none",
             transform: subTab === "sisa" ? "translateY(-2px)" : "none",
           }}
           title="Klik untuk melihat kalkulasi sisa bersih owner"
         >
           <Kpi
             icon="wallet"
-            label={isManager ? "Laba Bersih (Klik Tab)" : "Sisa Owner (Klik Tab)"}
+            label={
+              isManager ? "Laba Bersih (Klik Tab)" : "Sisa Owner (Klik Tab)"
+            }
             tone="dark"
             value={rupiah(data.sisa)}
             detail={`Margin laba bersih ${persenSisa}%`}
           />
         </div>
-
       </div>
 
       {/* SUB-VIEW 1: TAB PEMASUKAN */}
@@ -478,30 +627,99 @@ export function ReportsPage({
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20 }}>
             <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
-            <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
+            <p
+              style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}
+            >
               Rincian pemasukan berdasarkan metode pembayaran.
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginTop: 14 }}>
-              <div style={{ padding: 16, borderRadius: 8, border: "1px solid var(--line)", background: "var(--paper)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <i className="dot sage-dot" style={{ width: 10, height: 10 }} />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: 16,
+                marginTop: 14,
+              }}
+            >
+              <div
+                style={{
+                  padding: 16,
+                  borderRadius: 8,
+                  border: "1px solid var(--line)",
+                  background: "var(--paper)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 8,
+                  }}
+                >
+                  <i
+                    className="dot sage-dot"
+                    style={{ width: 10, height: 10 }}
+                  />
                   <strong style={{ fontSize: 15 }}>Pembayaran Tunai</strong>
-                  <span className="chip lunas" style={{ marginLeft: "auto" }}>{persenTunai}%</span>
+                  <span className="chip lunas" style={{ marginLeft: "auto" }}>
+                    {persenTunai}%
+                  </span>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>{rupiah(data.tunai)}</div>
-                <small style={{ color: "var(--muted)", display: "block", marginTop: 4 }}>
+                <div
+                  style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}
+                >
+                  {rupiah(data.tunai)}
+                </div>
+                <small
+                  style={{
+                    color: "var(--muted)",
+                    display: "block",
+                    marginTop: 4,
+                  }}
+                >
                   Kas fisik diterima langsung di laci kasir
                 </small>
               </div>
 
-              <div style={{ padding: 16, borderRadius: 8, border: "1px solid var(--line)", background: "var(--paper)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <i className="dot brass-dot" style={{ width: 10, height: 10 }} />
-                  <strong style={{ fontSize: 15 }}>Pembayaran QRIS / Digital</strong>
-                  <span className="chip active" style={{ marginLeft: "auto" }}>{persenQris}%</span>
+              <div
+                style={{
+                  padding: 16,
+                  borderRadius: 8,
+                  border: "1px solid var(--line)",
+                  background: "var(--paper)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 8,
+                  }}
+                >
+                  <i
+                    className="dot brass-dot"
+                    style={{ width: 10, height: 10 }}
+                  />
+                  <strong style={{ fontSize: 15 }}>
+                    Pembayaran QRIS / Digital
+                  </strong>
+                  <span className="chip active" style={{ marginLeft: "auto" }}>
+                    {persenQris}%
+                  </span>
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>{rupiah(data.qris)}</div>
-                <small style={{ color: "var(--muted)", display: "block", marginTop: 4 }}>
+                <div
+                  style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}
+                >
+                  {rupiah(data.qris)}
+                </div>
+                <small
+                  style={{
+                    color: "var(--muted)",
+                    display: "block",
+                    marginTop: 4,
+                  }}
+                >
                   Masuk otomatis ke rekening merchant Eastville
                 </small>
               </div>
@@ -513,7 +731,17 @@ export function ReportsPage({
             {live ? (
               <BarChart data={chart} />
             ) : (
-              <BarChart data={chart.length > 0 ? chart : [{ label: "01", value: 1200000 }, { label: "15", value: 1850000 }, { label: "29", value: 2100000 }]} />
+              <BarChart
+                data={
+                  chart.length > 0
+                    ? chart
+                    : [
+                        { label: "01", value: 1200000 },
+                        { label: "15", value: 1850000 },
+                        { label: "29", value: 2100000 },
+                      ]
+                }
+              />
             )}
           </section>
         </div>
@@ -522,7 +750,10 @@ export function ReportsPage({
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
       {subTab === "pengeluaran" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
+          <section
+            className="panel"
+            style={{ padding: 20, overflow: "hidden" }}
+          >
             <div className="page-title expense-page-title">
               <div>
                 <h2>Detail Pengeluaran Toko</h2>
@@ -530,7 +761,10 @@ export function ReportsPage({
                   Daftar biaya operasional yang tercatat.
                 </p>
               </div>
-              <Button className="primary-button" onClick={() => setExpenseFormOpen(true)}>
+              <Button
+                className="primary-button"
+                onClick={() => setExpenseFormOpen(true)}
+              >
                 <Icon name="plus" /> Catat Pengeluaran
               </Button>
             </div>
@@ -556,7 +790,9 @@ export function ReportsPage({
 
               {filteredExpenses.map((row) => (
                 <div
-                  className={`expense-row ${row.status === "BATAL" ? "voided" : ""}`}
+                  className={`expense-row ${
+                    row.status === "BATAL" ? "voided" : ""
+                  }`}
                   key={row.id}
                 >
                   <span>{row.date}</span>
@@ -588,54 +824,77 @@ export function ReportsPage({
               ))}
 
               {filteredExpenses.length === 0 && (
-                <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--slate)" }}>
+                <div
+                  style={{
+                    padding: "32px 16px",
+                    textAlign: "center",
+                    color: "var(--slate)",
+                  }}
+                >
                   Tidak ada data pengeluaran yang cocok dengan pencarian.
                 </div>
               )}
             </div>
-        </section>
+          </section>
         </div>
       )}
 
       {/* SUB-VIEW 3: TAB TOTAL KOMISI */}
       {subTab === "komisi" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section className="panel" style={{ padding: 20, overflow: "hidden" }}>
-          <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
-          <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}>
-            Rincian akumulasi omzet dan bagian komisi yang berhak diterima setiap kapster.
-          </p>
+          <section
+            className="panel"
+            style={{ padding: 20, overflow: "hidden" }}
+          >
+            <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
+            <p
+              style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}
+            >
+              Rincian akumulasi omzet dan bagian komisi yang berhak diterima
+              setiap kapster.
+            </p>
 
-          <div className="commission-table-scroll">
-            <div className="report-head">
-              <span>Kapster</span>
-              <span>Pelanggan</span>
-              <span>Omzet Dihasilkan</span>
-              <span>Total Komisi</span>
-            </div>
+            <div className="commission-table-scroll">
+              <div className="report-head">
+                <span>Kapster</span>
+                <span>Pelanggan</span>
+                <span>Omzet Dihasilkan</span>
+                <span>Total Komisi</span>
+              </div>
 
-            {data.perKapster.map((k) => {
-            const pct = k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : "40"
-            return (
-              <div className="report-row" key={k.kapsterId + k.kapster}>
-                <div>
-                  <strong>{k.kapster}</strong>
-                  <small style={{ color: "var(--muted)", display: "block" }}>Porsi komisi: ~{pct}%</small>
+              {data.perKapster.map((k) => {
+                const pct =
+                  k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : "40"
+                return (
+                  <div className="report-row" key={k.kapsterId + k.kapster}>
+                    <div>
+                      <strong>{k.kapster}</strong>
+                      <small
+                        style={{ color: "var(--muted)", display: "block" }}
+                      >
+                        Porsi komisi: ~{pct}%
+                      </small>
+                    </div>
+                    <span>{k.pelanggan} transaksi</span>
+                    <b>{rupiah(k.omzet)}</b>
+                    <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
+                  </div>
+                )
+              })}
+
+              {data.perKapster.length === 0 && (
+                <div
+                  style={{
+                    padding: "24px 16px",
+                    textAlign: "center",
+                    color: "var(--slate)",
+                  }}
+                >
+                  Belum ada data komisi kapster pada periode ini.
                 </div>
-                <span>{k.pelanggan} transaksi</span>
-                <b>{rupiah(k.omzet)}</b>
-                <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
-              </div>
-            )
-            })}
-
-            {data.perKapster.length === 0 && (
-              <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--slate)" }}>
-                Belum ada data komisi kapster pada periode ini.
-              </div>
-            )}
-          </div>
-        </section>
+              )}
+            </div>
+          </section>
         </div>
       )}
 
@@ -644,14 +903,27 @@ export function ReportsPage({
         <section className="panel" style={{ padding: 22 }}>
           <PageTitle
             eyebrow="Kalkulasi Keuntungan"
-            title={isManager ? "Rincian Laba Bersih Operasional" : "Kalkulasi Sisa Dana Bersih Owner"}
+            title={
+              isManager
+                ? "Rincian Laba Bersih Operasional"
+                : "Kalkulasi Sisa Dana Bersih Owner"
+            }
           />
           <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 20 }}>
-            Kalkulasi transparan dana bersih yang dikantongi {isManager ? "Manajemen" : "Owner"} setelah dikurangi
-            seluruh biaya operasional dan komisi kapster.
+            Kalkulasi transparan dana bersih yang dikantongi{" "}
+            {isManager ? "Manajemen" : "Owner"} setelah dikurangi seluruh biaya
+            operasional dan komisi kapster.
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", maxWidth: 1000 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              width: "100%",
+              maxWidth: 1000,
+            }}
+          >
             <div
               style={{
                 display: "flex",
@@ -666,10 +938,22 @@ export function ReportsPage({
               }}
             >
               <div>
-                <strong style={{ display: "block", color: "var(--ink)", fontSize: 14 }}>(+) Total Pemasukan Kotor</strong>
-                <small style={{ color: "var(--slate)" }}>Omzet gabungan tunai &amp; QRIS</small>
+                <strong
+                  style={{
+                    display: "block",
+                    color: "var(--ink)",
+                    fontSize: 14,
+                  }}
+                >
+                  (+) Total Pemasukan Kotor
+                </strong>
+                <small style={{ color: "var(--slate)" }}>
+                  Omzet gabungan tunai &amp; QRIS
+                </small>
               </div>
-              <strong style={{ fontSize: 16, color: "#15803d" }}>+ {rupiah(data.pemasukan)}</strong>
+              <strong style={{ fontSize: 16, color: "#15803d" }}>
+                + {rupiah(data.pemasukan)}
+              </strong>
             </div>
 
             <div
@@ -684,10 +968,22 @@ export function ReportsPage({
               }}
             >
               <div>
-                <strong style={{ display: "block", color: "var(--ink)", fontSize: 14 }}>(-) Total Pengeluaran Toko</strong>
-                <small style={{ color: "var(--slate)" }}>Listrik, air, perlengkapan &amp; sewa ({persenPengeluaran}%)</small>
+                <strong
+                  style={{
+                    display: "block",
+                    color: "var(--ink)",
+                    fontSize: 14,
+                  }}
+                >
+                  (-) Total Pengeluaran Toko
+                </strong>
+                <small style={{ color: "var(--slate)" }}>
+                  Listrik, air, perlengkapan &amp; sewa ({persenPengeluaran}%)
+                </small>
               </div>
-              <strong style={{ fontSize: 16, color: "#b91c1c" }}>- {rupiah(data.pengeluaran)}</strong>
+              <strong style={{ fontSize: 16, color: "#b91c1c" }}>
+                - {rupiah(data.pengeluaran)}
+              </strong>
             </div>
 
             <div
@@ -702,10 +998,22 @@ export function ReportsPage({
               }}
             >
               <div>
-                <strong style={{ display: "block", color: "var(--ink)", fontSize: 14 }}>(-) Total Komisi Kapster</strong>
-                <small style={{ color: "var(--slate)" }}>Hak komisi kapster layanan &amp; produk ({persenKomisi}%)</small>
+                <strong
+                  style={{
+                    display: "block",
+                    color: "var(--ink)",
+                    fontSize: 14,
+                  }}
+                >
+                  (-) Total Komisi Kapster
+                </strong>
+                <small style={{ color: "var(--slate)" }}>
+                  Hak komisi kapster layanan &amp; produk ({persenKomisi}%)
+                </small>
               </div>
-              <strong style={{ fontSize: 16, color: "#8c6014" }}>- {rupiah(data.komisi)}</strong>
+              <strong style={{ fontSize: 16, color: "#8c6014" }}>
+                - {rupiah(data.komisi)}
+              </strong>
             </div>
 
             <div
@@ -721,12 +1029,21 @@ export function ReportsPage({
               }}
             >
               <div>
-                <strong style={{ display: "block", fontSize: 15, color: "#fff" }}>
-                  (=) {isManager ? "Laba Bersih Akhir" : "Sisa Bersih Dikantongi Owner"}
+                <strong
+                  style={{ display: "block", fontSize: 15, color: "#fff" }}
+                >
+                  (=){" "}
+                  {isManager
+                    ? "Laba Bersih Akhir"
+                    : "Sisa Bersih Dikantongi Owner"}
                 </strong>
-                <small style={{ color: "#cbd5e1" }}>Margin bersih: {persenSisa}% dari total omzet</small>
+                <small style={{ color: "#cbd5e1" }}>
+                  Margin bersih: {persenSisa}% dari total omzet
+                </small>
               </div>
-              <strong style={{ fontSize: 20, color: "#facc15" }}>{rupiah(data.sisa)}</strong>
+              <strong style={{ fontSize: 20, color: "#facc15" }}>
+                {rupiah(data.sisa)}
+              </strong>
             </div>
           </div>
         </section>
@@ -776,7 +1093,11 @@ export function ReportsPage({
               />
             </label>
             <footer>
-              <Button className="secondary-button" type="button" onClick={() => setExpenseFormOpen(false)}>
+              <Button
+                className="secondary-button"
+                type="button"
+                onClick={() => setExpenseFormOpen(false)}
+              >
                 Batal
               </Button>
               <Button className="primary-button" type="submit">
@@ -787,12 +1108,15 @@ export function ReportsPage({
         </div>
       )}
 
-
-
-      {wa && <WhatsAppDialog onClose={() => setWa(false)} title="Laporan Keuangan" text={ringkasWa} />}
+      {wa && (
+        <WhatsAppDialog
+          onClose={() => setWa(false)}
+          title="Laporan Keuangan"
+          text={ringkasWa}
+        />
+      )}
     </div>
   )
 }
 
 export default ReportsPage
-
