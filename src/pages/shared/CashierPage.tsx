@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, rupiah } from "../../components/common/UI"
+import { Button, LoadingState, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiKasir, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
@@ -267,6 +267,12 @@ export function CashierPage({
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
   const [pinAtasan, setPinAtasan] = useState("")
+  const cartSwipeStart = useRef<{ lineId: string; x: number; y: number } | null>(null)
+  const cartWheelSwipe = useRef<{
+    lineId: string
+    deltaX: number
+    timer: number
+  } | null>(null)
   // Id unik per percobaan bayar: kirim ulang setelah timeout tidak membuat nota ganda.
   const requestId = useRef(`${Date.now()}-${Math.random().toString(36).slice(2, 10)}`)
   const punyaToken = !!getToken()
@@ -397,21 +403,6 @@ export function CashierPage({
   const change =
     method === "QRIS" ? 0 : Math.max(0, cash - (payableTotal - qris))
 
-  // Pembayaran mengikuti total otomatis (item/diskon/metode berubah); kasir tetap bisa mengetik manual.
-  useEffect(() => {
-    if (method === "Tunai") {
-      setCash(payableTotal)
-      setQris(0)
-    } else if (method === "QRIS") {
-      setCash(0)
-      setQris(payableTotal)
-    } else {
-      const cashPart = Math.round(payableTotal / 2 / 1000) * 1000
-      setCash(cashPart)
-      setQris(Math.max(0, payableTotal - cashPart))
-    }
-  }, [payableTotal, method])
-
   const payDisabledReason = ((): string | null => {
     if (!cart.length) return null
     if (gagalMuat) return "Data kasir belum termuat. Tekan Coba lagi di atas."
@@ -460,7 +451,7 @@ export function CashierPage({
   if (loading) {
     return (
       <div className="content">
-        <p>Memuat kasir...</p>
+        <LoadingState message="Memuat kasir..." />
       </div>
     )
   }
@@ -537,8 +528,7 @@ export function CashierPage({
       <section className="catalog">
         <DemoNotice live={live} error={liveError} />
         <div className="cashier-heading">
-          <small>KASIR</small>
-          <span>Pilih layanan</span>
+          <span>Kasir &amp; POS</span>
         </div>
         <section className="barber-picker">
           <div className="barber-picker-label">
@@ -655,20 +645,62 @@ export function CashierPage({
               </div>
             ) : (
               cart.map((line) => (
-                <article key={line.lineId}>
+                <article
+                  className="cart-line-swipe"
+                  key={line.lineId}
+                  title="Geser ke kiri atau seret dengan mouse untuk menghapus item"
+                  onWheel={(event) => {
+                    if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
+                    const swipe = cartWheelSwipe.current
+                    const next =
+                      swipe?.lineId === line.lineId
+                        ? swipe
+                        : { lineId: line.lineId, deltaX: 0, timer: 0 }
+                    next.deltaX += event.deltaX
+                    window.clearTimeout(next.timer)
+                    next.timer = window.setTimeout(() => {
+                      if (cartWheelSwipe.current?.lineId === line.lineId) {
+                        cartWheelSwipe.current = null
+                      }
+                    }, 250)
+                    cartWheelSwipe.current = next
+                    if (next.deltaX <= -100) {
+                      window.clearTimeout(next.timer)
+                      cartWheelSwipe.current = null
+                      setCart((items) => items.filter((item) => item.lineId !== line.lineId))
+                    }
+                  }}
+                  onPointerDown={(event) => {
+                    const target = event.target as HTMLElement
+                    if (target.closest("button, select")) {
+                      cartSwipeStart.current = null
+                      return
+                    }
+                    cartSwipeStart.current = {
+                      lineId: line.lineId,
+                      x: event.clientX,
+                      y: event.clientY,
+                    }
+                    event.currentTarget.setPointerCapture(event.pointerId)
+                  }}
+                  onPointerUp={(event) => {
+                    const start = cartSwipeStart.current
+                    cartSwipeStart.current = null
+                    if (!start || start.lineId !== line.lineId) return
+                    const dx = event.clientX - start.x
+                    const dy = event.clientY - start.y
+                    if (dx < -60 && Math.abs(dx) > Math.abs(dy)) {
+                      setCart((items) => items.filter((item) => item.lineId !== line.lineId))
+                    }
+                  }}
+                  onPointerCancel={() => {
+                    cartSwipeStart.current = null
+                  }}
+                >
                   <div>
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
                     </span>
-                    <Button
-                      onClick={() =>
-                        setCart((c) =>
-                          c.filter((x) => x.lineId !== line.lineId),
-                        )
-                      }
-                    >
-                      <Icon name="trash" />
-                    </Button>
                   </div>
                   <div>
                     <label className="cart-line-kapster">
@@ -1025,7 +1057,21 @@ export function CashierPage({
                   <Button
                     className={method === value ? "active" : ""}
                     key={value}
-                    onClick={() => setMethod(value)}
+                    onClick={() => {
+                      if (value === method) return
+                      setMethod(value)
+                      if (value === "Tunai") {
+                        setCash(payableTotal)
+                        setQris(0)
+                      } else if (value === "QRIS") {
+                        setCash(0)
+                        setQris(payableTotal)
+                      } else {
+                        const cashPart = Math.round(payableTotal / 2 / 1000) * 1000
+                        setCash(cashPart)
+                        setQris(Math.max(0, payableTotal - cashPart))
+                      }
+                    }}
                   >
                     <Icon name={value === "QRIS" ? "qris" : "cash"} />
                     <strong>{value}</strong>

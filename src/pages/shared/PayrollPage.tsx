@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 import {
   apiKasbon,
   apiGaji,
@@ -152,7 +152,11 @@ export function KasbonTab() {
         <header style={{ padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
           <strong style={{ fontSize: 14 }}>Riwayat Kasbon</strong>
         </header>
-        {loading && <p style={{ padding: 18, color: "var(--muted)" }}>Memuat data kasbon...</p>}
+        {loading && (
+          <div style={{ padding: "8px 18px" }}>
+            <LoadingState message="Memuat data kasbon..." compact />
+          </div>
+        )}
         {kasbonList.length === 0 && !loading && (
           <p style={{ padding: 18, color: "var(--muted)" }}>Belum ada catatan kasbon.</p>
         )}
@@ -359,7 +363,9 @@ export function PayrollPage() {
             </div>
           </section>
 
-          {loading && <p style={{ color: "var(--muted)", margin: "10px 0" }}>Menghitung komisi dari database...</p>}
+          {loading && (
+            <LoadingState message="Menghitung komisi dari database..." compact />
+          )}
 
           <div className="salary-grid">
             {kapsters.map((k) => {

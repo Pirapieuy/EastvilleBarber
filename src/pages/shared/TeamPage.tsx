@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { apiTim, apiPengaturan, getToken, UserRow, PengaturanKomisi } from "../../api"
 
@@ -209,7 +209,7 @@ export function TeamPage({
         </select>
       </div>
 
-      {loading && <p style={{ color: "var(--muted)", margin: "10px 0" }}>Memuat data tim...</p>}
+      {loading && <LoadingState message="Memuat data tim..." compact />}
       {loadError && (
         <p role="alert" style={{ color: "#dc2626", margin: "10px 0" }}>
           Data tim gagal dimuat: {loadError}{" "}

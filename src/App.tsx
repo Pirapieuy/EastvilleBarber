@@ -3,6 +3,7 @@ import { AppLayout } from "./layouts/AppLayout"
 import { Login } from "./components/common/Login"
 import { AppUser, DEMO_USERS, Role, toRoleKey } from "./types"
 import { clearToken, getToken, restoreSession } from "./api"
+import { LoadingState } from "./components/common/UI"
 
 // Kasir Pages
 import { KasirPOS } from "./pages/kasir/KasirPOS"
@@ -87,7 +88,11 @@ export function App() {
   }, [])
 
   if (checkingSession) {
-    return <div style={{ padding: 24 }}>Memuat sesi...</div>
+    return (
+      <div className="loading-state-screen">
+        <LoadingState message="Memuat sesi..." />
+      </div>
+    )
   }
 
   if (!loggedIn) {

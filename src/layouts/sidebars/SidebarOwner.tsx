@@ -62,7 +62,7 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
       {
         page: "AbsensiAdmin",
         alias: "attendance-admin",
-        label: "Absensi",
+        label: "Jam Kerja",
         icon: "calendar",
       },
     ],

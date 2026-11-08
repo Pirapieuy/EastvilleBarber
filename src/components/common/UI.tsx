@@ -78,17 +78,36 @@ export function PageTitle({
   title,
   action,
 }: {
-  eyebrow: string
+  eyebrow?: string
   title: string
   action?: ReactNode
 }) {
   return (
     <div className="page-title">
       <div>
-        <p className="eyebrow">{eyebrow}</p>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h2>{title}</h2>
       </div>
       {action}
+    </div>
+  )
+}
+
+export function LoadingState({
+  message,
+  compact = false,
+}: {
+  message: string
+  compact?: boolean
+}) {
+  return (
+    <div
+      className={`loading-state${compact ? " loading-state-compact" : ""}`}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="loading-spinner" aria-hidden="true" />
+      <span>{message}</span>
     </div>
   )
 }
@@ -117,3 +136,5 @@ export function Kpi({
     </article>
   )
 }
+
+export { CalendarPicker, MonthPicker } from "./CalendarPicker"

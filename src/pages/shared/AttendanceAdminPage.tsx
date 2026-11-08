@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle } from "../../components/common/UI"
+import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import {
   apiAbsensi,
@@ -51,7 +51,7 @@ export function AttendanceAdminPage({
   title?: string
 } = {}) {
   const isManager = (role ?? currentUser?.role) === "Manajer"
-  const pageTitle = title ?? "Jadwal Absensi"
+  const pageTitle = title ?? "Jam Kerja"
 
   const today = new Date().toISOString().slice(0, 10)
   const [tab, setTab] = useState<"Jadwal" | "Pengaturan">("Jadwal")
@@ -68,7 +68,7 @@ export function AttendanceAdminPage({
       nama: "Budi Santoso",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Tepat waktu",
+      status: "Tepat Waktu",
     },
     {
       id: "a-02",
@@ -79,7 +79,7 @@ export function AttendanceAdminPage({
       nama: "Zhefitra Ananda",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Hadir",
+      status: "Tepat Waktu",
     },
     {
       id: "a-03",
@@ -90,7 +90,7 @@ export function AttendanceAdminPage({
       nama: "Tata Pratama",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Hadir",
+      status: "Terlambat",
     },
   ])
   const [leaveRecords, setLeaveRecords] = useState<LeaveRecord[]>(DEFAULT_LEAVE_RECORDS)
@@ -193,79 +193,58 @@ export function AttendanceAdminPage({
     setLeaveModalOpen(false)
   }
 
-  async function handleSaveJamKerja(e: FormEvent) {
-    e.preventDefault()
+  async function handleSaveSettings(type: "all" | "jam" | "komisi") {
     setPengaturanMsg("")
     const baru: PengaturanKomisi = {
       ...pengaturan,
-      jamMulai,
-      jamSelesai,
-      komisiDefault: Number(komisiDefault),
-      komisiLembur: Number(komisiLembur),
+      jamMulai: type === "komisi" ? pengaturan.jamMulai : jamMulai,
+      jamSelesai: type === "komisi" ? pengaturan.jamSelesai : jamSelesai,
+      komisiDefault: type === "jam" ? pengaturan.komisiDefault : Number(komisiDefault),
+      komisiLembur: type === "jam" ? pengaturan.komisiLembur : Number(komisiLembur),
     }
 
     if (!getToken()) {
       setPengaturan(baru)
-      setPengaturanMsg("Jam kerja berhasil disimpan (mode lokal/demo).")
+      setPengaturanMsg(
+        type === "jam"
+          ? "Jam kerja berhasil disimpan (demo)."
+          : type === "komisi"
+          ? "Komisi berhasil disimpan (demo)."
+          : "Pengaturan berhasil disimpan (demo)."
+      )
       return
     }
 
     setPengaturanSaving(true)
     try {
       const res = await apiPengaturan.simpan({
-        jamMulai,
-        jamSelesai,
+        jamMulai: baru.jamMulai,
+        jamSelesai: baru.jamSelesai,
         komisiDefault: baru.komisiDefault,
         komisiLembur: baru.komisiLembur,
-        alasan: pengaturanAlasan.trim() || "Perubahan jam kerja operasional",
+        alasan:
+          pengaturanAlasan.trim() ||
+          (type === "jam"
+            ? "Perubahan jam kerja operasional"
+            : type === "komisi"
+            ? "Perubahan skema komisi"
+            : "Perubahan jam kerja & komisi"),
       })
       setPengaturan(res)
-      setPengaturanMsg("Pengaturan jam kerja berhasil disimpan ke server.")
+      setPengaturanMsg(
+        type === "jam"
+          ? "Jam kerja tersimpan di server."
+          : type === "komisi"
+          ? "Komisi tersimpan di server."
+          : "Pengaturan tersimpan di server."
+      )
       setPengaturanAlasan("")
     } catch (err) {
-      setPengaturanMsg(err instanceof Error ? err.message : "Gagal menyimpan jam kerja.")
+      setPengaturanMsg(err instanceof Error ? err.message : "Gagal menyimpan.")
     } finally {
       setPengaturanSaving(false)
     }
   }
-
-  async function handleSaveKomisi(e: FormEvent) {
-    e.preventDefault()
-    setPengaturanMsg("")
-    const baru: PengaturanKomisi = {
-      ...pengaturan,
-      jamMulai,
-      jamSelesai,
-      komisiDefault: Number(komisiDefault),
-      komisiLembur: Number(komisiLembur),
-    }
-
-    if (!getToken()) {
-      setPengaturan(baru)
-      setPengaturanMsg("Skema komisi berhasil disimpan (mode lokal/demo).")
-      return
-    }
-
-    setPengaturanSaving(true)
-    try {
-      const res = await apiPengaturan.simpan({
-        jamMulai,
-        jamSelesai,
-        komisiDefault: baru.komisiDefault,
-        komisiLembur: baru.komisiLembur,
-        alasan: pengaturanAlasan.trim() || "Perubahan skema komisi",
-      })
-      setPengaturan(res)
-      setPengaturanMsg("Pengaturan komisi berhasil disimpan ke server.")
-      setPengaturanAlasan("")
-    } catch (err) {
-      setPengaturanMsg(err instanceof Error ? err.message : "Gagal menyimpan komisi.")
-    } finally {
-      setPengaturanSaving(false)
-    }
-  }
-
-  const selectedMonthStr = (filterTanggal || today).slice(0, 7)
 
   // Gabungkan jadwal masuk per kapster untuk tanggal filter
   const scheduleRows = kapsters.map((k, idx) => {
@@ -273,23 +252,33 @@ export function AttendanceAdminPage({
     const leave = leaveRecords.find((l) => l.kapsterId === k.id && l.tanggal === filterTanggal)
     const leavesThisMonth = getLeaveCountInMonth(k.id, filterTanggal)
 
-    let shift = idx % 2 === 0 ? "09:00 - 18:00 (Pagi)" : "12:00 - 21:00 (Siang)"
-    let statusText = "Belum Masuk"
-    let statusType = "pending"
+    const shift = idx % 2 === 0 ? "09:00 - 18:00 (Pagi)" : "12:00 - 21:00 (Siang)"
+    let statusText: "Tepat Waktu" | "Terlambat" | "Tidak Hadir" = "Tidak Hadir"
+    let statusType: "tepat_waktu" | "terlambat" | "tidak_hadir" = "tidak_hadir"
 
-    if (leave) {
-      shift = "-"
-      statusText = `${leave.tipe}`
-      statusType = "libur"
-    } else if (abs) {
-      statusText = `${abs.status || "Hadir"} (${abs.jam})`
-      statusType = "hadir"
+    if (abs) {
+      const isLate =
+        (abs.status && abs.status.toLowerCase().includes("terlambat")) ||
+        (abs.jam && (
+          (idx % 2 === 0 && (abs.jam > "09.00" || abs.jam > "09:00")) ||
+          (idx % 2 !== 0 && (abs.jam > "12.00" || abs.jam > "12:00"))
+        ))
+      if (isLate) {
+        statusText = "Terlambat"
+        statusType = "terlambat"
+      } else {
+        statusText = "Tepat Waktu"
+        statusType = "tepat_waktu"
+      }
+    } else {
+      statusText = "Tidak Hadir"
+      statusType = "tidak_hadir"
     }
 
     return {
       kapsterId: k.id,
       nama: k.nama,
-      shift,
+      shift: leave ? "-" : shift,
       jamMasuk: abs ? abs.jam : "-",
       statusText,
       statusType,
@@ -315,40 +304,26 @@ export function AttendanceAdminPage({
               setPengaturanMsg("")
             }}
           >
-            {value === "Jadwal" ? "Jadwal & Absensi" : value === "Pengaturan" ? "Pengaturan Jam Kerja & Komisi" : value}
+            {value === "Jadwal" ? "Jadwal & Jam Kerja" : value === "Pengaturan" ? "Pengaturan Jam Kerja & Komisi" : value}
           </Button>
         ))}
       </div>
 
-      {/* TAB 1: JADWAL & ABSENSI */}
+      {/* TAB 1: JADWAL & JAM KERJA */}
       {tab === "Jadwal" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-              <div>
-                <p className="eyebrow">Daftar Kehadiran</p>
-                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
-                  Jadwal Masuk Kapster · {new Date(filterTanggal + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                </h3>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Button className="secondary-button" onClick={() => setTab("Pengaturan")}>
-                  <Icon name="clock" /> Atur Jam Kerja & Komisi
-                </Button>
-              </div>
+              <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
+                Jadwal & Kehadiran
+              </h3>
             </div>
 
             <div className="filters">
-              <div className="input-shell">
-                <Icon name="calendar" />
-                <input
-                  type="date"
-                  value={filterTanggal}
-                  onChange={(e) => e.target.value && setFilterTanggal(e.target.value)}
-                  title="Pilih tanggal untuk melihat jadwal atau riwayat hari sebelumnya"
-                />
-              </div>
+              <CalendarPicker
+                value={filterTanggal}
+                onChange={setFilterTanggal}
+              />
 
               <select value={filterKapster} onChange={(e) => setFilterKapster(e.target.value)}>
                 <option value="Semua">Semua kapster</option>
@@ -358,14 +333,6 @@ export function AttendanceAdminPage({
                   </option>
                 ))}
               </select>
-
-              <Button
-                className="secondary-button"
-                onClick={() => setFilterTanggal(today)}
-                title="Kembali ke hari ini"
-              >
-                Hari Ini
-              </Button>
             </div>
 
             {loading && <p style={{ padding: 14, color: "var(--muted)" }}>Memuat jadwal absensi...</p>}
@@ -381,8 +348,8 @@ export function AttendanceAdminPage({
                     padding: "12px 16px",
                     borderRadius: 8,
                     border: "1px solid var(--line)",
-                    background: row.statusType === "libur" ? "var(--bg)" : "var(--paper)",
-                    opacity: row.statusType === "libur" ? 0.8 : 1,
+                    background: row.leave ? "var(--bg)" : "var(--paper)",
+                    opacity: row.leave ? 0.85 : 1,
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -392,16 +359,16 @@ export function AttendanceAdminPage({
                         height: 38,
                         borderRadius: "50%",
                         background:
-                          row.statusType === "hadir"
+                          row.statusType === "tepat_waktu"
                             ? "rgba(34, 197, 94, 0.15)"
-                            : row.statusType === "libur"
-                            ? "rgba(200, 150, 62, 0.15)"
+                            : row.statusType === "terlambat"
+                            ? "rgba(234, 179, 8, 0.15)"
                             : "var(--line)",
                         color:
-                          row.statusType === "hadir"
+                          row.statusType === "tepat_waktu"
                             ? "#15803d"
-                            : row.statusType === "libur"
-                            ? "#8c6014"
+                            : row.statusType === "terlambat"
+                            ? "#b45309"
                             : "var(--muted)",
                         display: "flex",
                         alignItems: "center",
@@ -415,39 +382,33 @@ export function AttendanceAdminPage({
                     <div>
                       <strong style={{ fontSize: 14, color: "var(--ink)", display: "block" }}>{row.nama}</strong>
                       <small style={{ color: "var(--muted)", fontSize: 12 }}>
-                        Shift: {row.shift} · Jam Masuk: {row.jamMasuk}
+                        Shift: {row.shift} · Masuk: {row.jamMasuk}
+                        {row.leave && ` · (${row.leave.tipe})`}
                       </small>
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <span style={{ fontSize: 11, color: "var(--slate)" }}>
-                      Libur bulan ini: <strong>{row.leavesThisMonth}/4 hari</strong>
-                    </span>
-                    {row.statusType === "libur" ? (
-                      <i className="chip inactive">{row.statusText}</i>
-                    ) : (
-                      <Button
-                        className="secondary-button"
-                        style={{ padding: "6px 10px" }}
-                        onClick={() => {
-                          setLeaveKapsterId(row.kapsterId)
-                          setLeaveDate(filterTanggal)
-                          setLeaveType("Libur Mingguan")
-                          setLeaveReason("")
-                          setLeaveError("")
-                          setLeaveModalOpen(true)
-                        }}
-                      >
-                        Ajukan/Set Libur
-                      </Button>
-                    )}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <Button
+                      className="secondary-button"
+                      style={{ padding: "6px 10px" }}
+                      onClick={() => {
+                        setLeaveKapsterId(row.kapsterId)
+                        setLeaveDate(filterTanggal)
+                        setLeaveType("Libur Mingguan")
+                        setLeaveReason("")
+                        setLeaveError("")
+                        setLeaveModalOpen(true)
+                      }}
+                    >
+                      Ajukan Libur
+                    </Button>
                     <i
                       className={`chip ${
-                        row.statusType === "hadir"
+                        row.statusType === "tepat_waktu"
                           ? "lunas"
-                          : row.statusType === "libur"
-                          ? "inactive"
+                          : row.statusType === "terlambat"
+                          ? "pending"
                           : "batal"
                       }`}
                     >
@@ -459,16 +420,13 @@ export function AttendanceAdminPage({
             </div>
           </section>
 
-            {/* Kuota & Riwayat Libur Bulan Berjalan */}
+          {/* Kuota Libur Kapster */}
           <section className="panel" style={{ padding: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div>
-                <p className="eyebrow">Kebijakan Libur Tim</p>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
-                  Ringkasan Kuota Libur Bulan {new Date(filterTanggal + "T00:00:00").toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
-                </h4>
-              </div>
-              <span className="chip active">Maks. 4x / Kapster</span>
+              <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
+                Kuota Libur Kapster
+              </h4>
+              <span className="chip active">Maks. 4x / Bulan</span>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 10 }}>
@@ -518,7 +476,7 @@ export function AttendanceAdminPage({
                       />
                     </div>
                     <small style={{ color: "var(--muted)", display: "block", marginTop: 6, fontSize: 11 }}>
-                      {isMax ? "Kuota libur habis bulan ini" : `Sisa kuota: ${sisa} hari`}
+                      {isMax ? "Kuota habis" : `Sisa: ${sisa} hari`}
                     </small>
                   </div>
                 )
@@ -528,74 +486,125 @@ export function AttendanceAdminPage({
         </div>
       )}
 
-            {/* TAB 2: PENGATURAN JAM KERJA & KOMISI */}
+      {/* TAB 2: PENGATURAN JAM KERJA & KOMISI */}
       {tab === "Pengaturan" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section className="panel" style={{ padding: 22 }}>
-            <PageTitle eyebrow="Operasional Toko" title="Pengaturan Jam Kerja" />
-            <p style={{ color: "var(--slate)", fontSize: 13, margin: "6px 0 18px", maxWidth: 640 }}>
-              Tentukan batas jam mulai dan jam selesai operasional barbershop.
-            </p>
-            <form onSubmit={handleSaveJamKerja} style={{ maxWidth: 520, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Jam Mulai Operasional</span>
-                  <input required type="time" value={jamMulai} onChange={(e) => setJamMulai(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
-                </label>
-                <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Jam Selesai Operasional</span>
-                  <input required type="time" value={jamSelesai} onChange={(e) => setJamSelesai(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
-                </label>
-              </div>
-              {getToken() && (
-                <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Alasan Perubahan</span>
-                  <input placeholder="Misal: Penyesuaian jam buka toko" value={pengaturanAlasan} onChange={(e) => setPengaturanAlasan(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
-                </label>
-              )}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
-                <Button className="primary-button" disabled={pengaturanSaving} type="submit">{pengaturanSaving ? "Menyimpan..." : "Simpan Jam Kerja"}</Button>
-                {pengaturanMsg && <small style={{ color: "var(--slate)", fontSize: 12 }}>{pengaturanMsg}</small>}
-              </div>
-            </form>
-          </section>
+        <section className="panel" style={{ padding: 22, maxWidth: 640 }}>
+          <PageTitle title="Pengaturan Jam Kerja & Komisi" />
 
-          <section className="panel" style={{ padding: 22 }}>
-            <PageTitle eyebrow="Insentif Tim" title="Pengaturan Komisi" />
-            <p style={{ color: "var(--slate)", fontSize: 13, margin: "6px 0 18px", maxWidth: 640 }}>
-              Atur persentase komisi reguler dan lembur untuk layanan.
-            </p>
-            <form onSubmit={handleSaveKomisi} style={{ maxWidth: 520, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleSaveSettings("all")
+            }}
+            style={{ display: "flex", flexDirection: "column", gap: 18, marginTop: 16 }}
+          >
+            <div>
+              <h4 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 10px" }}>Jam Kerja Operasional</h4>
+              <div className="attendance-setting-pair">
                 <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Komisi Layanan Reguler (%)</span>
-                  <input max={100} min={0} required type="number" value={komisiDefault} onChange={(e) => setKomisiDefault(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Jam Mulai</span>
+                  <input
+                    required
+                    type="time"
+                    value={jamMulai}
+                    onChange={(e) => setJamMulai(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }}
+                  />
+                </label>
+                <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Jam Selesai</span>
+                  <input
+                    required
+                    type="time"
+                    value={jamSelesai}
+                    onChange={(e) => setJamSelesai(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div style={{ borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 10px" }}>Skema Komisi</h4>
+              <div className="attendance-setting-pair">
+                <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Komisi Reguler (%)</span>
+                  <input
+                    max={100}
+                    min={0}
+                    required
+                    type="number"
+                    value={komisiDefault}
+                    onChange={(e) => setKomisiDefault(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }}
+                  />
                 </label>
                 <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>Komisi Lembur (%)</span>
-                  <input max={100} min={0} required type="number" value={komisiLembur} onChange={(e) => setKomisiLembur(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
+                  <input
+                    max={100}
+                    min={0}
+                    required
+                    type="number"
+                    value={komisiLembur}
+                    onChange={(e) => setKomisiLembur(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }}
+                  />
                 </label>
               </div>
-              {getToken() && (
-                <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Alasan Perubahan</span>
-                  <input placeholder="Misal: Penyesuaian kebijakan insentif" value={pengaturanAlasan} onChange={(e) => setPengaturanAlasan(e.target.value)} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }} />
-                </label>
+            </div>
+
+            {getToken() && (
+              <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>Alasan Perubahan</span>
+                <input
+                  placeholder="Opsional: Alasan perubahan"
+                  value={pengaturanAlasan}
+                  onChange={(e) => setPengaturanAlasan(e.target.value)}
+                  style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid var(--line)" }}
+                />
+              </label>
+            )}
+
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginTop: 6 }}>
+              <Button
+                className="primary-button"
+                disabled={pengaturanSaving}
+                type="submit"
+              >
+                {pengaturanSaving ? "Menyimpan..." : "Simpan Semua"}
+              </Button>
+              <Button
+                className="secondary-button"
+                disabled={pengaturanSaving}
+                type="button"
+                onClick={() => handleSaveSettings("jam")}
+              >
+                Simpan Jam Kerja Saja
+              </Button>
+              <Button
+                className="secondary-button"
+                disabled={pengaturanSaving}
+                type="button"
+                onClick={() => handleSaveSettings("komisi")}
+              >
+                Simpan Komisi Saja
+              </Button>
+              {pengaturanMsg && (
+                <small style={{ color: "var(--slate)", fontSize: 12, marginLeft: 4 }}>
+                  {pengaturanMsg}
+                </small>
               )}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
-                <Button className="primary-button" disabled={pengaturanSaving} type="submit">{pengaturanSaving ? "Menyimpan..." : "Simpan Skema Komisi"}</Button>
-                {pengaturanMsg && <small style={{ color: "var(--slate)", fontSize: 12 }}>{pengaturanMsg}</small>}
-              </div>
-            </form>
-          </section>
-        </div>
+            </div>
+          </form>
+        </section>
       )}
 
       {leaveModalOpen && (
         <div className="modal-overlay">
           <form className="simple-modal" onSubmit={handleSaveLeave}>
             <header>
-              <h2>Input Libur / Cuti Kapster</h2>
+              <h2>Ajukan Libur</h2>
               <Button type="button" onClick={() => setLeaveModalOpen(false)}>
                 <Icon name="close" />
               </Button>
@@ -606,17 +615,23 @@ export function AttendanceAdminPage({
               </div>
             )}
             <label>
-              <span>Pilih Kapster</span>
+              <span>Kapster</span>
               <select value={leaveKapsterId} onChange={(e) => { setLeaveKapsterId(e.target.value); setLeaveError(""); }}>
                 {kapsters.map((k) => {
                   const used = getLeaveCountInMonth(k.id, leaveDate)
-                  return <option key={k.id} value={k.id}>{k.nama} (Sudah libur: {used}/4 kali)</option>
+                  return <option key={k.id} value={k.id}>{k.nama} (Libur: {used}/4)</option>
                 })}
               </select>
             </label>
             <label>
-              <span>Tanggal Libur / Cuti</span>
-              <input type="date" value={leaveDate} onChange={(e) => { setLeaveDate(e.target.value); setLeaveError(""); }} required />
+              <span>Tanggal</span>
+              <CalendarPicker
+                value={leaveDate}
+                onChange={(d) => {
+                  setLeaveDate(d)
+                  setLeaveError("")
+                }}
+              />
             </label>
             <label>
               <span>Jenis Izin</span>
@@ -627,15 +642,12 @@ export function AttendanceAdminPage({
               </select>
             </label>
             <label>
-              <span>Alasan / Keterangan</span>
-              <input placeholder="Misal: Keperluan keluarga" value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} />
+              <span>Keterangan</span>
+              <input placeholder="Alasan (opsional)" value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} />
             </label>
-            <div style={{ fontSize: 12, color: "var(--muted)", padding: "4px 0" }}>
-              * Setiap kapster dibatasi maksimal 4 kali libur dalam 1 bulan kalender.
-            </div>
             <footer>
               <Button className="secondary-button" type="button" onClick={() => setLeaveModalOpen(false)}>Batal</Button>
-              <Button className="primary-button" type="submit">Simpan Jadwal Libur</Button>
+              <Button className="primary-button" type="submit">Ajukan Libur</Button>
             </footer>
           </form>
         </div>

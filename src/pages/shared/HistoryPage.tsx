@@ -1,7 +1,7 @@
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, CalendarPicker, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
@@ -199,6 +199,85 @@ export function ReasonDialog({
   )
 }
 
+function TransactionDetailBody({
+  selected,
+  userRole,
+  onPrintReceipt,
+}: {
+  selected: HistoryTransactionRecord
+  userRole: string
+  onPrintReceipt: () => void
+}) {
+  return (
+    <>
+      <div className="detail-section">
+        <h3>Item Layanan & Produk ({selected.items.length})</h3>
+        <div className="detail-items-list">
+          {selected.items.map((item, idx) => (
+            <div key={idx} className="detail-item-line">
+              <div className="detail-item-info">
+                <div className="detail-item-title-row">
+                  <strong>{item.name}</strong>
+                  <span
+                    className={`item-type-badge ${item.type.toLowerCase()}`}
+                  >
+                    {item.type}
+                  </span>
+                </div>
+                <small>
+                  {item.qty} × {rupiah(item.price)}
+                </small>
+              </div>
+              <b className="detail-item-price">
+                {rupiah(item.qty * item.price)}
+              </b>
+            </div>
+          ))}
+        </div>
+        <div className="detail-total-bar">
+          <span>Total Akhir</span>
+          <strong>{rupiah(selected.total)}</strong>
+        </div>
+      </div>
+
+      <div className="detail-section">
+        <h3>Info Operasional</h3>
+        <div className="detail-cards">
+          <div>
+            <Icon name={selected.method === "QRIS" ? "qris" : "cash"} />
+            <small>Metode Pembayaran</small>
+            <strong>{selected.method}</strong>
+          </div>
+          <div>
+            <Icon name="user" />
+            <small>Kapster</small>
+            <strong>{selected.barber}</strong>
+          </div>
+          {userRole !== "Kasir" && (
+            <div>
+              <Icon name="wallet" />
+              <small>Rincian Komisi</small>
+              <strong>{rupiah(selected.commission)}</strong>
+              <span className="commission-hint">
+                {(selected.commissionNote || "").replace("(lembur)", "").replace("50%", "").trim()}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="detail-actions-group">
+        <Button
+          className="secondary-button"
+          onClick={onPrintReceipt}
+        >
+          <Icon name="print" /> Cetak Struk
+        </Button>
+      </div>
+    </>
+  )
+}
+
 export function HistoryPage({
   currentUser,
   role,
@@ -213,6 +292,7 @@ export function HistoryPage({
   const [selectedId, setSelectedId] = useState(INITIAL_HISTORY_TRANSACTIONS[0].id)
   const [action, setAction] = useState<null | "void" | "restore">(null)
   const [showReceipt, setShowReceipt] = useState(false)
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
@@ -293,7 +373,7 @@ export function HistoryPage({
   if (loading) {
     return (
       <div className="content">
-        <p>Memuat riwayat transaksi...</p>
+        <LoadingState message="Memuat riwayat transaksi..." />
       </div>
     )
   }
@@ -340,17 +420,15 @@ export function HistoryPage({
       <DemoNotice live={live} error={liveError} />
       <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
-        <div className="input-shell">
-          <Icon name="calendar" />
-          <input
-            onChange={(e) => setDateFilter(e.target.value)}
-            title="Kosongkan untuk semua tanggal"
-            max={TANGGAL_MAKS()}
-            min={TANGGAL_MULAI}
-            type="date"
-            value={dateFilter}
-          />
-        </div>
+        <CalendarPicker
+          value={dateFilter}
+          onChange={setDateFilter}
+          allowClear
+          clearLabel="Semua Tanggal"
+          placeholder="Semua Tanggal"
+          max={TANGGAL_MAKS()}
+          min={TANGGAL_MULAI}
+        />
         <select onChange={(e) => setBarberFilter(e.target.value)} value={barberFilter}>
           <option>Semua kapster</option>
           {barberOptions.map((barber) => (
@@ -361,8 +439,7 @@ export function HistoryPage({
       <div className="master-detail">
         <section className="panel transaction-list">
           <div className="table-head">
-            <span>Inv</span>
-            <span>Waktu</span>
+            <span>Nota</span>
             <span>Kapster</span>
             <span>Item</span>
           </div>
@@ -372,15 +449,21 @@ export function HistoryPage({
                 tx.status === "BATAL" ? "voided" : ""
               } ${selected?.id === tx.id ? "selected" : ""}`}
               key={tx.id}
-              onClick={() => setSelectedId(tx.id)}
+              onClick={() => {
+                setSelectedId(tx.id)
+                if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+                  setMobileDetailOpen(true)
+                }
+              }}
             >
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div className="tx-cell-col-nota">
                 <strong className="tx-cell-nota">{tx.id}</strong>
-                <small style={{ fontSize: "10px", color: "var(--slate)" }}>{tx.date}</small>
+                <small className="tx-cell-time">
+                  {tx.date} · {tx.time}
+                </small>
               </div>
-              <small className="tx-cell-nota">{tx.time}</small>
               <span className="tx-cell-kapster">{tx.barber}</span>
-              <span className="tx-cell-kapster">
+              <span className="tx-cell-items" title={tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}>
                 {tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}
               </span>
             </Button>
@@ -388,111 +471,88 @@ export function HistoryPage({
         </section>
 
         {selected && (
-        <aside className="panel detail">
-          <div className="detail-header-row">
-            <div>
-              <p className="eyebrow">Detail Transaksi</p>
-              <h2>{selected.id}</h2>
-              <small className="detail-timestamp">
-                {selected.date} · {selected.time} WIB
-              </small>
-            </div>
-            <i
-              className={`chip ${
-                selected.status === "BATAL"
-                  ? "batal"
-                  : selected.status === "Manual"
-                    ? "manual"
-                    : "lunas"
-              }`}
-            >
-              {selected.status === "BATAL" ? "Batal" : selected.status}
-            </i>
-          </div>
-
-          <div className="detail-section">
-            <h3>Item Layanan & Produk ({selected.items.length})</h3>
-            <div className="detail-items-list">
-              {selected.items.map((item, idx) => (
-                <div key={idx} className="detail-item-line">
-                  <div className="detail-item-info">
-                    <div className="detail-item-title-row">
-                      <strong>{item.name}</strong>
-                      <span
-                        className={`item-type-badge ${item.type.toLowerCase()}`}
-                      >
-                        {item.type}
-                      </span>
-                    </div>
-                    <small>
-                      {item.qty} × {rupiah(item.price)}
-                    </small>
-                  </div>
-                  <b className="detail-item-price">
-                    {rupiah(item.qty * item.price)}
-                  </b>
-                </div>
-              ))}
-            </div>
-            <div className="detail-total-bar">
-              <span>Total Akhir</span>
-              <strong>{rupiah(selected.total)}</strong>
-            </div>
-          </div>
-
-          <div className="detail-section">
-            <h3>Info Operasional</h3>
-            <div className="detail-cards">
+          <aside className="panel detail desktop-only-detail">
+            <div className="detail-header-row">
               <div>
-                <Icon name={selected.method === "QRIS" ? "qris" : "cash"} />
-                <small>Metode Pembayaran</small>
-                <strong>{selected.method}</strong>
+                <p className="eyebrow">Detail Transaksi</p>
+                <h2>{selected.id}</h2>
+                <small className="detail-timestamp">
+                  {selected.date} · {selected.time} WIB
+                </small>
               </div>
-              <div>
-                <Icon name="user" />
-                <small>Kapster</small>
-                <strong>{selected.barber}</strong>
-              </div>
-              {userRole !== "Kasir" && (
-              <div>
-                <Icon name="wallet" />
-                <small>Rincian Komisi</small>
-                <strong>{rupiah(selected.commission)}</strong>
-                <span className="commission-hint">
-                  {(selected.commissionNote || "").replace("(lembur)", "").replace("50%", "").trim()}
-                </span>
-              </div>
-              )}
-            </div>
-          </div>
-
-          <div className="detail-actions-group">
-            <Button
-              className="secondary-button"
-              onClick={() => setShowReceipt(true)}
-            >
-              <Icon name="print" /> Cetak Struk
-            </Button>
-            {selected.status !== "BATAL" && (
-              <Button
-                className="danger-button"
-                onClick={() => setAction("void")}
+              <i
+                className={`chip ${
+                  selected.status === "BATAL"
+                    ? "batal"
+                    : selected.status === "Manual"
+                      ? "manual"
+                      : "lunas"
+                }`}
               >
-                <Icon name="trash" /> Batalkan Transaksi
-              </Button>
-            )}
-            {selected.status === "BATAL" && userRole !== "Kasir" && (
-              <Button
-                className="primary-button"
-                onClick={() => setAction("restore")}
-              >
-                <Icon name="restore" /> Pulihkan Transaksi
-              </Button>
-            )}
-          </div>
-        </aside>
+                {selected.status === "BATAL" ? "Batal" : selected.status}
+              </i>
+            </div>
+
+            <TransactionDetailBody
+              selected={selected}
+              userRole={userRole}
+              onPrintReceipt={() => setShowReceipt(true)}
+            />
+          </aside>
         )}
       </div>
+
+      {mobileDetailOpen && selected && (
+        <div className="modal-overlay mobile-only-modal" onClick={() => setMobileDetailOpen(false)}>
+          <div
+            className="transaction-modal-box"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="transaction-modal-header">
+              <div>
+                <p className="eyebrow">Detail Transaksi</p>
+                <h2>{selected.id}</h2>
+                <small className="detail-timestamp">
+                  {selected.date} · {selected.time} WIB
+                </small>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <i
+                  className={`chip ${
+                    selected.status === "BATAL"
+                      ? "batal"
+                      : selected.status === "Manual"
+                        ? "manual"
+                        : "lunas"
+                  }`}
+                >
+                  {selected.status === "BATAL" ? "Batal" : selected.status}
+                </i>
+                <Button
+                  className="modal-close-icon-btn"
+                  onClick={() => setMobileDetailOpen(false)}
+                  aria-label="Tutup detail transaksi"
+                >
+                  <Icon name="close" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="transaction-modal-body">
+              <TransactionDetailBody
+                selected={selected}
+                userRole={userRole}
+                onPrintReceipt={() => {
+                  setMobileDetailOpen(false)
+                  setShowReceipt(true)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {action && selected && (
         <ReasonDialog
           title={

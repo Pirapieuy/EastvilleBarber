@@ -13,20 +13,9 @@ export function CatalogPage({
   const [activeTab, setActiveTab] = useState<"layanan" | "produk" | "diskon">(initialTab)
 
   return (
-    <div className="content">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 20,
-          borderBottom: "1px solid var(--line)",
-          paddingBottom: 14,
-        }}
-      >
-        <div className="segmented">
+    <div className="content catalog-page">
+      <div className="catalog-tab-header">
+        <div className="segmented catalog-segmented">
           <Button
             className={activeTab === "layanan" ? "active" : ""}
             onClick={() => setActiveTab("layanan")}
@@ -46,10 +35,6 @@ export function CatalogPage({
             <Icon name="cash" /> Diskon Event
           </Button>
         </div>
-
-        <small style={{ color: "var(--muted)", fontSize: 12 }}>
-          Katalog Terpadu: Layanan, Produk, & Pengaturan Diskon Event
-        </small>
       </div>
 
       {activeTab === "layanan" && <ServicesPage embedded />}

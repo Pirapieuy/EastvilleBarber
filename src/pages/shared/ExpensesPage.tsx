@@ -3,7 +3,7 @@ import { ReasonDialog } from "./HistoryPage"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import { Button, Kpi, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
 
 export interface ExpenseRecord {
   id: string
@@ -255,7 +255,7 @@ export function ExpensesPage() {
   if (loading) {
     return (
       <div className="content">
-        <p>Memuat pengeluaran...</p>
+        <LoadingState message="Memuat pengeluaran..." />
       </div>
     )
   }
