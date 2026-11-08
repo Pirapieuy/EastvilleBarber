@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { Icon } from "../components/common/Icon"
 import { Button } from "../components/common/UI"
 import { SidebarKasir } from "./sidebars/SidebarKasir"
@@ -82,6 +82,20 @@ export function AppLayout({
   const [mobileNav, setMobileNav] = useState(false)
 
   const roleKey = toRoleKey(currentRole)
+
+  useEffect(() => {
+    if (roleKey === "owner") return
+
+    const responsiveViewport = window.matchMedia("(max-width: 1024px)")
+    const closeDrawerOnResponsiveEntry = (event: MediaQueryListEvent) => {
+      if (event.matches) setMobileNav(false)
+    }
+
+    responsiveViewport.addEventListener("change", closeDrawerOnResponsiveEntry)
+    return () =>
+      responsiveViewport.removeEventListener("change", closeDrawerOnResponsiveEntry)
+  }, [roleKey])
+
   const pageTitle = PAGE_TITLE_MAP[activePage] || "Eastville"
   const firstName = userName ? userName.split(" ")[0] : ""
   const greeting = firstName ? `Selamat ${getSapaan()}, ${firstName}` : pageTitle

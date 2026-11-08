@@ -646,7 +646,8 @@ function handleListUsers(body) {
   if (!user) {
     return jsonResponse({ success: false, error: "Session tidak valid. Silakan login lagi.", code: "UNAUTHORIZED" });
   }
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  var roleKey = (user.role || "").toString().trim().toLowerCase();
+  if (roleKey !== "owner" && roleKey !== "manajer") {
     return jsonResponse({ success: false, error: "Akses ditolak. Hanya Owner dan Manajer yang dapat melihat daftar tim.", code: "FORBIDDEN" });
   }
 
