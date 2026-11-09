@@ -2206,6 +2206,7 @@ function handleCatatAbsensiKapster(body) {
   var targetUserId = (body.targetUserId || "").trim()
   var tanggal = (body.tanggal || "").trim()
   var status = (body.status || "").trim()
+  var fotoUrl = (body.fotoUrl || "").toString().trim()
   var catatan = (body.catatan || "").trim()
 
   if (!targetUserId)
@@ -2217,6 +2218,12 @@ function handleCatatAbsensiKapster(body) {
     return jsonResponse({ success: false, error: "Tanggal wajib diisi." })
   if (!status)
     return jsonResponse({ success: false, error: "Status wajib diisi." })
+  if (!/^data:image\/jpeg;base64,/.test(fotoUrl) || fotoUrl.length > 45000) {
+    return jsonResponse({
+      success: false,
+      error: "Foto wajah wajib diambil ulang dengan ukuran lebih kecil.",
+    })
+  }
 
   var allowedStatus = ["Hadir", "Izin", "Sakit", "Cuti"]
   if (allowedStatus.indexOf(status) === -1) {
@@ -2272,7 +2279,7 @@ function handleCatatAbsensiKapster(body) {
     targetRow[1],
     "Kapster",
     "",
-    "",
+    fotoUrl,
     status,
     catatan,
   ])
@@ -2302,7 +2309,7 @@ function handleCatatAbsensiKapster(body) {
       nama: targetRow[1],
       role: "Kapster",
       tipe: "",
-      fotoUrl: "",
+      fotoUrl: fotoUrl,
       status: status,
       catatan: catatan,
     },

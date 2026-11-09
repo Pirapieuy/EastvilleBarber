@@ -78,7 +78,7 @@ export function MySalaryPage() {
       />
 
       <article className="my-salary-hero">
-        <span>Komisi periode berjalan</span>
+        <span>Komisi</span>
         <strong>{rupiah(data.totalKomisi)}</strong>
         <p>{data.transaksiSelesai} transaksi selesai</p>
         <i>
@@ -87,7 +87,7 @@ export function MySalaryPage() {
         <small>
           {loading
             ? "Memperbarui dari server..."
-            : "Dihitung live dari transaksi selesai"}
+            : "Dihitung saat transaksi selesai"}
         </small>
       </article>
 

@@ -387,13 +387,15 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
           ))}
         </div>
         {mode === "Bulanan" ? (
-          <input
-            type="month"
-            max={TANGGAL_MAKS().slice(0, 7)}
-            min={TANGGAL_MULAI.slice(0, 7)}
-            value={bulan}
-            onChange={(e) => e.target.value && setBulan(e.target.value)}
-          />
+          <div className="commission-month-shell">
+            <span className="commission-month-label">Periode komisi</span>
+            <MonthPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={bulan}
+              onChange={(b) => b && setBulan(b)}
+            />
+          </div>
         ) : (
           <CalendarPicker
             max={TANGGAL_MAKS()}
@@ -421,7 +423,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
           return (
             <>
               <article className="my-salary-hero">
-                <span>Komisi produk saya</span>
+                <span>Komisi</span>
                 <strong>
                   {lunas
                     ? rupiah(lunas.reduce((n, t) => n + t.barberShare, 0))
@@ -439,7 +441,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                   {!live && getToken() && !liveError
                     ? "Memuat data dari server..."
                     : live
-                      ? "Dihitung live dari transaksi selesai"
+                      ? "Dihitung saat transaksi selesai"
                       : "Data contoh · belum terhubung ke server"}
                 </small>
               </article>

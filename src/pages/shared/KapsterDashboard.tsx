@@ -3,6 +3,7 @@ import {
   apiAbsensi,
   apiKapster,
   apiKomisi,
+  AbsensiRow,
   AktivitasKapster,
   getToken,
   KomisiKapsterRow,
@@ -33,7 +34,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   const [reloadKey, setReloadKey] = useState(0)
   const [komisi, setKomisi] = useState<KomisiKapsterRow | null>(null)
   const [aktivitas, setAktivitas] = useState<AktivitasKapster[] | null>(null)
-  const [masuk, setMasuk] = useState<string | null>(null)
+  const [absensiHariIni, setAbsensiHariIni] = useState<AbsensiRow | null>(null)
 
   useEffect(() => {
     if (!getToken()) {
@@ -49,15 +50,15 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
       .then(([k, a, abs]) => {
         setKomisi(k[0] ?? null)
         setAktivitas(a)
-        const m = abs.filter((r) => r.tipe === "Masuk").pop()
-        setMasuk(m ? m.jam : null)
+        const catatanHariIni = abs.find((row) => row.userId === user?.id) ?? abs[0] ?? null
+        setAbsensiHariIni(catatanHariIni)
         setLive(true)
       })
       .catch((e) => {
         console.error("Gagal memuat beranda kapster:", e)
         setLiveError(e instanceof Error ? e.message : "gagal memuat data")
       })
-  }, [hariIni, reloadKey])
+  }, [hariIni, reloadKey, user?.id])
 
   if (Boolean(getToken()) && !live && liveError) {
     return (
@@ -127,12 +128,6 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
             >
               <Icon name="wallet" /> Rincian Gaji & Kasbon
             </Button>
-            <Button
-              className="primary-button"
-              onClick={() => nav("AbsensiJadwalSaya")}
-            >
-              <Icon name="camera" /> Check-in Absensi
-            </Button>
           </div>
         }
       />
@@ -171,14 +166,14 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
           label="Status Kehadiran"
           tone="dark"
           value={
-            live ? (masuk ? "Sudah check-in" : "Belum check-in") : "Tepat Waktu"
+            live ? (absensiHariIni?.status || "Belum Hadir") : "Hadir"
           }
           detail={
             live
-              ? masuk
-                ? `Check-in ${masuk} WIB`
-                : "Belum ada check-in hari ini"
-              : "Check-in 09.52 WIB · Foto selfie OK"
+              ? absensiHariIni
+                ? `Dicatat kasir${absensiHariIni.jam ? ` · ${absensiHariIni.jam} WIB` : ""}`
+                : "Absensi belum dicatat kasir"
+              : "Absensi dicatat oleh kasir"
           }
         />
       </div>

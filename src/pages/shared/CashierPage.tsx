@@ -725,20 +725,22 @@ export function CashierPage({ currentUser, onNavigate }: {
             <span className="cart-tab-active">
               <Icon name="receipt" /> Pesanan saat ini
             </span>
-            {cart.length > 0 && (
+            <b className="cart-tab-count">
+              {cart.reduce((sum, line) => sum + line.qty, 0)} item
+            </b>
+          </div>
+          {cart.length > 0 && (
+            <div className="cart-clear-row">
               <Button
                 className="cart-clear-button"
                 onClick={clearCart}
                 title="Hapus semua produk dan layanan"
                 aria-label="Hapus semua produk dan layanan"
               >
-                <Icon name="trash" /> Kosongkan
+                <Icon name="trash" /> Hapus Semua
               </Button>
-            )}
-            <b className="cart-tab-count">
-              {cart.reduce((sum, line) => sum + line.qty, 0)} item
-            </b>
-          </div>
+            </div>
+          )}
           <div className="cart-lines">
             {cart.length === 0 ? (
               <div className="empty">
@@ -916,10 +918,7 @@ export function CashierPage({ currentUser, onNavigate }: {
             </Button>
             {discountOpen && (
               <div className="cart-discount-panel">
-                <div
-                  className="segmented"
-                  style={{ width: "100%", marginBottom: 10 }}
-                >
+                <div className="segmented full discount-mode">
                   <Button
                     className={discountTypeTab === "event" ? "active" : ""}
                     onClick={() => setDiscountTypeTab("event")}

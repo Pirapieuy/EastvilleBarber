@@ -544,19 +544,14 @@ export const apiAbsensi = {
     ),
 }
 
-/** Aksi absensi Kapster dari sisi Kasir (perlu backend: verifikasi-pin-kapster + catat-absensi-kapster). */
+/** Aksi absensi Kapster dari sisi Kasir. */
 export const apiAbsensiKapster = {
-  /** Verifikasi PIN Kapster (6 digit). Demo fallback: PIN 123456 diterima bila tidak ada token. */
-  verifikasiPinKapster: (targetUserId: string, pin: string) =>
-    api<{ valid: boolean targetUserId: string nama: string }>(
-      "verifikasi-pin-kapster",
-      { targetUserId, pin },
-    ),
   /** Catat absensi Kapster. */
   catatAbsensiKapster: (p: {
     targetUserId: string
     tanggal: string
     status: string
+    fotoUrl: string
     catatan?: string
   }) =>
     api<{
@@ -566,6 +561,7 @@ export const apiAbsensiKapster = {
       userId: string
       nama: string
       status: string
+      fotoUrl: string
       catatan: string
     }>("catat-absensi-kapster", p),
 }

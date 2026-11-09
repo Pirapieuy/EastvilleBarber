@@ -77,13 +77,15 @@ export function PageTitle({
   eyebrow,
   title,
   action,
+  className = "",
 }: {
   eyebrow?: string
   title: string
   action?: ReactNode
+  className?: string
 }) {
   return (
-    <div className="page-title">
+    <div className={`page-title ${className}`.trim()}>
       <div>
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h2>{title}</h2>
