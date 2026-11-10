@@ -433,7 +433,7 @@ export function HistoryPage({ currentUser, role }: {
   }
 
   return (
-    <div className="content">
+    <div className="content history-page-content">
       <DemoNotice live={live} error={liveError} />
       <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
@@ -446,15 +446,18 @@ export function HistoryPage({ currentUser, role }: {
           max={TANGGAL_MAKS()}
           min={TANGGAL_MULAI}
         />
-        <select
-          onChange={(e) => setBarberFilter(e.target.value)}
-          value={barberFilter}
-        >
-          <option>Semua kapster</option>
-          {barberOptions.map((barber) => (
-            <option key={barber}>{barber}</option>
+        <div className="barber-filter-bar">
+          {["Semua kapster", ...barberOptions].map((b) => (
+            <button
+              type="button"
+              key={b}
+              className={`barber-pill-btn ${barberFilter === b ? "active" : ""}`}
+              onClick={() => setBarberFilter(b)}
+            >
+              {b}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
@@ -543,6 +546,7 @@ export function HistoryPage({ currentUser, role }: {
             role="dialog"
             aria-modal="true"
           >
+            <div className="md:hidden mx-auto my-2 h-1.5 w-12 rounded-full bg-[var(--line)]" />
             <div className="transaction-modal-header">
               <div>
                 <p className="eyebrow">Detail Transaksi</p>

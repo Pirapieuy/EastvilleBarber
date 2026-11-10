@@ -3148,10 +3148,16 @@ textarea {
   color: var(--brass-dark);
 }
 
+.cart-payment .method-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+}
+
 .cart-payment .method-grid .button {
   min-height: 42px;
   justify-content: center;
-  padding: 6px;
+  padding: 6px 4px;
   text-align: center;
 }
 
@@ -3782,16 +3788,18 @@ textarea {
 }
 
 .master-detail {
-  min-height: 570px;
+  min-height: auto;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(360px, 390px);
+  align-items: start;
   gap: 14px;
   margin-top: 14px;
 }
 
 .transaction-list {
   min-width: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: calc(100svh - 220px);
 }
 
 .table-head,
@@ -4015,10 +4023,88 @@ textarea {
   background: var(--line);
 }
 
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .modal-overlay.mobile-only-modal {
+    padding: 0 !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+  }
+
+  .mobile-only-modal .transaction-modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 88svh !important;
+    border-radius: 18px 18px 0 0 !important;
+    border-bottom: 0 !important;
+    margin: 0 !important;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25) !important;
+    animation: modal-slide-up 240ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .mobile-only-modal .transaction-modal-body {
+    max-height: calc(88svh - 75px) !important;
+    overflow-y: auto !important;
+  }
+}
+
 @media (min-width: 1025px) {
   .mobile-only-modal {
     display: none !important;
   }
+}
+
+.barber-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 0 4px;
+  max-width: 100%;
+}
+
+.barber-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.barber-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--slate);
+  cursor: pointer;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.barber-pill-btn:hover {
+  border-color: var(--brass-dark);
+  color: var(--ink);
+}
+
+.barber-pill-btn.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
 }
 
 .calendar-picker-wrapper {
@@ -4149,6 +4235,9 @@ textarea {
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  align-self: start;
+  height: fit-content;
+  min-height: auto;
 }
 
 .detail-header-row {
@@ -7310,15 +7399,17 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .catalog {
-    overflow: visible;
-    padding: 18px 14px;
+  .cashier-heading {
+    display: none !important;
   }
 
-  .cart {
-    min-height: 520px;
-    padding: 0;
-    border-top: 1px solid var(--line);
+  .catalog {
+    overflow: visible;
+    padding: 18px 14px 96px;
+  }
+
+  .cashier-page .cart {
+    min-height: 0;
     border-left: 0;
   }
 
@@ -7336,18 +7427,29 @@ textarea {
     max-height: 45svh;
   }
 
+  .cashier-page .cart {
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  .cart-panel {
+    width: 100% !important;
+  }
+
   .cart-total {
     height: auto;
     min-height: 0;
     max-height: none;
     flex: 0 0 auto;
     overflow: visible;
-  }
-
-  .cart-total {
-    height: auto;
-    flex: 0 1 auto;
-    max-height: none;
+    width: 100% !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .master-detail {
@@ -7357,6 +7459,38 @@ textarea {
   .master-detail aside.detail,
   .desktop-only-detail {
     display: none !important;
+  }
+
+  .history-page-content {
+    min-height: calc(100svh - 60px) !important;
+    padding-bottom: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-inline: -14px !important;
+    margin-bottom: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
   }
 
   .salary-grid,
@@ -8980,6 +9114,10 @@ textarea {
   .mobile-content {
     width: 100%;
     padding: 66px 14px 28px;
+  }
+
+  .content.history-page-content {
+    padding-bottom: 0 !important;
   }
 
   .app-header-inner {
