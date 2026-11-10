@@ -29,7 +29,9 @@ export function eksporExcel(t: TabelEkspor) {
   const html = `<html><head><meta charset="utf-8"></head><body><h3>${esc(t.judul)}</h3>${
     t.keterangan ? `<p>${esc(t.keterangan)}</p>` : ""
   }${tabelHtml(t)}</body></html>`
-  const blob = new Blob(["﻿", html], { type: "application/vnd.ms-excel;charset=utf-8" })
+  const blob = new Blob(["﻿", html], {
+    type: "application/vnd.ms-excel;charset=utf-8",
+  })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
   a.href = url
@@ -43,13 +45,17 @@ export function eksporExcel(t: TabelEkspor) {
 export function eksporPdf(t: TabelEkspor) {
   const w = window.open("", "_blank")
   if (!w) {
-    window.alert("Pop-up diblokir browser. Izinkan pop-up untuk situs ini lalu coba lagi.")
+    window.alert(
+      "Pop-up diblokir browser. Izinkan pop-up untuk situs ini lalu coba lagi.",
+    )
     return
   }
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(t.judul)}</title>
 <style>body{font:12px system-ui,sans-serif;padding:24px;color:#111}h2{margin:0 0 4px}p{margin:0 0 12px;color:#555}
 table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:5px 8px;text-align:left}th{background:#eee}</style>
-</head><body><h2>Eastville Barbershop · ${esc(t.judul)}</h2>${t.keterangan ? `<p>${esc(t.keterangan)}</p>` : ""}${tabelHtml(t)}</body></html>`)
+</head><body><h2>Eastville Barbershop · ${esc(t.judul)}</h2>${
+    t.keterangan ? `<p>${esc(t.keterangan)}</p>` : ""
+  }${tabelHtml(t)}</body></html>`)
   w.document.close()
   w.focus()
   w.print()

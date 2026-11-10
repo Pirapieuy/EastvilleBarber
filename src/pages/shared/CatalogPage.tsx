@@ -5,12 +5,12 @@ import { PromoDiscountsTab } from "./PromoDiscountsTab"
 import { Button } from "../../components/common/UI"
 import { Icon } from "../../components/common/Icon"
 
-export function CatalogPage({
-  initialTab = "layanan",
-}: {
+export function CatalogPage({ initialTab = "layanan" }: {
   initialTab?: "layanan" | "produk" | "diskon"
 } = {}) {
-  const [activeTab, setActiveTab] = useState<"layanan" | "produk" | "diskon">(initialTab)
+  const [activeTab, setActiveTab] = useState<"layanan" | "produk" | "diskon">(
+    initialTab,
+  )
 
   return (
     <div className="content catalog-page">

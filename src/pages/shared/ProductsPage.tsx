@@ -2,11 +2,18 @@ import { FormEvent, useEffect, useState } from "react"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  LoadingState,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 
 const STOK_MENIPIS = 1
 
-export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) {
+export function ProductsPage({ embedded = false }: {
+  embedded?: boolean
+} = {}) {
   const [tab, setTab] = useState<"Daftar" | "Riwayat perubahan">("Daftar")
   const [productsList, setProductsList] = useState([
     {
@@ -88,37 +95,53 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return Promise.all([apiProduk.list(), apiProduk.log()]).then(([rows, logs]) => {
-      setProductsList(
-        rows.map((p: ProdukRow) => ({
-          code: p.kode,
-          name: p.nama,
-          seller: p.penjual,
-          stock: p.stok,
-          scheme: p.skema,
-          status: p.status,
-          price: p.harga,
-          costPrice: p.harga_modal,
-          shares: { barber: p.persen_kapster, seller: p.persen_penjual, eastville: p.persen_eastville },
-          nominalShares: { barber: p.nominal_kapster, seller: p.nominal_penjual, eastville: p.nominal_eastville },
-        })),
-      )
-      setChangeLogs(
-        (logs as { waktu: string; produk: string; perubahan: string; oleh: string; alasan: string }[]).map((l) => ({
-          time: new Date(l.waktu).toLocaleString("id-ID", {
-            day: "numeric",
-            month: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          product: l.produk,
-          change: l.perubahan,
-          by: l.oleh,
-          reason: l.alasan,
-        })),
-      )
-      setLive(true)
-    })
+    return Promise.all([apiProduk.list(), apiProduk.log()]).then(
+      ([rows, logs]) => {
+        setProductsList(
+          rows.map((p: ProdukRow) => ({
+            code: p.kode,
+            name: p.nama,
+            seller: p.penjual,
+            stock: p.stok,
+            scheme: p.skema,
+            status: p.status,
+            price: p.harga,
+            costPrice: p.harga_modal,
+            shares: {
+              barber: p.persen_kapster,
+              seller: p.persen_penjual,
+              eastville: p.persen_eastville,
+            },
+            nominalShares: {
+              barber: p.nominal_kapster,
+              seller: p.nominal_penjual,
+              eastville: p.nominal_eastville,
+            },
+          })),
+        )
+        setChangeLogs(
+          (logs as {
+            waktu: string
+            produk: string
+            perubahan: string
+            oleh: string
+            alasan: string
+          }[]).map((l) => ({
+            time: new Date(l.waktu).toLocaleString("id-ID", {
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            product: l.produk,
+            change: l.perubahan,
+            by: l.oleh,
+            reason: l.alasan,
+          })),
+        )
+        setLive(true)
+      },
+    )
   }
   useEffect(() => {
     if (!getToken()) {
@@ -156,7 +179,9 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
   ])
 
   const nominalTotal =
-    formData.nominalShares.barber + formData.nominalShares.seller + formData.nominalShares.eastville
+    formData.nominalShares.barber +
+    formData.nominalShares.seller +
+    formData.nominalShares.eastville
   const shareTotal =
     formData.shares.barber + formData.shares.seller + formData.shares.eastville
 
@@ -179,7 +204,7 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
     setFormOpen(true)
   }
 
-  function openEdit(prod: (typeof productsList)[number]) {
+  function openEdit(prod: typeof productsList[number]) {
     setEditingCode(prod.code)
     setFormData({ ...prod })
     setChangeReason("")
@@ -191,13 +216,24 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
     e.preventDefault()
     if (saving) return
     setFormError("")
-    if (!formData.name.trim() || !formData.code.trim() || !formData.seller.trim()) {
+    if (
+      !formData.name.trim() ||
+      !formData.code.trim() ||
+      !formData.seller.trim()
+    ) {
       return setFormError("Nama, kode, dan pemasok wajib diisi.")
     }
-    if (!(formData.price > 0)) return setFormError("Harga jual harus lebih dari 0.")
-    if (formData.costPrice < 0 || formData.stock < 0) return setFormError("Harga modal dan stok tidak boleh negatif.")
-    if (formData.scheme === "Nominal tetap" && nominalTotal !== formData.price) {
-      return setFormError(`Total pembagian nominal (${rupiah(nominalTotal)}) harus sama dengan harga jual (${rupiah(formData.price)}).`)
+    if (!(formData.price > 0))
+      return setFormError("Harga jual harus lebih dari 0.")
+    if (formData.costPrice < 0 || formData.stock < 0)
+      return setFormError("Harga modal dan stok tidak boleh negatif.")
+    if (
+      formData.scheme === "Nominal tetap" &&
+      nominalTotal !== formData.price
+    ) {
+      return setFormError(
+        `Total pembagian nominal (${rupiah(nominalTotal)}) harus sama dengan harga jual (${rupiah(formData.price)}).`,
+      )
     }
     if (live && editingCode && !changeReason.trim()) {
       return setFormError("Alasan perubahan wajib diisi saat mengubah produk.")
@@ -205,7 +241,12 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
     if (editingCode) {
       const lama = productsList.find((p) => p.code === editingCode)
       if (lama?.status === "Aktif" && formData.status === "Nonaktif") {
-        if (!window.confirm(`Nonaktifkan "${formData.name}"? Produk tidak akan muncul di Kasir.`)) return
+        if (
+          !window.confirm(
+            `Nonaktifkan "${formData.name}"? Produk tidak akan muncul di Kasir.`,
+          )
+        )
+          return
       }
     }
     if (live) {
@@ -283,7 +324,10 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
       <div className="content">
         <DemoNotice live={live} error={liveError} />
         <p>Data produk gagal dimuat: {liveError}</p>
-        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+        <Button
+          className="primary-button"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
           Coba lagi
         </Button>
       </div>
@@ -294,9 +338,13 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
     .filter((p) => {
       const q = cari.trim().toLowerCase()
       return (
-        (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)) &&
+        (!q ||
+          p.name.toLowerCase().includes(q) ||
+          p.code.toLowerCase().includes(q)) &&
         (statusFilter === "Semua status" ||
-          (statusFilter === "Aktif" ? p.status === "Aktif" : p.status !== "Aktif"))
+          (statusFilter === "Aktif"
+            ? p.status === "Aktif"
+            : p.status !== "Aktif"))
       )
     })
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -350,7 +398,10 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                 onChange={(e) => setCari(e.target.value)}
               />
             </div>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
               <option>Semua status</option>
               <option>Aktif</option>
               <option>Non-aktif</option>
@@ -364,8 +415,7 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
             <span>Status</span>
             <span>Aksi</span>
           </div>
-          {daftar
-            .map((product) => (
+          {daftar.map((product) => (
             <article className="product-admin-row" key={product.code}>
               <span>
                 <i>
@@ -377,7 +427,9 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                 </span>
               </span>
               <span>{product.seller}</span>
-              <span className={product.stock <= STOK_MENIPIS ? "stock-low" : ""}>
+              <span
+                className={product.stock <= STOK_MENIPIS ? "stock-low" : ""}
+              >
                 {product.stock} unit
               </span>
               <span className="scheme-tag">
@@ -522,7 +574,9 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                   <div className="status-toggle-switch">
                     <button
                       type="button"
-                      className={`status-btn ${formData.status === "Aktif" ? "active" : ""}`}
+                      className={`status-btn ${
+                        formData.status === "Aktif" ? "active" : ""
+                      }`}
                       onClick={() =>
                         setFormData({ ...formData, status: "Aktif" })
                       }
@@ -531,7 +585,9 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                     </button>
                     <button
                       type="button"
-                      className={`status-btn ${formData.status === "Nonaktif" ? "inactive" : ""}`}
+                      className={`status-btn ${
+                        formData.status === "Nonaktif" ? "inactive" : ""
+                      }`}
                       onClick={() =>
                         setFormData({ ...formData, status: "Nonaktif" })
                       }
@@ -546,7 +602,9 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                 <span className="form-label">Skema komisi</span>
                 <div className="commission-radio-group">
                   <label
-                    className={`commission-radio-card ${formData.scheme === "Persentase" ? "selected" : ""}`}
+                    className={`commission-radio-card ${
+                      formData.scheme === "Persentase" ? "selected" : ""
+                    }`}
                   >
                     <input
                       type="radio"
@@ -565,7 +623,9 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                     </div>
                   </label>
                   <label
-                    className={`commission-radio-card ${formData.scheme === "Nominal tetap" ? "selected" : ""}`}
+                    className={`commission-radio-card ${
+                      formData.scheme === "Nominal tetap" ? "selected" : ""
+                    }`}
                   >
                     <input
                       type="radio"
@@ -578,9 +638,7 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                     <span className="radio-circle" />
                     <div>
                       <strong>Nominal Tetap</strong>
-                      <small>
-                        Nilai tetap per unit produk terjual
-                      </small>
+                      <small>Nilai tetap per unit produk terjual</small>
                     </div>
                   </label>
                 </div>
@@ -785,7 +843,8 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
               <Button
                 className="primary-button"
                 disabled={
-                  saving || (formData.scheme === "Persentase" && shareTotal !== 100)
+                  saving ||
+                  (formData.scheme === "Persentase" && shareTotal !== 100)
                 }
                 type="submit"
               >
@@ -806,7 +865,8 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
               const qty = Math.trunc(Number(stockQty))
               const code = stockCode || productsList[0]?.code
               if (!code) return setStockError("Pilih produk dulu.")
-              if (!qty || qty < 1) return setStockError("Jumlah masuk harus lebih dari 0.")
+              if (!qty || qty < 1)
+                return setStockError("Jumlah masuk harus lebih dari 0.")
               if (live) {
                 setSaving(true)
                 try {
@@ -817,13 +877,19 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
                   )
                   await loadLive()
                 } catch (err) {
-                  setStockError(err instanceof Error ? err.message : "Gagal menambah stok.")
+                  setStockError(
+                    err instanceof Error ? err.message : "Gagal menambah stok.",
+                  )
                   return
                 } finally {
                   setSaving(false)
                 }
               } else {
-                setProductsList((list) => list.map((p) => (p.code === code ? { ...p, stock: p.stock + qty } : p)))
+                setProductsList((list) =>
+                  list.map((p) =>
+                    p.code === code ? { ...p, stock: p.stock + qty } : p,
+                  ),
+                )
               }
               setStockOpen(false)
             }}
@@ -877,7 +943,11 @@ export function ProductsPage({ embedded = false }: { embedded?: boolean } = {}) 
               >
                 Batal
               </Button>
-              <Button className="primary-button" disabled={saving} type="submit">
+              <Button
+                className="primary-button"
+                disabled={saving}
+                type="submit"
+              >
                 {saving ? "Menyimpan..." : "Tambah stok"}
               </Button>
             </footer>

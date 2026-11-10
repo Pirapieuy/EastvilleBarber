@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  LoadingState,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import {
   apiKasbon,
   apiGaji,
@@ -13,7 +18,7 @@ import {
 
 export function KasbonTab() {
   const [add, setAdd] = useState(false)
-  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
+  const [kapsters, setKapsters] = useState<{ id: string nama: string }[]>([
     { id: "u-kapster", nama: "Budi Santoso" },
     { id: "u-kapster2", nama: "Zhefitra Ananda" },
   ])
@@ -70,7 +75,8 @@ export function KasbonTab() {
 
   async function handleCreateKasbon(e: React.FormEvent) {
     e.preventDefault()
-    const target = kapsters.find((k) => k.id === selectedKapsterId) || kapsters[0]
+    const target =
+      kapsters.find((k) => k.id === selectedKapsterId) || kapsters[0]
     if (!target) return
     setSaving(true)
     try {
@@ -104,7 +110,7 @@ export function KasbonTab() {
   }
 
   // Ringkasan per kapster
-  const ringkasanMap: Record<string, { nama: string; total: number }> = {}
+  const ringkasanMap: Record<string, { nama: string total: number }> = {}
   kapsters.forEach((k) => {
     ringkasanMap[k.id] = { nama: k.nama, total: 0 }
   })
@@ -149,7 +155,12 @@ export function KasbonTab() {
       </div>
 
       <section className="panel list-panel">
-        <header style={{ padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
+        <header
+          style={{
+            padding: "12px 18px",
+            borderBottom: "1px solid var(--line)",
+          }}
+        >
           <strong style={{ fontSize: 14 }}>Riwayat Kasbon</strong>
         </header>
         {loading && (
@@ -158,7 +169,9 @@ export function KasbonTab() {
           </div>
         )}
         {kasbonList.length === 0 && !loading && (
-          <p style={{ padding: 18, color: "var(--muted)" }}>Belum ada catatan kasbon.</p>
+          <p style={{ padding: 18, color: "var(--muted)" }}>
+            Belum ada catatan kasbon.
+          </p>
         )}
         {kasbonList.map((k) => (
           <div className="advance-row" key={k.id}>
@@ -170,7 +183,10 @@ export function KasbonTab() {
               {k.status}
             </i>
             {k.status === "Aktif" && (
-              <Button className="danger-link" onClick={() => handleLunasi(k.id)}>
+              <Button
+                className="danger-link"
+                onClick={() => handleLunasi(k.id)}
+              >
                 Tandai Lunas
               </Button>
             )}
@@ -231,7 +247,11 @@ export function KasbonTab() {
               >
                 Batal
               </Button>
-              <Button className="primary-button" type="submit" disabled={saving}>
+              <Button
+                className="primary-button"
+                type="submit"
+                disabled={saving}
+              >
                 {saving ? "Menyimpan..." : "Simpan"}
               </Button>
             </footer>
@@ -244,14 +264,19 @@ export function KasbonTab() {
 
 export function PayrollPage() {
   const [tab, setTab] = useState<"Gaji" | "Kasbon">("Gaji")
-  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
+  const [kapsters, setKapsters] = useState<{ id: string nama: string }[]>([
     { id: "u-kapster", nama: "Budi Santoso" },
     { id: "u-kapster2", nama: "Zhefitra Ananda" },
   ])
-  const [salaryMap, setSalaryMap] = useState<Record<string, HitungGajiResult>>({})
+  const [salaryMap, setSalaryMap] = useState<Record<string, HitungGajiResult>>(
+    {},
+  )
   const [historyList, setHistoryList] = useState<GajiRow[]>([])
   const [loading, setLoading] = useState(false)
-  const [selectedPayTarget, setSelectedPayTarget] = useState<{ id: string; nama: string } | null>(null)
+  const [selectedPayTarget, setSelectedPayTarget] = useState<{
+    id: string
+    nama: string
+  } | null>(null)
   const [payCatatan, setPayCatatan] = useState("")
   const [paying, setPaying] = useState(false)
 
@@ -321,13 +346,18 @@ export function PayrollPage() {
       setPayCatatan("")
       loadData()
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal memproses pembayaran gaji.")
+      alert(
+        err instanceof Error ? err.message : "Gagal memproses pembayaran gaji.",
+      )
     } finally {
       setPaying(false)
     }
   }
 
-  const totalAllBersih = Object.values(salaryMap).reduce((a, b) => a + b.gajiBersih, 0)
+  const totalAllBersih = Object.values(salaryMap).reduce(
+    (a, b) => a + b.gajiBersih,
+    0,
+  )
 
   return (
     <div className="content">
@@ -364,7 +394,10 @@ export function PayrollPage() {
           </section>
 
           {loading && (
-            <LoadingState message="Menghitung komisi dari database..." compact />
+            <LoadingState
+              message="Menghitung komisi dari database..."
+              compact
+            />
           )}
 
           <div className="salary-grid">
@@ -420,9 +453,14 @@ export function PayrollPage() {
           </div>
 
           <section className="panel history-panel" style={{ marginTop: 24 }}>
-            <PageTitle eyebrow="Jejak pembayaran" title="Riwayat pembayaran gaji" />
+            <PageTitle
+              eyebrow="Jejak pembayaran"
+              title="Riwayat pembayaran gaji"
+            />
             {historyList.length === 0 ? (
-              <p style={{ padding: 18, color: "var(--muted)" }}>Belum ada riwayat pembayaran gaji tercatat di server.</p>
+              <p style={{ padding: 18, color: "var(--muted)" }}>
+                Belum ada riwayat pembayaran gaji tercatat di server.
+              </p>
             ) : (
               historyList.map((h) => (
                 <div className="history-payment" key={h.id}>
@@ -453,11 +491,16 @@ export function PayrollPage() {
               <div className="pay-preview">
                 <div>
                   <span>Total komisi layanan & produk</span>
-                  <strong>{rupiah(salaryMap[selectedPayTarget.id]?.totalKomisi || 0)}</strong>
+                  <strong>
+                    {rupiah(salaryMap[selectedPayTarget.id]?.totalKomisi || 0)}
+                  </strong>
                 </div>
                 <div>
                   <span>Potongan kasbon aktif</span>
-                  <strong>− {rupiah(salaryMap[selectedPayTarget.id]?.totalKasbon || 0)}</strong>
+                  <strong>
+                    −{" "}
+                    {rupiah(salaryMap[selectedPayTarget.id]?.totalKasbon || 0)}
+                  </strong>
                 </div>
                 <div>
                   <span>Gaji bersih yang dibayarkan</span>
@@ -468,7 +511,9 @@ export function PayrollPage() {
               </div>
 
               <label style={{ margin: "14px 0", display: "block" }}>
-                <span style={{ fontSize: 12, fontWeight: 600 }}>Catatan pembayaran (opsional)</span>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>
+                  Catatan pembayaran (opsional)
+                </span>
                 <input
                   placeholder="Misal: Transfer BCA, Tunai..."
                   value={payCatatan}
@@ -484,7 +529,11 @@ export function PayrollPage() {
                 >
                   Batal
                 </Button>
-                <Button className="primary-button" type="submit" disabled={paying}>
+                <Button
+                  className="primary-button"
+                  type="submit"
+                  disabled={paying}
+                >
                   {paying ? "Memproses..." : "Konfirmasi Pembayaran"}
                 </Button>
               </footer>

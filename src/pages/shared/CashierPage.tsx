@@ -47,6 +47,23 @@ export type CartLine = CatalogItem & {
   barber: string
 }
 
+function assignCartToBarber(lines: CartLine[], barber: string): CartLine[] {
+  const byItem = new Map<string | number, CartLine>()
+  lines.forEach((line) => {
+    const existing = byItem.get(line.id)
+    if (existing) {
+      existing.qty += line.qty
+      return
+    }
+    byItem.set(line.id, {
+      ...line,
+      lineId: `${line.id}-${barber}`,
+      barber,
+    })
+  })
+  return [...byItem.values()]
+}
+
 export function ReceiptView({
   cart,
   subtotal,
@@ -57,11 +74,16 @@ export function ReceiptView({
   qris,
   change,
   cashier,
+  barber,
   invoice = "INV-291026-0084",
   tanggal,
   contoh,
   backLabel = "Transaksi Baru (Selesai)",
   onClose,
+  onEdit,
+  onComplete,
+  /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
+  /** Struk dari data demo (tidak tersimpan di server) */
 }: {
   cart: CartLine[]
   subtotal: number
@@ -72,32 +94,33 @@ export function ReceiptView({
   qris: number
   change: number
   cashier: string
+  barber?: string
   invoice?: string
-  /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   tanggal?: string
-  /** Struk dari data demo (tidak tersimpan di server) */
   contoh?: boolean
   backLabel?: string
-  onClose: () => void
+  onClose?: () => void
+  onEdit?: () => void
+  onComplete?: () => void
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
-  const teksWa = [
-    `*EASTVILLE BARBERSHOP*`,
-    `Nota: ${invoice}`,
-    ...cart.map((l) => `${l.name} (${l.barber}) ${l.qty} x ${fmt(l.price)} = ${fmt(l.price * l.qty)}`),
-    discount > 0 ? `Diskon: -${fmt(discount)}` : "",
-    `*TOTAL: Rp ${fmt(total)}* (${method})`,
-    `Terima kasih sudah mempercayakan gaya Anda kepada Eastville.`,
-  ]
-    .filter(Boolean)
-    .join("\n")
   const [size, setSize] = useState<"58" | "80">("58")
+  const barberName =
+    barber ||
+    Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
+    "-"
   return (
     <div className="flow-page">
       <div className="flow-toolbar">
-        <Button className="primary-button" onClick={onClose}>
-          <Icon name="check" /> {backLabel}
-        </Button>
+        {onEdit ? (
+          <Button className="secondary-button" onClick={onEdit}>
+            <Icon name="pencil" /> Edit
+          </Button>
+        ) : (
+          <Button className="primary-button" onClick={onClose}>
+            <Icon name="check" /> {backLabel}
+          </Button>
+        )}
         <div className="segmented">
           <Button
             className={size === "58" ? "active" : ""}
@@ -112,18 +135,19 @@ export function ReceiptView({
             80 mm
           </Button>
         </div>
-        <Button
-          onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(teksWa)}`, "_blank")}
-        >
-          Kirim WhatsApp
-        </Button>
         <div style={{ display: "flex", gap: 8 }}>
           <Button className="primary-button" onClick={() => window.print()}>
             <Icon name="print" /> Cetak
           </Button>
-          <Button className="secondary-button" onClick={onClose}>
-            <Icon name="arrow" /> Kembali
-          </Button>
+          {onComplete ? (
+            <Button className="primary-button" onClick={onComplete}>
+              <Icon name="check" /> Selesai
+            </Button>
+          ) : (
+            <Button className="secondary-button" onClick={onClose}>
+              <Icon name="arrow" /> Kembali
+            </Button>
+          )}
         </div>
       </div>
       <div className="receipt-stage">
@@ -132,7 +156,11 @@ export function ReceiptView({
             <div>E</div>
             <h2>EASTVILLE</h2>
             <p>EASTVILLE BARBERSHOP</p>
-            {contoh && <p><strong>*** CONTOH (DEMO) ***</strong></p>}
+            {contoh && (
+              <p>
+                <strong>*** CONTOH (DEMO) ***</strong>
+              </p>
+            )}
           </header>
           <hr />
           <dl>
@@ -141,7 +169,14 @@ export function ReceiptView({
               <dd>
                 {tanggal ??
                   new Date()
-                    .toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })
+                    .toLocaleString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
                     .replace(",", " ·")}
               </dd>
             </div>
@@ -153,6 +188,10 @@ export function ReceiptView({
               <dt>Kasir</dt>
               <dd>{cashier}</dd>
             </div>
+            <div>
+              <dt>Kapster</dt>
+              <dd>{barberName}</dd>
+            </div>
           </dl>
           <hr />
           {cart.map((line) => (
@@ -160,7 +199,7 @@ export function ReceiptView({
               <span>
                 <strong>{line.name}</strong>
                 <small>
-                  Kapster: {line.barber} · {line.qty} ×{" "}
+                  {line.qty} ×{" "}
                   {new Intl.NumberFormat("id-ID").format(line.price)}
                 </small>
               </span>
@@ -219,10 +258,7 @@ export function ReceiptView({
   )
 }
 
-export function CashierPage({
-  currentUser,
-  onNavigate,
-}: {
+export function CashierPage({ currentUser, onNavigate }: {
   currentUser?: AppUser
   onNavigate?: (page: string) => void
 } = {}) {
@@ -230,36 +266,50 @@ export function CashierPage({
   const [cari, setCari] = useState("")
   const [selectedBarber, setSelectedBarber] = useState("Budi Santoso")
   const [cart, setCart] = useState<CartLine[]>([
-    { ...catalog[0], lineId: `${catalog[0].id}-Budi Santoso`, qty: 1, barber: "Budi Santoso" },
+    {
+      ...catalog[0],
+      lineId: `${catalog[0].id}-Budi Santoso`,
+      qty: 1,
+      barber: "Budi Santoso",
+    },
     {
       ...catalog[2],
-      lineId: `${catalog[2].id}-Zhefitra Ananda`,
+      lineId: `${catalog[2].id}-Budi Santoso`,
       qty: 1,
-      barber: "Zhefitra Ananda",
+      barber: "Budi Santoso",
     },
   ])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState(catalog[0].price + catalog[2].price)
-  const [qris, setQris] = useState(0)
   const [discount, setDiscount] = useState(0)
-  const [discountMode, setDiscountMode] = useState<"Nominal" | "Persen">("Nominal")
+  const [discountMode, setDiscountMode] = useState<"Nominal" | "Persen">(
+    "Nominal",
+  )
   const [discountDraft, setDiscountDraft] = useState(0)
   const [pinChecking, setPinChecking] = useState(false)
   const [discountPinError, setDiscountPinError] = useState("")
   const [discountReason, setDiscountReason] = useState("")
   const [discountReasonDraft, setDiscountReasonDraft] = useState("")
-  const [appliedDiscountPercent, setAppliedDiscountPercent] = useState<number | null>(null)
-  const [discountTypeTab, setDiscountTypeTab] = useState<"event" | "manual">("event")
+  const [appliedDiscountPercent, setAppliedDiscountPercent] =
+    useState<number | null>(null)
+  const [discountTypeTab, setDiscountTypeTab] = useState<"event" | "manual">(
+    "event",
+  )
   const [promosList, setPromosList] = useState<PromoDiscount[]>([])
   const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
+  const [cartSwipe, setCartSwipe] = useState<{
+    lineId: string
+    offset: number
+    removing?: boolean
+  } | null>(null)
 
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
   const [catalogData, setCatalogData] = useState<CatalogItem[]>(catalog)
-  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
-    ["Budi Santoso", "Zhefitra Ananda", "Seva", "Tata Pratama", "Faisal Rahman", "Ferdi"].map((name) => ({ name })),
+  const [barberList, setBarberList] = useState<{ id?: string name: string }[]>(
+    ["Budi Santoso", "Zhefitra Ananda"].map((name) => ({ name })),
   )
   const [invoice, setInvoice] = useState<string | undefined>()
   const [paying, setPaying] = useState(false)
@@ -267,14 +317,18 @@ export function CashierPage({
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
   const [pinAtasan, setPinAtasan] = useState("")
-  const cartSwipeStart = useRef<{ lineId: string; x: number; y: number } | null>(null)
+  const cartSwipeStart = useRef<{ lineId: string x: number y: number } | null>(
+    null,
+  )
   const cartWheelSwipe = useRef<{
     lineId: string
     deltaX: number
     timer: number
   } | null>(null)
   // Id unik per percobaan bayar: kirim ulang setelah timeout tidak membuat nota ganda.
-  const requestId = useRef(`${Date.now()}-${Math.random().toString(36).slice(2, 10)}`)
+  const requestId = useRef(
+    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+  )
   const punyaToken = !!getToken()
   const gagalMuat = punyaToken && !live
 
@@ -289,16 +343,25 @@ export function CashierPage({
         setCatalogData([
           ...layanan
             .filter((l) => l.status === "Aktif")
-            .map((l): CatalogItem => ({ id: l.id, name: l.nama, price: l.harga, type: "Layanan" })),
+            .map(
+              (l): CatalogItem => ({
+                id: l.id,
+                name: l.nama,
+                price: l.harga,
+                type: "Layanan",
+              }),
+            ),
           ...produk
             .filter((p) => p.status === "Aktif")
-            .map((p): CatalogItem => ({
-              id: p.kode,
-              name: p.nama,
-              price: p.harga,
-              type: "Produk",
-              stock: p.stok,
-            })),
+            .map(
+              (p): CatalogItem => ({
+                id: p.kode,
+                name: p.nama,
+                price: p.harga,
+                type: "Produk",
+                stock: p.stok,
+              }),
+            ),
         ])
         setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
         setSelectedBarber(kapster[0]?.nama ?? "")
@@ -325,7 +388,7 @@ export function CashierPage({
         pinOtorisasi: effectiveDiscount > 0 ? pinAtasan : undefined,
         clientRequestId: requestId.current,
         bayarTunai: method === "QRIS" ? 0 : cash,
-        bayarQris: method === "Tunai" ? 0 : qris,
+        bayarQris: qris,
         items: cart.map((l) => ({
           tipe: l.type,
           refId: l.id,
@@ -371,7 +434,9 @@ export function CashierPage({
       setDiscountPinError("")
       return true
     } catch (e) {
-      setDiscountPinError(e instanceof Error ? e.message : "PIN gagal diperiksa. Coba lagi.")
+      setDiscountPinError(
+        e instanceof Error ? e.message : "PIN gagal diperiksa. Coba lagi.",
+      )
       return false
     } finally {
       setPinChecking(false)
@@ -379,7 +444,9 @@ export function CashierPage({
   }
 
   const items = catalogData.filter(
-    (x) => x.type === tab && x.name.toLowerCase().includes(cari.trim().toLowerCase()),
+    (x) =>
+      x.type === tab &&
+      x.name.toLowerCase().includes(cari.trim().toLowerCase()),
   )
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
   // Jumlah produk di keranjang (semua kapster) dibatasi stok yang tersisa.
@@ -397,6 +464,12 @@ export function CashierPage({
     total > 0 &&
     (discountMode === "Persen" ? discountDraft >= 100 : discountDraft >= total)
   const payableTotal = Math.max(0, total - effectiveDiscount)
+  const qris =
+    method === "Tunai"
+      ? 0
+      : method === "QRIS"
+        ? payableTotal
+        : Math.max(0, payableTotal - cash)
   const paid =
     method === "Tunai" ? cash : method === "QRIS" ? qris : cash + qris
   const shortage = Math.max(0, payableTotal - paid)
@@ -487,7 +560,14 @@ export function CashierPage({
         />
       </div>
       {discountPinError && (
-        <small style={{ color: "#dc2626", fontSize: 11, marginTop: 4, display: "block" }}>
+        <small
+          style={{
+            color: "#dc2626",
+            fontSize: 11,
+            marginTop: 4,
+            display: "block",
+          }}
+        >
           {discountPinError}
         </small>
       )}
@@ -506,21 +586,44 @@ export function CashierPage({
         qris={qris}
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
+        barber={
+          Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
+          selectedBarber
+        }
         invoice={invoice}
         contoh={!live}
+        onEdit={() => {
+          setReceipt(false)
+        }}
+        onComplete={() => {
+          setReceipt(false)
+          clearCart()
+        }}
         onClose={() => {
           setReceipt(false)
-          setCart([])
-          setCash(0)
-          setQris(0)
-          setDiscount(0)
-          setAppliedDiscountPercent(null)
-          setDiscountReason("")
-          setDiscountReasonDraft("")
-          setPinAtasan("")
+          clearCart()
         }}
       />
     )
+  }
+
+  function clearCart() {
+    setCart([])
+    setCash(0)
+    setDiscount(0)
+    setAppliedDiscountPercent(null)
+    setDiscountReason("")
+    setDiscountReasonDraft("")
+    setPinAtasan("")
+    setDiscountPinError("")
+  }
+
+  function removeCartLineWithAnimation(lineId: string) {
+    setCartSwipe({ lineId, offset: -120, removing: true })
+    window.setTimeout(() => {
+      setCart((items) => items.filter((item) => item.lineId !== lineId))
+      setCartSwipe((current) => (current?.lineId === lineId ? null : current))
+    }, 180)
   }
 
   return (
@@ -540,9 +643,14 @@ export function CashierPage({
           <div className="barber-options">
             {barberList.map(({ name: barber }) => (
               <Button
-                className={`barber-btn ${selectedBarber === barber ? "active" : ""}`}
+                className={`barber-btn ${
+                  selectedBarber === barber ? "active" : ""
+                }`}
                 key={barber}
-                onClick={() => setSelectedBarber(barber)}
+                onClick={() => {
+                  setSelectedBarber(barber)
+                  setCart((items) => assignCartToBarber(items, barber))
+                }}
               >
                 <i>{barber.charAt(0)}</i>
                 <span>{barber}</span>
@@ -576,15 +684,31 @@ export function CashierPage({
         </div>
         <div className="catalog-grid">
           {items.length === 0 && (
-            <p style={{ color: "var(--slate)", gridColumn: "1 / -1", padding: "16px 0" }}>
+            <p
+              style={{
+                color: "var(--slate)",
+                gridColumn: "1 / -1",
+                padding: "16px 0",
+              }}
+            >
               Tidak ada {tab.toLowerCase()} yang cocok.
             </p>
           )}
           {items.map((item) => (
             <Button
               className={`catalog-item ${item.stock === 0 ? "disabled" : ""}`}
-              disabled={item.stock === 0 || stokHabis(item.id, item.stock) || !selectedBarber}
-              title={!selectedBarber ? "Pilih kapster dulu" : stokHabis(item.id, item.stock) ? "Stok habis di keranjang" : undefined}
+              disabled={
+                item.stock === 0 ||
+                stokHabis(item.id, item.stock) ||
+                !selectedBarber
+              }
+              title={
+                !selectedBarber
+                  ? "Pilih kapster dulu"
+                  : stokHabis(item.id, item.stock)
+                    ? "Stok habis di keranjang"
+                    : undefined
+              }
               key={item.id}
               onClick={() =>
                 setCart((c) => {
@@ -636,6 +760,18 @@ export function CashierPage({
               {cart.reduce((sum, line) => sum + line.qty, 0)} item
             </b>
           </div>
+          {cart.length > 0 && (
+            <div className="cart-clear-row">
+              <Button
+                className="cart-clear-button"
+                onClick={clearCart}
+                title="Hapus semua produk dan layanan"
+                aria-label="Hapus semua produk dan layanan"
+              >
+                <Icon name="trash" /> Hapus Semua
+              </Button>
+            </div>
+          )}
           <div className="cart-lines">
             {cart.length === 0 ? (
               <div className="empty">
@@ -648,7 +784,7 @@ export function CashierPage({
                 <article
                   className="cart-line-swipe"
                   key={line.lineId}
-                  title="Geser ke kiri atau seret dengan mouse untuk menghapus item"
+                  title="Gunakan tombol sampah atau geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -667,7 +803,7 @@ export function CashierPage({
                     if (next.deltaX <= -100) {
                       window.clearTimeout(next.timer)
                       cartWheelSwipe.current = null
-                      setCart((items) => items.filter((item) => item.lineId !== line.lineId))
+                      removeCartLineWithAnimation(line.lineId)
                     }
                   }}
                   onPointerDown={(event) => {
@@ -690,83 +826,100 @@ export function CashierPage({
                     const dx = event.clientX - start.x
                     const dy = event.clientY - start.y
                     if (dx < -60 && Math.abs(dx) > Math.abs(dy)) {
-                      setCart((items) => items.filter((item) => item.lineId !== line.lineId))
+                      removeCartLineWithAnimation(line.lineId)
+                    } else {
+                      setCartSwipe((current) =>
+                        current?.lineId === line.lineId ? null : current,
+                      )
+                    }
+                  }}
+                  onPointerMove={(event) => {
+                    const start = cartSwipeStart.current
+                    if (!start || start.lineId !== line.lineId) return
+                    const dx = event.clientX - start.x
+                    if (dx < 0) {
+                      setCartSwipe({
+                        lineId: line.lineId,
+                        offset: Math.max(dx, -120),
+                      })
                     }
                   }}
                   onPointerCancel={() => {
                     cartSwipeStart.current = null
+                    setCartSwipe((current) =>
+                      current?.lineId === line.lineId ? null : current,
+                    )
                   }}
                 >
-                  <div>
+                  <span className="cart-swipe-delete" aria-hidden="true">
+                    <Icon name="trash" /> Hapus
+                  </span>
+                  <div
+                    className={`cart-line-row ${
+                      cartSwipe?.lineId === line.lineId && cartSwipe.removing
+                        ? "removing"
+                        : ""
+                    }`}
+                    style={{
+                      transform: `translateX(${
+                        cartSwipe?.lineId === line.lineId ? cartSwipe.offset : 0
+                      }px)`,
+                      transition:
+                        cartSwipe?.lineId === line.lineId && !cartSwipe.removing
+                          ? "none"
+                          : undefined,
+                    }}
+                  >
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
                     </span>
-                  </div>
-                  <div>
-                    <label className="cart-line-kapster">
-                      <Icon name="user" />
-                      <select
-                        aria-label={`Pilih kapster untuk ${line.name}`}
-                        onChange={(e) => {
-                          const newBarber = e.target.value
-                          setCart((c) =>
-                            c.map((x) =>
-                              x.lineId === line.lineId
-                                ? {
-                                    ...x,
-                                    barber: newBarber,
-                                    lineId: `${x.id}-${newBarber}`,
-                                  }
-                                : x,
-                            ),
-                          )
-                        }}
-                        value={line.barber}
-                      >
-                        {barberList.map((b) => (
-                          <option key={b.name} value={b.name}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <div className="stepper">
+                    <div className="cart-line-controls">
+                      <div className="stepper">
+                        <Button
+                          onClick={() =>
+                            setCart((c) =>
+                              c.map((x) =>
+                                x.lineId === line.lineId
+                                  ? { ...x, qty: Math.max(1, x.qty - 1) }
+                                  : x,
+                              ),
+                            )
+                          }
+                        >
+                          <Icon name="minus" />
+                        </Button>
+                        <span>{line.qty}</span>
+                        <Button
+                          disabled={
+                            line.type === "Produk" &&
+                            stokHabis(
+                              line.id,
+                              catalogData.find((c) => c.id === line.id)?.stock,
+                            )
+                          }
+                          onClick={() =>
+                            setCart((c) =>
+                              c.map((x) =>
+                                x.lineId === line.lineId
+                                  ? { ...x, qty: x.qty + 1 }
+                                  : x,
+                              ),
+                            )
+                          }
+                        >
+                          <Icon name="plus" />
+                        </Button>
+                      </div>
+                      <b>{rupiah(line.price * line.qty)}</b>
                       <Button
-                        onClick={() =>
-                          setCart((c) =>
-                            c.map((x) =>
-                              x.lineId === line.lineId
-                                ? { ...x, qty: Math.max(1, x.qty - 1) }
-                                : x,
-                            ),
-                          )
-                        }
+                        className="cart-remove-button"
+                        onClick={() => removeCartLineWithAnimation(line.lineId)}
+                        title={`Hapus ${line.name}`}
+                        aria-label={`Hapus ${line.name}`}
                       >
-                        <Icon name="minus" />
-                      </Button>
-                      <span>{line.qty}</span>
-                      <Button
-                        disabled={
-                          line.type === "Produk" &&
-                          stokHabis(
-                            line.id,
-                            catalogData.find((c) => c.id === line.id)?.stock,
-                          )
-                        }
-                        onClick={() =>
-                          setCart((c) =>
-                            c.map((x) =>
-                              x.lineId === line.lineId
-                                ? { ...x, qty: x.qty + 1 }
-                                : x,
-                            ),
-                          )
-                        }
-                      >
-                        <Icon name="plus" />
+                        <Icon name="trash" />
                       </Button>
                     </div>
-                    <b>{rupiah(line.price * line.qty)}</b>
                   </div>
                 </article>
               ))
@@ -791,11 +944,12 @@ export function CashierPage({
                 setDiscountOpen(!discountOpen)
               }}
             >
-              <Icon name="receipt" /> {discount > 0 ? "Ubah diskon" : "Beri diskon"}
+              <Icon name="receipt" />{" "}
+              {discount > 0 ? "Ubah diskon" : "Beri diskon"}
             </Button>
             {discountOpen && (
               <div className="cart-discount-panel">
-                <div className="segmented" style={{ width: "100%", marginBottom: 10 }}>
+                <div className="segmented full discount-mode">
                   <Button
                     className={discountTypeTab === "event" ? "active" : ""}
                     onClick={() => setDiscountTypeTab("event")}
@@ -811,14 +965,24 @@ export function CashierPage({
                 </div>
 
                 {discountTypeTab === "event" ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                  >
                     {pinLabel}
                     <small style={{ color: "var(--muted)", fontSize: 11 }}>
                       Pilih diskon event yang sedang aktif:
                     </small>
-                    {promosList.filter((p) => p.status === "Aktif").length === 0 ? (
-                      <p style={{ color: "var(--slate)", fontSize: 12, padding: "8px 0" }}>
-                        Belum ada diskon event aktif. Atur di menu Layanan & Produk.
+                    {promosList.filter((p) => p.status === "Aktif").length ===
+                    0 ? (
+                      <p
+                        style={{
+                          color: "var(--slate)",
+                          fontSize: 12,
+                          padding: "8px 0",
+                        }}
+                      >
+                        Belum ada diskon event aktif. Atur di menu Layanan &
+                        Produk.
                       </p>
                     ) : (
                       promosList
@@ -838,10 +1002,18 @@ export function CashierPage({
                             }}
                           >
                             <div>
-                              <strong style={{ fontSize: 12, display: "block" }}>{p.nama}</strong>
-                              <small style={{ color: "var(--muted)", fontSize: 11 }}>
+                              <strong
+                                style={{ fontSize: 12, display: "block" }}
+                              >
+                                {p.nama}
+                              </strong>
+                              <small
+                                style={{ color: "var(--muted)", fontSize: 11 }}
+                              >
                                 Diskon {p.persen}% · s/d{" "}
-                                {new Date(p.berlakuSampai + "T00:00:00").toLocaleDateString("id-ID", {
+                                {new Date(
+                                  p.berlakuSampai + "T00:00:00",
+                                ).toLocaleDateString("id-ID", {
                                   day: "numeric",
                                   month: "short",
                                   year: "numeric",
@@ -853,32 +1025,44 @@ export function CashierPage({
                               disabled={pinChecking}
                               onClick={async () => {
                                 if (!(await cekPinDiskon())) return
-                                const appliedDiscount = Math.round((total * p.persen) / 100)
-                                const updatedTotal = Math.max(0, total - appliedDiscount)
+                                const appliedDiscount = Math.round(
+                                  (total * p.persen) / 100,
+                                )
+                                const updatedTotal = Math.max(
+                                  0,
+                                  total - appliedDiscount,
+                                )
                                 setDiscount(appliedDiscount)
                                 setAppliedDiscountPercent(p.persen)
                                 setDiscountReason(p.nama)
                                 if (method === "Tunai") {
                                   setCash(updatedTotal)
-                                  setQris(0)
                                 } else if (method === "QRIS") {
                                   setCash(0)
-                                  setQris(updatedTotal)
                                 } else {
                                   const cashPart = Math.min(cash, updatedTotal)
                                   setCash(cashPart)
-                                  setQris(updatedTotal - cashPart)
                                 }
                                 setDiscountOpen(false)
                               }}
-                              style={{ padding: "3px 8px", fontSize: 11, height: "auto" }}
+                              style={{
+                                padding: "3px 8px",
+                                fontSize: 11,
+                                height: "auto",
+                              }}
                             >
                               Terapkan
                             </Button>
                           </div>
                         ))
                     )}
-                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: 4,
+                      }}
+                    >
                       <Button
                         className="text-button"
                         onClick={() => setDiscountOpen(false)}
@@ -890,7 +1074,10 @@ export function CashierPage({
                   </div>
                 ) : (
                   <div className="discount-body">
-                    <div className="discount-mode segmented" style={{ marginBottom: 10 }}>
+                    <div
+                      className="discount-mode segmented"
+                      style={{ marginBottom: 10 }}
+                    >
                       {(["Nominal", "Persen"] as const).map((mode) => (
                         <Button
                           className={discountMode === mode ? "active" : ""}
@@ -916,7 +1103,9 @@ export function CashierPage({
                         <input
                           placeholder="Mis. Diskon Pelajar, Teman Owner"
                           value={discountReasonDraft}
-                          onChange={(e) => setDiscountReasonDraft(e.target.value)}
+                          onChange={(e) =>
+                            setDiscountReasonDraft(e.target.value)
+                          }
                         />
                       </div>
                     </label>
@@ -955,11 +1144,15 @@ export function CashierPage({
                         disabled={pinChecking}
                         onClick={async () => {
                           if (discountDraft <= 0) {
-                            setDiscountPinError("Nilai diskon harus lebih dari 0.")
+                            setDiscountPinError(
+                              "Nilai diskon harus lebih dari 0.",
+                            )
                             return
                           }
                           if (draftPenuh && !discountReasonDraft.trim()) {
-                            setDiscountPinError("Diskon penuh (gratis) wajib diisi alasannya.")
+                            setDiscountPinError(
+                              "Diskon penuh (gratis) wajib diisi alasannya.",
+                            )
                             return
                           }
                           if (!(await cekPinDiskon())) return
@@ -972,22 +1165,27 @@ export function CashierPage({
                             discountMode === "Persen"
                               ? Math.round((total * normalizedDiscount) / 100)
                               : normalizedDiscount
-                          const updatedTotal = Math.max(0, total - appliedDiscount)
+                          const updatedTotal = Math.max(
+                            0,
+                            total - appliedDiscount,
+                          )
                           setDiscount(appliedDiscount)
                           setAppliedDiscountPercent(
-                            discountMode === "Persen" ? normalizedDiscount : null,
+                            discountMode === "Persen"
+                              ? normalizedDiscount
+                              : null,
                           )
-                          setDiscountReason(discountReasonDraft.trim() || "Diskon Manual Otorisasi")
+                          setDiscountReason(
+                            discountReasonDraft.trim() ||
+                              "Diskon Manual Otorisasi",
+                          )
                           if (method === "Tunai") {
                             setCash(updatedTotal)
-                            setQris(0)
                           } else if (method === "QRIS") {
                             setCash(0)
-                            setQris(updatedTotal)
                           } else {
                             const cashPart = Math.min(cash, updatedTotal)
                             setCash(cashPart)
-                            setQris(updatedTotal - cashPart)
                           }
                           setDiscountOpen(false)
                         }}
@@ -1011,10 +1209,17 @@ export function CashierPage({
               >
                 <div>
                   <span style={{ fontSize: 12 }}>
-                    Diskon: <strong>{discountReason || "Diskon Otorisasi"}</strong>
-                    {appliedDiscountPercent !== null && ` (${appliedDiscountPercent}%)`}
+                    Diskon:{" "}
+                    <strong>{discountReason || "Diskon Otorisasi"}</strong>
+                    {appliedDiscountPercent !== null &&
+                      ` (${appliedDiscountPercent}%)`}
                   </span>
-                  <strong style={{ display: "block", color: "var(--brass-dark, #b45309)" }}>
+                  <strong
+                    style={{
+                      display: "block",
+                      color: "var(--brass-dark, #b45309)",
+                    }}
+                  >
                     − {rupiah(effectiveDiscount)}
                   </strong>
                 </div>
@@ -1027,13 +1232,10 @@ export function CashierPage({
                     setPinAtasan("")
                     if (method === "Tunai") {
                       setCash(total)
-                      setQris(0)
                     } else if (method === "QRIS") {
                       setCash(0)
-                      setQris(total)
                     } else {
                       setCash(total)
-                      setQris(0)
                     }
                   }}
                   style={{ fontSize: 11, color: "#dc2626", padding: "2px 6px" }}
@@ -1062,14 +1264,12 @@ export function CashierPage({
                       setMethod(value)
                       if (value === "Tunai") {
                         setCash(payableTotal)
-                        setQris(0)
                       } else if (value === "QRIS") {
                         setCash(0)
-                        setQris(payableTotal)
                       } else {
-                        const cashPart = Math.round(payableTotal / 2 / 1000) * 1000
+                        const cashPart =
+                          Math.round(payableTotal / 2 / 1000) * 1000
                         setCash(cashPart)
-                        setQris(Math.max(0, payableTotal - cashPart))
                       }
                     }}
                   >
@@ -1089,38 +1289,26 @@ export function CashierPage({
                         onChange={(e) => {
                           const val = Number(e.target.value.replace(/\D/g, ""))
                           setCash(val)
-                          if (method === "Gabungan") {
-                            setQris(Math.max(0, payableTotal - val))
-                          }
                         }}
                         value={cash}
                       />
                     </div>
                   </label>
                 )}
-                {method !== "Tunai" && (
-                  <label>
-                    <span>Jumlah QRIS</span>
-                    <div className="input-shell">
-                      <b>Rp</b>
-                      <input
-                        inputMode="numeric"
-                        onChange={(e) => {
-                          const val = Number(e.target.value.replace(/\D/g, ""))
-                          setQris(val)
-                          if (method === "Gabungan") {
-                            setCash(Math.max(0, payableTotal - val))
-                          }
-                        }}
-                        value={qris}
-                      />
-                    </div>
-                  </label>
-                )}
               </div>
               {method === "Tunai" && payableTotal > 0 && (
-                <div className="quick-cash" style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "8px 0" }}>
-                  <Button onClick={() => setCash(payableTotal)}>Uang pas</Button>
+                <div
+                  className="quick-cash"
+                  style={{
+                    display: "flex",
+                    gap: 6,
+                    flexWrap: "wrap",
+                    margin: "8px 0",
+                  }}
+                >
+                  <Button onClick={() => setCash(payableTotal)}>
+                    Uang pas
+                  </Button>
                   {pecahanCepat.map((n) => (
                     <Button key={n} onClick={() => setCash(n)}>
                       {rupiah(n)}
@@ -1169,8 +1357,12 @@ export function CashierPage({
               </Button>
               {gagalMuat && (
                 <div className="payment-result danger" role="alert">
-                  <span>Data kasir gagal dimuat{liveError ? `: ${liveError}` : ""}</span>
-                  <Button onClick={() => setReloadKey((k) => k + 1)}>Coba lagi</Button>
+                  <span>
+                    Data kasir gagal dimuat{liveError ? `: ${liveError}` : ""}
+                  </span>
+                  <Button onClick={() => setReloadKey((k) => k + 1)}>
+                    Coba lagi
+                  </Button>
                 </div>
               )}
               {payError && (

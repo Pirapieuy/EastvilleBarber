@@ -31,6 +31,18 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
       },
     ],
   },
+  {
+    id: "absensi",
+    title: "ABSENSI",
+    items: [
+      {
+        page: "AbsensiKapster",
+        alias: "absensi-kapster",
+        label: "Absensi Kapster",
+        icon: "calendar",
+      },
+    ],
+  },
 ]
 
 export function SidebarKasir(props: SidebarProps) {

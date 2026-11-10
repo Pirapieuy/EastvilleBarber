@@ -46,7 +46,8 @@ export function BaseSidebar({
   user,
   groups,
 }: BaseSidebarProps) {
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
+  const [collapsedGroups, setCollapsedGroups] =
+    useState<Record<string, boolean>>({})
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
 
   function toggleGroup(groupId: string) {
@@ -84,7 +85,9 @@ export function BaseSidebar({
                     type="button"
                     className="nav-group-header"
                     onClick={() => toggleGroup(group.id)}
-                    title={`Klik untuk ${isGroupCollapsed ? "buka" : "tutup"} kategori ${group.title}`}
+                    title={`Klik untuk ${
+                      isGroupCollapsed ? "buka" : "tutup"
+                    } kategori ${group.title}`}
                     aria-expanded={!isGroupCollapsed}
                   >
                     <span className="nav-group-title">{group.title}</span>
@@ -107,7 +110,9 @@ export function BaseSidebar({
                   >
                     {group.items.map((item) => (
                       <Button
-                        className={`nav-item ${isItemActive(item) ? "active" : ""}`}
+                        className={`nav-item ${
+                          isItemActive(item) ? "active" : ""
+                        }`}
                         key={item.page}
                         onClick={() => onNavigate(item.page)}
                       >
@@ -155,9 +160,7 @@ export function BaseSidebar({
                 title={`${user.name} (${user.roleBadge}) · Keluar`}
               >
                 <Icon name="logout" />
-                <span className="sidebar-tooltip">
-                  Keluar ({user.name})
-                </span>
+                <span className="sidebar-tooltip">Keluar ({user.name})</span>
               </Button>
             </div>
           )}

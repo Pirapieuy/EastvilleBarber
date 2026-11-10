@@ -4,7 +4,9 @@ import { Button, PageTitle } from "../../components/common/UI"
 import { apiAbsensi, getToken, AbsensiRow } from "../../api"
 
 export function AttendancePage() {
-  const [state, setState] = useState<"ready" | "camera" | "preview" | "done">("ready")
+  const [state, setState] = useState<"ready" | "camera" | "preview" | "done">(
+    "ready",
+  )
   const [tipe, setTipe] = useState<"Masuk" | "Pulang">("Masuk")
   const [serverTime, setServerTime] = useState("")
   const [history, setHistory] = useState<AbsensiRow[]>([
@@ -17,7 +19,7 @@ export function AttendancePage() {
       nama: "Budi Santoso",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Tepat waktu",
+      status: "Tepat Waktu",
     },
     {
       id: "abs-02",
@@ -28,7 +30,7 @@ export function AttendancePage() {
       nama: "Budi Santoso",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Terlambat 12 mnt",
+      status: "Terlambat",
     },
   ])
   const [loading, setLoading] = useState(false)
@@ -85,13 +87,19 @@ export function AttendancePage() {
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
         <Button
           className={tipe === "Masuk" ? "primary-button" : "secondary-button"}
-          onClick={() => { setTipe("Masuk"); setState("ready") }}
+          onClick={() => {
+            setTipe("Masuk")
+            setState("ready")
+          }}
         >
           Check-in Masuk
         </Button>
         <Button
           className={tipe === "Pulang" ? "primary-button" : "secondary-button"}
-          onClick={() => { setTipe("Pulang"); setState("ready") }}
+          onClick={() => {
+            setTipe("Pulang")
+            setState("ready")
+          }}
         >
           Check-out Pulang
         </Button>
@@ -103,7 +111,9 @@ export function AttendancePage() {
           <strong>{tipe === "Masuk" ? "10.00" : "21.00"}</strong>
         </div>
         <i className={`chip ${state === "done" ? "lunas" : "manual"}`}>
-          {state === "done" ? "Tercatat di server" : `Belum ${tipe.toLowerCase()}`}
+          {state === "done"
+            ? "Tercatat di server"
+            : `Belum ${tipe.toLowerCase()}`}
         </i>
       </article>
 
@@ -196,19 +206,37 @@ export function AttendancePage() {
 
       <section className="panel attendance-history">
         <PageTitle eyebrow="Riwayat kehadiran" title="Absensi Terakhir" />
-        {loading && <p style={{ padding: 12, color: "var(--muted)" }}>Memuat riwayat...</p>}
+        {loading && (
+          <p style={{ padding: 12, color: "var(--muted)" }}>
+            Memuat riwayat...
+          </p>
+        )}
         {history.map((row) => (
           <article key={row.id}>
             <span className="photo-thumb">
               <Icon name="user" />
             </span>
             <span>
-              <strong>{row.tanggal} · {row.tipe || "Masuk"}</strong>
+              <strong>
+                {row.tanggal} · {row.tipe || "Masuk"}
+              </strong>
               <small>{row.jam} · Waktu server</small>
             </span>
-            <i className="chip lunas">
-              {row.status || "Hadir"}
-            </i>
+            {(() => {
+              const s = (row.status || "").toLowerCase()
+              const display = s.includes("terlambat")
+                ? "Terlambat"
+                : s.includes("tidak")
+                  ? "Tidak Hadir"
+                  : "Tepat Waktu"
+              const chipClass =
+                display === "Tepat Waktu"
+                  ? "lunas"
+                  : display === "Terlambat"
+                    ? "pending"
+                    : "batal"
+              return <i className={`chip ${chipClass}`}>{display}</i>
+            })()}
           </article>
         ))}
       </section>

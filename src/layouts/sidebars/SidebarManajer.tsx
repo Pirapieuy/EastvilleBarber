@@ -30,12 +30,6 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
         icon: "chart",
       },
       {
-        page: "Pengeluaran",
-        alias: "expenses",
-        label: "Pengeluaran",
-        icon: "expense",
-      },
-      {
         page: "RekapManual",
         alias: "manual",
         label: "Input Nota Kertas",
@@ -68,7 +62,7 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
       {
         page: "AbsensiTim",
         alias: "attendance-admin",
-        label: "Absensi",
+        label: "Jam Kerja",
         icon: "calendar",
       },
     ],

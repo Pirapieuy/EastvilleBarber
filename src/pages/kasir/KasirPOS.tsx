@@ -1,10 +1,7 @@
 import { CashierPage } from "../shared/CashierPage"
 import { AppUser } from "../../types"
 
-export function KasirPOS({
-  currentUser,
-  onNavigate,
-}: {
+export function KasirPOS({ currentUser, onNavigate }: {
   currentUser?: AppUser
   onNavigate?: (page: string) => void
 } = {}) {

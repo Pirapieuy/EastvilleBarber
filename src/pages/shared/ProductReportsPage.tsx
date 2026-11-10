@@ -3,9 +3,21 @@ import { useEffect, useMemo, useState } from "react"
 import { apiLaporan, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, CalendarPicker, Kpi, LoadingState, MonthPicker, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  Kpi,
+  LoadingState,
+  MonthPicker,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
-import { eksporExcel, eksporPdf, TabelEkspor } from "../../components/common/exportTable"
+import {
+  eksporExcel,
+  eksporPdf,
+  TabelEkspor,
+} from "../../components/common/exportTable"
 import { WhatsAppDialog } from "./ReportsPage"
 
 export interface ProductTransactionRecord {
@@ -137,26 +149,35 @@ export function CompactDetail({
 }
 
 const pad2 = (n: number) => String(n).padStart(2, "0")
-const isoLokal = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+const isoLokal = (d: Date) =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 
 /** Rentang yyyy-MM-dd: satu hari, satu pekan (Senin-Minggu) yang memuat tanggal, atau satu bulan. */
-function rentangProduk(mode: "Harian" | "Mingguan" | "Bulanan", tanggal: string, bulan: string) {
+function rentangProduk(
+  mode: "Harian" | "Mingguan" | "Bulanan",
+  tanggal: string,
+  bulan: string,
+) {
   if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
   if (mode === "Mingguan") {
     const d = new Date(`${tanggal}T00:00:00`)
     const mundur = (d.getDay() + 6) % 7
     const senin = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mundur)
-    const minggu = new Date(senin.getFullYear(), senin.getMonth(), senin.getDate() + 6)
+    const minggu = new Date(
+      senin.getFullYear(),
+      senin.getMonth(),
+      senin.getDate() + 6,
+    )
     return { dari: isoLokal(senin), sampai: isoLokal(minggu) }
   }
   const [y, m] = bulan.split("-").map(Number)
-  return { dari: `${bulan}-01`, sampai: `${bulan}-${pad2(new Date(y, m, 0).getDate())}` }
+  return {
+    dari: `${bulan}-01`,
+    sampai: `${bulan}-${pad2(new Date(y, m, 0).getDate())}`,
+  }
 }
 
-export function ProductReportsPage({
-  currentUser,
-  role: forcedRole,
-}: {
+export function ProductReportsPage({ currentUser, role: forcedRole }: {
   currentUser?: AppUser
   role?: Role
 } = {}) {
@@ -167,9 +188,14 @@ export function ProductReportsPage({
   )
   const [wa, setWa] = useState(false)
   const [cari, setCari] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">("Semua")
-  const [activeTab, setActiveTab] = useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
-  const [txList, setTxList] = useState<ProductTransactionRecord[]>(INITIAL_PRODUCT_TRANSACTIONS)
+  const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">(
+    "Semua",
+  )
+  const [activeTab, setActiveTab] =
+    useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
+  const [txList, setTxList] = useState<ProductTransactionRecord[]>(
+    INITIAL_PRODUCT_TRANSACTIONS,
+  )
   const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
   const [tanggal, setTanggal] = useState(() => isoLokal(new Date()))
   const [bulan, setBulan] = useState(() => {
@@ -180,7 +206,10 @@ export function ProductReportsPage({
   const [liveError, setLiveError] = useState("")
   const [fetching, setFetching] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
-  const isKapsterView = role === "Kapster" || forcedRole === "Kapster" || currentUser?.role === "Kapster"
+  const isKapsterView =
+    role === "Kapster" ||
+    forcedRole === "Kapster" ||
+    currentUser?.role === "Kapster"
 
   const rentang = rentangProduk(mode, tanggal, bulan)
 
@@ -216,7 +245,7 @@ export function ProductReportsPage({
   }, [rentang.dari, rentang.sampai, reloadKey])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
-    const per: Record<string, { unit: number; omzet: number }> = {}
+    const per: Record<string, { unit: number omzet: number }> = {}
     txList
       .filter((tx) => tx.status === "Lunas")
       .forEach((tx) => {
@@ -238,7 +267,10 @@ export function ProductReportsPage({
     const q = cari.trim().toLowerCase()
     return txList.filter(
       (tx) =>
-        !q || [tx.id, tx.product, tx.barber, tx.seller].some((v) => v.toLowerCase().includes(q)),
+        !q ||
+        [tx.id, tx.product, tx.barber, tx.seller].some((v) =>
+          v.toLowerCase().includes(q),
+        ),
     )
   }, [txList, cari])
 
@@ -246,8 +278,32 @@ export function ProductReportsPage({
     berkas: `laporan-produk-${rentang.dari}_${rentang.sampai}`,
     judul: "Laporan Produk",
     keterangan: `Periode ${rentang.dari} s/d ${rentang.sampai} · transaksi lunas ${validTransactions.length} · batal tidak dihitung dalam total`,
-    kolom: ["Nota", "Waktu", "Produk", "Qty", "Kapster", "Pemasok", "Total Omzet", "Bagian Kapster", "Bagian Pemasok", "Bagian Eastville", "Status"],
-    baris: filteredTransactions.map((tx) => [tx.id, tx.time, tx.product, tx.qty, tx.barber, tx.seller, tx.totalOmzet, tx.barberShare, tx.sellerShare, tx.eastvilleShare, tx.status]),
+    kolom: [
+      "Nota",
+      "Waktu",
+      "Produk",
+      "Qty",
+      "Kapster",
+      "Pemasok",
+      "Total Omzet",
+      "Bagian Kapster",
+      "Bagian Pemasok",
+      "Bagian Eastville",
+      "Status",
+    ],
+    baris: filteredTransactions.map((tx) => [
+      tx.id,
+      tx.time,
+      tx.product,
+      tx.qty,
+      tx.barber,
+      tx.seller,
+      tx.totalOmzet,
+      tx.barberShare,
+      tx.sellerShare,
+      tx.eastvilleShare,
+      tx.status,
+    ]),
   })
 
   const totalOmzet = useMemo(
@@ -285,7 +341,10 @@ export function ProductReportsPage({
       <div className="content">
         <DemoNotice live={live} error={liveError} />
         <p>Laporan produk gagal dimuat: {liveError}</p>
-        <Button className="primary-button" onClick={() => setReloadKey((k) => k + 1)}>
+        <Button
+          className="primary-button"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
           Coba lagi
         </Button>
       </div>
@@ -318,20 +377,41 @@ export function ProductReportsPage({
         <DemoNotice live={live} error={liveError} />
         <div className="segmented full">
           {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
-            <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
+            <Button
+              className={mode === m ? "active" : ""}
+              key={m}
+              onClick={() => setMode(m)}
+            >
               {m}
             </Button>
           ))}
         </div>
         {mode === "Bulanan" ? (
-          <input type="month" max={TANGGAL_MAKS().slice(0, 7)} min={TANGGAL_MULAI.slice(0, 7)} value={bulan} onChange={(e) => e.target.value && setBulan(e.target.value)} />
+          <div className="commission-month-shell">
+            <span className="commission-month-label">Periode komisi</span>
+            <MonthPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={bulan}
+              onChange={(b) => b && setBulan(b)}
+            />
+          </div>
         ) : (
-          <CalendarPicker max={TANGGAL_MAKS()} min={TANGGAL_MULAI} value={tanggal} onChange={(d) => d && setTanggal(d)} />
+          <CalendarPicker
+            max={TANGGAL_MAKS()}
+            min={TANGGAL_MULAI}
+            value={tanggal}
+            onChange={(d) => d && setTanggal(d)}
+          />
         )}
         {(() => {
           const lunas = live ? txList.filter((t) => t.status === "Lunas") : null
           const perProduk: Record<string, number> = {}
-          lunas?.forEach((t) => (perProduk[t.product] = (perProduk[t.product] ?? 0) + t.barberShare))
+          lunas?.forEach(
+            (t) =>
+              (perProduk[t.product] =
+                (perProduk[t.product] ?? 0) + t.barberShare),
+          )
           const daftar: [string, number][] = lunas
             ? Object.entries(perProduk).sort((x, y) => y[1] - x[1])
             : [
@@ -343,24 +423,33 @@ export function ProductReportsPage({
           return (
             <>
               <article className="my-salary-hero">
-                <span>Komisi produk saya</span>
-                <strong>{lunas ? rupiah(lunas.reduce((n, t) => n + t.barberShare, 0)) : "Rp 520.000"}</strong>
+                <span>Komisi</span>
+                <strong>
+                  {lunas
+                    ? rupiah(lunas.reduce((n, t) => n + t.barberShare, 0))
+                    : "Rp 520.000"}
+                </strong>
                 <p>
                   {lunas
                     ? `${lunas.reduce((n, t) => n + t.qty, 0)} unit · ${new Set(lunas.map((t) => t.id)).size} transaksi`
                     : "44 unit · 18 transaksi"}
                 </p>
-                <i><b /></i>
+                <i>
+                  <b />
+                </i>
                 <small>
                   {!live && getToken() && !liveError
                     ? "Memuat data dari server..."
                     : live
-                    ? "Dihitung live dari transaksi selesai"
-                    : "Data contoh · belum terhubung ke server"}
+                      ? "Dihitung saat transaksi selesai"
+                      : "Data contoh · belum terhubung ke server"}
                 </small>
               </article>
               <section className="panel customer-list">
-                <PageTitle eyebrow="Penjualan pribadi" title="Komisi per produk" />
+                <PageTitle
+                  eyebrow="Penjualan pribadi"
+                  title="Komisi per produk"
+                />
                 {daftar.map((x) => (
                   <div key={x[0]}>
                     <i>
@@ -371,7 +460,9 @@ export function ProductReportsPage({
                   </div>
                 ))}
                 {lunas && daftar.length === 0 && (
-                  <p style={{ color: "var(--slate)", padding: "12px 0" }}>Belum ada penjualan produk pada periode ini.</p>
+                  <p style={{ color: "var(--slate)", padding: "12px 0" }}>
+                    Belum ada penjualan produk pada periode ini.
+                  </p>
                 )}
               </section>
             </>
@@ -394,7 +485,11 @@ export function ProductReportsPage({
         <div className="report-filter-row">
           <div className="segmented">
             {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
-              <Button className={mode === m ? "active" : ""} key={m} onClick={() => setMode(m)}>
+              <Button
+                className={mode === m ? "active" : ""}
+                key={m}
+                onClick={() => setMode(m)}
+              >
                 {m}
               </Button>
             ))}
@@ -428,8 +523,18 @@ export function ProductReportsPage({
           </div>
         )}
         <div className="report-export-buttons">
-          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>Excel</Button>
-          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>PDF</Button>
+          <Button
+            className="secondary-button"
+            onClick={() => eksporExcel(tabelEkspor())}
+          >
+            Excel
+          </Button>
+          <Button
+            className="secondary-button"
+            onClick={() => eksporPdf(tabelEkspor())}
+          >
+            PDF
+          </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
           </Button>
@@ -448,21 +553,29 @@ export function ProductReportsPage({
           label="Total Komisi Kapster"
           tone="brass"
           value={rupiah(totalBarber)}
-          detail={`${totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0}% bagian kapster`}
+          detail={`${
+            totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0
+          }% bagian kapster`}
         />
         <Kpi
           icon="home"
           label="Total Bagian Pemasok"
           tone="amber"
           value={rupiah(totalSeller)}
-          detail={`${totalOmzet > 0 ? ((totalSeller / totalOmzet) * 100).toFixed(1) : 0}% bagian pemasok`}
+          detail={`${
+            totalOmzet > 0 ? ((totalSeller / totalOmzet) * 100).toFixed(1) : 0
+          }% bagian pemasok`}
         />
         <Kpi
           icon="wallet"
           label="Total Bagian Eastville"
           tone="dark"
           value={rupiah(totalEastville)}
-          detail={`${totalOmzet > 0 ? ((totalEastville / totalOmzet) * 100).toFixed(1) : 0}% sisa barbershop`}
+          detail={`${
+            totalOmzet > 0
+              ? ((totalEastville / totalOmzet) * 100).toFixed(1)
+              : 0
+          }% sisa barbershop`}
         />
       </div>
 
@@ -509,7 +622,6 @@ export function ProductReportsPage({
                 onChange={(e) => setCari(e.target.value)}
               />
             </div>
-
           </div>
 
           <div className="product-tx-table-wrap">
@@ -526,7 +638,9 @@ export function ProductReportsPage({
             {filteredTransactions.map((tx) => (
               <div
                 key={tx.id}
-                className={`product-tx-row ${tx.status === "Batal" ? "voided" : ""}`}
+                className={`product-tx-row ${
+                  tx.status === "Batal" ? "voided" : ""
+                }`}
               >
                 <span className="tx-meta-col">
                   <strong>{tx.id}</strong>
@@ -541,24 +655,30 @@ export function ProductReportsPage({
                   {rupiah(tx.totalOmzet)}
                 </strong>
                 <span
-                  className={`share-cell barber-cell ${tx.status === "Batal" ? "strike-text" : ""}`}
+                  className={`share-cell barber-cell ${
+                    tx.status === "Batal" ? "strike-text" : ""
+                  }`}
                 >
                   {rupiah(tx.barberShare)}
                 </span>
                 <span
-                  className={`share-cell seller-cell ${tx.status === "Batal" ? "strike-text" : ""}`}
+                  className={`share-cell seller-cell ${
+                    tx.status === "Batal" ? "strike-text" : ""
+                  }`}
                 >
                   {rupiah(tx.sellerShare)}
                 </span>
                 <span
-                  className={`share-cell eastville-cell ${tx.status === "Batal" ? "strike-text" : ""}`}
+                  className={`share-cell eastville-cell ${
+                    tx.status === "Batal" ? "strike-text" : ""
+                  }`}
                 >
                   {rupiah(tx.eastvilleShare)}
                 </span>
                 {tx.status === "Batal" && (
                   <div className="void-reason-note">
-                    <Icon name="alert" /> Dibatalkan oleh {tx.voidBy} · {tx.voidAt}:{" "}
-                    {tx.voidReason}
+                    <Icon name="alert" /> Dibatalkan oleh {tx.voidBy} ·{" "}
+                    {tx.voidAt}: {tx.voidReason}
                   </div>
                 )}
               </div>
@@ -566,7 +686,6 @@ export function ProductReportsPage({
           </div>
         </section>
       )}
-
 
       {activeTab === "ringkasan" && (
         <>
@@ -618,22 +737,32 @@ export function ProductReportsPage({
             </div>
           </section>
           <div className="product-detail-grid">
-            <ProductDetail rows={live ? ringkas((tx) => tx.product) : undefined} />
+            <ProductDetail
+              rows={live ? ringkas((tx) => tx.product) : undefined}
+            />
             <CompactDetail
               title="Per kapster"
               icon="user"
-              rows={live ? ringkas((tx) => tx.barber) : [
-                ["Seva", "44 unit", "Rp 520.000"],
-                ["Tata", "36 unit", "Rp 420.000"],
-              ]}
+              rows={
+                live
+                  ? ringkas((tx) => tx.barber)
+                  : [
+                      ["Seva", "44 unit", "Rp 520.000"],
+                      ["Tata", "36 unit", "Rp 420.000"],
+                    ]
+              }
             />
             <CompactDetail
               title="Per pemasok"
               icon="home"
-              rows={live ? ringkas((tx) => tx.seller) : [
-                ["HAIRPRO Official", "118 unit", "Rp 5.840.000"],
-                ["Mitra Grooming", "29 unit", "Rp 1.160.000"],
-              ]}
+              rows={
+                live
+                  ? ringkas((tx) => tx.seller)
+                  : [
+                      ["HAIRPRO Official", "118 unit", "Rp 5.840.000"],
+                      ["Mitra Grooming", "29 unit", "Rp 1.160.000"],
+                    ]
+              }
             />
           </div>
         </>
@@ -642,7 +771,11 @@ export function ProductReportsPage({
         <WhatsAppDialog
           onClose={() => setWa(false)}
           title="Laporan Produk"
-          text={`Periode: ${rentang.dari === rentang.sampai ? rentang.dari : `${rentang.dari} s/d ${rentang.sampai}`}\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi kapster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
+          text={`Periode: ${
+            rentang.dari === rentang.sampai
+              ? rentang.dari
+              : `${rentang.dari} s/d ${rentang.sampai}`
+          }\nTotal Omzet produk: ${rupiah(totalOmzet)}\nTotal Komisi kapster: ${rupiah(totalBarber)}\nTotal Bagian pemasok: ${rupiah(totalSeller)}\nTotal Bagian Eastville: ${rupiah(totalEastville)}`}
         />
       )}
     </div>

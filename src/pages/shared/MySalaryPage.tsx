@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  LoadingState,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import { apiGaji, getToken, HitungGajiResult } from "../../api"
-
 
 export function MySalaryPage() {
   const punyaToken = Boolean(getToken())
@@ -17,13 +21,15 @@ export function MySalaryPage() {
     apiGaji
       .hitung()
       .then((res) => setData(res))
-      .catch((e) => setError(e instanceof Error ? e.message : "Gagal memuat data gaji."))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Gagal memuat data gaji."),
+      )
       .finally(() => setLoading(false))
   }
 
   useEffect(() => {
     fetchData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (!punyaToken) {
@@ -61,24 +67,35 @@ export function MySalaryPage() {
         eyebrow="Pendapatan pribadi"
         title="Gaji Saya"
         action={
-          <Button className="secondary-button" onClick={fetchData} disabled={loading}>
+          <Button
+            className="secondary-button"
+            onClick={fetchData}
+            disabled={loading}
+          >
             <Icon name="history" /> {loading ? "Memperbarui..." : "Refresh"}
           </Button>
         }
       />
 
       <article className="my-salary-hero">
-        <span>Komisi periode berjalan</span>
+        <span>Komisi</span>
         <strong>{rupiah(data.totalKomisi)}</strong>
         <p>{data.transaksiSelesai} transaksi selesai</p>
         <i>
           <b />
         </i>
-        <small>{loading ? "Memperbarui dari server..." : "Dihitung live dari transaksi selesai"}</small>
+        <small>
+          {loading
+            ? "Memperbarui dari server..."
+            : "Dihitung saat transaksi selesai"}
+        </small>
       </article>
 
       <section className="panel salary-breakdown">
-        <PageTitle eyebrow="Perincian pendapatan" title="Rincian gaji & kasbon" />
+        <PageTitle
+          eyebrow="Perincian pendapatan"
+          title="Rincian gaji & kasbon"
+        />
         <div key="komisi">
           <span>
             <Icon name="cashier" />
@@ -119,7 +136,8 @@ export function MySalaryPage() {
       )}
 
       <div className="privacy" style={{ marginTop: 20 }}>
-        <Icon name="lock" /> Hanya data komisi dan transaksi milik akun Anda yang ditampilkan.
+        <Icon name="lock" /> Hanya data komisi dan transaksi milik akun Anda
+        yang ditampilkan.
       </div>
     </div>
   )

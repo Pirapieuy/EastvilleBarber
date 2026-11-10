@@ -1,7 +1,13 @@
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, CalendarPicker, LoadingState, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  LoadingState,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import { apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
@@ -59,9 +65,7 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     id: "INV-291026-0083",
     time: "09.46",
     date: "29 Okt 2026",
-    items: [
-      { name: "Hair Coloring", qty: 1, price: 120000, type: "Layanan" },
-    ],
+    items: [{ name: "Hair Coloring", qty: 1, price: 120000, type: "Layanan" }],
     barber: "Tata",
     method: "QRIS",
     commission: 48000,
@@ -95,9 +99,7 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     id: "INV-291026-0041",
     time: "08.51",
     date: "29 Okt 2026",
-    items: [
-      { name: "Haircut + Cuci", qty: 1, price: 50000, type: "Layanan" },
-    ],
+    items: [{ name: "Haircut + Cuci", qty: 1, price: 50000, type: "Layanan" }],
     barber: "Seva",
     method: "Tunai",
     commission: 20000,
@@ -259,7 +261,10 @@ function TransactionDetailBody({
               <small>Rincian Komisi</small>
               <strong>{rupiah(selected.commission)}</strong>
               <span className="commission-hint">
-                {(selected.commissionNote || "").replace("(lembur)", "").replace("50%", "").trim()}
+                {(selected.commissionNote || "")
+                  .replace("(lembur)", "")
+                  .replace("50%", "")
+                  .trim()}
               </span>
             </div>
           )}
@@ -267,10 +272,7 @@ function TransactionDetailBody({
       </div>
 
       <div className="detail-actions-group">
-        <Button
-          className="secondary-button"
-          onClick={onPrintReceipt}
-        >
+        <Button className="secondary-button" onClick={onPrintReceipt}>
           <Icon name="print" /> Cetak Struk
         </Button>
       </div>
@@ -278,10 +280,7 @@ function TransactionDetailBody({
   )
 }
 
-export function HistoryPage({
-  currentUser,
-  role,
-}: {
+export function HistoryPage({ currentUser, role }: {
   currentUser?: AppUser
   role?: Role
 } = {}) {
@@ -289,7 +288,9 @@ export function HistoryPage({
   const [txList, setTxList] = useState<HistoryTransactionRecord[]>(
     INITIAL_HISTORY_TRANSACTIONS,
   )
-  const [selectedId, setSelectedId] = useState(INITIAL_HISTORY_TRANSACTIONS[0].id)
+  const [selectedId, setSelectedId] = useState(
+    INITIAL_HISTORY_TRANSACTIONS[0].id,
+  )
   const [action, setAction] = useState<null | "void" | "restore">(null)
   const [showReceipt, setShowReceipt] = useState(false)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
@@ -303,20 +304,25 @@ export function HistoryPage({
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
   ).sort()
   const visibleTx = txList.filter(
-    (tx) => barberFilter === "Semua kapster" || tx.barber.split(", ").includes(barberFilter),
+    (tx) =>
+      barberFilter === "Semua kapster" ||
+      tx.barber.split(", ").includes(barberFilter),
   )
 
   const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
 
-
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return apiTransaksi.list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {}).then((rows) => {
-      const list = rows as HistoryTransactionRecord[]
-      setTxList(list)
-      setSelectedId((cur) => (list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? "")))
-      setLive(true)
-    })
+    return apiTransaksi
+      .list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {})
+      .then((rows) => {
+        const list = rows as HistoryTransactionRecord[]
+        setTxList(list)
+        setSelectedId((cur) =>
+          list.some((t) => t.id === cur) ? cur : (list[0]?.id ?? ""),
+        )
+        setLive(true)
+      })
   }
   useEffect(() => {
     if (!getToken()) {
@@ -333,7 +339,8 @@ export function HistoryPage({
     if (live && selected) {
       // Error dilempar ke dialog (ditampilkan inline, dialog tetap terbuka)
       if (action === "void") await apiTransaksi.batalkan(selected.id, reason)
-      else if (action === "restore") await apiTransaksi.pulihkan(selected.id, reason)
+      else if (action === "restore")
+        await apiTransaksi.pulihkan(selected.id, reason)
       await loadLive()
       return
     }
@@ -379,13 +386,23 @@ export function HistoryPage({
   }
 
   if (showReceipt && selected) {
-    const subtotal = selected.subtotal ?? selected.items.reduce((s, it) => s + it.price * it.qty, 0)
+    const subtotal =
+      selected.subtotal ??
+      selected.items.reduce((s, it) => s + it.price * it.qty, 0)
     // Server lama belum mengirim rincian bayar: pakai perkiraan dari metode.
     const adaRincian = selected.bayarTunai !== undefined
-    const tunai = adaRincian ? (selected.bayarTunai ?? 0) : selected.method === "QRIS" ? 0 : selected.total
+    const tunai = adaRincian
+      ? (selected.bayarTunai ?? 0)
+      : selected.method === "QRIS"
+        ? 0
+        : selected.total
     const qrisBayar = adaRincian
       ? (selected.bayarQris ?? 0)
-      : selected.method === "Tunai" ? 0 : selected.method === "QRIS" ? selected.total : selected.total / 2
+      : selected.method === "Tunai"
+        ? 0
+        : selected.method === "QRIS"
+          ? selected.total
+          : selected.total / 2
     const cartLines: CartLine[] = selected.items.map((it, idx) => ({
       id: idx + 100,
       lineId: `${selected.id}-${idx}`,
@@ -429,7 +446,10 @@ export function HistoryPage({
           max={TANGGAL_MAKS()}
           min={TANGGAL_MULAI}
         />
-        <select onChange={(e) => setBarberFilter(e.target.value)} value={barberFilter}>
+        <select
+          onChange={(e) => setBarberFilter(e.target.value)}
+          value={barberFilter}
+        >
           <option>Semua kapster</option>
           {barberOptions.map((barber) => (
             <option key={barber}>{barber}</option>
@@ -451,7 +471,10 @@ export function HistoryPage({
               key={tx.id}
               onClick={() => {
                 setSelectedId(tx.id)
-                if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+                if (
+                  typeof window !== "undefined" &&
+                  window.innerWidth <= 1024
+                ) {
                   setMobileDetailOpen(true)
                 }
               }}
@@ -463,8 +486,15 @@ export function HistoryPage({
                 </small>
               </div>
               <span className="tx-cell-kapster">{tx.barber}</span>
-              <span className="tx-cell-items" title={tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}>
-                {tx.items.map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`).join(", ")}
+              <span
+                className="tx-cell-items"
+                title={tx.items
+                  .map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`)
+                  .join(", ")}
+              >
+                {tx.items
+                  .map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`)
+                  .join(", ")}
               </span>
             </Button>
           ))}
@@ -503,7 +533,10 @@ export function HistoryPage({
       </div>
 
       {mobileDetailOpen && selected && (
-        <div className="modal-overlay mobile-only-modal" onClick={() => setMobileDetailOpen(false)}>
+        <div
+          className="modal-overlay mobile-only-modal"
+          onClick={() => setMobileDetailOpen(false)}
+        >
           <div
             className="transaction-modal-box"
             onClick={(e) => e.stopPropagation()}

@@ -13,7 +13,9 @@ export function Login({
   const [pin, setPin] = useState("")
   const [show, setShow] = useState(false)
   const [error, setError] = useState("")
-  const [view, setView] = useState<"login" | "email" | "sent" | "reset">("login")
+  const [view, setView] = useState<"login" | "email" | "sent" | "reset">(
+    "login",
+  )
   const [email, setEmail] = useState("")
   const [newPin, setNewPin] = useState("")
   const [resetToken, setResetToken] = useState("")
@@ -43,10 +45,7 @@ export function Login({
         username: user.username,
         role: user.role,
       }
-      const targetPage: Page =
-        user.role === "Kasir"
-          ? "cashier"
-          : "dashboard"
+      const targetPage: Page = user.role === "Kasir" ? "cashier" : "dashboard"
       onLogin(appUser, targetPage)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Login gagal.")
@@ -76,13 +75,23 @@ export function Login({
             </div>
             {view === "email" && (
               <>
-                <Button className="auth-back" onClick={() => { setError(""); setView("login") }}>
+                <Button
+                  className="auth-back"
+                  onClick={() => {
+                    setError("")
+                    setView("login")
+                  }}
+                >
                   <Icon name="back" /> Kembali
                 </Button>
                 <p className="eyebrow">Lupa PIN</p>
                 <h2>Temukan akun Anda</h2>
                 <p>Masukkan email yang terdaftar pada data karyawan.</p>
-                {error && <div className="danger-banner" style={{ margin: "10px 0" }}><Icon name="alert" /> {error}</div>}
+                {error && (
+                  <div className="danger-banner" style={{ margin: "10px 0" }}>
+                    <Icon name="alert" /> {error}
+                  </div>
+                )}
                 <label>
                   <span>Email</span>
                   <div className="input-shell">
@@ -102,17 +111,29 @@ export function Login({
                     setError("")
                     setLoading(true)
                     try {
-                      const res = await apiAuth.forgotPin(email.trim().toLowerCase())
+                      const res = await apiAuth.forgotPin(
+                        email.trim().toLowerCase(),
+                      )
                       setResetToken(res.resetToken)
                       setView("sent")
                     } catch (e) {
-                      setError(e instanceof Error ? e.message : "Gagal meminta tautan reset.")
+                      setError(
+                        e instanceof Error
+                          ? e.message
+                          : "Gagal meminta tautan reset.",
+                      )
                     } finally {
                       setLoading(false)
                     }
                   }}
                 >
-                  {loading ? "Mengirim..." : <>Kirim tautan reset <Icon name="arrow" /></>}
+                  {loading ? (
+                    "Mengirim..."
+                  ) : (
+                    <>
+                      Kirim tautan reset <Icon name="arrow" />
+                    </>
+                  )}
                 </Button>
               </>
             )}
@@ -128,13 +149,19 @@ export function Login({
                 </p>
                 <Button
                   className="primary-button"
-                  onClick={() => { setError(""); setView("reset") }}
+                  onClick={() => {
+                    setError("")
+                    setView("reset")
+                  }}
                 >
                   Lanjut Atur PIN Baru
                 </Button>
                 <Button
                   className="text-button"
-                  onClick={() => { setError(""); setView("email") }}
+                  onClick={() => {
+                    setError("")
+                    setView("email")
+                  }}
                 >
                   Gunakan email lain
                 </Button>
@@ -147,7 +174,11 @@ export function Login({
                 <p>
                   Gunakan enam digit yang mudah Anda ingat tetapi sulit ditebak.
                 </p>
-                {error && <div className="danger-banner" style={{ margin: "10px 0" }}><Icon name="alert" /> {error}</div>}
+                {error && (
+                  <div className="danger-banner" style={{ margin: "10px 0" }}>
+                    <Icon name="alert" /> {error}
+                  </div>
+                )}
                 <label>
                   <span>PIN baru</span>
                   <div className="input-shell">
@@ -174,12 +205,22 @@ export function Login({
                     setError("")
                     setLoading(true)
                     try {
-                      await apiAuth.resetPin(email.trim().toLowerCase(), resetToken, newPin)
-                      alert("PIN berhasil diubah! Silakan login dengan PIN baru.")
+                      await apiAuth.resetPin(
+                        email.trim().toLowerCase(),
+                        resetToken,
+                        newPin,
+                      )
+                      alert(
+                        "PIN berhasil diubah! Silakan login dengan PIN baru.",
+                      )
                       setPin("")
                       setView("login")
                     } catch (e) {
-                      setError(e instanceof Error ? e.message : "Gagal menyimpan PIN baru.")
+                      setError(
+                        e instanceof Error
+                          ? e.message
+                          : "Gagal menyimpan PIN baru.",
+                      )
                     } finally {
                       setLoading(false)
                     }

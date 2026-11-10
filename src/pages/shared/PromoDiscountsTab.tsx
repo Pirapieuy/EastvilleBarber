@@ -8,7 +8,9 @@ import {
 } from "../../utils/promoStorage"
 
 export function PromoDiscountsTab() {
-  const [promos, setPromos] = useState<PromoDiscount[]>(() => getPromoDiscounts())
+  const [promos, setPromos] = useState<PromoDiscount[]>(() =>
+    getPromoDiscounts(),
+  )
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -87,9 +89,9 @@ export function PromoDiscountsTab() {
       p.id === id
         ? {
             ...p,
-            status: (p.status === "Aktif" ? "Nonaktif" : "Aktif") as
-              | "Aktif"
-              | "Nonaktif",
+            status: (p.status === "Aktif"
+              ? "Nonaktif"
+              : "Aktif") as "Aktif" | "Nonaktif",
           }
         : p,
     )
@@ -213,7 +215,11 @@ export function PromoDiscountsTab() {
                   <Button
                     className="text-button"
                     onClick={() => handleDelete(p.id)}
-                    style={{ fontSize: 12, padding: "4px 8px", color: "#dc2626" }}
+                    style={{
+                      fontSize: 12,
+                      padding: "4px 8px",
+                      color: "#dc2626",
+                    }}
                   >
                     <Icon name="trash" />
                   </Button>
@@ -226,7 +232,11 @@ export function PromoDiscountsTab() {
 
       {modalOpen && (
         <div className="modal-overlay">
-          <form className="simple-modal" onSubmit={handleSave} style={{ maxWidth: 460 }}>
+          <form
+            className="simple-modal"
+            onSubmit={handleSave}
+            style={{ maxWidth: 460 }}
+          >
             <header>
               <h2>{editingId ? "Edit Diskon Event" : "Tambah Diskon Event"}</h2>
               <Button type="button" onClick={() => setModalOpen(false)}>
@@ -285,7 +295,9 @@ export function PromoDiscountsTab() {
               <span>Status</span>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as "Aktif" | "Nonaktif")}
+                onChange={(e) =>
+                  setStatus(e.target.value as "Aktif" | "Nonaktif")
+                }
               >
                 <option value="Aktif">Aktif</option>
                 <option value="Nonaktif">Nonaktif</option>

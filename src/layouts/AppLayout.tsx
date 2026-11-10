@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { Icon } from "../components/common/Icon"
 import { Button } from "../components/common/UI"
 import { SidebarKasir } from "./sidebars/SidebarKasir"
@@ -57,6 +57,7 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   attendance: "Absensi & Jadwal Saya",
   "attendance-admin": "Jam Kerja",
   "attendance-tim": "Jam Kerja",
+  AbsensiKapster: "Absensi Kapster",
   JadwalAbsensi: "Jam Kerja",
   "jadwal-absensi": "Jam Kerja",
   JejakAudit: "Jejak Audit",
@@ -82,9 +83,28 @@ export function AppLayout({
   const [mobileNav, setMobileNav] = useState(false)
 
   const roleKey = toRoleKey(currentRole)
+
+  useEffect(() => {
+    if (roleKey === "owner") return
+
+    const responsiveViewport = window.matchMedia("(max-width: 1024px)")
+    const closeDrawerOnResponsiveEntry = (event: MediaQueryListEvent) => {
+      if (event.matches) setMobileNav(false)
+    }
+
+    responsiveViewport.addEventListener("change", closeDrawerOnResponsiveEntry)
+    return () =>
+      responsiveViewport.removeEventListener(
+        "change",
+        closeDrawerOnResponsiveEntry,
+      )
+  }, [roleKey])
+
   const pageTitle = PAGE_TITLE_MAP[activePage] || "Eastville"
   const firstName = userName ? userName.split(" ")[0] : ""
-  const greeting = firstName ? `Selamat ${getSapaan()}, ${firstName}` : pageTitle
+  const greeting = firstName
+    ? `Selamat ${getSapaan()}, ${firstName}`
+    : pageTitle
 
   function handleNavigate(page: string) {
     onNavigate(page)

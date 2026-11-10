@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { CalendarPicker, LoadingState, PageTitle } from "../../components/common/UI"
+import {
+  CalendarPicker,
+  LoadingState,
+  PageTitle,
+} from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
 
 const DEMO_LOGS: string[][] = [
@@ -92,11 +96,13 @@ function parseAuditRow(row: AuditLogRow): string[] {
         month: "short",
         year: "numeric",
       })
-      const jamStr = d.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }).replace(".", ":")
+      const jamStr = d
+        .toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+        .replace(".", ":")
       waktuStr = `${tglStr}, ${jamStr}`
     }
   }
@@ -105,7 +111,11 @@ function parseAuditRow(row: AuditLogRow): string[] {
   if (!waktuStr && row.tanggal && /^\d{4}-\d{2}-\d{2}$/.test(row.tanggal)) {
     const d = new Date(row.tanggal + "T12:00:00")
     const tglStr = !isNaN(d.getTime())
-      ? d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
+      ? d.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
       : row.tanggal
     const jamClean = row.jam ? row.jam.replace(".", ":") : ""
     waktuStr = jamClean ? `${tglStr}, ${jamClean}` : tglStr
@@ -118,7 +128,10 @@ function parseAuditRow(row: AuditLogRow): string[] {
       waktuStr = String(row.waktu)
     } else {
       // Tambahkan tahun 2026 agar lengkap
-      const thn = row.tanggal && row.tanggal.length >= 4 ? row.tanggal.slice(0, 4) : "2026"
+      const thn =
+        row.tanggal && row.tanggal.length >= 4
+          ? row.tanggal.slice(0, 4)
+          : "2026"
       const parts = String(row.waktu).split(" ")
       if (parts.length >= 3) {
         // e.g. "2 Nov 15.32" -> "2 Nov 2026, 15:32"
@@ -228,7 +241,8 @@ export function AuditPage() {
       <div className="append-only-note">
         <Icon name="lock" />
         <span>
-          <strong>Catatan Keamanan Permanen</strong>Data terlindungi dan tidak dapat diubah atau dihapus.
+          <strong>Catatan Keamanan Permanen</strong>Data terlindungi dan tidak
+          dapat diubah atau dihapus.
         </span>
       </div>
       <section className="panel audit-list">
@@ -315,4 +329,3 @@ export function AuditPage() {
 }
 
 export default AuditPage
-

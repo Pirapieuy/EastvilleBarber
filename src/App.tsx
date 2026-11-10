@@ -9,6 +9,7 @@ import { LoadingState } from "./components/common/UI"
 import { KasirPOS } from "./pages/kasir/KasirPOS"
 import { RiwayatTransaksi as RiwayatTransaksiKasir } from "./pages/kasir/RiwayatTransaksi"
 import { RekapManual as RekapManualKasir } from "./pages/kasir/RekapManual"
+import { AbsensiKapster } from "./pages/kasir/AbsensiKapster"
 
 // Manajer Pages
 import { BerandaManajer } from "./pages/manajer/BerandaManajer"
@@ -43,7 +44,6 @@ import { BackupData as BackupDataOwner } from "./pages/owner/BackupData"
 import { BerandaKapster } from "./pages/kapster/BerandaKapster"
 import { GajiKomisiSaya } from "./pages/kapster/GajiKomisiSaya"
 import { KomisiProdukSaya } from "./pages/kapster/KomisiProdukSaya"
-import { AbsensiJadwalSaya } from "./pages/kapster/AbsensiJadwalSaya"
 
 const ROLE_DEFAULT_PAGES: Record<Role, string> = {
   Owner: "BerandaOwner",
@@ -56,7 +56,9 @@ export function App() {
   // Mulai dari belum login. Kalau ada token tersimpan, sesi dicek ke server dulu supaya
   // refresh tidak mengeluarkan user yang sah (dan tidak masuk sebagai Owner demo).
   const [loggedIn, setLoggedIn] = useState(false)
-  const [checkingSession, setCheckingSession] = useState(() => Boolean(getToken()))
+  const [checkingSession, setCheckingSession] = useState(() =>
+    Boolean(getToken()),
+  )
   const [currentRole, setCurrentRole] = useState<Role>("Owner")
   const [activePage, setActivePage] = useState<string>("BerandaOwner")
 
@@ -78,7 +80,12 @@ export function App() {
     if (!checkingSession) return
     restoreSession().then((user) => {
       if (user) {
-        setSessionUser({ id: user.id, name: user.name, username: user.username, role: user.role })
+        setSessionUser({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          role: user.role,
+        })
         setCurrentRole(user.role)
         setActivePage(ROLE_DEFAULT_PAGES[user.role])
         setLoggedIn(true)
@@ -123,28 +130,31 @@ export function App() {
       if (activePage === "RekapManual" || activePage === "manual") {
         return <RekapManualKasir />
       }
+      if (activePage === "AbsensiKapster" || activePage === "absensi-kapster") {
+        return <AbsensiKapster />
+      }
       return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
     }
 
     if (roleKey === "manajer") {
       if (activePage === "BerandaManajer" || activePage === "dashboard") {
         return (
-          <BerandaManajer
-            user={currentUser}
-            onNavigate={setActivePage}
-            navigate={setActivePage}
-          />
+          <BerandaManajer onNavigate={setActivePage} navigate={setActivePage} />
         )
       }
       if (activePage === "RiwayatTransaksi" || activePage === "history") {
         return <RiwayatTransaksiManajer currentUser={currentUser} />
       }
-    if (activePage === "LaporanKeuangan" || activePage === "reports") {
-      return <LaporanKeuanganOwner currentUser={currentUser} />
-    }
-    if (activePage === "LaporanProduk" || activePage === "product-reports" || activePage === "laporan-produk") {
-      return <LaporanProdukOwner currentUser={currentUser} />
-    }
+      if (activePage === "LaporanKeuangan" || activePage === "reports") {
+        return <LaporanKeuanganOwner currentUser={currentUser} />
+      }
+      if (
+        activePage === "LaporanProduk" ||
+        activePage === "product-reports" ||
+        activePage === "laporan-produk"
+      ) {
+        return <LaporanProdukOwner currentUser={currentUser} />
+      }
       if (activePage === "Pengeluaran" || activePage === "expenses") {
         return <PengeluaranManajer />
       }
@@ -209,9 +219,6 @@ export function App() {
       ) {
         return <KomisiProdukSaya currentUser={currentUser} />
       }
-      if (activePage === "AbsensiJadwalSaya" || activePage === "attendance") {
-        return <AbsensiJadwalSaya />
-      }
       return (
         <BerandaKapster
           user={currentUser}
@@ -224,10 +231,7 @@ export function App() {
     // Role Owner
     if (activePage === "BerandaOwner" || activePage === "dashboard") {
       return (
-        <BerandaOwner
-          onNavigate={setActivePage}
-          navigate={setActivePage}
-        />
+        <BerandaOwner onNavigate={setActivePage} navigate={setActivePage} />
       )
     }
     if (activePage === "RiwayatTransaksi" || activePage === "history") {
@@ -236,7 +240,11 @@ export function App() {
     if (activePage === "LaporanKeuangan" || activePage === "reports") {
       return <LaporanKeuanganOwner currentUser={currentUser} />
     }
-    if (activePage === "LaporanProduk" || activePage === "product-reports" || activePage === "laporan-produk") {
+    if (
+      activePage === "LaporanProduk" ||
+      activePage === "product-reports" ||
+      activePage === "laporan-produk"
+    ) {
       return <LaporanProdukOwner currentUser={currentUser} />
     }
     if (activePage === "Pengeluaran" || activePage === "expenses") {
@@ -279,12 +287,7 @@ export function App() {
     if (activePage === "BackupData" || activePage === "backup") {
       return <BackupDataOwner />
     }
-    return (
-      <BerandaOwner
-        onNavigate={setActivePage}
-        navigate={setActivePage}
-      />
-    )
+    return <BerandaOwner onNavigate={setActivePage} navigate={setActivePage} />
   }
 
   return (
