@@ -3,8 +3,6 @@ import { Icon } from "../../components/common/Icon"
 import { Button, LoadingState, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiAbsensi, apiKasir, getToken } from "../../api"
-import { DemoNotice } from "../../components/common/DemoNotice"
-import { getPromoDiscounts, PromoDiscount } from "../../utils/promoStorage"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
 import { TANGGAL_MAKS } from "../../utils/tanggal"
 
@@ -16,32 +14,6 @@ export type CatalogItem = {
   stock?: number
   consignment?: boolean
 }
-
-export const catalog: CatalogItem[] = [
-  { id: 1, name: "Haircut", price: 40000, type: "Layanan" },
-  { id: 2, name: "Haircut + Cuci", price: 50000, type: "Layanan" },
-  { id: 3, name: "Shaving", price: 25000, type: "Layanan" },
-  { id: 4, name: "Hair Coloring", price: 120000, type: "Layanan" },
-  { id: 5, name: "Treatment", price: 60000, type: "Layanan" },
-  { id: 6, name: "Free Style Dust", price: 70000, type: "Produk", stock: 3 },
-  { id: 7, name: "Hair Paste Pomade", price: 70000, type: "Produk", stock: 8 },
-  {
-    id: 8,
-    name: "Water Based Pomade",
-    price: 70000,
-    type: "Produk",
-    stock: 5,
-    consignment: true,
-  },
-  {
-    id: 9,
-    name: "Miracle Treatment",
-    price: 70000,
-    type: "Produk",
-    stock: 0,
-    consignment: true,
-  },
-]
 
 export type CartLine = CatalogItem & {
   lineId: string
@@ -291,21 +263,8 @@ export function CashierPage({ currentUser, onNavigate }: {
 } = {}) {
   const [tab, setTab] = useState<"Layanan" | "Produk">("Layanan")
   const [cari, setCari] = useState("")
-  const [selectedBarber, setSelectedBarber] = useState("Budi Santoso")
-  const [cart, setCart] = useState<CartLine[]>([
-    {
-      ...catalog[0],
-      lineId: `${catalog[0].id}-Budi Santoso`,
-      qty: 1,
-      barber: "Budi Santoso",
-    },
-    {
-      ...catalog[2],
-      lineId: `${catalog[2].id}-Budi Santoso`,
-      qty: 1,
-      barber: "Budi Santoso",
-    },
-  ])
+  const [selectedBarber, setSelectedBarber] = useState("")
+  const [cart, setCart] = useState<CartLine[]>([])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState(0)
   const [qrisInput, setQrisInput] = useState(0)
@@ -313,6 +272,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [discount, setDiscount] = useState(0)
   const [kodeDiskon, setKodeDiskon] = useState("")
   const [kodeError, setKodeError] = useState("")
+  const [kodeChecking, setKodeChecking] = useState(false)
   const [kodeTerpakai, setKodeTerpakai] = useState("")
   const [discountReason, setDiscountReason] = useState("")
   const [appliedDiscountPercent, setAppliedDiscountPercent] =
@@ -329,10 +289,8 @@ export function CashierPage({ currentUser, onNavigate }: {
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
-  const [catalogData, setCatalogData] = useState<CatalogItem[]>(catalog)
-  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
-    ["Budi Santoso", "Zhefitra Ananda"].map((name) => ({ name })),
-  )
+  const [catalogData, setCatalogData] = useState<CatalogItem[]>([])
+  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>([])
   const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(new Set())
   const [attendanceTarget, setAttendanceTarget] = useState("")
   const [invoice, setInvoice] = useState<string | undefined>()
@@ -356,7 +314,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
   )
   const punyaToken = !!getToken()
-  const gagalMuat = punyaToken && !live
+  const gagalMuat = !live
 
   useEffect(() => {
     if (!getToken()) {
@@ -448,8 +406,8 @@ export function CashierPage({ currentUser, onNavigate }: {
   async function executeSaveTransaction(): Promise<boolean> {
     if (isTransactionSaved) return true
     if (!live) {
-      setIsTransactionSaved(true)
-      return true
+      setSaveReceiptError("Data kasir belum termuat. Coba lagi sebentar.")
+      return false
     }
     setSaveReceiptError("")
     setSavingReceipt(true)
@@ -509,31 +467,30 @@ export function CashierPage({ currentUser, onNavigate }: {
     }
   }
 
-  /** Terapkan diskon dari kode unik. Kode dibuat owner (menu Layanan & Produk). */
-  function terapkanKode() {
+  /** Terapkan diskon dari kode unik; kode dicocokkan dengan daftar di server. */
+  async function terapkanKode() {
     const kode = kodeDiskon.trim().toUpperCase()
     if (!kode) {
       setKodeError("Masukkan kode diskon.")
       return
     }
-    const hariIni = TANGGAL_MAKS()
-    const promo = getPromoDiscounts().find(
-      (p) =>
-        p.status === "Aktif" &&
-        p.berlakuSampai >= hariIni &&
-        (p.kode ?? "").toUpperCase() === kode,
-    )
-    if (!promo) {
-      setKodeError("Kode tidak ditemukan atau sudah kedaluwarsa.")
-      return
-    }
-    setDiscount(Math.round((total * promo.persen) / 100))
-    setAppliedDiscountPercent(promo.persen)
-    setDiscountReason(promo.nama)
-    setKodeTerpakai(kode)
-    setKodeDiskon("")
+    setKodeChecking(true)
     setKodeError("")
-    setDiscountOpen(false)
+    try {
+      const promo = await apiKasir.cekKode(kode)
+      setDiscount(Math.round((total * promo.persen) / 100))
+      setAppliedDiscountPercent(promo.persen)
+      setDiscountReason(promo.nama)
+      setKodeTerpakai(promo.kode)
+      setKodeDiskon("")
+      setDiscountOpen(false)
+    } catch (e) {
+      setKodeError(
+        e instanceof Error ? e.message : "Kode tidak dapat diperiksa. Coba lagi.",
+      )
+    } finally {
+      setKodeChecking(false)
+    }
   }
 
   const items = catalogData.filter(
@@ -623,12 +580,21 @@ export function CashierPage({ currentUser, onNavigate }: {
     )
   }
 
-  // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
-  const loading = Boolean(getToken()) && !live && !liveError
-  if (loading) {
+  // Data asli sedang dimuat atau gagal dimuat: jangan tampilkan data contoh.
+  if (!live) {
+    if (!liveError || liveError === "belum login ke server (token tidak ada)") {
+      return (
+        <div className="content">
+          <LoadingState message="Memuat kasir…" />
+        </div>
+      )
+    }
     return (
       <div className="content">
-        <LoadingState message="Memuat kasir..." />
+        <div className="payment-result danger" role="alert">
+          <span>Data kasir gagal dimuat: {liveError}</span>
+          <Button onClick={() => setReloadKey((k) => k + 1)}>Coba lagi</Button>
+        </div>
       </div>
     )
   }
@@ -661,7 +627,6 @@ export function CashierPage({ currentUser, onNavigate }: {
           selectedBarber
         }
         invoice={invoice}
-        contoh={!live}
         saving={savingReceipt}
         saveError={saveReceiptError}
         onEdit={() => {
@@ -706,7 +671,6 @@ export function CashierPage({ currentUser, onNavigate }: {
   return (
     <div className="cashier-page">
       <section className="catalog">
-        <DemoNotice live={live} error={liveError} />
         <div className="cashier-heading hidden md:flex">
           <span>Kasir &amp; POS</span>
         </div>
@@ -719,7 +683,7 @@ export function CashierPage({ currentUser, onNavigate }: {
           </div>
           <div className="barber-options">
             {barberList.map(({ id, name: barber }) => {
-              const isAttended = !live || Boolean(id && attendedBarbers.has(id))
+              const isAttended = Boolean(id && attendedBarbers.has(id))
               return (
               <Button
                 className={`barber-btn ${!isAttended ? "disabled" : ""} ${
@@ -1129,7 +1093,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault()
-                          terapkanKode()
+                          void terapkanKode()
                         }
                       }}
                       placeholder="Contoh: JUMAT15"
@@ -1144,10 +1108,10 @@ export function CashierPage({ currentUser, onNavigate }: {
                 </label>
                 <Button
                   className="primary-button"
-                  disabled={!kodeDiskon.trim()}
-                  onClick={terapkanKode}
+                  disabled={!kodeDiskon.trim() || kodeChecking}
+                  onClick={() => void terapkanKode()}
                 >
-                  Terapkan
+                  {kodeChecking ? "Memeriksa…" : "Terapkan"}
                 </Button>
               </div>
             )}

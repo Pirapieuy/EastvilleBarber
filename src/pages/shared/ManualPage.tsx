@@ -1,7 +1,6 @@
 import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
-import { apiKasir, apiTransaksi, getToken } from "../../api"
-import { getPromoDiscounts } from "../../utils/promoStorage"
+import { apiKasir, apiKodeDiskon, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import {
@@ -47,6 +46,9 @@ export function ManualPage() {
   const [cari, setCari] = useState("")
   const [diskon, setDiskon] = useState("")
   const [promoId, setPromoId] = useState("")
+  const [promoList, setPromoList] = useState<
+    { id: string; kode: string; nama: string; persen: number; berlakuSampai: string }[]
+  >([])
   const [pin, setPin] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState("")
@@ -60,6 +62,22 @@ export function ManualPage() {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    apiKodeDiskon
+      .list()
+      .then((rows) =>
+        setPromoList(
+          rows
+            .filter((r) => r.status === "Aktif")
+            .map((r) => ({
+              id: r.id,
+              kode: r.kode,
+              nama: r.nama,
+              persen: Number(r.persen),
+              berlakuSampai: r.berlaku_sampai,
+            })),
+        ),
+      )
+      .catch(() => setPromoList([]))
     Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster()])
       .then(([layanan, produk, kap]) => {
         setItems([
@@ -102,9 +120,7 @@ export function ManualPage() {
     (sum, i) => sum + i.price * (qty[keyOf(i)] ?? 0),
     0,
   )
-  const promoAktif = getPromoDiscounts().filter(
-    (p) => p.status === "Aktif" && p.berlakuSampai >= tanggal,
-  )
+  const promoAktif = promoList.filter((p) => p.berlakuSampai >= tanggal)
   const promo = promoAktif.find((p) => p.id === promoId)
   const diskonNum = promo
     ? Math.round((subtotal * promo.persen) / 100)
@@ -166,7 +182,8 @@ export function ManualPage() {
         diskon: diskonNum,
         bayarTunai: method === "QRIS" ? 0 : cashNum,
         bayarQris: method === "Tunai" ? 0 : qrisNum,
-        pinOtorisasi: diskonNum > 0 && pin ? pin : undefined,
+        kodeDiskon: promo ? promo.kode : undefined,
+        pinOtorisasi: !promo && diskonNum > 0 && pin ? pin : undefined,
         items: selected.map((i) => ({
           tipe: i.tipe,
           refId: i.tipe === "Layanan" ? Number(i.id) : i.id,
@@ -326,15 +343,15 @@ export function ManualPage() {
         <div className="form-grid manual-info-grid">
           {promoAktif.length > 0 && (
             <label>
-              <span>Diskon event (opsional)</span>
+              <span>Kode diskon (opsional)</span>
               <select
                 onChange={(e) => setPromoId(e.target.value)}
                 value={promoId}
               >
-                <option value="">Tanpa diskon event</option>
+                <option value="">Tanpa kode diskon</option>
                 {promoAktif.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.nama} ({p.persen}%)
+                    {p.kode} · {p.nama} ({p.persen}%)
                   </option>
                 ))}
               </select>
@@ -354,7 +371,7 @@ export function ManualPage() {
               </div>
             </label>
           )}
-          {diskonNum > 0 && (
+          {diskonNum > 0 && !promo && (
             <label>
               <span>PIN Owner atau Manajer</span>
               <input

@@ -1,16 +1,48 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
-import {
-  getPromoDiscounts,
-  PromoDiscount,
-  savePromoDiscounts,
-} from "../../utils/promoStorage"
+import { apiKodeDiskon, KodeDiskonRow } from "../../api"
+import { LoadingState } from "../../components/common/UI"
+
+type PromoDiscount = {
+  id: string
+  kode: string
+  nama: string
+  persen: number
+  berlakuSampai: string
+  status: "Aktif" | "Nonaktif"
+  dipakai: number
+}
+
+const dariServer = (r: KodeDiskonRow): PromoDiscount => ({
+  id: r.id,
+  kode: r.kode,
+  nama: r.nama,
+  persen: Number(r.persen),
+  berlakuSampai: r.berlaku_sampai,
+  status: r.status,
+  dipakai: Number(r.dipakai) || 0,
+})
 
 export function PromoDiscountsTab() {
-  const [promos, setPromos] = useState<PromoDiscount[]>(() =>
-    getPromoDiscounts(),
-  )
+  const [promos, setPromos] = useState<PromoDiscount[]>([])
+  const [memuat, setMemuat] = useState(true)
+  const [gagalMuat, setGagalMuat] = useState("")
+  const [menyimpan, setMenyimpan] = useState(false)
+  const [kode, setKode] = useState("")
+
+  function muat() {
+    setMemuat(true)
+    setGagalMuat("")
+    apiKodeDiskon
+      .list()
+      .then((rows) => setPromos(rows.map(dariServer)))
+      .catch((e) =>
+        setGagalMuat(e instanceof Error ? e.message : "Gagal memuat kode diskon."),
+      )
+      .finally(() => setMemuat(false))
+  }
+  useEffect(muat, [])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -26,6 +58,7 @@ export function PromoDiscountsTab() {
 
   function openCreate() {
     setEditingId(null)
+    setKode("")
     setNama("")
     setPersen(10)
     const d = new Date()
@@ -38,6 +71,7 @@ export function PromoDiscountsTab() {
 
   function openEdit(p: PromoDiscount) {
     setEditingId(p.id)
+    setKode(p.kode)
     setNama(p.nama)
     setPersen(p.persen)
     setBerlakuSampai(p.berlakuSampai)
@@ -46,8 +80,25 @@ export function PromoDiscountsTab() {
     setModalOpen(true)
   }
 
-  function handleSave(e: FormEvent) {
+  async function simpanKe(p: Omit<PromoDiscount, "dipakai">) {
+    await apiKodeDiskon.simpan({
+      id: p.id || undefined,
+      kode: p.kode,
+      nama: p.nama,
+      persen: p.persen,
+      berlakuSampai: p.berlakuSampai,
+      status: p.status,
+    })
+    muat()
+  }
+
+  async function handleSave(e: FormEvent) {
     e.preventDefault()
+    const kodeBersih = kode.trim().toUpperCase().replace(/[^A-Z0-9]/g, "")
+    if (kodeBersih.length < 4 || kodeBersih.length > 20) {
+      setError("Kode harus 4-20 huruf atau angka, tanpa spasi.")
+      return
+    }
     if (!nama.trim()) {
       setError("Masukkan keterangan atau nama promo diskon.")
       return
@@ -60,50 +111,44 @@ export function PromoDiscountsTab() {
       setError("Pilih tanggal batas masa berlaku diskon.")
       return
     }
-
-    let updated: PromoDiscount[]
-    if (editingId) {
-      updated = promos.map((p) =>
-        p.id === editingId
-          ? { ...p, nama: nama.trim(), persen, berlakuSampai, status }
-          : p,
-      )
-    } else {
-      const newPromo: PromoDiscount = {
-        id: `prm-${Date.now()}`,
+    setMenyimpan(true)
+    try {
+      await simpanKe({
+        id: editingId ?? "",
+        kode: kodeBersih,
         nama: nama.trim(),
         persen,
         berlakuSampai,
         status,
-      }
-      updated = [newPromo, ...promos]
+      })
+      setModalOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menyimpan kode.")
+    } finally {
+      setMenyimpan(false)
     }
-
-    setPromos(updated)
-    savePromoDiscounts(updated)
-    setModalOpen(false)
   }
 
-  function toggleStatus(id: string) {
-    const updated = promos.map((p) =>
-      p.id === id
-        ? {
-            ...p,
-            status: (p.status === "Aktif"
-              ? "Nonaktif"
-              : "Aktif") as "Aktif" | "Nonaktif",
-          }
-        : p,
-    )
-    setPromos(updated)
-    savePromoDiscounts(updated)
+  async function toggleStatus(id: string) {
+    const p = promos.find((x) => x.id === id)
+    if (!p) return
+    try {
+      await simpanKe({
+        ...p,
+        status: p.status === "Aktif" ? "Nonaktif" : "Aktif",
+      })
+    } catch (err) {
+      setGagalMuat(err instanceof Error ? err.message : "Gagal mengubah status.")
+    }
   }
 
-  function handleDelete(id: string) {
-    if (window.confirm("Hapus promo diskon event ini?")) {
-      const updated = promos.filter((p) => p.id !== id)
-      setPromos(updated)
-      savePromoDiscounts(updated)
+  async function handleDelete(id: string) {
+    if (!window.confirm("Hapus kode diskon ini?")) return
+    try {
+      await apiKodeDiskon.hapus(id)
+      muat()
+    } catch (err) {
+      setGagalMuat(err instanceof Error ? err.message : "Gagal menghapus kode.")
     }
   }
 
@@ -117,6 +162,18 @@ export function PromoDiscountsTab() {
         </Button>
       </div>
 
+      {memuat && <LoadingState message="Memuat kode diskon…" />}
+      {gagalMuat && (
+        <div className="payment-result danger" role="alert">
+          <span>{gagalMuat}</span>
+          <Button onClick={muat}>Coba lagi</Button>
+        </div>
+      )}
+      {!memuat && !gagalMuat && promos.length === 0 && (
+        <p style={{ color: "var(--slate)", fontSize: 13 }}>
+          Belum ada kode diskon. Tekan "Tambah Diskon Event" untuk membuat kode pertama.
+        </p>
+      )}
       <div
         style={{
           display: "grid",
@@ -176,6 +233,9 @@ export function PromoDiscountsTab() {
                 >
                   {p.persen}% OFF
                 </div>
+                <small style={{ color: "var(--slate)", display: "block", marginBottom: 4 }}>
+                  Kode: <strong style={{ letterSpacing: "0.04em" }}>{p.kode}</strong> · dipakai {p.dipakai}x
+                </small>
                 <small style={{ color: "var(--muted)", display: "block" }}>
                   Masa berlaku:{" "}
                   <strong>
@@ -261,10 +321,26 @@ export function PromoDiscountsTab() {
             )}
 
             <label>
-              <span>Masa Berlaku Sampai</span>
-              <CalendarPicker
-                value={berlakuSampai}
-                onChange={setBerlakuSampai}
+              <span>Kode unik</span>
+              <input
+                autoCapitalize="characters"
+                autoComplete="off"
+                maxLength={20}
+                onChange={(e) => setKode(e.target.value.toUpperCase())}
+                placeholder="Contoh: JUMAT15"
+                value={kode}
+              />
+              <small style={{ color: "var(--muted)" }}>
+                Kasir mengetik kode ini untuk mendapat diskon.
+              </small>
+            </label>
+
+            <label>
+              <span>Nama promo</span>
+              <input
+                onChange={(e) => setNama(e.target.value)}
+                placeholder="Contoh: Promo Jumat Berkah"
+                value={nama}
               />
             </label>
 
@@ -312,8 +388,8 @@ export function PromoDiscountsTab() {
               >
                 Batal
               </Button>
-              <Button className="primary-button" type="submit">
-                Simpan Diskon
+              <Button className="primary-button" disabled={menyimpan} type="submit">
+                {menyimpan ? "Menyimpan…" : "Simpan Diskon"}
               </Button>
             </footer>
           </form>
