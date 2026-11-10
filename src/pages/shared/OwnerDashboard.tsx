@@ -46,7 +46,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   const [liveData, setLiveData] = useState<LaporanKeuangan | null>(null)
   // null = data absensi tidak tersedia (modul lain gagal), bukan "tidak ada yang hadir"
   const [liveAbsensi, setLiveAbsensi] = useState<AbsensiRow[] | null>(null)
-  const [kapsterAll, setKapsterAll] = useState<{ id: string nama: string }[]>(
+  const [kapsterAll, setKapsterAll] = useState<{ id: string; nama: string }[]>(
     [],
   )
   const [liveServices, setLiveServices] = useState<DailyServiceItem[]>([])

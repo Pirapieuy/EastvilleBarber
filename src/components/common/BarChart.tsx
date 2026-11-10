@@ -5,7 +5,7 @@ export function BarChart({
   data,
   height = 140,
 }: {
-  data: { label: string value: number }[]
+  data: { label: string; value: number }[]
   height?: number
 }) {
   const max = Math.max(1, ...data.map((d) => d.value))

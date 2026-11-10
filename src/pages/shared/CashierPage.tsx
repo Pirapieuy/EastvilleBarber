@@ -308,7 +308,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
   const [catalogData, setCatalogData] = useState<CatalogItem[]>(catalog)
-  const [barberList, setBarberList] = useState<{ id?: string name: string }[]>(
+  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
     ["Budi Santoso", "Zhefitra Ananda"].map((name) => ({ name })),
   )
   const [invoice, setInvoice] = useState<string | undefined>()
@@ -317,7 +317,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
   const [pinAtasan, setPinAtasan] = useState("")
-  const cartSwipeStart = useRef<{ lineId: string x: number y: number } | null>(
+  const cartSwipeStart = useRef<{ lineId: string; x: number; y: number } | null>(
     null,
   )
   const cartWheelSwipe = useRef<{

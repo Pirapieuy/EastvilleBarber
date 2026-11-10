@@ -245,7 +245,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   }, [rentang.dari, rentang.sampai, reloadKey])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
-    const per: Record<string, { unit: number omzet: number }> = {}
+    const per: Record<string, { unit: number; omzet: number }> = {}
     txList
       .filter((tx) => tx.status === "Lunas")
       .forEach((tx) => {
@@ -649,12 +649,13 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                 <span className="tx-product-col">
                   <strong>{tx.product}</strong>
                 </span>
-                <span>{tx.barber}</span>
-                <span>{tx.seller}</span>
+                <span data-label="Kapster">{tx.barber}</span>
+                <span data-label="Pemasok">{tx.seller}</span>
                 <strong className={tx.status === "Batal" ? "strike-text" : ""}>
                   {rupiah(tx.totalOmzet)}
                 </strong>
                 <span
+                  data-label="Bagian Kapster"
                   className={`share-cell barber-cell ${
                     tx.status === "Batal" ? "strike-text" : ""
                   }`}
@@ -662,6 +663,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                   {rupiah(tx.barberShare)}
                 </span>
                 <span
+                  data-label="Bagian Pemasok"
                   className={`share-cell seller-cell ${
                     tx.status === "Batal" ? "strike-text" : ""
                   }`}
@@ -669,6 +671,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                   {rupiah(tx.sellerShare)}
                 </span>
                 <span
+                  data-label="Bagian Eastville"
                   className={`share-cell eastville-cell ${
                     tx.status === "Batal" ? "strike-text" : ""
                   }`}

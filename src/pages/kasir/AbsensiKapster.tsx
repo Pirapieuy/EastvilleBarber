@@ -20,7 +20,7 @@ type View = "list" | "photo" | "status"
 export function AbsensiKapster() {
   const todayIso = new Date().toISOString().slice(0, 10)
   const [tanggal, setTanggal] = useState(todayIso)
-  const [kapsters, setKapsters] = useState<{ id: string nama: string }[]>([])
+  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([])
   const [absensi, setAbsensi] = useState<AbsensiRow[]>([])
   const [riwayatAbsensi, setRiwayatAbsensi] = useState<AbsensiRow[]>([])
   const [activeTab, setActiveTab] = useState<"absensi" | "riwayat">("absensi")
@@ -137,7 +137,7 @@ export function AbsensiKapster() {
     [statusByUser, tanggal],
   )
 
-  function openKapster(kapster: { id: string nama: string }) {
+  function openKapster(kapster: { id: string; nama: string }) {
     setSelectedKapster(kapster)
     setFotoWajah("")
     setPhotoError("")
