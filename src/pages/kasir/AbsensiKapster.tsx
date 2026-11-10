@@ -608,13 +608,6 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
                   alt={`Foto wajah ${selectedKapster.nama}`}
                   style={{ width: "100%", maxHeight: 300, objectFit: "cover", borderRadius: 12 }}
                 />
-                <Button
-                  className="secondary-button"
-                  onClick={() => setFotoWajah("")}
-                  style={{ marginTop: 8 }}
-                >
-                  Ambil Ulang
-                </Button>
               </div>
             ) : (
               <div className="absensi-camera-wrap">
@@ -629,44 +622,50 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
                 />
                 {!cameraReady && !photoError && <div className="absensi-camera-message">Menghubungkan kamera…</div>}
                 <div className="absensi-camera-guide" aria-hidden="true" />
-                <Button
-                  className="absensi-capture-button"
-                  onClick={() => void capturePhoto()}
-                  disabled={!cameraReady}
-                  aria-label="Ambil foto wajah"
-                >
-                  <Icon name="camera" />
-                  Ambil foto
-                </Button>
               </div>
             )}
             {photoError && (
-              <p role="alert" style={{ color: "#b91c1c", fontSize: 12, margin: "0 0 12px" }}>
+              <p role="alert" className="absensi-error">
                 {photoError}
               </p>
             )}
-            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-              <Button
-                className="secondary-button"
-                onClick={closeModal}
-                disabled={submitting}
-                style={{ flex: 1 }}
-              >
-                Batal
-              </Button>
-              <Button
-                onClick={handleCatat}
-                disabled={!fotoWajah || submitting}
-                style={{
-                  flex: 1,
-                  background: "#15803d",
-                  border: "1px solid #15803d",
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              >
-                {submitting ? "Mengirim..." : "Kirim Absensi"}
-              </Button>
+            <div className="absensi-actions">
+              {fotoWajah ? (
+                <Button
+                  className="absensi-primary"
+                  onClick={handleCatat}
+                  disabled={submitting}
+                >
+                  {submitting ? "Mengirim…" : "Kirim Absensi"}
+                </Button>
+              ) : (
+                <Button
+                  className="absensi-primary"
+                  onClick={() => void capturePhoto()}
+                  disabled={!cameraReady}
+                >
+                  <Icon name="camera" />
+                  Ambil Foto
+                </Button>
+              )}
+              <div className="absensi-actions-secondary">
+                {fotoWajah && (
+                  <Button
+                    className="secondary-button"
+                    onClick={() => setFotoWajah("")}
+                    disabled={submitting}
+                  >
+                    Ambil Ulang
+                  </Button>
+                )}
+                <Button
+                  className="secondary-button"
+                  onClick={closeModal}
+                  disabled={submitting}
+                >
+                  Batal
+                </Button>
+              </div>
             </div>
           </div>
         </div>
