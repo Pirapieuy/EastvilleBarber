@@ -147,6 +147,8 @@ export interface CheckoutPayload {
   alasan?: string
   /** PIN Owner/Manajer untuk menyetujui diskon (diverifikasi server) */
   pinOtorisasi?: string
+  /** Kode unik diskon yang diketik kasir (diverifikasi server bila backend sudah mendukung) */
+  kodeDiskon?: string
   /** Id unik per percobaan bayar: server tidak membuat nota ganda bila dikirim ulang */
   clientRequestId?: string
 }
@@ -173,6 +175,11 @@ export const apiKasir = {
   /** Cek PIN Owner/Manajer lebih awal (khusus Kasir; 5x salah = tunggu 5 menit). Gagal -> melempar Error. */
   verifikasiPin: (pin: string) =>
     api<{ valid: boolean }>("verifikasi-pin-otorisasi", { pin }),
+  /** Cek kode diskon unik ke server (nama dan persen untuk ditampilkan di keranjang) */
+  cekKode: (kode: string) =>
+    api<{ kode: string; nama: string; persen: number }>("cek-kode-diskon", {
+      kode,
+    }),
 }
 
 export interface RekapShift {
@@ -581,4 +588,28 @@ export interface AuditLogRow {
 export const apiAudit = {
   list: (filter: { tanggal?: string; aksi?: string; user?: string } = {}) =>
     api<AuditLogRow[]>("list-audit", filter),
+}
+
+/** Kode diskon unik (dibuat Owner/Manajer; kasir hanya mengetik kodenya). */
+export interface KodeDiskonRow {
+  id: string
+  kode: string
+  nama: string
+  persen: number
+  berlaku_sampai: string
+  status: "Aktif" | "Nonaktif"
+  dipakai?: number
+}
+
+export const apiKodeDiskon = {
+  list: () => api<KodeDiskonRow[]>("list-kode-diskon"),
+  simpan: (kodeDiskon: {
+    id?: string
+    kode: string
+    nama: string
+    persen: number
+    berlakuSampai: string
+    status: "Aktif" | "Nonaktif"
+  }) => api<{ id: string }>("simpan-kode-diskon", { kodeDiskon }),
+  hapus: (id: string) => api<{ id: string }>("hapus-kode-diskon", { id }),
 }

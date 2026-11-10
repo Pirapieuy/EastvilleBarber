@@ -1,5 +1,7 @@
 export interface PromoDiscount {
   id: string
+  /** Kode unik yang diketik kasir; dibuat owner. */
+  kode?: string
   nama: string
   persen: number
   berlakuSampai: string
@@ -11,6 +13,7 @@ const STORAGE_KEY = "eastville_promos"
 export const DEFAULT_PROMOS: PromoDiscount[] = [
   {
     id: "prm-1",
+    kode: "JUMAT15",
     nama: "Promo Jumat Berkah",
     persen: 15,
     berlakuSampai: "2026-12-31",
@@ -18,6 +21,7 @@ export const DEFAULT_PROMOS: PromoDiscount[] = [
   },
   {
     id: "prm-2",
+    kode: "MEMBER10",
     nama: "Diskon Member Setia",
     persen: 10,
     berlakuSampai: "2026-12-31",
@@ -25,6 +29,7 @@ export const DEFAULT_PROMOS: PromoDiscount[] = [
   },
   {
     id: "prm-3",
+    kode: "ANNIV20",
     nama: "Event Anniversary Eastville",
     persen: 20,
     berlakuSampai: "2026-11-30",
