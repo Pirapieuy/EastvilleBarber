@@ -9630,3 +9630,20 @@ summary,
     grid-template-columns: 1fr;
   }
 }
+
+/* Riwayat: area gulir tetap bisa digulir, tetapi bilahnya tidak ditampilkan */
+.history-no-scrollbar,
+.history-no-scrollbar * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.history-no-scrollbar *::-webkit-scrollbar,
+.history-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.history-no-scrollbar .transaction-list,
+.history-no-scrollbar .transaction-modal-body {
+  scrollbar-gutter: auto;
+}

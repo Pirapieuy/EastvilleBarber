@@ -444,7 +444,7 @@ export function HistoryPage({ currentUser, role }: {
   }
 
   return (
-    <div className="content history-page-content">
+    <div className="content history-page-content history-no-scrollbar">
       <DemoNotice live={live} error={liveError} />
       <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
@@ -532,17 +532,19 @@ export function HistoryPage({ currentUser, role }: {
                   {selected.date} · {selected.time} WIB
                 </small>
               </div>
-              <i
-                className={`chip ${
-                  selected.status === "BATAL"
-                    ? "batal"
-                    : selected.status === "Manual"
-                      ? "manual"
-                      : "lunas"
-                }`}
-              >
-                {selected.status === "BATAL" ? "Batal" : selected.status}
-              </i>
+              {selected.status !== "Lunas" && (
+                  <i
+                    className={`chip ${
+                      selected.status === "BATAL"
+                        ? "batal"
+                        : selected.status === "Manual"
+                          ? "manual"
+                          : "lunas"
+                    }`}
+                  >
+                    {selected.status === "BATAL" ? "Batal" : selected.status}
+                  </i>
+              )}
             </div>
 
             <TransactionDetailBody
@@ -575,17 +577,19 @@ export function HistoryPage({ currentUser, role }: {
                 </small>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <i
-                  className={`chip ${
-                    selected.status === "BATAL"
-                      ? "batal"
-                      : selected.status === "Manual"
-                        ? "manual"
-                        : "lunas"
-                  }`}
-                >
-                  {selected.status === "BATAL" ? "Batal" : selected.status}
-                </i>
+                {selected.status !== "Lunas" && (
+                  <i
+                    className={`chip ${
+                      selected.status === "BATAL"
+                        ? "batal"
+                        : selected.status === "Manual"
+                          ? "manual"
+                          : "lunas"
+                    }`}
+                  >
+                    {selected.status === "BATAL" ? "Batal" : selected.status}
+                  </i>
+                )}
                 <Button
                   className="modal-close-icon-btn"
                   onClick={() => setMobileDetailOpen(false)}
