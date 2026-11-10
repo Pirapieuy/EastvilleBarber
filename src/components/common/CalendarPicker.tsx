@@ -28,6 +28,7 @@ export interface CalendarPickerProps {
   clearLabel?: string
   placeholder?: string
   compact?: boolean
+  showToday?: boolean
   style?: React.CSSProperties
 }
 
@@ -41,6 +42,7 @@ export function CalendarPicker({
   clearLabel = "Semua Tanggal",
   placeholder = "Pilih tanggal",
   compact = false,
+  showToday = true,
   style,
 }: CalendarPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -284,14 +286,16 @@ export function CalendarPicker({
               ) : (
                 <div />
               )}
-              <button
-                type="button"
-                className="secondary-button"
-                style={{ padding: "4px 8px", fontSize: 11 }}
-                onClick={handleJumpToday}
-              >
-                Hari Ini
-              </button>
+              {showToday && (
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "4px 8px", fontSize: 11 }}
+                  onClick={handleJumpToday}
+                >
+                  Hari Ini
+                </button>
+              )}
             </div>
           </section>
         </div>

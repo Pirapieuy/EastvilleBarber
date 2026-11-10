@@ -2460,6 +2460,102 @@ textarea {
   background: var(--brass);
 }
 
+.barber-btn.disabled {
+  color: var(--muted);
+  background: #f5f2ec;
+  border-color: var(--line);
+  opacity: 0.72;
+}
+
+.barber-btn.disabled i {
+  background: var(--muted);
+}
+
+.absensi-inline > :not(.modal-overlay) {
+  display: none !important;
+}
+
+.absensi-loading-panel {
+  width: min(92vw, 440px);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 28%);
+  text-align: center;
+  color: var(--ink);
+  cursor: wait;
+}
+
+.absensi-loading-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+
+.absensi-loading-title {
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.absensi-loading-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.absensi-loading-status {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.absensi-loading-status .loading-state {
+  min-height: 96px;
+  color: var(--ink);
+}
+
+@media (max-width: 768px) {
+  .mobile-content.attendance-history-page .attendance-history-filters {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-wrapper {
+    grid-column: 1 / -1 !important;
+    justify-self: center !important;
+    width: max-content !important;
+    max-width: 100% !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-btn {
+    width: max-content !important;
+    max-width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-text {
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .search {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
 .segmented {
   display: inline-flex;
   gap: 4px;
@@ -9027,5 +9123,13 @@ summary,
   .product-tx-row > .void-reason-note {
     grid-column: 1 / -1;
     grid-row: 5;
+  }
+}
+
+@media (max-width: 820px) {
+  .logout-modal-overlay {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
   }
 }

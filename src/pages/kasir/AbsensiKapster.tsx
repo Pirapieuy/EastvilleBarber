@@ -17,7 +17,13 @@ import { AbsensiStatus } from "../../types"
 
 type View = "list" | "photo" | "status"
 
-export function AbsensiKapster() {
+export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, initialKapsterName, onComplete }: {
+  onNavigate?: (page: string) => void
+  inline?: boolean
+  initialKapsterId?: string
+  initialKapsterName?: string
+  onComplete?: (success: boolean) => void
+} = {}) {
   const todayIso = new Date().toISOString().slice(0, 10)
   const [tanggal, setTanggal] = useState(todayIso)
   const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([])
@@ -111,6 +117,15 @@ export function AbsensiKapster() {
   useEffect(() => {
     loadData()
   }, [tanggal])
+
+  useEffect(() => {
+    if (loading || kapsters.length === 0) return
+    const requestedId = initialKapsterId || sessionStorage.getItem("eastville-attendance-kapster")
+    if (!requestedId) return
+    sessionStorage.removeItem("eastville-attendance-kapster")
+    const requestedKapster = kapsters.find((kapster) => kapster.id === requestedId)
+    if (requestedKapster) openKapster(requestedKapster)
+  }, [loading, kapsters])
 
   useEffect(() => {
     if (activeTab !== "riwayat" || riwayatAbsensi.length > 0) return
@@ -219,6 +234,14 @@ export function AbsensiKapster() {
       setRiwayatAbsensi([])
       setView("list")
       await loadData()
+      if (inline) {
+        onComplete?.(status === "Hadir")
+        return
+      }
+      if (sessionStorage.getItem("eastville-return-to-pos") === "1") {
+        sessionStorage.removeItem("eastville-return-to-pos")
+        onNavigate?.("KasirPOS")
+      }
     } catch (err) {
       setToast({
         type: "error",
@@ -230,12 +253,14 @@ export function AbsensiKapster() {
   }
 
   function closeModal() {
+    sessionStorage.removeItem("eastville-return-to-pos")
     setView("list")
     setSelectedKapster(null)
     setFotoWajah("")
     setPhotoError("")
     setStatus("Hadir")
     setCatatan("")
+    if (inline) onComplete?.(false)
   }
 
   function dismissToast() {
@@ -294,6 +319,28 @@ export function AbsensiKapster() {
   }
 
   if (loading) {
+    if (inline) {
+      return (
+        <div className="modal-overlay" role="status">
+          <div className="modal-panel absensi-modal absensi-loading-panel">
+            <div className="absensi-loading-heading">
+              <span className="absensi-modal-icon"><Icon name="camera" /></span>
+              <div>
+                <div className="absensi-loading-title">Absensi Kapster</div>
+                <div className="absensi-loading-meta">
+                  {initialKapsterName || kapsters.find((kapster) => kapster.id === initialKapsterId)?.nama || "Memuat nama kapster"}
+                  <span aria-hidden="true">·</span>
+                  {tanggal}
+                </div>
+              </div>
+            </div>
+            <div className="absensi-loading-status">
+              <LoadingState message="Memuat Absensi" />
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="content">
         <LoadingState message="Memuat data kapster..." />
@@ -302,7 +349,7 @@ export function AbsensiKapster() {
   }
 
   return (
-    <div className="mobile-content absensi-kasir">
+    <div className={`mobile-content absensi-kasir ${inline ? "absensi-inline" : ""}`}>
       <PageTitle
         eyebrow={todayStr}
         title="Absensi Kapster"
@@ -548,7 +595,7 @@ export function AbsensiKapster() {
             >
               <span className="absensi-modal-icon"><Icon name="camera" /></span>
               <div className="absensi-modal-heading">
-                <div className="absensi-modal-title">Ambil foto wajah</div>
+                <div className="absensi-modal-title">Absensi Kapster</div>
                 <div className="absensi-modal-subtitle">
                   {selectedKapster.nama} <span aria-hidden="true">·</span> {tanggal}
                 </div>
