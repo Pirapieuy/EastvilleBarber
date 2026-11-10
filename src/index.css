@@ -9482,3 +9482,61 @@ summary,
   font-size: 13px;
   text-align: center;
 }
+
+/* Pengeluaran: baris jadi kartu di layar kecil, jumlah sebagai informasi utama */
+@media (max-width: 820px) {
+  .expense-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'cat amount'
+      'desc desc'
+      'date status'
+      'act act';
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 6px 12px !important;
+    padding: 14px 16px !important;
+  }
+
+  .expense-row > .exp-cat {
+    grid-area: cat;
+    font-size: 15px;
+  }
+
+  .expense-row > .exp-amount {
+    grid-area: amount;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .expense-row > .exp-desc {
+    grid-area: desc;
+    color: var(--slate);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .expense-row > .exp-date {
+    grid-area: date;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .expense-row > .chip {
+    grid-area: status;
+    justify-self: end;
+  }
+
+  .expense-row > .button {
+    grid-area: act;
+    width: 100%;
+    margin-top: 6px;
+    min-height: 44px;
+  }
+
+  .expense-row > [data-label]::before {
+    content: none;
+  }
+}
