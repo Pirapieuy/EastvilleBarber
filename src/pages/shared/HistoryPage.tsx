@@ -463,8 +463,8 @@ export function HistoryPage({ currentUser, role }: {
         <section className="panel transaction-list">
           <div className="table-head">
             <span>Nota</span>
-            <span>Kapster</span>
-            <span>Item</span>
+            <span>Kapster &amp; item</span>
+            <span>Total</span>
           </div>
           {visibleTx.map((tx) => (
             <Button
@@ -488,17 +488,29 @@ export function HistoryPage({ currentUser, role }: {
                   {tx.date} · {tx.time}
                 </small>
               </div>
-              <span className="tx-cell-kapster">{tx.barber}</span>
-              <span
-                className="tx-cell-items"
-                title={tx.items
-                  .map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`)
-                  .join(", ")}
-              >
-                {tx.items
-                  .map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`)
-                  .join(", ")}
-              </span>
+              <div className="tx-cell-col-main">
+                <span className="tx-cell-kapster">{tx.barber}</span>
+                <span
+                  className="tx-cell-items"
+                  title={tx.items
+                    .map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`)
+                    .join(", ")}
+                >
+                  {tx.items
+                    .map((it) => `${it.name}${it.qty > 1 ? ` x${it.qty}` : ""}`)
+                    .join(", ")}
+                </span>
+              </div>
+              <div className="tx-cell-col-total">
+                <strong className="tx-cell-total">{rupiah(tx.total)}</strong>
+                {tx.status !== "Lunas" && (
+                  <span
+                    className={`tx-status-chip ${tx.status === "BATAL" ? "batal" : "manual"}`}
+                  >
+                    {tx.status === "BATAL" ? "Dibatalkan" : "Manual"}
+                  </span>
+                )}
+              </div>
             </Button>
           ))}
         </section>
