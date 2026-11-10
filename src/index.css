@@ -2847,7 +2847,18 @@ textarea {
   position: absolute;
   inset: 0 0 0 auto;
   width: 120px;
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff;
+  background: var(--oxblood);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cart-swipe-delete .icon {
+  width: 14px;
 }
 
 .cart-lines article .cart-line-row {
@@ -9646,4 +9657,137 @@ summary,
 .history-no-scrollbar .transaction-list,
 .history-no-scrollbar .transaction-modal-body {
   scrollbar-gutter: auto;
+}
+
+/* Keranjang: baris tiga kolom (nama | jumlah | harga), jumlah bisa diketik */
+.cart-lines article .cart-line-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 96px;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.cart-lines article .cart-line-title {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  text-align: left;
+}
+
+.cart-lines article .cart-line-title strong {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.cart-lines article .cart-line-title small {
+  display: block;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cart-lines article .stepper {
+  width: 112px;
+  height: 36px;
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--paper);
+}
+
+.cart-lines article .stepper .button {
+  width: 32px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--ink);
+}
+
+.cart-lines article .stepper .button:disabled {
+  color: var(--line);
+}
+
+.cart-lines article .stepper input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-inline: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.cart-lines article .cart-line-price {
+  width: 96px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media (max-width: 420px) {
+  .cart-lines article .cart-line-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
+
+  .cart-lines article .cart-line-price {
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+  }
+
+  .cart-lines article .cart-line-title {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .cart-lines article .stepper {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+  }
+}
+
+/* Kode diskon: kolom isian dan tombol sejajar, sama tinggi dan sama lebar tepi */
+.cart-discount-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 8px;
+}
+
+.cart-discount-panel > label {
+  min-width: 0;
+}
+
+.cart-discount-panel > label > span {
+  display: block;
+  margin: 0 0 6px 2px;
+  color: var(--slate);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cart-discount-panel .input-shell,
+.cart-discount-panel > .primary-button {
+  height: 44px;
+  min-height: 44px;
+}
+
+.cart-discount-panel > .primary-button {
+  padding: 0 18px;
+  border-radius: 11px;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.cart-discount-panel .cart-error {
+  grid-column: 1 / -1;
 }

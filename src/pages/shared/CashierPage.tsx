@@ -658,6 +658,26 @@ export function CashierPage({ currentUser, onNavigate }: {
     setKodeError("")
   }
 
+  /** Atur jumlah item langsung (ketik); produk dibatasi sisa stok. */
+  function setLineQty(line: CartLine, raw: string) {
+    const digits = raw.replace(/\D/g, "")
+    if (digits === "") return
+    let next = Math.max(1, Number(digits))
+    if (line.type === "Produk") {
+      const stok = catalogData.find((c) => c.id === line.id)?.stock
+      if (stok !== undefined) {
+        const lain = cart
+          .filter((x) => x.id === line.id && x.lineId !== line.lineId)
+          .reduce((sum, x) => sum + x.qty, 0)
+        next = Math.min(next, Math.max(1, stok - lain))
+      }
+    }
+    next = Math.min(next, 999)
+    setCart((c) =>
+      c.map((x) => (x.lineId === line.lineId ? { ...x, qty: next } : x)),
+    )
+  }
+
   function removeCartLineWithAnimation(lineId: string) {
     setCartSwipe({ lineId, offset: -120, removing: true })
     window.setTimeout(() => {
@@ -922,7 +942,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <article
                   className="cart-line-swipe"
                   key={line.lineId}
-                  title="Gunakan tombol sampah atau geser ke kiri untuk menghapus item"
+                  title="Geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -1010,54 +1030,56 @@ export function CashierPage({ currentUser, onNavigate }: {
                   >
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
+                      <small>{rupiah(line.price)}</small>
                     </span>
-                    <div className="cart-line-controls">
-                      <div className="stepper">
-                        <Button
-                          onClick={() =>
-                            setCart((c) =>
-                              c.map((x) =>
-                                x.lineId === line.lineId
-                                  ? { ...x, qty: Math.max(1, x.qty - 1) }
-                                  : x,
-                              ),
-                            )
-                          }
-                        >
-                          <Icon name="minus" />
-                        </Button>
-                        <span>{line.qty}</span>
-                        <Button
-                          disabled={
-                            line.type === "Produk" &&
-                            stokHabis(
-                              line.id,
-                              catalogData.find((c) => c.id === line.id)?.stock,
-                            )
-                          }
-                          onClick={() =>
-                            setCart((c) =>
-                              c.map((x) =>
-                                x.lineId === line.lineId
-                                  ? { ...x, qty: x.qty + 1 }
-                                  : x,
-                              ),
-                            )
-                          }
-                        >
-                          <Icon name="plus" />
-                        </Button>
-                      </div>
-                      <b>{rupiah(line.price * line.qty)}</b>
+                    <div className="stepper">
                       <Button
-                        className="cart-remove-button"
-                        onClick={() => removeCartLineWithAnimation(line.lineId)}
-                        title={`Hapus ${line.name}`}
-                        aria-label={`Hapus ${line.name}`}
+                        aria-label={`Kurangi ${line.name}`}
+                        disabled={line.qty <= 1}
+                        onClick={() =>
+                          setCart((c) =>
+                            c.map((x) =>
+                              x.lineId === line.lineId
+                                ? { ...x, qty: Math.max(1, x.qty - 1) }
+                                : x,
+                            ),
+                          )
+                        }
                       >
-                        <Icon name="trash" />
+                        <Icon name="minus" />
+                      </Button>
+                      <input
+                        aria-label={`Jumlah ${line.name}`}
+                        inputMode="numeric"
+                        onChange={(e) => setLineQty(line, e.target.value)}
+                        onFocus={(e) => e.target.select()}
+                        value={line.qty}
+                      />
+                      <Button
+                        aria-label={`Tambah ${line.name}`}
+                        disabled={
+                          line.type === "Produk" &&
+                          stokHabis(
+                            line.id,
+                            catalogData.find((c) => c.id === line.id)?.stock,
+                          )
+                        }
+                        onClick={() =>
+                          setCart((c) =>
+                            c.map((x) =>
+                              x.lineId === line.lineId
+                                ? { ...x, qty: x.qty + 1 }
+                                : x,
+                            ),
+                          )
+                        }
+                      >
+                        <Icon name="plus" />
                       </Button>
                     </div>
+                    <b className="cart-line-price">
+                      {rupiah(line.price * line.qty)}
+                    </b>
                   </div>
                 </article>
               ))
@@ -1102,11 +1124,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                       value={kodeDiskon}
                     />
                   </div>
-                  {kodeError && (
-                    <small className="cart-error" role="alert">
-                      {kodeError}
-                    </small>
-                  )}
                 </label>
                 <Button
                   className="primary-button"
@@ -1115,6 +1132,11 @@ export function CashierPage({ currentUser, onNavigate }: {
                 >
                   {kodeChecking ? "Memeriksa…" : "Terapkan"}
                 </Button>
+                {kodeError && (
+                  <small className="cart-error" role="alert">
+                    {kodeError}
+                  </small>
+                )}
               </div>
             )}
             {discount > 0 && (
