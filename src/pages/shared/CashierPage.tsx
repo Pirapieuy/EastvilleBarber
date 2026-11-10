@@ -154,7 +154,7 @@ export function ReceiptView({
           <header>
             <div>E</div>
             <h2>EASTVILLE</h2>
-            <p>EASTVILLE BARBERSHOP</p>
+            <p>BARBERSHOP</p>
             {contoh && (
               <p>
                 <strong>*** CONTOH (DEMO) ***</strong>
@@ -169,19 +169,20 @@ export function ReceiptView({
                 {tanggal ??
                   new Date()
                     .toLocaleString("id-ID", {
-                      day: "numeric",
+                      day: "2-digit",
                       month: "short",
                       year: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
                       hour12: false,
                     })
-                    .replace(",", " ·")}
+                    .replace(/\./g, ":")
+                    .replace(",", "")}
               </dd>
             </div>
             <div>
               <dt>No. nota</dt>
-              <dd>{invoice}</dd>
+              <dd>{invoice ?? "Dibuat saat disimpan"}</dd>
             </div>
             <div>
               <dt>Kasir</dt>
@@ -213,10 +214,12 @@ export function ReceiptView({
               <dt>Subtotal</dt>
               <dd>{new Intl.NumberFormat("id-ID").format(subtotal)}</dd>
             </div>
-            <div>
-              <dt>Diskon</dt>
-              <dd>− {new Intl.NumberFormat("id-ID").format(discount)}</dd>
-            </div>
+            {discount > 0 && (
+              <div>
+                <dt>Diskon</dt>
+                <dd>− {new Intl.NumberFormat("id-ID").format(discount)}</dd>
+              </div>
+            )}
             <div className="receipt-total">
               <dt>TOTAL</dt>
               <dd>{rupiah(total)}</dd>
@@ -240,10 +243,12 @@ export function ReceiptView({
                 <dd>{new Intl.NumberFormat("id-ID").format(qris)}</dd>
               </div>
             )}
-            <div>
-              <dt>Kembalian</dt>
-              <dd>{new Intl.NumberFormat("id-ID").format(change)}</dd>
-            </div>
+            {method === "Tunai" && (
+              <div>
+                <dt>Kembalian</dt>
+                <dd>{new Intl.NumberFormat("id-ID").format(change)}</dd>
+              </div>
+            )}
           </dl>
           <hr />
           <footer>
@@ -392,13 +397,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     setPayError("")
     setSaveReceiptError("")
     setIsTransactionSaved(false)
-    const now = new Date()
-    const dStr =
-      String(now.getDate()).padStart(2, "0") +
-      String(now.getMonth() + 1).padStart(2, "0") +
-      String(now.getFullYear()).slice(-2)
-    const rNum = String(Math.floor(Math.random() * 9000) + 1000)
-    setInvoice(`INV-${dStr}-${rNum}`)
+    setInvoice(undefined)
     setIsCartOpen(false)
     setReceipt(true)
   }
