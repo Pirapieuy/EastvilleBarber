@@ -8,7 +8,7 @@ export function AbsensiTim({ currentUser }: {
     <AttendanceAdminPage
       currentUser={currentUser}
       role="Manajer"
-      title="Absensi Tim"
+      title="Jam Kerja"
     />
   )
 }

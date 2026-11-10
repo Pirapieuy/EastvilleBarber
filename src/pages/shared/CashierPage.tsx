@@ -74,11 +74,14 @@ export function ReceiptView({
   qris,
   change,
   cashier,
+  barber,
   invoice = "INV-291026-0084",
   tanggal,
   contoh,
   backLabel = "Transaksi Baru (Selesai)",
   onClose,
+  onEdit,
+  onComplete,
   /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   /** Struk dari data demo (tidak tersimpan di server) */
 }: {
@@ -91,20 +94,33 @@ export function ReceiptView({
   qris: number
   change: number
   cashier: string
+  barber?: string
   invoice?: string
   tanggal?: string
   contoh?: boolean
   backLabel?: string
-  onClose: () => void
+  onClose?: () => void
+  onEdit?: () => void
+  onComplete?: () => void
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
+  const barberName =
+    barber ||
+    Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
+    "-"
   return (
     <div className="flow-page">
       <div className="flow-toolbar">
-        <Button className="primary-button" onClick={onClose}>
-          <Icon name="check" /> {backLabel}
-        </Button>
+        {onEdit ? (
+          <Button className="secondary-button" onClick={onEdit}>
+            <Icon name="pencil" /> Edit
+          </Button>
+        ) : (
+          <Button className="primary-button" onClick={onClose}>
+            <Icon name="check" /> {backLabel}
+          </Button>
+        )}
         <div className="segmented">
           <Button
             className={size === "58" ? "active" : ""}
@@ -123,9 +139,15 @@ export function ReceiptView({
           <Button className="primary-button" onClick={() => window.print()}>
             <Icon name="print" /> Cetak
           </Button>
-          <Button className="secondary-button" onClick={onClose}>
-            <Icon name="arrow" /> Kembali
-          </Button>
+          {onComplete ? (
+            <Button className="primary-button" onClick={onComplete}>
+              <Icon name="check" /> Selesai
+            </Button>
+          ) : (
+            <Button className="secondary-button" onClick={onClose}>
+              <Icon name="arrow" /> Kembali
+            </Button>
+          )}
         </div>
       </div>
       <div className="receipt-stage">
@@ -166,6 +188,10 @@ export function ReceiptView({
               <dt>Kasir</dt>
               <dd>{cashier}</dd>
             </div>
+            <div>
+              <dt>Kapster</dt>
+              <dd>{barberName}</dd>
+            </div>
           </dl>
           <hr />
           {cart.map((line) => (
@@ -173,7 +199,7 @@ export function ReceiptView({
               <span>
                 <strong>{line.name}</strong>
                 <small>
-                  Kapster: {line.barber} · {line.qty} ×{" "}
+                  {line.qty} ×{" "}
                   {new Intl.NumberFormat("id-ID").format(line.price)}
                 </small>
               </span>
@@ -560,17 +586,22 @@ export function CashierPage({ currentUser, onNavigate }: {
         qris={qris}
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
+        barber={
+          Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
+          selectedBarber
+        }
         invoice={invoice}
         contoh={!live}
+        onEdit={() => {
+          setReceipt(false)
+        }}
+        onComplete={() => {
+          setReceipt(false)
+          clearCart()
+        }}
         onClose={() => {
           setReceipt(false)
-          setCart([])
-          setCash(0)
-          setDiscount(0)
-          setAppliedDiscountPercent(null)
-          setDiscountReason("")
-          setDiscountReasonDraft("")
-          setPinAtasan("")
+          clearCart()
         }}
       />
     )

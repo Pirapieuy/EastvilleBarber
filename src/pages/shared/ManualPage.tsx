@@ -3,7 +3,12 @@ import { FormEvent, useEffect, useState } from "react"
 import { apiKasir, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 
 interface ManualItem {
   tipe: "Layanan" | "Produk"
@@ -193,15 +198,12 @@ export function ManualPage() {
         <div className="form-grid manual-info-grid">
           <label>
             <span>Tanggal transaksi</span>
-            <input
+            <CalendarPicker
               max={today()}
               min={TANGGAL_MULAI}
-              onChange={(e) => setTanggal(e.target.value)}
-              required
-              type="date"
               value={tanggal}
+              onChange={setTanggal}
             />
-            <small>Tanggal masa depan dinonaktifkan.</small>
           </label>
           <label>
             <span>Jam (perkiraan)</span>
@@ -273,6 +275,13 @@ export function ManualPage() {
             />
             <strong>{rupiah(priceOf(l))}</strong>
             <Button
+              className="danger-button"
+              style={{
+                minWidth: 44,
+                minHeight: 44,
+                padding: "10px 12px",
+                borderRadius: 10,
+              }}
               onClick={() =>
                 setLines((prev) => prev.filter((x) => x.key !== l.key))
               }
@@ -323,6 +332,23 @@ export function ManualPage() {
             <small>Total transaksi</small>
             <strong>{rupiah(total)}</strong>
           </div>
+          {method !== "QRIS" && cashNum > 0 && total > 0 && (
+            <div
+              className="manual-total"
+              style={{
+                background: kembalian > 0 ? "rgba(34,197,94,0.08)" : undefined,
+                borderRadius: 8,
+                padding: "8px 12px",
+              }}
+            >
+              <small>Kembalian</small>
+              <strong
+                style={{ color: kembalian > 0 ? "#15803d" : "var(--ink)" }}
+              >
+                {rupiah(kembalian)}
+              </strong>
+            </div>
+          )}
         </div>
       </section>
       <div className="sticky-submit">

@@ -139,11 +139,7 @@ export function App() {
     if (roleKey === "manajer") {
       if (activePage === "BerandaManajer" || activePage === "dashboard") {
         return (
-          <BerandaManajer
-            user={currentUser}
-            onNavigate={setActivePage}
-            navigate={setActivePage}
-          />
+          <BerandaManajer onNavigate={setActivePage} navigate={setActivePage} />
         )
       }
       if (activePage === "RiwayatTransaksi" || activePage === "history") {
