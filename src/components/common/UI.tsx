@@ -80,7 +80,7 @@ export function PageTitle({
   className = "",
 }: {
   eyebrow?: string
-  title: string
+  title: ReactNode
   action?: ReactNode
   className?: string
 }) {

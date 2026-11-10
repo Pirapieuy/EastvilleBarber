@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
@@ -295,7 +302,7 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
     .filter((row) => row.nama.toLocaleLowerCase("id-ID").includes(cariKapster.trim().toLocaleLowerCase("id-ID")))
     .sort((a, b) => b.waktu.localeCompare(a.waktu))
 
-  const modalOverlayStyle = {
+  const modalOverlayStyle: CSSProperties = {
     position: "fixed",
     inset: 0,
     zIndex: 100,
@@ -308,7 +315,7 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
     padding: 16,
   }
 
-  const modalPanelStyle = {
+  const modalPanelStyle: CSSProperties = {
     maxWidth: 440,
     width: "min(92vw, 440px)",
     padding: 20,

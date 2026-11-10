@@ -1,6 +1,7 @@
 import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
 import { apiKasir, apiTransaksi, getToken } from "../../api"
+import { getPromoDiscounts } from "../../utils/promoStorage"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import {
@@ -45,6 +46,7 @@ export function ManualPage() {
   const [qty, setQty] = useState<Record<string, number>>({})
   const [cari, setCari] = useState("")
   const [diskon, setDiskon] = useState("")
+  const [promoId, setPromoId] = useState("")
   const [pin, setPin] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState("")
@@ -100,7 +102,13 @@ export function ManualPage() {
     (sum, i) => sum + i.price * (qty[keyOf(i)] ?? 0),
     0,
   )
-  const diskonNum = Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
+  const promoAktif = getPromoDiscounts().filter(
+    (p) => p.status === "Aktif" && p.berlakuSampai >= tanggal,
+  )
+  const promo = promoAktif.find((p) => p.id === promoId)
+  const diskonNum = promo
+    ? Math.round((subtotal * promo.persen) / 100)
+    : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
   const total = subtotal - diskonNum
   const kapsterAktif = kapsterId || kapster[0]?.id || ""
   const cashNum = Number(cash.replace(/\D/g, "")) || 0
@@ -173,6 +181,7 @@ export function ManualPage() {
       )
       setQty({})
       setDiskon("")
+      setPromoId("")
       setPin("")
       setNote("")
       setCash("")
@@ -315,18 +324,36 @@ export function ManualPage() {
       <section className="panel form-panel">
         <h3>3. Diskon</h3>
         <div className="form-grid manual-info-grid">
-          <label>
-            <span>Potongan harga (opsional)</span>
-            <div className="input-shell">
-              <b>Rp</b>
-              <input
-                inputMode="numeric"
-                onChange={(e) => setDiskon(e.target.value)}
-                placeholder="0"
-                value={diskon}
-              />
-            </div>
-          </label>
+          {promoAktif.length > 0 && (
+            <label>
+              <span>Diskon event (opsional)</span>
+              <select
+                onChange={(e) => setPromoId(e.target.value)}
+                value={promoId}
+              >
+                <option value="">Tanpa diskon event</option>
+                {promoAktif.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nama} ({p.persen}%)
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {!promo && (
+            <label>
+              <span>Potongan manual (opsional)</span>
+              <div className="input-shell">
+                <b>Rp</b>
+                <input
+                  inputMode="numeric"
+                  onChange={(e) => setDiskon(e.target.value)}
+                  placeholder="0"
+                  value={diskon}
+                />
+              </div>
+            </label>
+          )}
           {diskonNum > 0 && (
             <label>
               <span>PIN Owner atau Manajer</span>

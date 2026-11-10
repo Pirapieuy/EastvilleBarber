@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { CSSProperties, ReactNode } from "react"
 import { IconName } from "../../types"
 
 const iconPaths: Record<IconName, ReactNode> = {
@@ -183,13 +183,16 @@ const iconPaths: Record<IconName, ReactNode> = {
 export function Icon({
   name,
   className = "",
+  style,
 }: {
   name: IconName
   className?: string
+  style?: CSSProperties
 }) {
   return (
     <svg
       className={`icon ${className}`}
+      style={style}
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
