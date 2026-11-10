@@ -60,9 +60,9 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
         icon: "wallet",
       },
       {
-        page: "AbsensiTim",
-        alias: "attendance-admin",
-        label: "Jam Kerja",
+        page: "RiwayatAbsensi",
+        alias: "attendance-history",
+        label: "Riwayat Absensi",
         icon: "calendar",
       },
     ],

@@ -31,18 +31,6 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
       },
     ],
   },
-  {
-    id: "absensi",
-    title: "ABSENSI",
-    items: [
-      {
-        page: "AbsensiKapster",
-        alias: "absensi-kapster",
-        label: "Absensi Kapster",
-        icon: "calendar",
-      },
-    ],
-  },
 ]
 
 export function SidebarKasir(props: SidebarProps) {
@@ -51,9 +39,9 @@ export function SidebarKasir(props: SidebarProps) {
       {...props}
       groups={KASIR_GROUPS}
       user={{
-        name: props.userName || "Siti Rahma",
+        name: "Kasir",
         role: "Kasir",
-        roleBadge: "KASIR",
+        roleBadge: "",
       }}
     />
   )
