@@ -82,7 +82,10 @@ export function ReceiptView({
   backLabel = "Transaksi Baru (Selesai)",
   onClose,
   onEdit,
+  onPrint,
   onComplete,
+  saving,
+  saveError,
   /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   /** Struk dari data demo (tidak tersimpan di server) */
 }: {
@@ -102,7 +105,10 @@ export function ReceiptView({
   backLabel?: string
   onClose?: () => void
   onEdit?: () => void
-  onComplete?: () => void
+  onPrint?: () => void | Promise<void>
+  onComplete?: () => void | Promise<void>
+  saving?: boolean
+  saveError?: string
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
@@ -136,13 +142,32 @@ export function ReceiptView({
             80 mm
           </Button>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button className="primary-button" onClick={() => window.print()}>
-            <Icon name="print" /> Cetak
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {saveError && (
+            <span style={{ color: "#dc2626", fontSize: 12, fontWeight: 600 }}>
+              {saveError}
+            </span>
+          )}
+          <Button
+            className="primary-button"
+            disabled={saving}
+            onClick={async () => {
+              if (onPrint) {
+                await onPrint()
+              } else {
+                window.print()
+              }
+            }}
+          >
+            <Icon name="print" /> {saving ? "Menyimpan..." : "Cetak"}
           </Button>
           {onComplete ? (
-            <Button className="primary-button" onClick={onComplete}>
-              <Icon name="check" /> Selesai
+            <Button
+              className="primary-button"
+              disabled={saving}
+              onClick={onComplete}
+            >
+              <Icon name="check" /> {saving ? "Menyimpan..." : "Selesai"}
             </Button>
           ) : (
             <Button className="secondary-button" onClick={onClose}>
@@ -299,6 +324,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [promosList, setPromosList] = useState<PromoDiscount[]>([])
   const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartSwipe, setCartSwipe] = useState<{
     lineId: string
     offset: number
@@ -317,6 +343,9 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [invoice, setInvoice] = useState<string | undefined>()
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState("")
+  const [isTransactionSaved, setIsTransactionSaved] = useState(false)
+  const [savingReceipt, setSavingReceipt] = useState(false)
+  const [saveReceiptError, setSaveReceiptError] = useState("")
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
   const [pinAtasan, setPinAtasan] = useState("")
@@ -386,10 +415,50 @@ export function CashierPage({ currentUser, onNavigate }: {
       })
   }, [reloadKey])
 
-  async function pay() {
-    if (!live) return setReceipt(true)
+  useEffect(() => {
+    if (!isCartOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsCartOpen(false)
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isCartOpen])
+
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isCartOpen])
+
+  function pay() {
+    if (Boolean(payDisabledReason) || !cart.length) return
     setPayError("")
-    setPaying(true)
+    setSaveReceiptError("")
+    setIsTransactionSaved(false)
+    const now = new Date()
+    const dStr =
+      String(now.getDate()).padStart(2, "0") +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      String(now.getFullYear()).slice(-2)
+    const rNum = String(Math.floor(Math.random() * 9000) + 1000)
+    setInvoice(`INV-${dStr}-${rNum}`)
+    setIsCartOpen(false)
+    setReceipt(true)
+  }
+
+  async function executeSaveTransaction(): Promise<boolean> {
+    if (isTransactionSaved) return true
+    if (!live) {
+      setIsTransactionSaved(true)
+      return true
+    }
+    setSaveReceiptError("")
+    setSavingReceipt(true)
     try {
       const res = await apiKasir.checkout({
         metode: method,
@@ -408,7 +477,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         })),
       })
       setInvoice(res.id)
-      setReceipt(true)
+      setIsTransactionSaved(true)
       requestId.current = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
       // Segarkan stok produk setelah terjual
       apiKasir.produk().then((produk) =>
@@ -419,10 +488,30 @@ export function CashierPage({ currentUser, onNavigate }: {
           }),
         ),
       )
+      return true
     } catch (e) {
-      setPayError(e instanceof Error ? e.message : "Transaksi gagal.")
+      setSaveReceiptError(
+        e instanceof Error ? e.message : "Transaksi gagal disimpan.",
+      )
+      return false
     } finally {
-      setPaying(false)
+      setSavingReceipt(false)
+    }
+  }
+
+  async function handlePrintReceipt() {
+    const success = await executeSaveTransaction()
+    if (success) {
+      window.print()
+    }
+  }
+
+  async function handleCompleteReceipt() {
+    const success = await executeSaveTransaction()
+    if (success) {
+      setReceipt(false)
+      clearCart()
+      setIsTransactionSaved(false)
     }
   }
 
@@ -540,12 +629,11 @@ export function CashierPage({ currentUser, onNavigate }: {
     )
   }
 
-  // Pecahan cepat: pembulatan ke atas terdekat + pecahan lazim, hanya yang lebih besar dari tagihan.
   const pecahanCepat = Array.from(
     new Set(
-      [10000, 50000, 100000]
+      [10000, 20000, 50000, 100000]
         .map((k) => Math.ceil(payableTotal / k) * k)
-        .concat([70000, 80000, 100000, 150000, 200000]),
+        .concat([50000, 100000, 150000, 200000, 300000]),
     ),
   )
     .filter((n) => n > payableTotal)
@@ -603,16 +691,20 @@ export function CashierPage({ currentUser, onNavigate }: {
         }
         invoice={invoice}
         contoh={!live}
+        saving={savingReceipt}
+        saveError={saveReceiptError}
         onEdit={() => {
           setReceipt(false)
+          setSaveReceiptError("")
         }}
-        onComplete={() => {
-          setReceipt(false)
-          clearCart()
-        }}
+        onPrint={handlePrintReceipt}
+        onComplete={handleCompleteReceipt}
         onClose={() => {
           setReceipt(false)
-          clearCart()
+          if (isTransactionSaved) {
+            clearCart()
+            setIsTransactionSaved(false)
+          }
         }}
       />
     )
@@ -637,11 +729,13 @@ export function CashierPage({ currentUser, onNavigate }: {
     }, 180)
   }
 
+  const itemCount = cart.reduce((sum, line) => sum + line.qty, 0)
+
   return (
     <div className="cashier-page">
       <section className="catalog">
         <DemoNotice live={live} error={liveError} />
-        <div className="cashier-heading">
+        <div className="cashier-heading hidden md:flex">
           <span>Kasir &amp; POS</span>
         </div>
         <section className="barber-picker">
@@ -787,15 +881,80 @@ export function CashierPage({ currentUser, onNavigate }: {
           ))}
         </div>
       </section>
-      <aside className="cart">
+      <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] md:hidden">
+        <button
+          type="button"
+          onClick={() => setIsCartOpen(true)}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--ink)] text-white shadow-md active:scale-[0.99] transition cursor-pointer"
+          aria-label="Buka Pesanan Saat Ini"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-[var(--brass)]">
+              <Icon name="receipt" />
+            </div>
+            <span className="font-semibold text-sm text-white">
+              Pesanan saat ini
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--brass)] text-[var(--ink)]">
+              {itemCount} item
+            </span>
+            {payableTotal > 0 && (
+              <span className="font-bold text-sm text-[var(--brass-soft)]">
+                {rupiah(payableTotal)}
+              </span>
+            )}
+            <span
+              className="flex items-center justify-center w-6 h-6 text-white/80"
+              style={{ transform: "rotate(180deg)" }}
+              aria-hidden="true"
+            >
+              <Icon name="chevron" />
+            </span>
+          </div>
+        </button>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+          isCartOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsCartOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside
+        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[88svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain md:static md:w-auto md:max-w-none md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-[var(--bone)] md:shadow-none md:translate-y-0 md:opacity-100 md:pointer-events-auto ${
+          isCartOpen
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "translate-y-full opacity-0 pointer-events-none"
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Pesanan saat ini"
+      >
         <div className="cart-panel">
-          <div className="cart-tabs">
+          <div className="md:hidden mx-auto my-2.5 h-1.5 w-12 rounded-full bg-[var(--line)]" />
+          <div className="cart-tabs flex items-center justify-between">
             <span className="cart-tab-active">
               <Icon name="receipt" /> Pesanan saat ini
             </span>
-            <b className="cart-tab-count">
-              {cart.reduce((sum, line) => sum + line.qty, 0)} item
-            </b>
+            <div className="flex items-center gap-2 ml-auto">
+              <b className="cart-tab-count">
+                {itemCount} item
+              </b>
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(false)}
+                className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--bone)] text-[var(--ink)] active:scale-95 transition cursor-pointer"
+                aria-label="Tutup pesanan"
+              >
+                <Icon name="chevron" />
+              </button>
+            </div>
           </div>
           {cart.length > 0 && (
             <div className="cart-clear-row">
@@ -1291,11 +1450,27 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <small>Pembayaran</small>
                 <Icon name="wallet" />
               </div>
-              <div className="method-grid">
+              <div
+                className="method-grid"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: 6,
+                }}
+              >
                 {(["Tunai", "QRIS", "Gabungan"] as const).map((value) => (
                   <Button
                     className={method === value ? "active" : ""}
                     key={value}
+                    style={{
+                      minHeight: 44,
+                      padding: "6px 4px",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
                     onClick={() => {
                       if (value === method) return
                       setMethod(value)
@@ -1333,7 +1508,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </label>
                 )}
               </div>
-              {method === "Tunai" && payableTotal > 0 && (
+              {method !== "QRIS" && payableTotal > 0 && (
                 <div
                   className="quick-cash"
                   style={{
@@ -1343,11 +1518,38 @@ export function CashierPage({ currentUser, onNavigate }: {
                     margin: "8px 0",
                   }}
                 >
-                  <Button onClick={() => setCash(payableTotal)}>
+                  <Button
+                    className={cash === payableTotal ? "active" : ""}
+                    style={
+                      cash === payableTotal
+                        ? {
+                            borderColor: "var(--brass)",
+                            background: "var(--brass-soft)",
+                            color: "var(--ink)",
+                            fontWeight: 700,
+                          }
+                        : undefined
+                    }
+                    onClick={() => setCash(payableTotal)}
+                  >
                     Uang pas
                   </Button>
                   {pecahanCepat.map((n) => (
-                    <Button key={n} onClick={() => setCash(n)}>
+                    <Button
+                      key={n}
+                      className={cash === n ? "active" : ""}
+                      style={
+                        cash === n
+                          ? {
+                              borderColor: "var(--brass)",
+                              background: "var(--brass-soft)",
+                              color: "var(--ink)",
+                              fontWeight: 700,
+                            }
+                          : undefined
+                      }
+                      onClick={() => setCash(n)}
+                    >
                       {rupiah(n)}
                     </Button>
                   ))}
@@ -1358,14 +1560,16 @@ export function CashierPage({ currentUser, onNavigate }: {
                   <Icon name="qris" /> Pastikan pembayaran QRIS sudah masuk.
                 </div>
               )}
-              <div
-                className={`payment-result ${shortage ? "danger" : "success"}`}
-              >
-                <span>{shortage ? "Pembayaran kurang" : "Kembalian"}</span>
-                <strong>
-                  {shortage ? `Kurang ${rupiah(shortage)}` : rupiah(change)}
-                </strong>
-              </div>
+              {method !== "QRIS" && (
+                <div
+                  className={`payment-result ${shortage ? "danger" : "success"}`}
+                >
+                  <span>{shortage ? "Pembayaran kurang" : "Kembalian"}</span>
+                  <strong>
+                    {shortage ? `Kurang ${rupiah(shortage)}` : rupiah(change)}
+                  </strong>
+                </div>
+              )}
               {payDisabledReason && (
                 <div
                   style={{
@@ -1390,7 +1594,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 disabled={Boolean(payDisabledReason) || !cart.length}
                 onClick={pay}
               >
-                {paying ? "Memproses..." : "Bayar"} <Icon name="cash" />
+                Bayar <Icon name="cash" />
               </Button>
               {gagalMuat && (
                 <div className="payment-result danger" role="alert">

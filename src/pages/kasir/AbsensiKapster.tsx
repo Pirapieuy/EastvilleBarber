@@ -15,7 +15,7 @@ import {
 } from "../../api"
 import { AbsensiStatus } from "../../types"
 
-type View = "list" | "photo" | "status"
+type View = "list" | "photo"
 
 export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, initialKapsterName, onComplete }: {
   onNavigate?: (page: string) => void
@@ -223,19 +223,19 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
       await apiAbsensiKapster.catatAbsensiKapster({
         targetUserId: selectedKapster.id,
         tanggal,
-        status,
+        status: "Hadir",
         fotoUrl: fotoWajah,
-        catatan,
+        catatan: "",
       })
       setToast({
         type: "success",
-        message: `Absensi ${selectedKapster.nama} berhasil dicatat (${status}).`,
+        message: `Absensi ${selectedKapster.nama} berhasil dicatat (Hadir).`,
       })
       setRiwayatAbsensi([])
       setView("list")
       await loadData()
       if (inline) {
-        onComplete?.(status === "Hadir")
+        onComplete?.(true)
         return
       }
       if (sessionStorage.getItem("eastville-return-to-pos") === "1") {
@@ -649,155 +649,23 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
               <Button
                 className="secondary-button"
                 onClick={closeModal}
+                disabled={submitting}
                 style={{ flex: 1 }}
               >
                 Batal
               </Button>
               <Button
-                onClick={() => setView("status")}
-                disabled={!fotoWajah}
-                style={{
-                  flex: 1,
-                  background: "var(--brass-dark)",
-                  border: "1px solid var(--brass-dark)",
-                  color: "#fff",
-                }}
-              >
-                Lanjut
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Status picker modal */}
-      {view === "status" && selectedKapster && (
-        <div
-          className="modal-overlay"
-          onClick={closeModal}
-          style={modalOverlayStyle}
-        >
-          <div
-            className="modal-panel absensi-modal"
-            onClick={(e) => e.stopPropagation()}
-            style={modalPanelStyle}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                paddingBottom: 12,
-                borderBottom: "1px solid var(--line)",
-                marginBottom: 14,
-              }}
-            >
-              <Icon
-                name="calendar"
-                style={{ width: 20, height: 20, color: "var(--ink)" }}
-              />
-              <div>
-                <div
-                  style={{ fontWeight: 700, color: "var(--ink)", fontSize: 16 }}
-                >
-                  Pilih Status Absensi
-                </div>
-                <div
-                  style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}
-                >
-                  {selectedKapster.nama} ·{" "}
-                  {new Date(tanggal + "T00:00:00").toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2,1fr)",
-                gap: 10,
-                marginBottom: 14,
-              }}
-            >
-              {["Hadir", "Izin", "Sakit", "Cuti"].map((s) => {
-                const cfg = STATUS_CONFIG[(s as AbsensiStatus)]
-                const active = status === s
-                return (
-                  <Button
-                    key={s}
-                    className={active ? "primary-button" : "secondary-button"}
-                    onClick={() => setStatus(s as AbsensiStatus)}
-                    style={{
-                      padding: "12px 10px",
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: active ? "#fff" : cfg.color,
-                      background: active ? cfg.color : cfg.bg,
-                      border: `1px solid ${cfg.color}`,
-                      borderRadius: 12,
-                      gap: 6,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {s}
-                  </Button>
-                )
-              })}
-            </div>
-            <label
-              style={{
-                display: "block",
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--ink)",
-                marginBottom: 8,
-              }}
-            >
-              Catatan (opsional)
-            </label>
-            <textarea
-              value={catatan}
-              onChange={(e) => setCatatan(e.target.value)}
-              rows={3}
-              placeholder="Mis. Izin keluarga, Sakit demam, dll."
-              style={{
-                width: "100%",
-                padding: 12,
-                fontSize: 14,
-                border: "1px solid var(--line)",
-                borderRadius: 12,
-                fontFamily: "inherit",
-                background: "#fff",
-                color: "var(--ink)",
-              }}
-            />
-            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-              <Button
-                className="secondary-button"
-                onClick={closeModal}
-                disabled={submitting}
-                style={{ flex: 1, padding: 12, fontWeight: 700 }}
-              >
-                Batal
-              </Button>
-              <Button
                 onClick={handleCatat}
-                disabled={submitting}
+                disabled={!fotoWajah || submitting}
                 style={{
                   flex: 1,
-                  padding: 12,
-                  fontWeight: 700,
                   background: "#15803d",
                   border: "1px solid #15803d",
                   color: "#fff",
+                  fontWeight: 700,
                 }}
               >
-                Simpan Absensi
+                {submitting ? "Mengirim..." : "Kirim Absensi"}
               </Button>
             </div>
           </div>
