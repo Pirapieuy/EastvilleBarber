@@ -904,9 +904,6 @@ export function CashierPage({ currentUser, onNavigate }: {
               <Icon name="receipt" /> Pesanan saat ini
             </span>
             <div className="flex items-center gap-2 ml-auto">
-              <b className="cart-tab-count">
-                {itemCount} item
-              </b>
               <button
                 type="button"
                 onClick={() => setIsCartOpen(false)}
@@ -920,9 +917,7 @@ export function CashierPage({ currentUser, onNavigate }: {
           <div className="cart-lines">
             {cart.length > 0 && (
               <div className="cart-clear-row">
-                <span className="cart-list-label">
-                  {cart.length} baris pesanan
-                </span>
+                <span className="cart-list-label">{itemCount} item</span>
                 <Button
                   className="cart-clear-button"
                   onClick={clearCart}
