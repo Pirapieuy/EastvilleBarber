@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, LoadingState, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
-import { apiKasir, getToken } from "../../api"
+import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { getPromoDiscounts, PromoDiscount } from "../../utils/promoStorage"
+import { AbsensiKapster } from "../kasir/AbsensiKapster"
 
 export type CatalogItem = {
   id: number | string
@@ -285,6 +286,8 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [barberList, setBarberList] = useState<{ id?: string name: string }[]>(
     ["Budi Santoso", "Zhefitra Ananda"].map((name) => ({ name })),
   )
+  const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(new Set())
+  const [attendanceTarget, setAttendanceTarget] = useState("")
   const [invoice, setInvoice] = useState<string | undefined>()
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState("")
@@ -312,8 +315,8 @@ export function CashierPage({ currentUser, onNavigate }: {
       return
     }
     setLiveError("")
-    Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster()])
-      .then(([layanan, produk, kapster]) => {
+    Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster(), apiAbsensi.list({ tanggal: new Date().toISOString().slice(0, 10) })])
+      .then(([layanan, produk, kapster, attendance]) => {
         setCatalogData([
           ...layanan
             .filter((l) => l.status === "Aktif")
@@ -337,8 +340,16 @@ export function CashierPage({ currentUser, onNavigate }: {
               }),
             ),
         ])
+        const latestAttendance = new Map<string, (typeof attendance)[number]>()
+        attendance.forEach((row) => {
+          const existing = latestAttendance.get(row.userId)
+          if (!existing || row.waktu > existing.waktu) latestAttendance.set(row.userId, row)
+        })
+        const present = new Set([...latestAttendance.values()].filter((row) => row.status === "Hadir").map((row) => row.userId))
+        setAttendedBarbers(present)
+        const eligible = kapster.filter((k) => present.has(k.id))
         setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
-        setSelectedBarber(kapster[0]?.nama ?? "")
+        setSelectedBarber(eligible[0]?.nama ?? "")
         setCart([])
         setCash(0)
         setLive(true)
@@ -610,13 +621,21 @@ export function CashierPage({ currentUser, onNavigate }: {
             <small>Kapster aktif</small>
           </div>
           <div className="barber-options">
-            {barberList.map(({ name: barber }) => (
+            {barberList.map(({ id, name: barber }) => {
+              const isAttended = !live || Boolean(id && attendedBarbers.has(id))
+              return (
               <Button
-                className={`barber-btn ${
+                className={`barber-btn ${!isAttended ? "disabled" : ""} ${
                   selectedBarber === barber ? "active" : ""
                 }`}
                 key={barber}
+                aria-disabled={!isAttended}
+                title={!isAttended ? "Kapster perlu absensi foto terlebih dahulu" : undefined}
                 onClick={() => {
+                  if (!isAttended) {
+                    if (id) setAttendanceTarget(id)
+                    return
+                  }
                   setSelectedBarber(barber)
                   setCart((items) => assignCartToBarber(items, barber))
                 }}
@@ -624,9 +643,27 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <i>{barber.charAt(0)}</i>
                 <span>{barber}</span>
               </Button>
-            ))}
+            )})}
           </div>
         </section>
+        {attendanceTarget && (
+          <AbsensiKapster
+            inline
+            initialKapsterId={attendanceTarget}
+            initialKapsterName={barberList.find((barber) => barber.id === attendanceTarget)?.name}
+            onComplete={(success) => {
+              if (success) {
+                const kapster = barberList.find((barber) => barber.id === attendanceTarget)
+                setAttendedBarbers((current) => new Set(current).add(attendanceTarget))
+                if (kapster) {
+                  setSelectedBarber(kapster.name)
+                  setCart((items) => assignCartToBarber(items, kapster.name))
+                }
+              }
+              setAttendanceTarget("")
+            }}
+          />
+        )}
         <div className="catalog-tools">
           <div className="segmented">
             <Button

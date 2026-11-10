@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { createPortal } from "react-dom"
 import { Icon } from "../../components/common/Icon"
 import { Button, BrandMark } from "../../components/common/UI"
 import { IconName, Role } from "../../types"
@@ -136,11 +137,11 @@ export function BaseSidebar({
                   </div>
                   <div className="user-info-text">
                     <strong>{user.name}</strong>
-                    <span
+                    {user.roleBadge && <span
                       className={`role-chip role-${user.role.toLowerCase()}`}
                     >
                       {user.roleBadge}
-                    </span>
+                    </span>}
                   </div>
                 </div>
                 <Button
@@ -167,38 +168,40 @@ export function BaseSidebar({
         </div>
       </aside>
 
-      {logoutModalOpen && (
-        <div className="modal-overlay logout-modal-overlay">
-          <div className="logout-confirm-card" role="dialog" aria-modal="true">
-            <div className="logout-card-header">
-              <div className="logout-icon-shell">
-                <Icon name="logout" />
+      {logoutModalOpen &&
+        createPortal(
+          <div className="modal-overlay logout-modal-overlay">
+            <div className="logout-confirm-card" role="dialog" aria-modal="true">
+              <div className="logout-card-header">
+                <div className="logout-icon-shell">
+                  <Icon name="logout" />
+                </div>
+                <div>
+                  <h3>Konfirmasi Keluar</h3>
+                  <p>Yakin ingin keluar dari akun ini?</p>
+                </div>
               </div>
-              <div>
-                <h3>Konfirmasi Keluar</h3>
-                <p>Yakin ingin keluar dari akun ini?</p>
+              <div className="logout-card-actions">
+                <Button
+                  className="secondary-button"
+                  onClick={() => setLogoutModalOpen(false)}
+                >
+                  Batal
+                </Button>
+                <Button
+                  className="danger-button"
+                  onClick={() => {
+                    setLogoutModalOpen(false)
+                    if (onLogout) onLogout()
+                  }}
+                >
+                  Ya, Keluar
+                </Button>
               </div>
             </div>
-            <div className="logout-card-actions">
-              <Button
-                className="secondary-button"
-                onClick={() => setLogoutModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                className="danger-button"
-                onClick={() => {
-                  setLogoutModalOpen(false)
-                  if (onLogout) onLogout()
-                }}
-              >
-                Ya, Keluar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   )
 }

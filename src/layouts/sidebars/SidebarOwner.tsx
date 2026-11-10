@@ -59,12 +59,7 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
         label: "Gaji & Kasbon",
         icon: "wallet",
       },
-      {
-        page: "AbsensiAdmin",
-        alias: "attendance-admin",
-        label: "Jam Kerja",
-        icon: "calendar",
-      },
+      { page: "RiwayatAbsensi", alias: "attendance-history", label: "Riwayat Absensi", icon: "calendar" },
     ],
   },
   {

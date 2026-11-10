@@ -23,7 +23,6 @@ import { LayananHarga as LayananHargaManajer } from "./pages/manajer/LayananHarg
 import { MasterProduk as MasterProdukManajer } from "./pages/manajer/MasterProduk"
 import { TimManajer } from "./pages/manajer/TimManajer"
 import { GajiKasbon as GajiKasbonManajer } from "./pages/manajer/GajiKasbon"
-import { AbsensiTim } from "./pages/manajer/AbsensiTim"
 
 // Owner Pages
 import { BerandaOwner } from "./pages/owner/BerandaOwner"
@@ -36,7 +35,7 @@ import { LayananHarga as LayananHargaOwner } from "./pages/owner/LayananHarga"
 import { MasterProduk as MasterProdukOwner } from "./pages/owner/MasterProduk"
 import { TimEastville } from "./pages/owner/TimEastville"
 import { GajiKasbon as GajiKasbonOwner } from "./pages/owner/GajiKasbon"
-import { AbsensiAdmin as AbsensiAdminOwner } from "./pages/owner/AbsensiAdmin"
+import { AttendanceHistoryPage } from "./pages/shared/AttendanceHistoryPage"
 import { JejakAudit as JejakAuditOwner } from "./pages/owner/JejakAudit"
 import { BackupData as BackupDataOwner } from "./pages/owner/BackupData"
 
@@ -131,7 +130,7 @@ export function App() {
         return <RekapManualKasir />
       }
       if (activePage === "AbsensiKapster" || activePage === "absensi-kapster") {
-        return <AbsensiKapster />
+        return <AbsensiKapster onNavigate={setActivePage} />
       }
       return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
     }
@@ -186,13 +185,15 @@ export function App() {
         return <GajiKasbonManajer />
       }
       if (
+        activePage === "RiwayatAbsensi" ||
+        activePage === "attendance-history" ||
         activePage === "AbsensiTim" ||
         activePage === "attendance-admin" ||
         activePage === "attendance-tim" ||
         activePage === "JadwalAbsensi" ||
         activePage === "jadwal-absensi"
       ) {
-        return <AbsensiTim currentUser={currentUser} />
+        return <AttendanceHistoryPage />
       }
       return (
         <BerandaManajer
@@ -278,12 +279,14 @@ export function App() {
       return <GajiKasbonOwner />
     }
     if (
+      activePage === "RiwayatAbsensi" ||
+      activePage === "attendance-history" ||
       activePage === "AbsensiAdmin" ||
       activePage === "attendance-admin" ||
       activePage === "JadwalAbsensi" ||
       activePage === "jadwal-absensi"
     ) {
-      return <AbsensiAdminOwner currentUser={currentUser} />
+      return <AttendanceHistoryPage />
     }
     if (activePage === "JejakAudit" || activePage === "audit") {
       return <JejakAuditOwner />

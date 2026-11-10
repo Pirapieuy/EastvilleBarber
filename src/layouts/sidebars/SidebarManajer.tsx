@@ -65,12 +65,7 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
         label: "Gaji & Kasbon",
         icon: "wallet",
       },
-      {
-        page: "AbsensiTim",
-        alias: "attendance-admin",
-        label: "Absensi",
-        icon: "calendar",
-      },
+      { page: "RiwayatAbsensi", alias: "attendance-history", label: "Riwayat Absensi", icon: "calendar" },
     ],
   },
 ]
