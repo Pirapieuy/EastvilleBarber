@@ -2847,18 +2847,7 @@ textarea {
   position: absolute;
   inset: 0 0 0 auto;
   width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: #fff;
-  background: var(--oxblood);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.cart-swipe-delete .icon {
-  width: 14px;
+  display: none;
 }
 
 .cart-lines article .cart-line-row {
@@ -9662,9 +9651,9 @@ summary,
 /* Keranjang: baris tiga kolom (nama | jumlah | harga), jumlah bisa diketik */
 .cart-lines article .cart-line-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 96px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   min-height: 48px;
 }
 
@@ -9679,19 +9668,22 @@ summary,
 .cart-lines article .cart-line-title strong {
   font-size: 13px;
   line-height: 1.25;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .cart-lines article .cart-line-title small {
   display: block;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .cart-lines article .stepper {
-  width: 112px;
-  height: 36px;
+  width: 90px;
+  height: 34px;
   display: grid;
-  grid-template-columns: 32px 1fr 32px;
+  grid-template-columns: 28px 1fr 28px;
   align-items: stretch;
   overflow: hidden;
   border-radius: 9px;
@@ -9699,7 +9691,7 @@ summary,
 }
 
 .cart-lines article .stepper .button {
-  width: 32px;
+  width: 28px;
   height: 100%;
   display: grid;
   place-items: center;
@@ -9726,13 +9718,14 @@ summary,
 }
 
 .cart-lines article .cart-line-price {
-  width: 96px;
+  min-width: 72px;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   text-align: right;
+  white-space: nowrap;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 340px) {
   .cart-lines article .cart-line-row {
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: 8px;
