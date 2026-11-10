@@ -821,6 +821,7 @@ export function CashierPage({ currentUser, onNavigate }: {
           ))}
         </div>
       </section>
+      {cart.length > 0 && (
       <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] md:hidden">
         <button
           type="button"
@@ -855,6 +856,7 @@ export function CashierPage({ currentUser, onNavigate }: {
           </div>
         </button>
       </div>
+      )}
 
       <div
         className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
