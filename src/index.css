@@ -9461,3 +9461,24 @@ summary,
     grid-template-columns: 1fr;
   }
 }
+
+/* Riwayat: dropdown kapster di samping tanggal */
+.history-kapster-select {
+  min-width: 0;
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink);
+  background-color: var(--paper);
+  font-size: 13px;
+}
+
+.history-empty {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--slate);
+  font-size: 13px;
+  text-align: center;
+}

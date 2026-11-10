@@ -303,19 +303,24 @@ export function HistoryPage({ currentUser, role }: {
   const barberOptions = Array.from(
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
   ).sort()
+  // Kapster yang dipilih bisa hilang saat tanggal diganti: kembali ke semua.
+  const activeBarber = barberOptions.includes(barberFilter)
+    ? barberFilter
+    : "Semua kapster"
   const visibleTx = txList.filter(
     (tx) =>
-      barberFilter === "Semua kapster" ||
-      tx.barber.split(", ").includes(barberFilter),
+      activeBarber === "Semua kapster" ||
+      tx.barber.split(", ").includes(activeBarber),
   )
 
   const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
 
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
-  function loadLive() {
+  function loadLive(isStale: () => boolean = () => false) {
     return apiTransaksi
       .list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {})
       .then((rows) => {
+        if (isStale()) return
         const list = rows as HistoryTransactionRecord[]
         setTxList(list)
         setSelectedId((cur) =>
@@ -329,10 +334,16 @@ export function HistoryPage({ currentUser, role }: {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
-    loadLive().catch((e) => {
+    let stale = false
+    loadLive(() => stale).catch((e) => {
+      if (stale) return
       console.error("Gagal memuat riwayat:", e)
+      setTxList([])
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
+    return () => {
+      stale = true
+    }
   }, [dateFilter])
 
   async function handleConfirmAction(reason: string) {
@@ -446,18 +457,19 @@ export function HistoryPage({ currentUser, role }: {
           max={TANGGAL_MAKS()}
           min={TANGGAL_MULAI}
         />
-        <div className="barber-filter-bar">
-          {["Semua kapster", ...barberOptions].map((b) => (
-            <button
-              type="button"
-              key={b}
-              className={`barber-pill-btn ${barberFilter === b ? "active" : ""}`}
-              onClick={() => setBarberFilter(b)}
-            >
+        <select
+          aria-label="Filter kapster"
+          className="history-kapster-select"
+          onChange={(e) => setBarberFilter(e.target.value)}
+          value={activeBarber}
+        >
+          <option value="Semua kapster">Semua kapster</option>
+          {barberOptions.map((b) => (
+            <option key={b} value={b}>
               {b}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
@@ -466,6 +478,13 @@ export function HistoryPage({ currentUser, role }: {
             <span>Kapster</span>
             <span>Item</span>
           </div>
+          {visibleTx.length === 0 && (
+            <p className="history-empty">
+              Belum ada transaksi
+              {dateFilter ? " pada tanggal ini" : ""}
+              {activeBarber !== "Semua kapster" ? ` untuk ${activeBarber}` : ""}.
+            </p>
+          )}
           {visibleTx.map((tx) => (
             <Button
               className={`transaction-row ${
