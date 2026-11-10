@@ -9750,10 +9750,13 @@ summary,
 }
 
 /* Kode diskon: kolom isian dan tombol sejajar, sama tinggi dan sama lebar tepi */
-.cart-discount-panel {
-  grid-template-columns: minmax(0, 1fr) auto;
+.cart-discount-panel,
+.cashier-page .cart-discount-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
   align-items: end;
-  column-gap: 8px;
+  gap: 0 8px;
+  padding: 12px;
 }
 
 .cart-discount-panel > label {
@@ -9775,10 +9778,15 @@ summary,
 }
 
 .cart-discount-panel > .primary-button {
-  padding: 0 18px;
+  width: 100%;
+  padding: 0 8px;
   border-radius: 11px;
   box-shadow: none;
   white-space: nowrap;
+}
+
+.cart-discount-panel .input-shell {
+  border-radius: 11px;
 }
 
 .cart-discount-panel .cart-error {
