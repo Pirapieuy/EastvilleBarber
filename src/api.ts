@@ -147,6 +147,8 @@ export interface CheckoutPayload {
   alasan?: string
   /** PIN Owner/Manajer untuk menyetujui diskon (diverifikasi server) */
   pinOtorisasi?: string
+  /** Kode unik diskon yang diketik kasir (diverifikasi server bila backend sudah mendukung) */
+  kodeDiskon?: string
   /** Id unik per percobaan bayar: server tidak membuat nota ganda bila dikirim ulang */
   clientRequestId?: string
 }

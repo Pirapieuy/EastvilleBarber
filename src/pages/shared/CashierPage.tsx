@@ -6,6 +6,7 @@ import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { getPromoDiscounts, PromoDiscount } from "../../utils/promoStorage"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
+import { TANGGAL_MAKS } from "../../utils/tanggal"
 
 export type CatalogItem = {
   id: number | string
@@ -306,22 +307,16 @@ export function CashierPage({ currentUser, onNavigate }: {
     },
   ])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
-  const [cash, setCash] = useState(catalog[0].price + catalog[2].price)
+  const [cash, setCash] = useState(0)
+  const [qrisInput, setQrisInput] = useState(0)
+  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
   const [discount, setDiscount] = useState(0)
-  const [discountMode, setDiscountMode] = useState<"Nominal" | "Persen">(
-    "Nominal",
-  )
-  const [discountDraft, setDiscountDraft] = useState(0)
-  const [pinChecking, setPinChecking] = useState(false)
-  const [discountPinError, setDiscountPinError] = useState("")
+  const [kodeDiskon, setKodeDiskon] = useState("")
+  const [kodeError, setKodeError] = useState("")
+  const [kodeTerpakai, setKodeTerpakai] = useState("")
   const [discountReason, setDiscountReason] = useState("")
-  const [discountReasonDraft, setDiscountReasonDraft] = useState("")
   const [appliedDiscountPercent, setAppliedDiscountPercent] =
     useState<number | null>(null)
-  const [discountTypeTab, setDiscountTypeTab] = useState<"event" | "manual">(
-    "event",
-  )
-  const [promosList, setPromosList] = useState<PromoDiscount[]>([])
   const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
@@ -348,7 +343,6 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [saveReceiptError, setSaveReceiptError] = useState("")
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
-  const [pinAtasan, setPinAtasan] = useState("")
   const cartSwipeStart = useRef<{ lineId: string; x: number; y: number } | null>(
     null,
   )
@@ -370,7 +364,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       return
     }
     setLiveError("")
-    Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster(), apiAbsensi.list({ tanggal: new Date().toISOString().slice(0, 10) })])
+    Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster(), apiAbsensi.list({ tanggal: TANGGAL_MAKS() })])
       .then(([layanan, produk, kapster, attendance]) => {
         setCatalogData([
           ...layanan
@@ -465,9 +459,9 @@ export function CashierPage({ currentUser, onNavigate }: {
         diskon: effectiveDiscount,
         gratis,
         alasan: discountReason || undefined,
-        pinOtorisasi: effectiveDiscount > 0 ? pinAtasan : undefined,
+        kodeDiskon: effectiveDiscount > 0 ? kodeTerpakai : undefined,
         clientRequestId: requestId.current,
-        bayarTunai: method === "QRIS" ? 0 : cash,
+        bayarTunai: tunaiTerpakai,
         bayarQris: qris,
         items: cart.map((l) => ({
           tipe: l.type,
@@ -515,32 +509,31 @@ export function CashierPage({ currentUser, onNavigate }: {
     }
   }
 
-  /** Cek PIN Owner/Manajer saat "Terapkan" diskon (server memakai batas 5x salah); demo memakai 123456. */
-  async function cekPinDiskon(): Promise<boolean> {
-    const pin = pinAtasan.trim()
-    if (!/^\d{6}$/.test(pin)) {
-      setDiscountPinError("PIN otorisasi harus 6 digit angka.")
-      return false
+  /** Terapkan diskon dari kode unik. Kode dibuat owner (menu Layanan & Produk). */
+  function terapkanKode() {
+    const kode = kodeDiskon.trim().toUpperCase()
+    if (!kode) {
+      setKodeError("Masukkan kode diskon.")
+      return
     }
-    if (!live) {
-      if (pin === "123456") return true
-      setDiscountPinError("PIN otorisasi salah. Default demo: 123456")
-      return false
+    const hariIni = TANGGAL_MAKS()
+    const promo = getPromoDiscounts().find(
+      (p) =>
+        p.status === "Aktif" &&
+        p.berlakuSampai >= hariIni &&
+        (p.kode ?? "").toUpperCase() === kode,
+    )
+    if (!promo) {
+      setKodeError("Kode tidak ditemukan atau sudah kedaluwarsa.")
+      return
     }
-    setDiscountPinError("")
-    setPinChecking(true)
-    try {
-      await apiKasir.verifikasiPin(pin)
-      setDiscountPinError("")
-      return true
-    } catch (e) {
-      setDiscountPinError(
-        e instanceof Error ? e.message : "PIN gagal diperiksa. Coba lagi.",
-      )
-      return false
-    } finally {
-      setPinChecking(false)
-    }
+    setDiscount(Math.round((total * promo.persen) / 100))
+    setAppliedDiscountPercent(promo.persen)
+    setDiscountReason(promo.nama)
+    setKodeTerpakai(kode)
+    setKodeDiskon("")
+    setKodeError("")
+    setDiscountOpen(false)
   }
 
   const items = catalogData.filter(
@@ -560,26 +553,37 @@ export function CashierPage({ currentUser, onNavigate }: {
       : Math.round((total * appliedDiscountPercent) / 100)
   // Diskon yang menutup seluruh subtotal = transaksi gratis (promo/traktiran): alasan wajib.
   const gratis = total > 0 && effectiveDiscount >= total
-  const draftPenuh =
-    total > 0 &&
-    (discountMode === "Persen" ? discountDraft >= 100 : discountDraft >= total)
   const payableTotal = Math.max(0, total - effectiveDiscount)
+  // Tunai: isi jumlah tunai. QRIS: otomatis sebesar tagihan.
+  // Gabungan: isi salah satu (tunai atau QRIS), sisanya dihitung otomatis.
   const qris =
     method === "Tunai"
       ? 0
       : method === "QRIS"
         ? payableTotal
-        : Math.max(0, payableTotal - cash)
-  const paid =
-    method === "Tunai" ? cash : method === "QRIS" ? qris : cash + qris
+        : gabunganDari === "qris"
+          ? Math.min(qrisInput, payableTotal)
+          : Math.max(0, payableTotal - Math.min(cash, payableTotal))
+  const tunaiTerpakai =
+    method === "QRIS"
+      ? 0
+      : method === "Tunai"
+        ? cash
+        : gabunganDari === "qris"
+          ? Math.max(0, payableTotal - qris)
+          : Math.min(cash, payableTotal)
+  const paid = tunaiTerpakai + qris
   const shortage = Math.max(0, payableTotal - paid)
-  const change =
-    method === "QRIS" ? 0 : Math.max(0, cash - (payableTotal - qris))
+  const change = method === "Tunai" ? Math.max(0, cash - payableTotal) : 0
 
   const payDisabledReason = ((): string | null => {
     if (!cart.length) return null
     if (gagalMuat) return "Data kasir belum termuat. Tekan Coba lagi di atas."
     if (paying) return "Sedang memproses pembayaran..."
+    if (method === "Tunai" && cash <= 0) return "Masukkan jumlah tunai."
+    if (method === "Gabungan" && tunaiTerpakai + qris <= 0) {
+      return "Masukkan jumlah tunai atau QRIS."
+    }
     if (shortage > 0) {
       return `Pembayaran masih kurang ${rupiah(shortage)}.`
     }
@@ -640,39 +644,6 @@ export function CashierPage({ currentUser, onNavigate }: {
     .sort((a, b) => a - b)
     .slice(0, 5)
 
-  const pinLabel = (
-    <label>
-      <span>PIN Otorisasi Manajer/Owner</span>
-      <div className="input-shell">
-        <Icon name="lock" />
-        <input
-          autoComplete="off"
-          inputMode="numeric"
-          maxLength={6}
-          onChange={(e) => {
-            setPinAtasan(e.target.value.replace(/\D/g, ""))
-            setDiscountPinError("")
-          }}
-          placeholder={live ? "6 digit PIN" : "6 digit PIN (demo: 123456)"}
-          type="password"
-          value={pinAtasan}
-        />
-      </div>
-      {discountPinError && (
-        <small
-          style={{
-            color: "#dc2626",
-            fontSize: 11,
-            marginTop: 4,
-            display: "block",
-          }}
-        >
-          {discountPinError}
-        </small>
-      )}
-    </label>
-  )
-
   if (receipt) {
     return (
       <ReceiptView
@@ -681,7 +652,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         discount={effectiveDiscount}
         total={payableTotal}
         method={method}
-        cash={cash}
+        cash={method === "Tunai" ? cash : tunaiTerpakai}
         qris={qris}
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
@@ -713,12 +684,13 @@ export function CashierPage({ currentUser, onNavigate }: {
   function clearCart() {
     setCart([])
     setCash(0)
+    setQrisInput(0)
     setDiscount(0)
     setAppliedDiscountPercent(null)
     setDiscountReason("")
-    setDiscountReasonDraft("")
-    setPinAtasan("")
-    setDiscountPinError("")
+    setKodeTerpakai("")
+    setKodeDiskon("")
+    setKodeError("")
   }
 
   function removeCartLineWithAnimation(lineId: string) {
@@ -827,7 +799,11 @@ export function CashierPage({ currentUser, onNavigate }: {
           )}
           {items.map((item) => (
             <Button
-              className={`catalog-item ${item.stock === 0 ? "disabled" : ""}`}
+              className={`catalog-item ${
+                item.stock === 0 || stokHabis(item.id, item.stock) || !selectedBarber
+                  ? "disabled"
+                  : ""
+              }`}
               disabled={
                 item.stock === 0 ||
                 stokHabis(item.id, item.stock) ||
@@ -835,7 +811,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               }
               title={
                 !selectedBarber
-                  ? "Pilih kapster dulu"
+                  ? "Kapster belum absen"
                   : stokHabis(item.id, item.stock)
                     ? "Stok habis di keranjang"
                     : undefined
@@ -1126,271 +1102,53 @@ export function CashierPage({ currentUser, onNavigate }: {
               <span>Subtotal</span>
               <strong>{rupiah(total)}</strong>
             </div>
-            <Button
-              className="discount-button"
-              onClick={() => {
-                setDiscountDraft(
-                  discountMode === "Persen"
-                    ? (appliedDiscountPercent ?? 0)
-                    : discount,
-                )
-                setDiscountReasonDraft(discountReason)
-                setPromosList(getPromoDiscounts())
-                setDiscountPinError("")
-                setDiscountOpen(!discountOpen)
-              }}
-            >
-              <Icon name="receipt" />{" "}
-              {discount > 0 ? "Ubah diskon" : "Beri diskon"}
-            </Button>
-            {discountOpen && (
+            {discount === 0 && (
+              <Button
+                className="discount-button"
+                onClick={() => {
+                  setKodeError("")
+                  setDiscountOpen(!discountOpen)
+                }}
+              >
+                <Icon name="receipt" /> Pakai kode diskon
+              </Button>
+            )}
+            {discountOpen && discount === 0 && (
               <div className="cart-discount-panel">
-                <div className="segmented full discount-mode">
-                  <Button
-                    className={discountTypeTab === "event" ? "active" : ""}
-                    onClick={() => setDiscountTypeTab("event")}
-                  >
-                    <Icon name="cash" /> Diskon Event
-                  </Button>
-                  <Button
-                    className={discountTypeTab === "manual" ? "active" : ""}
-                    onClick={() => setDiscountTypeTab("manual")}
-                  >
-                    <Icon name="lock" /> Diskon Manual
-                  </Button>
-                </div>
-
-                {discountTypeTab === "event" ? (
-                  <div
-                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
-                  >
-                    {pinLabel}
-                    <small style={{ color: "var(--muted)", fontSize: 11 }}>
-                      Pilih diskon event yang sedang aktif:
-                    </small>
-                    {promosList.filter((p) => p.status === "Aktif").length ===
-                    0 ? (
-                      <p
-                        style={{
-                          color: "var(--slate)",
-                          fontSize: 12,
-                          padding: "8px 0",
-                        }}
-                      >
-                        Belum ada diskon event aktif. Atur di menu Layanan &
-                        Produk.
-                      </p>
-                    ) : (
-                      promosList
-                        .filter((p) => p.status === "Aktif")
-                        .map((p) => (
-                          <div
-                            key={p.id}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              padding: "8px 10px",
-                              borderRadius: 6,
-                              border: "1px solid var(--line)",
-                              background: "var(--paper)",
-                              gap: 8,
-                            }}
-                          >
-                            <div>
-                              <strong
-                                style={{ fontSize: 12, display: "block" }}
-                              >
-                                {p.nama}
-                              </strong>
-                              <small
-                                style={{ color: "var(--muted)", fontSize: 11 }}
-                              >
-                                Diskon {p.persen}% · s/d{" "}
-                                {new Date(
-                                  p.berlakuSampai + "T00:00:00",
-                                ).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
-                              </small>
-                            </div>
-                            <Button
-                              className="secondary-button"
-                              disabled={pinChecking}
-                              onClick={async () => {
-                                if (!(await cekPinDiskon())) return
-                                const appliedDiscount = Math.round(
-                                  (total * p.persen) / 100,
-                                )
-                                const updatedTotal = Math.max(
-                                  0,
-                                  total - appliedDiscount,
-                                )
-                                setDiscount(appliedDiscount)
-                                setAppliedDiscountPercent(p.persen)
-                                setDiscountReason(p.nama)
-                                if (method === "Tunai") {
-                                  setCash(updatedTotal)
-                                } else if (method === "QRIS") {
-                                  setCash(0)
-                                } else {
-                                  const cashPart = Math.min(cash, updatedTotal)
-                                  setCash(cashPart)
-                                }
-                                setDiscountOpen(false)
-                              }}
-                              style={{
-                                padding: "3px 8px",
-                                fontSize: 11,
-                                height: "auto",
-                              }}
-                            >
-                              Terapkan
-                            </Button>
-                          </div>
-                        ))
-                    )}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        marginTop: 4,
+                <label>
+                  <span>Kode diskon</span>
+                  <div className="input-shell">
+                    <Icon name="receipt" />
+                    <input
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      onChange={(e) => {
+                        setKodeDiskon(e.target.value.toUpperCase())
+                        setKodeError("")
                       }}
-                    >
-                      <Button
-                        className="text-button"
-                        onClick={() => setDiscountOpen(false)}
-                        style={{ fontSize: 12 }}
-                      >
-                        Tutup
-                      </Button>
-                    </div>
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          terapkanKode()
+                        }
+                      }}
+                      placeholder="Contoh: JUMAT15"
+                      value={kodeDiskon}
+                    />
                   </div>
-                ) : (
-                  <div className="discount-body">
-                    <div
-                      className="discount-mode segmented"
-                      style={{ marginBottom: 10 }}
-                    >
-                      {(["Nominal", "Persen"] as const).map((mode) => (
-                        <Button
-                          className={discountMode === mode ? "active" : ""}
-                          key={mode}
-                          onClick={() => {
-                            setDiscountMode(mode)
-                            setDiscountDraft(
-                              mode === "Persen"
-                                ? (appliedDiscountPercent ?? 0)
-                                : discount,
-                            )
-                          }}
-                        >
-                          {mode === "Nominal" ? "Nominal (Rp)" : "Persen (%)"}
-                        </Button>
-                      ))}
-                    </div>
-                    {pinLabel}
-                    <label>
-                      <span>Keterangan / Alasan Diskon</span>
-                      <div className="input-shell">
-                        <Icon name="pencil" />
-                        <input
-                          placeholder="Mis. Diskon Pelajar, Teman Owner"
-                          value={discountReasonDraft}
-                          onChange={(e) =>
-                            setDiscountReasonDraft(e.target.value)
-                          }
-                        />
-                      </div>
-                    </label>
-                    <label>
-                      <span>
-                        {discountMode === "Persen"
-                          ? "Persentase diskon"
-                          : "Nilai diskon"}
-                      </span>
-                      <div className="input-shell">
-                        <b>{discountMode === "Persen" ? "%" : "Rp"}</b>
-                        <input
-                          inputMode="numeric"
-                          onChange={(e) => {
-                            setDiscountDraft(
-                              Number(e.target.value.replace(/\D/g, "")),
-                            )
-                            setDiscountPinError("")
-                          }}
-                          value={discountDraft}
-                        />
-                      </div>
-                    </label>
-                    <div className="discount-actions">
-                      <Button
-                        className="text-button"
-                        onClick={() => {
-                          setDiscountPinError("")
-                          setDiscountOpen(false)
-                        }}
-                      >
-                        Batal
-                      </Button>
-                      <Button
-                        className="secondary-button"
-                        disabled={pinChecking}
-                        onClick={async () => {
-                          if (discountDraft <= 0) {
-                            setDiscountPinError(
-                              "Nilai diskon harus lebih dari 0.",
-                            )
-                            return
-                          }
-                          if (draftPenuh && !discountReasonDraft.trim()) {
-                            setDiscountPinError(
-                              "Diskon penuh (gratis) wajib diisi alasannya.",
-                            )
-                            return
-                          }
-                          if (!(await cekPinDiskon())) return
-                          setDiscountPinError("")
-                          const normalizedDiscount =
-                            discountMode === "Persen"
-                              ? Math.min(discountDraft, 100)
-                              : Math.min(discountDraft, total)
-                          const appliedDiscount =
-                            discountMode === "Persen"
-                              ? Math.round((total * normalizedDiscount) / 100)
-                              : normalizedDiscount
-                          const updatedTotal = Math.max(
-                            0,
-                            total - appliedDiscount,
-                          )
-                          setDiscount(appliedDiscount)
-                          setAppliedDiscountPercent(
-                            discountMode === "Persen"
-                              ? normalizedDiscount
-                              : null,
-                          )
-                          setDiscountReason(
-                            discountReasonDraft.trim() ||
-                              "Diskon Manual Otorisasi",
-                          )
-                          if (method === "Tunai") {
-                            setCash(updatedTotal)
-                          } else if (method === "QRIS") {
-                            setCash(0)
-                          } else {
-                            const cashPart = Math.min(cash, updatedTotal)
-                            setCash(cashPart)
-                          }
-                          setDiscountOpen(false)
-                        }}
-                      >
-                        {pinChecking ? "Memeriksa PIN..." : "Terapkan"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                  {kodeError && (
+                    <small className="cart-error" role="alert">
+                      {kodeError}
+                    </small>
+                  )}
+                </label>
+                <Button
+                  className="primary-button"
+                  disabled={!kodeDiskon.trim()}
+                  onClick={terapkanKode}
+                >
+                  Terapkan
+                </Button>
               </div>
             )}
             {discount > 0 && (
@@ -1405,8 +1163,8 @@ export function CashierPage({ currentUser, onNavigate }: {
               >
                 <div>
                   <span style={{ fontSize: 12 }}>
-                    Diskon:{" "}
-                    <strong>{discountReason || "Diskon Otorisasi"}</strong>
+                    Kode <strong>{kodeTerpakai}</strong> ·{" "}
+                    <strong>{discountReason}</strong>
                     {appliedDiscountPercent !== null &&
                       ` (${appliedDiscountPercent}%)`}
                   </span>
@@ -1425,14 +1183,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                     setDiscount(0)
                     setAppliedDiscountPercent(null)
                     setDiscountReason("")
-                    setPinAtasan("")
-                    if (method === "Tunai") {
-                      setCash(total)
-                    } else if (method === "QRIS") {
-                      setCash(0)
-                    } else {
-                      setCash(total)
-                    }
+                    setKodeTerpakai("")
                   }}
                   style={{ fontSize: 11, color: "#dc2626", padding: "2px 6px" }}
                   title="Batalkan diskon"
@@ -1450,39 +1201,17 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <small>Pembayaran</small>
                 <Icon name="wallet" />
               </div>
-              <div
-                className="method-grid"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: 6,
-                }}
-              >
+              <div className="method-grid">
                 {(["Tunai", "QRIS", "Gabungan"] as const).map((value) => (
                   <Button
                     className={method === value ? "active" : ""}
                     key={value}
-                    style={{
-                      minHeight: 44,
-                      padding: "6px 4px",
-                      justifyContent: "center",
-                      textAlign: "center",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
                     onClick={() => {
                       if (value === method) return
                       setMethod(value)
-                      if (value === "Tunai") {
-                        setCash(payableTotal)
-                      } else if (value === "QRIS") {
-                        setCash(0)
-                      } else {
-                        const cashPart =
-                          Math.round(payableTotal / 2 / 1000) * 1000
-                        setCash(cashPart)
-                      }
+                      setCash(0)
+                      setQrisInput(0)
+                      setGabunganDari("tunai")
                     }}
                   >
                     <Icon name={value === "QRIS" ? "qris" : "cash"} />
@@ -1490,85 +1219,120 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </Button>
                 ))}
               </div>
-              <div className="money-fields">
-                {method !== "QRIS" && (
-                  <label>
-                    <span>Jumlah Tunai</span>
+
+              {method === "Tunai" && (
+                <>
+                  <label className="pay-field">
+                    <span>Jumlah tunai</span>
                     <div className="input-shell">
                       <b>Rp</b>
                       <input
                         inputMode="numeric"
-                        onChange={(e) => {
-                          const val = Number(e.target.value.replace(/\D/g, ""))
-                          setCash(val)
-                        }}
-                        value={cash}
+                        onChange={(e) =>
+                          setCash(Number(e.target.value.replace(/\D/g, "")))
+                        }
+                        placeholder="0"
+                        value={cash || ""}
                       />
                     </div>
                   </label>
-                )}
-              </div>
-              {method !== "QRIS" && payableTotal > 0 && (
-                <div
-                  className="quick-cash"
-                  style={{
-                    display: "flex",
-                    gap: 6,
-                    flexWrap: "wrap",
-                    margin: "8px 0",
-                  }}
-                >
-                  <Button
-                    className={cash === payableTotal ? "active" : ""}
-                    style={
-                      cash === payableTotal
-                        ? {
-                            borderColor: "var(--brass)",
-                            background: "var(--brass-soft)",
-                            color: "var(--ink)",
-                            fontWeight: 700,
-                          }
-                        : undefined
-                    }
-                    onClick={() => setCash(payableTotal)}
-                  >
-                    Uang pas
-                  </Button>
-                  {pecahanCepat.map((n) => (
-                    <Button
-                      key={n}
-                      className={cash === n ? "active" : ""}
-                      style={
-                        cash === n
-                          ? {
-                              borderColor: "var(--brass)",
-                              background: "var(--brass-soft)",
-                              color: "var(--ink)",
-                              fontWeight: 700,
-                            }
-                          : undefined
-                      }
-                      onClick={() => setCash(n)}
+                  {payableTotal > 0 && (
+                    <div className="quick-cash">
+                      <Button
+                        className={cash === payableTotal ? "active" : ""}
+                        onClick={() => setCash(payableTotal)}
+                      >
+                        Uang pas
+                      </Button>
+                      {pecahanCepat.map((n) => (
+                        <Button
+                          key={n}
+                          className={cash === n ? "active" : ""}
+                          onClick={() => setCash(n)}
+                        >
+                          {rupiah(n)}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  {cash > 0 && (
+                    <div
+                      className={`payment-result ${shortage ? "danger" : "success"}`}
                     >
-                      {rupiah(n)}
-                    </Button>
-                  ))}
-                </div>
+                      <span>{shortage ? "Pembayaran kurang" : "Kembalian"}</span>
+                      <strong>
+                        {shortage ? `Kurang ${rupiah(shortage)}` : rupiah(change)}
+                      </strong>
+                    </div>
+                  )}
+                </>
               )}
-              {method !== "Tunai" && (
+
+              {method === "QRIS" && (
                 <div className="cart-qris-note">
                   <Icon name="qris" /> Pastikan pembayaran QRIS sudah masuk.
                 </div>
               )}
-              {method !== "QRIS" && (
-                <div
-                  className={`payment-result ${shortage ? "danger" : "success"}`}
-                >
-                  <span>{shortage ? "Pembayaran kurang" : "Kembalian"}</span>
-                  <strong>
-                    {shortage ? `Kurang ${rupiah(shortage)}` : rupiah(change)}
-                  </strong>
-                </div>
+
+              {method === "Gabungan" && (
+                <>
+                  <p className="pay-hint">
+                    Isi salah satu saja, sisanya dihitung otomatis.
+                  </p>
+                  <div className="pay-split">
+                    <label className="pay-field">
+                      <span>Jumlah tunai</span>
+                      <div className="input-shell">
+                        <b>Rp</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => {
+                            setGabunganDari("tunai")
+                            setCash(Number(e.target.value.replace(/\D/g, "")))
+                          }}
+                          placeholder="0"
+                          value={
+                            gabunganDari === "tunai"
+                              ? cash || ""
+                              : tunaiTerpakai || ""
+                          }
+                        />
+                      </div>
+                    </label>
+                    <label className="pay-field">
+                      <span>Jumlah QRIS</span>
+                      <div className="input-shell">
+                        <b>Rp</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => {
+                            setGabunganDari("qris")
+                            setQrisInput(
+                              Number(e.target.value.replace(/\D/g, "")),
+                            )
+                          }}
+                          placeholder="0"
+                          value={
+                            gabunganDari === "qris"
+                              ? qrisInput || ""
+                              : qris || ""
+                          }
+                        />
+                      </div>
+                    </label>
+                  </div>
+                  {tunaiTerpakai + qris > 0 && (
+                    <div className="payment-result success">
+                      <span>Tunai {rupiah(tunaiTerpakai)}</span>
+                      <strong>QRIS {rupiah(qris)}</strong>
+                    </div>
+                  )}
+                  {qris > 0 && (
+                    <div className="cart-qris-note">
+                      <Icon name="qris" /> Pastikan pembayaran QRIS sudah masuk.
+                    </div>
+                  )}
+                </>
               )}
               {payDisabledReason && (
                 <div

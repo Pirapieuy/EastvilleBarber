@@ -2655,8 +2655,22 @@ textarea {
   transform: translateY(-1px);
 }
 
-.catalog-item.disabled {
-  opacity: 0.45;
+.catalog-item.disabled,
+.catalog-item:disabled {
+  border-color: var(--line);
+  color: var(--muted);
+  background: #f1eee8;
+  box-shadow: none;
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.7;
+  transform: none;
+}
+
+.catalog-item.disabled strong,
+.catalog-item.disabled b,
+.catalog-item.disabled small {
+  color: var(--muted);
 }
 
 .item-icon {
@@ -9538,5 +9552,76 @@ summary,
 
   .expense-row > [data-label]::before {
     content: none;
+  }
+}
+
+/* Kasir POS: diskon kode unik dan pembayaran yang hanya menampilkan isian relevan */
+.cart-discount-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.cart-discount-panel .cart-error,
+.cart-error {
+  display: block;
+  margin-top: 4px;
+  color: var(--oxblood);
+  font-size: 12px;
+}
+
+.cart-payment .method-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cart-payment .method-grid .button {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 4px;
+}
+
+.cart-payment .pay-field {
+  display: block;
+  margin-top: 12px;
+}
+
+.cart-payment .pay-field > span {
+  display: block;
+  margin: 0 0 6px 2px;
+  color: var(--slate);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cart-payment .pay-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cart-payment .pay-hint {
+  margin: 12px 0 0;
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.cart-payment .quick-cash {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.cart-payment .payment-result {
+  margin-top: 12px;
+}
+
+@media (max-width: 420px) {
+  .cart-payment .pay-split {
+    grid-template-columns: 1fr;
   }
 }
