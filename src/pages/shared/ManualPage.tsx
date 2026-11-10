@@ -210,7 +210,7 @@ export function ManualPage() {
                 </div>
                 {n === 0 ? (
                   <Button
-                    className="secondary-button nota-add"
+                    className={`secondary-button nota-add ${it.tipe === "Produk" ? "nota-add-product" : "nota-add-service"}`}
                     onClick={() => ubahQty(it, 1)}
                   >
                     <Icon name="plus" /> Tambah
@@ -247,11 +247,11 @@ export function ManualPage() {
       <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Transaksi dari buku fisik"
-        title="Input Nota Kertas"
+        title="Input Manual"
       />
 
       <section className="panel form-panel">
-        <h3>1. Data nota</h3>
+        <h3>Data nota</h3>
         <div className="form-grid manual-info-grid">
           <label>
             <span>Nomor nota di buku</span>
@@ -276,17 +276,18 @@ export function ManualPage() {
               ))}
             </select>
           </label>
-          <label>
+          <div className="form-grid-field manual-date-field">
             <span>Tanggal</span>
             <CalendarPicker
               max={today()}
               min={TANGGAL_MULAI}
+              showToday={false}
               value={tanggal}
               onChange={setTanggal}
             />
-          </label>
+          </div>
           <label>
-            <span>Jam (perkiraan)</span>
+            <span>Jam</span>
             <input
               onChange={(e) => setJam(e.target.value)}
               required
@@ -300,7 +301,7 @@ export function ManualPage() {
 
       <section className="panel form-panel">
         <div className="section-title">
-          <h3>2. Layanan dan produk</h3>
+          <h3>Layanan dan produk</h3>
           <span className="nota-count">
             {selected.length > 0 ? `${selected.length} dipilih` : "Belum ada"}
           </span>
@@ -321,8 +322,9 @@ export function ManualPage() {
         )}
       </section>
 
-      <section className="panel form-panel">
-        <h3>3. Diskon</h3>
+      <div className="manual-checkout-grid">
+      <section className="panel form-panel manual-discount-panel">
+        <h3>Diskon</h3>
         <div className="form-grid manual-info-grid">
           {promoAktif.length > 0 && (
             <label>
@@ -372,8 +374,8 @@ export function ManualPage() {
         </div>
       </section>
 
-      <section className="panel form-panel">
-        <h3>4. Pembayaran</h3>
+      <section className="panel form-panel manual-payment-panel">
+        <h3>Pembayaran</h3>
         <div className="segmented nota-method">
           {(["Tunai", "QRIS", "Gabungan"] as const).map((m) => (
             <Button
@@ -381,6 +383,11 @@ export function ManualPage() {
               key={m}
               onClick={() => setMethod(m)}
             >
+              <span className="nota-method-orb">
+                <Icon
+                  name={m === "Tunai" ? "cash" : m === "QRIS" ? "qris" : "wallet"}
+                />
+              </span>
               {m}
             </Button>
           ))}
@@ -415,6 +422,16 @@ export function ManualPage() {
             </label>
           )}
         </div>
+        {method === "QRIS" && (
+          <p className="manual-qris-notice" role="note">
+            Pastikan pembayaran QRIS berhasil sebelum menyimpan nota.
+          </p>
+        )}
+        {method !== "QRIS" && total > 0 && paid < total && (
+          <p className="manual-payment-warning" role="alert">
+            Uang yang diterima belum mencukupi total pembayaran.
+          </p>
+        )}
         <dl className="nota-summary">
           <div>
             <dt>Subtotal</dt>
@@ -443,6 +460,7 @@ export function ManualPage() {
           </p>
         )}
       </section>
+      </div>
 
       <div className="sticky-submit">
         <span>
