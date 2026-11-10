@@ -2800,28 +2800,44 @@ textarea {
   top: -10px;
   z-index: 2;
   display: flex;
-  justify-content: flex-end;
-  margin-top: -10px;
-  padding: 10px 2px 6px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -10px -12px 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
   background: var(--paper);
+}
+
+.cart-list-label {
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .cart-clear-button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 6px;
-  border: 1px solid var(--oxblood-soft);
-  border-radius: 7px;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
   color: var(--oxblood);
   background: transparent;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
 
+.cart-clear-button:hover {
+  background: var(--oxblood-soft);
+}
+
 .cart-clear-button .icon {
-  width: 13px;
+  width: 14px;
 }
 
 .cart-lines {

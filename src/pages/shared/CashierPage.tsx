@@ -920,6 +920,9 @@ export function CashierPage({ currentUser, onNavigate }: {
           <div className="cart-lines">
             {cart.length > 0 && (
               <div className="cart-clear-row">
+                <span className="cart-list-label">
+                  {cart.length} baris pesanan
+                </span>
                 <Button
                   className="cart-clear-button"
                   onClick={clearCart}
