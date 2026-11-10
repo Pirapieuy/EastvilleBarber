@@ -211,9 +211,10 @@ export function ManualPage() {
                 {n === 0 ? (
                   <Button
                     className={`secondary-button nota-add ${it.tipe === "Produk" ? "nota-add-product" : "nota-add-service"}`}
+                    aria-label={`Tambah ${it.name}`}
                     onClick={() => ubahQty(it, 1)}
                   >
-                    <Icon name="plus" /> Tambah
+                    <Icon name="plus" />
                   </Button>
                 ) : (
                   <div className="nota-stepper">
@@ -315,11 +316,13 @@ export function ManualPage() {
             value={cari}
           />
         </div>
-        {daftar("Layanan", "Layanan")}
-        {daftar("Produk", "Produk")}
-        {tampil("Layanan").length + tampil("Produk").length === 0 && (
-          <p className="nota-empty">Tidak ada yang cocok dengan “{cari}”.</p>
-        )}
+        <div className="nota-catalog-columns">
+          {daftar("Layanan", "Layanan")}
+          {daftar("Produk", "Produk")}
+          {tampil("Layanan").length + tampil("Produk").length === 0 && (
+            <p className="nota-empty">Tidak ada yang cocok dengan “{cari}”.</p>
+          )}
+        </div>
       </section>
 
       <div className="manual-checkout-grid">
@@ -376,19 +379,24 @@ export function ManualPage() {
 
       <section className="panel form-panel manual-payment-panel">
         <h3>Pembayaran</h3>
-        <div className="segmented nota-method">
+        <div className="method-grid manual-method-grid">
           {(["Tunai", "QRIS", "Gabungan"] as const).map((m) => (
             <Button
               className={method === m ? "active" : ""}
               key={m}
+              style={{
+                minHeight: 44,
+                padding: "6px 4px",
+                justifyContent: "center",
+                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
               onClick={() => setMethod(m)}
             >
-              <span className="nota-method-orb">
-                <Icon
-                  name={m === "Tunai" ? "cash" : m === "QRIS" ? "qris" : "wallet"}
-                />
-              </span>
-              {m}
+              <Icon name={m === "QRIS" ? "qris" : "cash"} />
+              <strong>{m}</strong>
             </Button>
           ))}
         </div>

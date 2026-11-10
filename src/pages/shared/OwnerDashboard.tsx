@@ -31,7 +31,6 @@ interface DailyServiceItem {
   kapsterName: string
   price: number
   method: "Tunai" | "QRIS"
-  status: "Selesai" | "Batal"
 }
 
 export function OwnerDashboard({ onNavigate, navigate }: {
@@ -88,7 +87,6 @@ export function OwnerDashboard({ onNavigate, navigate }: {
             kapsterName: t.barber || "-",
             price: Number(t.total) || 0,
             method: t.method === "QRIS" ? "QRIS" : "Tunai",
-            status: t.status === "BATAL" ? "Batal" : "Selesai",
           })),
         )
       })
@@ -336,100 +334,45 @@ export function OwnerDashboard({ onNavigate, navigate }: {
           </section>
 
           {/* Riwayat transaksi */}
-          <section className="panel" style={{ padding: 18 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-              }}
-            >
+          <section className="panel owner-recent-panel">
+            <div className="owner-recent-head">
               <div>
                 <p className="eyebrow">Aktivitas Pelayanan</p>
-                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
-                  Riwayat Transaksi
-                </h3>
+                <h3>Riwayat Transaksi</h3>
               </div>
-              <span style={{ fontSize: 13, color: "var(--muted)" }}>
+              <span className="owner-recent-count">
                 {servicesList.length} transaksi
               </span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="owner-recent-list">
               {servicesList.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: 24,
-                    color: "var(--muted)",
-                  }}
-                >
+                <div className="owner-recent-empty">
                   Belum ada transaksi layanan pada tanggal ini.
                 </div>
               ) : (
                 servicesList.slice(0, 5).map((s) => (
-                  <div
-                    key={s.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "10px 14px",
-                      borderRadius: 8,
-                      border: "1px solid var(--line)",
-                      background: "var(--paper)",
-                    }}
-                  >
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 14 }}
-                    >
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 12,
-                          color: "var(--muted)",
-                          fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
-                        {s.time}
-                      </span>
-                      <div>
-                        <strong
-                          style={{
-                            fontSize: 13,
-                            color: "var(--ink)",
-                            display: "block",
-                          }}
-                        >
+                  <article className="owner-recent-row" key={s.id}>
+                    <div className="owner-recent-main">
+                      <time className="owner-recent-time">{s.time}</time>
+                      <div className="owner-recent-info">
+                        <strong className="owner-recent-service">
                           {s.serviceName}
                         </strong>
-                        <small style={{ color: "var(--slate)", fontSize: 12 }}>
+                        <small className="owner-recent-meta">
                           Kapster: {s.kapsterName} · Metode: {s.method}
                         </small>
                       </div>
                     </div>
 
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 12 }}
-                    >
-                      <b style={{ fontSize: 13, color: "var(--ink)" }}>
-                        {rupiah(s.price)}
-                      </b>
-                      <span
-                        className={`chip ${
-                          s.status === "Batal" ? "batal" : "active"
-                        }`}
-                        style={{ fontSize: 11, padding: "2px 8px" }}
-                      >
-                        {s.status}
-                      </span>
+                    <div className="owner-recent-trailing">
+                      <b className="owner-recent-amount">{rupiah(s.price)}</b>
                     </div>
-                  </div>
+                  </article>
                 ))
               )}
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+            <div className="owner-recent-footer">
               <Button
                 className="text-button"
                 onClick={() => nav("RiwayatTransaksi")}
