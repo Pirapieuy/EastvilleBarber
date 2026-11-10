@@ -10,9 +10,14 @@ import {
 } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, Kpi, PageTitle, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  Kpi,
+  PageTitle,
+  rupiah,
+} from "../../components/common/UI"
 import { TANGGAL_MULAI } from "../../utils/tanggal"
-import { AppUser } from "../../types"
 
 const pad = (n: number) => String(n).padStart(2, "0")
 const toIso = (d: Date) =>
@@ -28,21 +33,7 @@ interface DailyServiceItem {
   status: "Selesai" | "Batal"
 }
 
-const NAMA_BULAN = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
-]
-const HARI_SINGKAT = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+import { AppUser } from "../../types"
 
 export function ManagerDashboard({ user, onNavigate, navigate }: {
   user?: AppUser
@@ -50,13 +41,9 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
   navigate?: (page: string) => void
 } = {}) {
   const nav = onNavigate ?? navigate ?? (() => {})
-  const firstName = user?.name ? user.name.split(" ")[0] : "Dian"
   const todayIso = toIso(new Date())
 
   const [selectedDate, setSelectedDate] = useState(todayIso)
-  const [calMonth, setCalMonth] = useState(() => new Date().getMonth())
-  const [calYear, setCalYear] = useState(() => new Date().getFullYear())
-  const [showDatePicker, setShowDatePicker] = useState(false)
 
   const [liveData, setLiveData] = useState<LaporanKeuangan | null>(null)
   // null = data absensi tidak tersedia (modul lain gagal), bukan "tidak ada yang hadir"
@@ -131,51 +118,23 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
   const kapsterList = kapsterAll.map((k) => {
     const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
     const masuk = rows.find((r) => r.tipe === "Masuk")
-    const pulang = rows.find((r) => r.tipe === "Pulang")
+    let statusText: "Tepat Waktu" | "Terlambat" | "Tidak Hadir" = "Tidak Hadir"
+    if (masuk) {
+      const isLate =
+        masuk.status?.toLowerCase().includes("terlambat") ||
+        (masuk.jam && (masuk.jam > "10.00" || masuk.jam > "10:00"))
+      statusText = isLate ? "Terlambat" : "Tepat Waktu"
+    }
     return {
       id: k.id,
       nama: k.nama,
       jamMasuk: masuk?.jam ?? "-",
-      status: pulang ? "Sudah pulang" : (masuk?.status ?? ""),
+      status: statusText,
       layananCount:
         liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
     }
   })
   const servicesList = liveServices
-
-  const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay()
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
-  const startOffset = (firstDayOfMonth + 6) % 7
-
-  function handlePrevMonth() {
-    if (calMonth === 0) {
-      setCalMonth(11)
-      setCalYear((y) => y - 1)
-    } else setCalMonth((m) => m - 1)
-  }
-  function handleNextMonth() {
-    if (calMonth === 11) {
-      setCalMonth(0)
-      setCalYear((y) => y + 1)
-    } else setCalMonth((m) => m + 1)
-  }
-  function handleSelectDate(day: number) {
-    setSelectedDate(`${calYear}-${pad(calMonth + 1)}-${pad(day)}`)
-  }
-  function handleJumpToday() {
-    const now = new Date()
-    setCalMonth(now.getMonth())
-    setCalYear(now.getFullYear())
-    setSelectedDate(todayIso)
-  }
-
-  const dateObj = new Date(selectedDate + "T00:00:00")
-  const formattedSelectedDate = dateObj.toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
 
   if (punyaToken && !liveData && liveError) {
     return (
@@ -197,158 +156,16 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
       <DemoNotice live={Boolean(liveData)} error={liveError} />
 
       <PageTitle
-        eyebrow={`Aktivitas 1 Hari · ${formattedSelectedDate}`}
-        title={`Selamat datang, ${firstName}.`}
+        title="Ringkasan Operasional Hari Ini"
         action={
-          <div className="page-actions" style={{ position: "relative" }}>
-            <Button
-              className="secondary-button"
-              onClick={() => nav("RekapManual")}
-            >
-              <Icon name="pencil" /> Input Nota Kertas
-            </Button>
-            <Button
-              className="primary-button"
-              onClick={() => nav("Pengeluaran")}
-            >
-              <Icon name="expense" /> Catat Pengeluaran
-            </Button>
-            <Button
-              className="secondary-button"
-              onClick={() => setShowDatePicker((v) => !v)}
-              title="Pilih tanggal"
-            >
-              <Icon name="calendar" />
-              {formattedSelectedDate}
-            </Button>
-            {!isToday && (
-              <Button className="secondary-button" onClick={handleJumpToday}>
-                <Icon name="history" /> Kembali ke Hari Ini
-              </Button>
-            )}
-            {showDatePicker && (
-              <div
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  top: "calc(100% + 8px)",
-                  zIndex: 20,
-                  width: 280,
-                }}
-              >
-                <section className="panel" style={{ padding: 14 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 10,
-                    }}
-                  >
-                    <strong style={{ fontSize: 13 }}>
-                      {NAMA_BULAN[calMonth]} {calYear}
-                    </strong>
-                    <div style={{ display: "flex", gap: 4 }}>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        style={{ padding: "4px 8px" }}
-                        onClick={handlePrevMonth}
-                      >
-                        <Icon name="chevron" />
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        style={{
-                          padding: "4px 8px",
-                          transform: "rotate(180deg)",
-                        }}
-                        onClick={handleNextMonth}
-                      >
-                        <Icon name="chevron" />
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(7,1fr)",
-                      gap: 2,
-                      textAlign: "center",
-                      fontSize: 10,
-                      marginBottom: 6,
-                    }}
-                  >
-                    {HARI_SINGKAT.map((h) => (
-                      <div key={h}>{h}</div>
-                    ))}
-                  </div>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(7,1fr)",
-                      gap: 2,
-                    }}
-                  >
-                    {Array.from({ length: startOffset }).map((_, i) => (
-                      <div key={`e-${i}`} />
-                    ))}
-                    {Array.from({ length: daysInMonth }).map((_, i) => {
-                      const day = i + 1
-                      const curIso = `${calYear}-${pad(calMonth + 1)}-${pad(day)}`
-                      const sel = curIso === selectedDate
-                      const tod = curIso === todayIso
-                      return (
-                        <button
-                          key={day}
-                          type="button"
-                          disabled={curIso > todayIso || curIso < TANGGAL_MULAI}
-                          onClick={() => {
-                            handleSelectDate(day)
-                            setShowDatePicker(false)
-                          }}
-                          style={{
-                            height: 30,
-                            borderRadius: 6,
-                            border: sel
-                              ? "1px solid var(--ink)"
-                              : "1px solid transparent",
-                            background: sel
-                              ? "var(--ink)"
-                              : tod
-                                ? "rgba(200,150,62,0.12)"
-                                : "transparent",
-                            color: sel ? "#fff" : "var(--ink)",
-                            fontSize: 11,
-                            fontWeight: sel || tod ? 700 : 500,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {day}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 10,
-                      display: "flex",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      style={{ padding: "4px 8px", fontSize: 11 }}
-                      onClick={handleJumpToday}
-                    >
-                      Hari Ini
-                    </button>
-                  </div>
-                </section>
-              </div>
-            )}
+          <div className="page-actions">
+            <CalendarPicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              max={todayIso}
+              min={TANGGAL_MULAI}
+              align="right"
+            />
           </div>
         }
       />
@@ -377,7 +194,7 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
         />
         <Kpi
           icon="wallet"
-          label="Laba Bersih Hari Ini"
+          label="Sisa Bersih Hari Ini"
           tone="dark"
           value={rupiah(dailyNet)}
           detail="Pemasukan − Pengeluaran − Komisi"
@@ -403,12 +220,9 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
                 marginBottom: 14,
               }}
             >
-              <div>
-                <p className="eyebrow">Kehadiran Tim</p>
-                <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
-                  Status Absensi Hari Ini
-                </h3>
-              </div>
+              <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
+                Kehadiran Tim
+              </h3>
               <span className="chip active">
                 {liveAbsensi
                   ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir`
@@ -440,10 +254,18 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
                           width: 36,
                           height: 36,
                           borderRadius: "50%",
-                          background: isLibur
-                            ? "var(--line)"
-                            : "rgba(34, 197, 94, 0.15)",
-                          color: isLibur ? "var(--muted)" : "#15803d",
+                          background:
+                            k.status === "Tepat Waktu"
+                              ? "rgba(34, 197, 94, 0.15)"
+                              : k.status === "Terlambat"
+                                ? "rgba(234, 179, 8, 0.15)"
+                                : "var(--line)",
+                          color:
+                            k.status === "Tepat Waktu"
+                              ? "#15803d"
+                              : k.status === "Terlambat"
+                                ? "#b45309"
+                                : "var(--muted)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -482,11 +304,17 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
                           {k.layananCount} layanan
                         </span>
                       )}
-                      {k.status && (
-                        <i className={`chip ${isLibur ? "inactive" : "lunas"}`}>
-                          {k.status}
-                        </i>
-                      )}
+                      <i
+                        className={`chip ${
+                          k.status === "Tepat Waktu"
+                            ? "lunas"
+                            : k.status === "Terlambat"
+                              ? "pending"
+                              : "batal"
+                        }`}
+                      >
+                        {k.status}
+                      </i>
                     </div>
                   </div>
                 )

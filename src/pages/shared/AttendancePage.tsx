@@ -19,7 +19,7 @@ export function AttendancePage() {
       nama: "Budi Santoso",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Tepat waktu",
+      status: "Tepat Waktu",
     },
     {
       id: "abs-02",
@@ -30,7 +30,7 @@ export function AttendancePage() {
       nama: "Budi Santoso",
       role: "Kapster",
       tipe: "Masuk",
-      status: "Terlambat 12 mnt",
+      status: "Terlambat",
     },
   ])
   const [loading, setLoading] = useState(false)
@@ -222,7 +222,21 @@ export function AttendancePage() {
               </strong>
               <small>{row.jam} · Waktu server</small>
             </span>
-            <i className="chip lunas">{row.status || "Hadir"}</i>
+            {(() => {
+              const s = (row.status || "").toLowerCase()
+              const display = s.includes("terlambat")
+                ? "Terlambat"
+                : s.includes("tidak")
+                  ? "Tidak Hadir"
+                  : "Tepat Waktu"
+              const chipClass =
+                display === "Tepat Waktu"
+                  ? "lunas"
+                  : display === "Terlambat"
+                    ? "pending"
+                    : "batal"
+              return <i className={`chip ${chipClass}`}>{display}</i>
+            })()}
           </article>
         ))}
       </section>

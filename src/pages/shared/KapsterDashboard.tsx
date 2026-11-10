@@ -50,7 +50,8 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
       .then(([k, a, abs]) => {
         setKomisi(k[0] ?? null)
         setAktivitas(a)
-        const catatanHariIni = abs.find((row) => row.userId === user?.id) ?? abs[0] ?? null
+        const catatanHariIni =
+          abs.find((row) => row.userId === user?.id) ?? abs[0] ?? null
         setAbsensiHariIni(catatanHariIni)
         setLive(true)
       })
@@ -119,7 +120,14 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
       <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow={live ? hari : "Rabu, 29 Oktober 2026"}
-        title={`Selamat ${sapaan}, ${firstName}.`}
+        title={
+          <>
+            <span className="page-title-desktop">
+              Selamat {sapaan}, {firstName}.
+            </span>
+            <span className="page-title-mobile">Beranda</span>
+          </>
+        }
         action={
           <div className="page-actions">
             <Button
@@ -165,13 +173,13 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
           icon="check"
           label="Status Kehadiran"
           tone="dark"
-          value={
-            live ? (absensiHariIni?.status || "Belum Hadir") : "Hadir"
-          }
+          value={live ? absensiHariIni?.status || "Belum Hadir" : "Hadir"}
           detail={
             live
               ? absensiHariIni
-                ? `Dicatat kasir${absensiHariIni.jam ? ` · ${absensiHariIni.jam} WIB` : ""}`
+                ? `Dicatat kasir${
+                    absensiHariIni.jam ? ` · ${absensiHariIni.jam} WIB` : ""
+                  }`
                 : "Absensi belum dicatat kasir"
               : "Absensi dicatat oleh kasir"
           }

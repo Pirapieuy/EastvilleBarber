@@ -5,6 +5,7 @@ import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
+  CalendarPicker,
   Kpi,
   LoadingState,
   PageTitle,
@@ -517,11 +518,7 @@ export function ExpensesPage() {
             </label>
             <label>
               <span>Tanggal</span>
-              <input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-              />
+              <CalendarPicker value={newDate} onChange={setNewDate} />
             </label>
             {formError && (
               <div className="info-banner" role="alert">
