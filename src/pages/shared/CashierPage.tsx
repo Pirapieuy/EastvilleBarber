@@ -282,7 +282,6 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [discountReason, setDiscountReason] = useState("")
   const [appliedDiscountPercent, setAppliedDiscountPercent] =
     useState<number | null>(null)
-  const [discountOpen, setDiscountOpen] = useState(false)
   const [receipt, setReceipt] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartSwipe, setCartSwipe] = useState<{
@@ -482,7 +481,6 @@ export function CashierPage({ currentUser, onNavigate }: {
       setDiscountReason(promo.nama)
       setKodeTerpakai(promo.kode)
       setKodeDiskon("")
-      setDiscountOpen(false)
     } catch (e) {
       setKodeError(
         e instanceof Error ? e.message : "Kode tidak dapat diperiksa. Coba lagi.",
@@ -831,7 +829,9 @@ export function CashierPage({ currentUser, onNavigate }: {
               {item.type === "Produk" && (
                 <small>
                   <i>
-                    {item.stock === 0 ? "Stok habis" : `Stok ${item.stock}`}
+                    {(item.stock ?? 0) - qtyDiKeranjang(item.id) <= 0
+                      ? "Stok habis"
+                      : `Stok ${(item.stock ?? 0) - qtyDiKeranjang(item.id)}`}
                   </i>
                   {item.consignment && <em>Titipan</em>}
                 </small>
@@ -917,19 +917,19 @@ export function CashierPage({ currentUser, onNavigate }: {
               </button>
             </div>
           </div>
-          {cart.length > 0 && (
-            <div className="cart-clear-row">
-              <Button
-                className="cart-clear-button"
-                onClick={clearCart}
-                title="Hapus semua produk dan layanan"
-                aria-label="Hapus semua produk dan layanan"
-              >
-                <Icon name="trash" /> Hapus Semua
-              </Button>
-            </div>
-          )}
           <div className="cart-lines">
+            {cart.length > 0 && (
+              <div className="cart-clear-row">
+                <Button
+                  className="cart-clear-button"
+                  onClick={clearCart}
+                  title="Hapus semua produk dan layanan"
+                  aria-label="Hapus semua produk dan layanan"
+                >
+                  <Icon name="trash" /> Hapus Semua
+                </Button>
+              </div>
+            )}
             {cart.length === 0 ? (
               <div className="empty">
                 <Icon name="receipt" />
@@ -1090,17 +1090,6 @@ export function CashierPage({ currentUser, onNavigate }: {
               <strong>{rupiah(total)}</strong>
             </div>
             {discount === 0 && (
-              <Button
-                className="discount-button"
-                onClick={() => {
-                  setKodeError("")
-                  setDiscountOpen(!discountOpen)
-                }}
-              >
-                <Icon name="receipt" /> Pakai kode diskon
-              </Button>
-            )}
-            {discountOpen && discount === 0 && (
               <div className="cart-discount-panel">
                 <label>
                   <span>Kode diskon</span>
@@ -1126,7 +1115,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 </label>
                 <Button
                   className="primary-button"
-                  disabled={!kodeDiskon.trim() || kodeChecking}
+                  disabled={!kodeDiskon.trim() || kodeChecking || total <= 0}
                   onClick={() => void terapkanKode()}
                 >
                   {kodeChecking ? "Memeriksa…" : "Terapkan"}

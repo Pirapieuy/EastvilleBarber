@@ -2796,9 +2796,14 @@ textarea {
 }
 
 .cart-clear-row {
+  position: sticky;
+  top: -10px;
+  z-index: 2;
   display: flex;
   justify-content: flex-end;
-  padding: 6px 18px 0;
+  margin-top: -10px;
+  padding: 10px 2px 6px;
+  background: var(--paper);
 }
 
 .cart-clear-button {
