@@ -133,6 +133,14 @@ export function OwnerDashboard({ onNavigate, navigate }: {
     }
   })
   const servicesList = liveServices
+  const jumlahHadir = kapsterList.filter((k) => k.jamMasuk !== "-").length
+  const statusKehadiran = !liveAbsensi
+    ? "active"
+    : jumlahHadir === 0
+      ? "batal"
+      : jumlahHadir === kapsterList.length
+        ? "active"
+        : "pending"
 
   if (punyaToken && !liveData && liveError) {
     return (
@@ -154,6 +162,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
       <DemoNotice live={Boolean(liveData)} error={liveError} />
 
       <PageTitle
+        className="owner-dashboard-title"
         title="Ringkasan Operasional Hari Ini"
         action={
           <div className="page-actions">
@@ -162,7 +171,8 @@ export function OwnerDashboard({ onNavigate, navigate }: {
               onChange={setSelectedDate}
               max={todayIso}
               min={TANGGAL_MULAI}
-              align="left"
+              align="right"
+              showToday={false}
             />
           </div>
         }
@@ -171,31 +181,31 @@ export function OwnerDashboard({ onNavigate, navigate }: {
       <div className="kpi-grid" style={loading ? { opacity: 0.6 } : undefined}>
         <Kpi
           icon="cash"
-          label={`Pemasukan (${isToday ? "Hari Ini" : "Pilihan"})`}
+          label={`Pemasukan${isToday ? "" : " (Pilihan)"}`}
           tone="sage"
           value={rupiah(dailyIncome)}
           detail={`Tunai ${rupiah(dailyCash)} · QRIS ${rupiah(dailyQris)}`}
         />
         <Kpi
           icon="expense"
-          label={`Pengeluaran (${isToday ? "Hari Ini" : "Pilihan"})`}
+          label={`Pengeluaran${isToday ? "" : " (Pilihan)"}`}
           tone="amber"
           value={rupiah(dailyExpense)}
           detail="Operasional harian"
         />
         <Kpi
           icon="people"
-          label="Total Komisi Hari Ini"
+          label="Total Komisi"
           tone="brass"
           value={rupiah(dailyCommission)}
           detail="Akumulasi komisi kapster"
         />
         <Kpi
           icon="wallet"
-          label="Sisa Bersih Hari Ini"
+          label="Sisa Bersih"
           tone="dark"
           value={rupiah(dailyNet)}
-          detail="Pemasukan − Pengeluaran − Komisi"
+          detail="Rangkuman sisa bersih"
         />
       </div>
 
@@ -208,7 +218,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
         }}
       >
         <div className="dashboard-lower-grid">
-          {/* Status & Daftar Kapster Hari Ini */}
+          {/* Status & Daftar Kapster */}
           <section className="panel" style={{ padding: 18 }}>
             <div
               style={{
@@ -221,9 +231,11 @@ export function OwnerDashboard({ onNavigate, navigate }: {
               <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
                 Kehadiran Tim
               </h3>
-              <span className="chip active">
+              <span className={`chip ${statusKehadiran}`}>
                 {liveAbsensi
-                  ? `${kapsterList.filter((k) => k.jamMasuk !== "-").length} dari ${kapsterList.length} Hadir`
+                  ? jumlahHadir === 0
+                    ? `0 dari ${kapsterList.length} Hadir`
+                    : `${jumlahHadir} dari ${kapsterList.length} Hadir`
                   : ""}
               </span>
             </div>
@@ -310,10 +322,11 @@ export function OwnerDashboard({ onNavigate, navigate }: {
                             ? "lunas"
                             : k.status === "Terlambat"
                               ? "pending"
-                              : "batal"
+                              : ""
                         }`}
+                        style={k.status === "Tidak Hadir" ? { background: "var(--line)", color: "var(--muted)" } : undefined}
                       >
-                        {k.status}
+                        {k.status === "Tidak Hadir" ? "Belum Hadir" : k.status}
                       </i>
                     </div>
                   </div>
@@ -322,7 +335,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
             </div>
           </section>
 
-          {/* Layanan yang Berjalan Hari Ini */}
+          {/* Riwayat transaksi */}
           <section className="panel" style={{ padding: 18 }}>
             <div
               style={{
@@ -416,12 +429,14 @@ export function OwnerDashboard({ onNavigate, navigate }: {
                 ))
               )}
             </div>
-            <Button
-              className="text-button"
-              onClick={() => nav("RiwayatTransaksi")}
-            >
-              Selengkapnya <Icon name="arrow" />
-            </Button>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+              <Button
+                className="text-button"
+                onClick={() => nav("RiwayatTransaksi")}
+              >
+                Selengkapnya
+              </Button>
+            </div>
           </section>
         </div>
       </div>

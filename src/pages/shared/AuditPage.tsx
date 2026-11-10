@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
-import { Icon } from "../../components/common/Icon"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   CalendarPicker,
   LoadingState,
@@ -82,6 +81,68 @@ const AKSI_MAP: Record<string, string> = {
   ABSENSI: "Absensi",
   BACKUP: "Backup",
   PULIHKAN_BACKUP: "Pulihkan Backup",
+}
+
+function AuditFilterSelect({
+  value,
+  options,
+  onChange,
+}: {
+  value: string
+  options: string[]
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const closeOutside = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("pointerdown", closeOutside)
+    document.addEventListener("keydown", closeOnEscape)
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside)
+      document.removeEventListener("keydown", closeOnEscape)
+    }
+  }, [open])
+
+  return (
+    <div className={`audit-filter${open ? " open" : ""}`} ref={rootRef}>
+      <button
+        aria-expanded={open}
+        className="audit-filter-trigger"
+        onClick={() => setOpen((current) => !current)}
+        type="button"
+      >
+        <span>{value}</span>
+        <i aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="audit-filter-menu" role="group" aria-label={value}>
+          {options.map((option) => (
+            <button
+              aria-pressed={value === option}
+              className={`audit-filter-option${value === option ? " selected" : ""}`}
+              key={option}
+              onClick={() => {
+                onChange(option)
+                setOpen(false)
+              }}
+              type="button"
+            >
+              <span>{option}</span>
+              {value === option && <b aria-hidden="true">✓</b>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function parseAuditRow(row: AuditLogRow): string[] {
@@ -238,13 +299,6 @@ export function AuditPage() {
   return (
     <div className="content">
       <PageTitle eyebrow="Khusus Owner" title="Jejak audit" />
-      <div className="append-only-note">
-        <Icon name="lock" />
-        <span>
-          <strong>Catatan Keamanan Permanen</strong>Data terlindungi dan tidak
-          dapat diubah atau dihapus.
-        </span>
-      </div>
       <section className="panel audit-list">
         <div className="filters">
           <CalendarPicker
@@ -254,33 +308,28 @@ export function AuditPage() {
             clearLabel="Semua Tanggal"
             placeholder="Semua Tanggal"
           />
-          <select
+          <AuditFilterSelect
             value={filterAksi}
-            onChange={(e) => setFilterAksi(e.target.value)}
-          >
-            <option>Semua jenis aksi</option>
-            <option>Login</option>
-            <option>Transaksi</option>
-            <option>Pengeluaran</option>
-            <option>Gaji</option>
-            <option>Kasbon</option>
-            <option>Absensi</option>
-            <option>Produk</option>
-            <option>Layanan</option>
-            <option>Komisi</option>
-            <option>Backup</option>
-          </select>
-          <select
+            onChange={setFilterAksi}
+            options={[
+              "Semua jenis aksi",
+              "Login",
+              "Transaksi",
+              "Pengeluaran",
+              "Gaji",
+              "Kasbon",
+              "Absensi",
+              "Produk",
+              "Layanan",
+              "Komisi",
+              "Backup",
+            ]}
+          />
+          <AuditFilterSelect
             value={filterUser}
-            onChange={(e) => setFilterUser(e.target.value)}
-          >
-            <option>Semua pengguna</option>
-            {userList.map((u) => (
-              <option key={u} value={u}>
-                {u}
-              </option>
-            ))}
-          </select>
+            onChange={setFilterUser}
+            options={["Semua pengguna", ...userList]}
+          />
           {filterDate && (
             <button
               type="button"
@@ -314,10 +363,12 @@ export function AuditPage() {
             <article className="audit-row" key={`${row[0]}-${row[1]}-${idx}`}>
               {row.map((value, index) => (
                 <span
-                  className={index === 2 ? "audit-action" : ""}
+                  data-label={["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][index]}
                   key={`${value}-${index}`}
                 >
-                  {value}
+                  <span className={index === 2 ? "audit-action" : undefined}>
+                    {value}
+                  </span>
                 </span>
               ))}
             </article>
