@@ -30,6 +30,7 @@ const dariServer = (r: KodeDiskonRow): PromoDiscount => ({
 })
 
 export function PromoDiscountsTab() {
+  const [showHelp, setShowHelp] = useState(false)
   const [promos, setPromos] = useState<PromoDiscount[]>([])
   const [memuat, setMemuat] = useState(true)
   const [gagalMuat, setGagalMuat] = useState("")
@@ -167,8 +168,24 @@ export function PromoDiscountsTab() {
   const todayStr = TANGGAL_MAKS()
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+    <div className="promo-discounts-tab" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="promo-discount-actions">
+        <div className="promo-discount-help-wrap">
+          <button
+            className="promo-discount-help"
+            type="button"
+            aria-label="Informasi diskon event"
+            aria-expanded={showHelp}
+            onClick={() => setShowHelp((shown) => !shown)}
+          >
+            <Icon name="alert" />
+          </button>
+          {showHelp && (
+            <div className="promo-discount-tooltip" role="tooltip">
+              Belum ada diskon. Klik Tambah Diskon Event untuk membuat kode.
+            </div>
+          )}
+        </div>
         <Button className="primary-button" onClick={openCreate}>
           <Icon name="plus" /> Tambah Diskon Event
         </Button>
@@ -182,9 +199,7 @@ export function PromoDiscountsTab() {
         </div>
       )}
       {!memuat && !gagalMuat && promos.length === 0 && (
-        <p style={{ color: "var(--slate)", fontSize: 13 }}>
-          Belum ada kode diskon. Tekan "Tambah Diskon Event" untuk membuat kode pertama.
-        </p>
+        <div className="promo-discount-empty">Belum ada diskon</div>
       )}
       <div
         style={{
