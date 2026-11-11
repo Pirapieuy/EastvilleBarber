@@ -212,7 +212,7 @@ function TransactionDetailBody({
 }) {
   return (
     <>
-      <div className="detail-section">
+      <div className="detail-section detail-items-section">
         <h3>Item Layanan & Produk ({selected.items.length})</h3>
         <div className="detail-items-list">
           {selected.items.map((item, idx) => (
@@ -236,26 +236,44 @@ function TransactionDetailBody({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="detail-pinned">
+        {(selected.discount ?? 0) > 0 && (
+          <div className="detail-money-rows">
+            <div>
+              <span>Subtotal</span>
+              <b>
+                {rupiah(
+                  selected.subtotal ??
+                    selected.items.reduce((n, it) => n + it.price * it.qty, 0),
+                )}
+              </b>
+            </div>
+            <div className="diskon">
+              <span>Diskon</span>
+              <b>− {rupiah(selected.discount ?? 0)}</b>
+            </div>
+          </div>
+        )}
         <div className="detail-total-bar">
           <span>Total Akhir</span>
           <strong>{rupiah(selected.total)}</strong>
         </div>
-      </div>
 
-      <div className="detail-section">
-        <h3>Info Operasional</h3>
-        <div className="detail-cards">
-          <div>
-            <Icon name={selected.method === "QRIS" ? "qris" : "cash"} />
-            <small>Metode Pembayaran</small>
-            <strong>{selected.method}</strong>
-          </div>
-          <div>
-            <Icon name="user" />
-            <small>Kapster</small>
-            <strong>{selected.barber}</strong>
-          </div>
-          {userRole !== "Kasir" && (
+        <div className="detail-section">
+          <h3>Info Operasional</h3>
+          <div className="detail-cards">
+            <div>
+              <Icon name={selected.method === "QRIS" ? "qris" : "cash"} />
+              <small>Metode Pembayaran</small>
+              <strong>{selected.method}</strong>
+            </div>
+            <div>
+              <Icon name="user" />
+              <small>Kapster</small>
+              <strong>{selected.barber}</strong>
+            </div>
             <div>
               <Icon name="wallet" />
               <small>Rincian Komisi</small>
@@ -267,14 +285,14 @@ function TransactionDetailBody({
                   .trim()}
               </span>
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      <div className="detail-actions-group">
-        <Button className="secondary-button" onClick={onPrintReceipt}>
-          <Icon name="print" /> Cetak Struk
-        </Button>
+        <div className="detail-actions-group">
+          <Button className="secondary-button" onClick={onPrintReceipt}>
+            <Icon name="print" /> Cetak Struk
+          </Button>
+        </div>
       </div>
     </>
   )

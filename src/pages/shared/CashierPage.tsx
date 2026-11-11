@@ -688,9 +688,6 @@ export function CashierPage({ currentUser, onNavigate }: {
   return (
     <div className="cashier-page">
       <section className="catalog">
-        <div className="cashier-heading hidden md:flex">
-          <span>Kasir &amp; POS</span>
-        </div>
         <section className="barber-picker">
           <div className="barber-picker-label">
             <span className="item-icon">
@@ -1006,9 +1003,15 @@ export function CashierPage({ currentUser, onNavigate }: {
                     )
                   }}
                 >
-                  <span className="cart-swipe-delete" aria-hidden="true">
-                    <Icon name="trash" /> Hapus
-                  </span>
+                  {cartSwipe?.lineId === line.lineId && cartSwipe.offset < 0 && (
+                    <span
+                      className="cart-swipe-delete"
+                      aria-hidden="true"
+                      style={{ width: Math.abs(cartSwipe.offset) }}
+                    >
+                      <Icon name="trash" />
+                    </span>
+                  )}
                   <div
                     className={`cart-line-row ${
                       cartSwipe?.lineId === line.lineId && cartSwipe.removing
@@ -1082,6 +1085,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               ))
             )}
           </div>
+          {cart.length > 0 && (
           <div className="cart-total">
             <div>
               <span>Subtotal</span>
@@ -1351,6 +1355,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               )}
             </section>
           </div>
+          )}
         </div>
       </aside>
     </div>

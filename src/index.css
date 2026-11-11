@@ -2367,7 +2367,7 @@ textarea {
 }
 
 .cashier-heading {
-  display: flex;
+  display: none;
   align-items: flex-start;
   flex-direction: column;
   gap: 5px;
@@ -2888,8 +2888,12 @@ textarea {
 .cart-swipe-delete {
   position: absolute;
   inset: 0 0 0 auto;
-  width: 120px;
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  background: #d93025;
 }
 
 .cart-lines article .cart-line-row {
@@ -7579,7 +7583,7 @@ textarea {
   }
 
   .cashier-heading {
-    display: none !important;
+    display: flex !important;
   }
 
   .catalog {
@@ -10160,10 +10164,10 @@ summary,
 .cart-discount-panel,
 .cashier-page .cart-discount-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 112px;
+  grid-template-columns: minmax(0, 1fr) 92px;
   align-items: end;
   gap: 0 8px;
-  padding: 12px;
+  padding: 8px 10px;
 }
 
 .cart-discount-panel > label {
@@ -10172,16 +10176,17 @@ summary,
 
 .cart-discount-panel > label > span {
   display: block;
-  margin: 0 0 6px 2px;
+  margin: 0 0 4px 2px;
   color: var(--slate);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
 .cart-discount-panel .input-shell,
 .cart-discount-panel > .primary-button {
-  height: 44px;
-  min-height: 44px;
+  height: 36px;
+  min-height: 36px;
+  font-size: 13px;
 }
 
 .cart-discount-panel > .primary-button {
@@ -10560,5 +10565,444 @@ summary,
   .audit-list > .filters {
     position: relative;
     top: auto;
+  }
+}
+
+/* Kasir desktop: daftar item tetap punya ruang, ringkasan menempel di bawah */
+@media (min-width: 821px) {
+  .cashier-page .cart-lines {
+    min-height: 150px;
+  }
+
+  .cashier-page .cart-total {
+    height: auto;
+    min-height: 0;
+    max-height: 62svh;
+    flex: 0 0 auto;
+  }
+}
+
+/* Input Manual: isian Rp tanpa bingkai ganda, judul panel tidak menempel */
+.manual-checkout-grid .input-shell input,
+.manual-checkout-grid .input-shell input:focus {
+  height: 100%;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.manual-checkout-grid .input-shell:focus-within {
+  border-color: var(--brass);
+}
+
+.manual-payment-panel > h3 {
+  margin-bottom: 12px;
+}
+
+.manual-payment-panel > .form-grid label > span {
+  margin-top: 6px;
+}
+
+/* Dropdown cari di Riwayat: pemicu sudah punya bingkai sendiri */
+.search-select.history-kapster-select {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Uang cepat: kotak rapi, melebar rata tiga kolom */
+.cart-payment .quick-cash {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cart-payment .quick-cash button {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 4px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.cart-payment .quick-cash button.active {
+  border-color: var(--brass);
+  background: var(--brass-soft);
+}
+
+/* Katalog kasir: judul sudah dihapus, jadi kotak kapster tidak perlu jarak atas tambahan */
+.cashier-page .barber-picker {
+  margin-top: 0;
+}
+
+.cashier-page .catalog {
+  padding-top: 24px;
+}
+
+@media (max-width: 820px) {
+  .cashier-page .catalog {
+    padding-top: 14px;
+  }
+}
+
+/* Riwayat dan Input Manual: judul sudah dihapus, elemen pertama tidak perlu jarak atas tambahan */
+.history-page-content > .filters:first-child,
+.history-page-content > .demo-notice + .filters {
+  margin-top: 0;
+}
+
+.content.narrow > .panel.form-panel:first-of-type {
+  margin-top: 0;
+}
+
+/* Riwayat: daftar dan detail mengikuti tinggi layar, daftar item hanya ±2,5 baris lalu digulir */
+.detail-items-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.detail-items-list::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  /* Halaman setinggi layar: daftar dan detail mengisi sisa tinggi sampai bawah,
+     jarak bawah sama dengan jarak atas (26px) */
+  .content.history-page-content {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 26px;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .history-page-content .transaction-list {
+    height: 100%;
+    max-height: none;
+    margin-top: 0;
+  }
+
+  .history-page-content .desktop-only-detail {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .history-page-content .desktop-only-detail::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Tablet dan HP: daftar nota berupa kartu yang sama */
+@media (max-width: 1024px) {
+  .history-page-content .master-detail {
+    margin-inline: 0 !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 0 1 auto !important;
+    max-height: calc(100svh - 190px) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow) !important;
+    margin-bottom: 14px !important;
+  }
+
+  .content.history-page-content {
+    padding-bottom: 28px !important;
+  }
+}
+
+/* Riwayat di tablet dan HP: tiap nota jadi kartu dua baris (nota + kapster, lalu item) */
+@media (max-width: 1024px) {
+  .history-page-content .table-head {
+    display: none !important;
+  }
+
+  .history-page-content .transaction-list {
+    padding: 4px 0;
+    overflow-y: auto;
+  }
+
+  .history-page-content .transaction-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "nota kapster"
+      "item item" !important;
+    gap: 6px 12px !important;
+    padding: 12px 14px !important;
+    min-height: 0 !important;
+  }
+
+  .history-page-content .transaction-row .tx-cell-col-nota {
+    grid-area: nota;
+  }
+
+  .history-page-content .transaction-row .tx-cell-kapster {
+    grid-area: kapster;
+    max-width: 140px;
+    overflow: hidden;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .history-page-content .transaction-row .tx-cell-items {
+    grid-area: item;
+    padding-top: 6px;
+    border-top: 1px dashed var(--line);
+  }
+
+  /* Detail di modal: metode dan kapster berdampingan, komisi selebar penuh */
+  .transaction-modal-body .detail-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .transaction-modal-body .detail-cards > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .transaction-modal-body .detail-cards small {
+    min-height: 0;
+  }
+}
+
+/* Detail transaksi: ukuran teks sama di panel desktop dan jendela HP/tablet */
+.desktop-only-detail .detail-item-title-row strong,
+.transaction-modal-body .detail-item-title-row strong {
+  font-size: 13px;
+}
+
+.desktop-only-detail .detail-item-info small,
+.transaction-modal-body .detail-item-info small {
+  font-size: 11.5px;
+}
+
+.desktop-only-detail .detail-item-price,
+.transaction-modal-body .detail-item-price {
+  font-size: 13px;
+}
+
+.desktop-only-detail .item-type-badge,
+.transaction-modal-body .item-type-badge {
+  font-size: 10px;
+}
+
+.desktop-only-detail .detail-total-bar strong,
+.transaction-modal-body .detail-total-bar strong {
+  font-size: 16px;
+}
+
+.detail-money-rows {
+  display: grid;
+  gap: 6px;
+  padding: 2px 4px 0;
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.detail-money-rows > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-money-rows b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-money-rows .diskon b {
+  color: var(--oxblood);
+}
+
+/* Desktop: daftar item lebih lega dan tombol Cetak Struk menempel di dasar kartu */
+@media (min-width: 1025px) {
+  .history-page-content .desktop-only-detail .detail-items-list {
+    max-height: none;
+    min-height: 140px;
+    flex: 0 1 auto;
+  }
+
+  .history-page-content .desktop-only-detail .detail-section:first-of-type {
+    min-height: 0;
+    flex: 0 1 auto;
+  }
+
+  .history-page-content .desktop-only-detail .detail-actions-group {
+    margin-top: auto;
+  }
+}
+
+/* Detail transaksi: hanya daftar item yang bergerak; total, info operasional, dan Cetak Struk menempel di bawah */
+.detail-items-section {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.detail-items-section .detail-items-list {
+  min-height: 0;
+  flex: 1 1 auto;
+  max-height: none;
+}
+
+.detail-pinned {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail-pinned .detail-actions-group {
+  margin-top: 0;
+}
+
+.history-page-content .desktop-only-detail {
+  overflow: hidden;
+}
+
+.transaction-modal-body {
+  overflow: hidden;
+}
+
+.transaction-modal-body .detail-items-list {
+  max-height: 34svh;
+}
+
+@media (max-width: 1024px) {
+  .mobile-only-modal .transaction-modal-body {
+    overflow: hidden !important;
+    min-height: 0;
+  }
+
+  /* Info operasional tetap tiga kartu sejajar di HP dan tablet */
+  .transaction-modal-body .detail-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .transaction-modal-body .detail-cards > div:nth-child(3) {
+    grid-column: auto;
+  }
+
+  .transaction-modal-body .detail-cards > div {
+    padding: 8px 9px;
+  }
+
+  .transaction-modal-body .detail-cards small {
+    font-size: 9.5px;
+    min-height: 24px;
+  }
+
+  .transaction-modal-body .detail-cards strong {
+    font-size: 12px;
+  }
+
+  .transaction-modal-body .commission-hint {
+    display: none;
+  }
+
+  /* Jarak kartu daftar ke tepi bawah sama dengan jarak samping */
+  .content.history-page-content {
+    padding-bottom: 27px !important;
+  }
+
+  .history-page-content .master-detail {
+    margin-inline: 0 !important;
+    margin-top: 12px !important;
+    flex: 1 1 auto !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .content.history-page-content {
+    padding-bottom: 14px !important;
+  }
+}
+
+/* Detail transaksi: daftar item minimal 2 kartu; kalau layar lebih pendek, seluruh panel bisa digulir */
+.detail-items-section {
+  flex: 1 1 auto;
+  min-height: 190px;
+}
+
+.detail-items-section .detail-items-list {
+  min-height: 132px;
+}
+
+.history-page-content .desktop-only-detail {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.history-page-content .desktop-only-detail::-webkit-scrollbar {
+  display: none;
+}
+
+.transaction-modal-body,
+.mobile-only-modal .transaction-modal-body {
+  overflow-y: auto !important;
+  scrollbar-width: none;
+}
+
+.transaction-modal-body::-webkit-scrollbar {
+  display: none;
+}
+
+.transaction-modal-body .detail-items-section {
+  flex: 0 0 auto;
+}
+
+.transaction-modal-body .detail-items-list {
+  max-height: 34svh;
+  min-height: 132px;
+}
+
+/* Detail transaksi: tinggi daftar mengikuti isi (1 item = 1 baris), digulir hanya bila melebihi batas */
+.detail-items-section {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.detail-items-section .detail-items-list,
+.transaction-modal-body .detail-items-list {
+  min-height: 0;
+}
+
+.detail-items-section .detail-items-list {
+  max-height: max(132px, calc(100svh - 560px));
+}
+
+.transaction-modal-body .detail-items-list {
+  max-height: 34svh;
+}
+
+@media (min-width: 1025px) {
+  .history-page-content .desktop-only-detail .detail-pinned {
+    margin-top: auto;
   }
 }

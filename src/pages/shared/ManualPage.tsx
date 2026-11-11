@@ -3,10 +3,10 @@ import { FormEvent, useEffect, useState } from "react"
 import { apiKasir, apiKodeDiskon, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
+import { SearchSelect } from "../../components/common/SearchSelect"
 import {
   Button,
   CalendarPicker,
-  PageTitle,
   rupiah,
 } from "../../components/common/UI"
 
@@ -45,7 +45,14 @@ export function ManualPage() {
   const [qty, setQty] = useState<Record<string, number>>({})
   const [cari, setCari] = useState("")
   const [diskon, setDiskon] = useState("")
-  const [promoId, setPromoId] = useState("")
+  const [kodeInput, setKodeInput] = useState("")
+  const [kodeError, setKodeError] = useState("")
+  const [kodeChecking, setKodeChecking] = useState(false)
+  const [promo, setPromo] = useState<{
+    kode: string
+    nama: string
+    persen: number
+  } | null>(null)
   const [promoList, setPromoList] = useState<
     { id: string; kode: string; nama: string; persen: number; berlakuSampai: string }[]
   >([])
@@ -120,8 +127,6 @@ export function ManualPage() {
     (sum, i) => sum + i.price * (qty[keyOf(i)] ?? 0),
     0,
   )
-  const promoAktif = promoList.filter((p) => p.berlakuSampai >= tanggal)
-  const promo = promoAktif.find((p) => p.id === promoId)
   const diskonNum = promo
     ? Math.round((subtotal * promo.persen) / 100)
     : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
@@ -150,6 +155,27 @@ export function ManualPage() {
     items.filter(
       (i) => i.tipe === tipe && i.name.toLowerCase().includes(kataKunci),
     )
+
+  async function terapkanKode() {
+    const kode = kodeInput.trim().toUpperCase()
+    if (!kode) return
+    setKodeChecking(true)
+    setKodeError("")
+    try {
+      const lokal = promoList.find(
+        (p) => p.kode.toUpperCase() === kode && p.berlakuSampai >= tanggal,
+      )
+      const hasil = lokal ?? (await apiKasir.cekKode(kode))
+      setPromo({ kode: hasil.kode, nama: hasil.nama, persen: hasil.persen })
+      setKodeInput("")
+    } catch (e) {
+      setKodeError(
+        e instanceof Error ? e.message : "Kode tidak dapat diperiksa. Coba lagi.",
+      )
+    } finally {
+      setKodeChecking(false)
+    }
+  }
 
   function ubahQty(item: ManualItem, delta: number) {
     setQty((prev) => {
@@ -198,7 +224,7 @@ export function ManualPage() {
       )
       setQty({})
       setDiskon("")
-      setPromoId("")
+      setPromo(null)
       setPin("")
       setNote("")
       setCash("")
@@ -263,10 +289,6 @@ export function ManualPage() {
   return (
     <form className="content narrow" onSubmit={handleSave}>
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        eyebrow="Transaksi dari buku fisik"
-        title="Input Manual"
-      />
 
       <section className="panel form-panel">
         <h3>Data nota</h3>
@@ -281,9 +303,10 @@ export function ManualPage() {
               value={note}
             />
           </label>
-          <label>
+          <div className="form-grid-field">
             <span>Kapster</span>
-            <select
+            <SearchSelect
+              aria-label="Kapster"
               onChange={(e) => setKapsterId(e.target.value)}
               value={kapsterAktif}
             >
@@ -292,8 +315,8 @@ export function ManualPage() {
                   {k.nama}
                 </option>
               ))}
-            </select>
-          </label>
+            </SearchSelect>
+          </div>
           <div className="form-grid-field manual-date-field">
             <span>Tanggal</span>
             <CalendarPicker
@@ -346,21 +369,52 @@ export function ManualPage() {
       <section className="panel form-panel manual-discount-panel">
         <h3>Diskon</h3>
         <div className="form-grid manual-info-grid">
-          {promoAktif.length > 0 && (
-            <label>
-              <span>Kode diskon (opsional)</span>
-              <select
-                onChange={(e) => setPromoId(e.target.value)}
-                value={promoId}
+          {promo ? (
+            <div className="discount-applied manual-discount-applied">
+              <span>
+                <b>{promo.kode}</b> · {promo.nama} ({promo.persen}%)
+              </span>
+              <Button onClick={() => setPromo(null)} title="Batalkan kode">
+                <Icon name="trash" /> Hapus
+              </Button>
+            </div>
+          ) : (
+            <div className="cart-discount-panel">
+              <label>
+                <span>Kode diskon</span>
+                <div className="input-shell">
+                  <Icon name="receipt" />
+                  <input
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setKodeInput(e.target.value.toUpperCase())
+                      setKodeError("")
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        void terapkanKode()
+                      }
+                    }}
+                    placeholder="Contoh: JUMAT15"
+                    value={kodeInput}
+                  />
+                </div>
+              </label>
+              <Button
+                className="primary-button"
+                disabled={!kodeInput.trim() || kodeChecking || subtotal <= 0}
+                onClick={() => void terapkanKode()}
               >
-                <option value="">Tanpa kode diskon</option>
-                {promoAktif.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.kode} · {p.nama} ({p.persen}%)
-                  </option>
-                ))}
-              </select>
-            </label>
+                {kodeChecking ? "Memeriksa…" : "Terapkan"}
+              </Button>
+              {kodeError && (
+                <small className="cart-error" role="alert">
+                  {kodeError}
+                </small>
+              )}
+            </div>
           )}
           {!promo && (
             <label>
