@@ -4,7 +4,7 @@ import { Button, LoadingState, rupiah } from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
-import { TANGGAL_MAKS } from "../../utils/tanggal"
+import { formatTanggalWaktu, TANGGAL_MAKS } from "../../utils/tanggal"
 
 export type CatalogItem = {
   id: number | string
@@ -166,18 +166,7 @@ export function ReceiptView({
             <div>
               <dt>Tanggal</dt>
               <dd>
-                {tanggal ??
-                  new Date()
-                    .toLocaleString("id-ID", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })
-                    .replace(/\./g, ":")
-                    .replace(",", "")}
+                {tanggal ? formatTanggalWaktu(tanggal) : formatTanggalWaktu(new Date())}
               </dd>
             </div>
             <div>
@@ -476,8 +465,16 @@ export function CashierPage({ currentUser, onNavigate }: {
     setKodeError("")
     try {
       const promo = await apiKasir.cekKode(kode)
-      setDiscount(Math.round((total * promo.persen) / 100))
-      setAppliedDiscountPercent(promo.persen)
+      const discountValue = promo.nilai ?? promo.persen
+      setDiscount(
+        Math.min(
+          total,
+          promo.jenis === "nominal"
+            ? discountValue
+            : Math.round((total * discountValue) / 100),
+        ),
+      )
+      setAppliedDiscountPercent(promo.jenis === "nominal" ? null : discountValue)
       setDiscountReason(promo.nama)
       setKodeTerpakai(promo.kode)
       setKodeDiskon("")
@@ -503,7 +500,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     stock !== undefined && qtyDiKeranjang(id) >= stock
   const effectiveDiscount =
     appliedDiscountPercent === null
-      ? discount
+      ? Math.min(discount, total)
       : Math.round((total * appliedDiscountPercent) / 100)
   // Diskon yang menutup seluruh subtotal = transaksi gratis (promo/traktiran): alasan wajib.
   const gratis = total > 0 && effectiveDiscount >= total

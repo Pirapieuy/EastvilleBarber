@@ -175,9 +175,9 @@ export const apiKasir = {
   /** Cek PIN Owner/Manajer lebih awal (khusus Kasir; 5x salah = tunggu 5 menit). Gagal -> melempar Error. */
   verifikasiPin: (pin: string) =>
     api<{ valid: boolean }>("verifikasi-pin-otorisasi", { pin }),
-  /** Cek kode diskon unik ke server (nama dan persen untuk ditampilkan di keranjang) */
+  /** Cek kode diskon unik ke server. */
   cekKode: (kode: string) =>
-    api<{ kode: string; nama: string; persen: number }>("cek-kode-diskon", {
+    api<{ kode: string; nama: string; persen: number; jenis?: "persen" | "nominal"; nilai?: number }>("cek-kode-diskon", {
       kode,
     }),
 }
@@ -596,6 +596,8 @@ export interface KodeDiskonRow {
   kode: string
   nama: string
   persen: number
+  jenis?: "persen" | "nominal"
+  nilai?: number
   berlaku_sampai: string
   status: "Aktif" | "Nonaktif"
   dipakai?: number
@@ -608,6 +610,8 @@ export const apiKodeDiskon = {
     kode: string
     nama: string
     persen: number
+    jenis?: "persen" | "nominal"
+    nilai?: number
     berlakuSampai: string
     status: "Aktif" | "Nonaktif"
   }) => api<{ id: string }>("simpan-kode-diskon", { kodeDiskon }),

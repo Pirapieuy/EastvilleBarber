@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
+import { formatTanggalWaktu } from "../../utils/tanggal"
 import {
   Button,
   LoadingState,
@@ -127,12 +128,7 @@ export function ProductsPage({ embedded = false }: {
             oleh: string
             alasan: string
           }[]).map((l) => ({
-            time: new Date(l.waktu).toLocaleString("id-ID", {
-              day: "numeric",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            time: formatTanggalWaktu(l.waktu),
             product: l.produk,
             change: l.perubahan,
             by: l.oleh,
@@ -455,22 +451,28 @@ export function ProductsPage({ embedded = false }: {
         </section>
       ) : (
         <section className="panel change-log">
-          <div className="change-log-head">
-            <span>Waktu</span>
-            <span>Produk</span>
-            <span>Perubahan</span>
-            <span>Oleh</span>
-            <span>Alasan</span>
-          </div>
-          {changeLogs.map((row, idx) => (
-            <article key={idx}>
-              <span>{row.time}</span>
-              <strong>{row.product}</strong>
-              <span>{row.change}</span>
-              <span>{row.by}</span>
-              <small>{row.reason}</small>
-            </article>
-          ))}
+          <table className="change-log-table">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Produk</th>
+                <th>Perubahan</th>
+                <th>Oleh</th>
+                <th>Alasan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {changeLogs.map((row, idx) => (
+                <tr key={idx}>
+                  <td>{row.time}</td>
+                  <td><strong>{row.product}</strong></td>
+                  <td>{row.change}</td>
+                  <td>{row.by}</td>
+                  <td>{row.reason}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
       )}
       {formOpen && (

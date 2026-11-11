@@ -1,4 +1,4 @@
-import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import {
@@ -314,6 +314,9 @@ export function HistoryPage({ currentUser, role }: {
   )
 
   const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
+  const selectedDateTime = selected
+    ? `${formatTanggal(selected.date)}, ${selected.time.replace(".", ":")}`
+    : ""
 
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive(isStale: () => boolean = () => false) {
@@ -435,7 +438,7 @@ export function HistoryPage({ currentUser, role }: {
         change={Math.max(0, tunai + qrisBayar - selected.total)}
         cashier={selected.createdBy}
         invoice={selected.id}
-        tanggal={`${selected.date} · ${selected.time}`}
+        tanggal={selectedDateTime}
         contoh={!live}
         backLabel="Kembali ke Riwayat"
         onClose={() => setShowReceipt(false)}
@@ -529,7 +532,7 @@ export function HistoryPage({ currentUser, role }: {
                 <p className="eyebrow">Detail Transaksi</p>
                 <h2>{selected.id}</h2>
                 <small className="detail-timestamp">
-                  {selected.date} · {selected.time} WIB
+                  {selectedDateTime} WIB
                 </small>
               </div>
               {selected.status !== "Lunas" && (
@@ -573,7 +576,7 @@ export function HistoryPage({ currentUser, role }: {
                 <p className="eyebrow">Detail Transaksi</p>
                 <h2>{selected.id}</h2>
                 <small className="detail-timestamp">
-                  {selected.date} · {selected.time} WIB
+                  {selectedDateTime} WIB
                 </small>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

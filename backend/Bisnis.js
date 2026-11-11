@@ -29,7 +29,7 @@ var PENGATURAN_DEFAULT = {
   komisi_default: 40, // % layanan untuk kapster di jam kerja
   komisi_lembur: 50, // % layanan untuk kapster di luar jam kerja
 }
-var SCHEMA_VERSION = "6"
+var SCHEMA_VERSION = "7"
 
 var HEADERS = {
   Layanan: ["id", "nama", "harga", "status", "kategori"],
@@ -117,6 +117,8 @@ var HEADERS = {
     "dibuat_oleh",
     "waktu",
     "dipakai",
+    "jenis",
+    "nilai",
   ],
   TutupKasir: [
     "id",
@@ -1072,11 +1074,16 @@ function cekKodeDiskon_(kodeInput, subtotal) {
       ? fmtTanggal_(ketemu.berlaku_sampai, "yyyy-MM-dd")
       : (ketemu.berlaku_sampai || "").toString()
   if (sampai && sampai < hariIni) return { error: "Kode diskon sudah kedaluwarsa." }
-  var persen = Math.min(100, Math.max(0, Number(ketemu.persen) || 0))
-  if (persen <= 0) return { error: "Kode diskon tidak valid." }
+  var jenis = ketemu.jenis === "nominal" ? "nominal" : "persen"
+  var nilai = Number(ketemu.nilai) || Number(ketemu.persen) || 0
+  if (nilai <= 0 || (jenis === "persen" && nilai > 100))
+    return { error: "Kode diskon tidak valid." }
   return {
     kode: kode,
-    diskon: Math.min(subtotal, Math.round((subtotal * persen) / 100)),
+    diskon: Math.min(
+      subtotal,
+      jenis === "nominal" ? nilai : Math.round((subtotal * nilai) / 100),
+    ),
   }
 }
 
@@ -1088,7 +1095,13 @@ function cekKodeKasir_(body) {
   var r = readTable_(SHEET_KODE_DISKON).filter(function (x) {
     return normalKode_(x.kode) === kode
   })[0]
-  return ok_({ kode: kode, nama: String(r.nama), persen: Number(r.persen) })
+  return ok_({
+    kode: kode,
+    nama: String(r.nama),
+    persen: Number(r.persen) || 0,
+    jenis: r.jenis === "nominal" ? "nominal" : "persen",
+    nilai: Number(r.nilai) || Number(r.persen) || 0,
+  })
 }
 
 /** Menambah hitungan pemakaian kode setelah transaksi tersimpan. */
@@ -1104,13 +1117,16 @@ function simpanKodeDiskon_(body, user) {
   var d = body.kodeDiskon || {}
   var kode = normalKode_(d.kode)
   var nama = (d.nama || "").toString().trim()
-  var persen = toInt_(d.persen)
+  var jenis = d.jenis === "nominal" ? "nominal" : "persen"
+  var nilai = toInt_(d.nilai === undefined ? d.persen : d.nilai)
+  var persen = jenis === "persen" ? nilai : 0
   var sampai = (d.berlakuSampai || "").toString().trim()
   var status = d.status === "Nonaktif" ? "Nonaktif" : "Aktif"
   if (kode.length < 4 || kode.length > 20)
     return fail_("Kode harus 4-20 huruf atau angka.")
   if (!nama) return fail_("Nama promo wajib diisi.")
-  if (persen < 1 || persen > 100) return fail_("Persen diskon harus 1-100.")
+  if (nilai < 1 || (jenis === "persen" && nilai > 100))
+    return fail_(jenis === "persen" ? "Persen diskon harus 1-100." : "Nominal diskon minimal Rp1.")
   if (!/^\d{4}-\d{2}-\d{2}$/.test(sampai))
     return fail_("Tanggal berlaku sampai tidak valid.")
 
@@ -1129,9 +1145,11 @@ function simpanKodeDiskon_(body, user) {
     setCell_(SHEET_KODE_DISKON, lama._row, "kode", kode)
     setCell_(SHEET_KODE_DISKON, lama._row, "nama", nama)
     setCell_(SHEET_KODE_DISKON, lama._row, "persen", persen)
+    setCell_(SHEET_KODE_DISKON, lama._row, "jenis", jenis)
+    setCell_(SHEET_KODE_DISKON, lama._row, "nilai", nilai)
     setCell_(SHEET_KODE_DISKON, lama._row, "berlaku_sampai", sampai)
     setCell_(SHEET_KODE_DISKON, lama._row, "status", status)
-    writeAuditLog(user.id, user.nama, "UBAH_KODE_DISKON", kode + " " + persen + "% " + status)
+    writeAuditLog(user.id, user.nama, "UBAH_KODE_DISKON", kode + " " + (jenis === "persen" ? nilai + "%" : "Rp" + nilai) + " " + status)
     return ok_({ id: lama.id })
   }
   var id = "kd-" + Utilities.getUuid().replace(/-/g, "").slice(0, 8)
@@ -1140,13 +1158,15 @@ function simpanKodeDiskon_(body, user) {
     kode: kode,
     nama: nama,
     persen: persen,
+    jenis: jenis,
+    nilai: nilai,
     berlaku_sampai: sampai,
     status: status,
     dibuat_oleh: user.nama,
     waktu: now,
     dipakai: 0,
   })
-  writeAuditLog(user.id, user.nama, "BUAT_KODE_DISKON", kode + " " + persen + "%")
+  writeAuditLog(user.id, user.nama, "BUAT_KODE_DISKON", kode + " " + (jenis === "persen" ? nilai + "%" : "Rp" + nilai))
   return ok_({ id: id })
 }
 

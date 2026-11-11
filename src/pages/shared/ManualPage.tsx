@@ -47,7 +47,7 @@ export function ManualPage() {
   const [diskon, setDiskon] = useState("")
   const [promoId, setPromoId] = useState("")
   const [promoList, setPromoList] = useState<
-    { id: string; kode: string; nama: string; persen: number; berlakuSampai: string }[]
+    { id: string; kode: string; nama: string; persen: number; jenis: "persen" | "nominal"; nilai: number; berlakuSampai: string }[]
   >([])
   const [pin, setPin] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
@@ -73,6 +73,8 @@ export function ManualPage() {
               kode: r.kode,
               nama: r.nama,
               persen: Number(r.persen),
+              jenis: r.jenis === "nominal" ? "nominal" : "persen",
+              nilai: Number(r.nilai) || Number(r.persen),
               berlakuSampai: r.berlaku_sampai,
             })),
         ),
@@ -123,7 +125,12 @@ export function ManualPage() {
   const promoAktif = promoList.filter((p) => p.berlakuSampai >= tanggal)
   const promo = promoAktif.find((p) => p.id === promoId)
   const diskonNum = promo
-    ? Math.round((subtotal * promo.persen) / 100)
+    ? Math.min(
+        subtotal,
+        promo.jenis === "nominal"
+          ? promo.nilai
+          : Math.round((subtotal * promo.nilai) / 100),
+      )
     : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
   const total = subtotal - diskonNum
   const kapsterAktif = kapsterId || kapster[0]?.id || ""
@@ -356,7 +363,7 @@ export function ManualPage() {
                 <option value="">Tanpa kode diskon</option>
                 {promoAktif.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.kode} · {p.nama} ({p.persen}%)
+                    {p.kode} · {p.nama} ({p.jenis === "nominal" ? `Rp ${p.nilai.toLocaleString("id-ID")}` : `${p.nilai}%`})
                   </option>
                 ))}
               </select>

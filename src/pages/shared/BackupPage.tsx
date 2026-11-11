@@ -21,6 +21,7 @@ const demoBackups: BackupRow[] = [
 ]
 
 export function BackupPage() {
+  const [showBackupHelp, setShowBackupHelp] = useState(false)
   const [backups, setBackups] = useState<BackupRow[]>(
     getToken() ? [] : demoBackups,
   )
@@ -188,11 +189,24 @@ export function BackupPage() {
       <section className="panel backup-actions-card">
         <div>
           <p className="eyebrow">Backup manual</p>
-          <h2>Backup data</h2>
-          <p>
-            Mengamankan data layanan, produk, transaksi, pengeluaran, stok, dan
-            pengaturan komisi. Data akun tidak ikut.
-          </p>
+          <h2 className="backup-title-with-tip">
+            Backup data
+            <button
+              className="backup-help-tip"
+              type="button"
+              aria-label="Informasi backup data"
+              aria-expanded={showBackupHelp}
+              onClick={() => setShowBackupHelp((shown) => !shown)}
+            >
+              <Icon name="alert" />
+              {showBackupHelp && (
+                <span role="tooltip">
+                  Backup mencakup data layanan, produk, transaksi, pengeluaran,
+                  stok, dan pengaturan komisi. Data akun tidak ikut dicadangkan.
+                </span>
+              )}
+            </button>
+          </h2>
           {message && <small>{message}</small>}
         </div>
         <Button

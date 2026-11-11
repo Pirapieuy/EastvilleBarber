@@ -21,6 +21,7 @@ import {
   getToken,
 } from "../../api"
 import { AbsensiStatus } from "../../types"
+import { formatTanggal, TANGGAL_MAKS } from "../../utils/tanggal"
 
 type View = "list" | "photo"
 
@@ -31,7 +32,7 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
   initialKapsterName?: string
   onComplete?: (success: boolean) => void
 } = {}) {
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = TANGGAL_MAKS()
   const [tanggal, setTanggal] = useState(todayIso)
   const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([])
   const [absensi, setAbsensi] = useState<AbsensiRow[]>([])
@@ -274,12 +275,7 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
     setToast(null)
   }
 
-  const todayStr = new Date().toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+  const todayStr = formatTanggal(new Date())
 
   const STATUS_CONFIG: Record<AbsensiStatus, {
     label: string
@@ -568,9 +564,7 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
                   <span className="absensi-history-avatar"><Icon name="calendar" /></span>}
                 <div className="absensi-history-info">
                   <strong>{row.nama}</strong>
-                  <span>{new Date(`${row.tanggal}T00:00:00`).toLocaleDateString("id-ID", {
-                    day: "numeric", month: "long", year: "numeric",
-                  })}{row.jam ? ` · ${row.jam}` : ""}</span>
+                  <span>{formatTanggal(row.tanggal)}{row.jam ? `, ${row.jam.replace(".", ":")}` : ""}</span>
                 </div>
                 <span className="absensi-history-status">{row.status || row.tipe || "Tercatat"}</span>
               </article>

@@ -3307,6 +3307,15 @@ textarea {
   width: min(490px, 100%);
 }
 
+.promo-discount-modal {
+  overflow: visible;
+}
+
+.promo-discount-modal .calendar-picker-popup {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
 .payment-modal > header,
 .simple-modal > header,
 .reason-dialog > header,
@@ -6286,6 +6295,14 @@ textarea {
   position: relative;
 }
 
+/* Avoid an empty reserved scrollbar gutter making the table rows look narrower
+   than the cream header when the list does not need to scroll. */
+.service-list,
+.product-admin-list,
+.change-log {
+  scrollbar-gutter: auto;
+}
+
 .table-head,
 .service-head,
 .product-admin-head,
@@ -6323,9 +6340,13 @@ textarea {
 .service-head,
 .service-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1.4fr) 0.7fr 0.9fr 0.8fr 0.65fr 70px;
+  grid-template-columns: minmax(140px, 1.4fr) 0.7fr 0.9fr 0.8fr 0.65fr minmax(88px, 0.6fr);
   align-items: center;
   gap: 8px;
+}
+
+.service-head > :last-child {
+  text-align: center;
 }
 
 .service-head,
@@ -6348,6 +6369,10 @@ textarea {
   border-top: 1px solid var(--line);
   color: var(--slate);
   font-size: 12px;
+}
+
+.service-row .secondary-button {
+  justify-self: center;
 }
 
 .service-row.inactive {
@@ -6420,7 +6445,7 @@ textarea {
 .product-admin-head,
 .product-admin-row {
   display: grid;
-  grid-template-columns: minmax(150px, 1.4fr) 1fr 0.55fr 1fr 0.7fr 62px;
+  grid-template-columns: minmax(150px, 1.4fr) 1fr 0.55fr 1fr 0.7fr 88px;
   align-items: center;
   gap: 8px;
 }
@@ -6481,6 +6506,7 @@ textarea {
 }
 
 .product-admin-row .secondary-button {
+  justify-self: center;
   min-height: 31px;
   padding: 0 8px;
   font-size: 11px;
@@ -6493,6 +6519,37 @@ textarea {
   grid-template-columns: minmax(110px, 0.9fr) minmax(150px, 1.2fr) minmax(180px, 1.4fr) minmax(160px, 1.2fr) minmax(220px, 1.8fr);
   align-items: center;
   gap: 24px;
+}
+
+.change-log-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.change-log-table th {
+  padding: 10px 16px;
+  color: var(--slate);
+  background: var(--bone);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.change-log-table td {
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.change-log-table td strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .change-log-head {
@@ -6517,6 +6574,25 @@ textarea {
   color: var(--slate);
   font-size: 11.5px;
   line-height: 1.4;
+}
+
+@media (min-width: 621px) and (max-width: 1100px) {
+  .change-log-head,
+  .change-log article {
+    grid-template-columns: minmax(88px, 0.9fr) minmax(110px, 1.2fr) minmax(125px, 1.4fr) minmax(110px, 1.2fr) minmax(130px, 1.8fr);
+    min-width: 0;
+    width: 100%;
+    gap: 12px;
+    box-sizing: border-box;
+  }
+
+  .change-log-head {
+    padding-inline: 12px;
+  }
+
+  .change-log article {
+    padding-inline: 12px;
+  }
 }
 
 .product-modal {
@@ -7262,6 +7338,47 @@ textarea {
 .backup-actions-card h2 {
   margin-top: 4px;
   font: 600 15px/1 var(--heading);
+}
+
+.backup-title-with-tip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 9px;
+}
+
+.backup-help-tip {
+  position: relative;
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--brass);
+  cursor: pointer;
+}
+
+.backup-help-tip .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.backup-help-tip > span {
+  position: absolute;
+  z-index: 30;
+  top: 50%;
+  left: calc(100% + 10px);
+  width: min(280px, calc(100vw - 48px));
+  padding: 9px 11px;
+  border-radius: 8px;
+  color: var(--paper);
+  background: var(--ink);
+  font: 400 12px/1.45 var(--body);
+  text-align: left;
+  box-shadow: 0 5px 18px rgb(0 0 0 / 18%);
+  transform: translateY(-50%);
 }
 
 .backup-actions-card p:last-child {
@@ -9198,6 +9315,88 @@ textarea {
     -webkit-overflow-scrolling: touch;
   }
 
+  .change-log {
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain;
+  }
+
+  .change-log-head,
+  .change-log article {
+    display: grid !important;
+    grid-template-columns: minmax(110px, 0.9fr) minmax(150px, 1.2fr) minmax(180px, 1.4fr) minmax(160px, 1.2fr) minmax(220px, 1.8fr) !important;
+    min-width: 860px !important;
+    width: 860px !important;
+    gap: 24px !important;
+    box-sizing: border-box !important;
+  }
+
+  .change-log-head {
+    padding: 0 16px !important;
+  }
+
+  .change-log article {
+    padding: 10px 16px !important;
+  }
+
+  /* Keep commission history as a table on phones, sizing all columns to the
+     viewport instead of retaining the desktop table's 860px canvas. */
+  .change-log {
+    overflow-x: auto !important;
+  }
+
+  .change-log .change-log-head,
+  .change-log article {
+    display: grid !important;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.05fr) minmax(0, 1.3fr) minmax(0, 1.05fr) minmax(0, 1.2fr) !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .change-log .change-log-head {
+    min-height: 37px;
+    padding: 6px 7px !important;
+    font-size: 8px !important;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .change-log article {
+    padding: 9px 7px !important;
+    font-size: 9px !important;
+    line-height: 1.2;
+  }
+
+  .change-log article > * {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .change-log-table {
+    width: max-content !important;
+    min-width: 100% !important;
+    font-size: 9px !important;
+  }
+
+  .change-log-table th {
+    padding: 8px 9px !important;
+    font-size: 8px !important;
+  }
+
+  .change-log-table td {
+    padding: 9px !important;
+    font-size: 9px !important;
+  }
+
+  .change-log-table td strong {
+    font-size: 9px !important;
+  }
+
   .panel,
   .kpi,
   .dashboard-grid > *,
@@ -10491,7 +10690,7 @@ summary,
 
 @media (max-width: 620px) {
   .owner-recent-panel {
-    padding: 14px !important;
+    padding: 14px 14px 24px !important;
   }
 
   .owner-recent-head {
@@ -10515,18 +10714,19 @@ summary,
 
   .owner-recent-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
-    gap: 8px;
-    padding: 9px 10px;
+    gap: 6px;
+    padding: 16px 12px;
+    min-height: 88px;
     border-radius: 10px;
   }
 
   .owner-recent-main {
     display: grid;
-    grid-template-columns: 30px minmax(0, 1fr);
+    grid-template-columns: 36px minmax(0, 1fr);
     align-items: start;
-    gap: 7px;
+    gap: 8px;
   }
 
   .owner-recent-time {
@@ -10537,20 +10737,23 @@ summary,
   .owner-recent-service {
     display: block;
     font-size: 11px;
-    line-height: 1.35;
+    line-height: 1.5;
     overflow-wrap: anywhere;
   }
 
   .owner-recent-meta {
     font-size: 10px;
-    line-height: 1.35;
+    line-height: 1.5;
     overflow-wrap: anywhere;
   }
 
   .owner-recent-trailing {
     min-width: 0;
     justify-content: flex-end;
-    align-self: center;
+    align-self: start;
+    justify-self: end;
+    grid-column: 1;
+    margin-top: 2px;
   }
 
   .owner-recent-amount {
@@ -10559,11 +10762,11 @@ summary,
   }
 
   .owner-recent-footer {
-    margin-top: 6px;
+    margin-top: 20px;
   }
 
   .owner-recent-footer .text-button {
-    min-height: 32px;
+    min-height: 36px;
   }
 }
 

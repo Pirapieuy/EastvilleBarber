@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Icon } from "./Icon"
+import { formatTanggal, TANGGAL_MAKS } from "../../utils/tanggal"
 
 const NAMA_BULAN = [
   "Januari",
@@ -48,7 +49,7 @@ export function CalendarPicker({
   const containerRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
 
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = TANGGAL_MAKS()
   const initialDate = value || todayIso
   const [calYear, setCalYear] = useState(() => {
     const y = parseInt(initialDate.slice(0, 4), 10)
@@ -136,12 +137,7 @@ export function CalendarPicker({
   if (value) {
     const d = new Date(value.includes("T") ? value : `${value}T00:00:00`)
     if (!isNaN(d.getTime())) {
-      formatted = d.toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+      formatted = formatTanggal(d)
     }
   }
 
