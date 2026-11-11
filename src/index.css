@@ -11187,11 +11187,16 @@ summary,
 
 /* Footer Input Manual: latar penuh (tidak tembus) */
 .manual-page .sticky-submit {
-  bottom: 0;
+  bottom: 12px;
   margin-top: 0;
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
+  padding: 10px 10px 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
   background: var(--paper);
-  box-shadow: none;
+  /* bayangan lembut + alas warna halaman di bawah pil agar isi form tidak mengintip */
+  box-shadow: 0 12px 0 var(--bone), 0 6px 22px rgb(52 40 25 / 14%);
+}
+
+.manual-page .sticky-submit .primary-button {
+  border-radius: 12px;
 }
