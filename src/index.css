@@ -11124,3 +11124,8 @@ summary,
     overflow-y: auto !important;
   }
 }
+
+/* Pesanan saat ini: hanya satu "tab", penanda garis emas dihapus agar tidak tampak melayang */
+.cashier-page .cart-tab-active::after {
+  display: none;
+}
