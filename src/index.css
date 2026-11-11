@@ -11187,6 +11187,11 @@ summary,
 
 /* Footer Input Manual: latar penuh (tidak tembus) */
 .manual-page .sticky-submit {
+  bottom: 0;
+  margin-top: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
   background: var(--paper);
-  box-shadow: 0 0 0 10px var(--bone), 0 -8px 24px rgb(52 40 25 / 7%);
+  box-shadow: none;
 }
