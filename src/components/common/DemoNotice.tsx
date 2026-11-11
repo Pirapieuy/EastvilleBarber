@@ -22,7 +22,7 @@ export function DemoNotice({ live, error }: { live: boolean; error?: string }) {
       error.includes("gagal memuat data")
     ) {
       helpText =
-        "Koneksi internet terputus. Gunakan menu 'Input Nota Kertas' untuk mencatat nota fisik."
+        "Koneksi internet terputus. Gunakan menu 'Input Manual' untuk mencatat nota fisik."
     } else {
       helpText = `Status: ${error}`
     }

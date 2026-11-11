@@ -32,7 +32,7 @@ const MANAJER_GROUPS: SidebarNavGroup[] = [
       {
         page: "RekapManual",
         alias: "manual",
-        label: "Input Nota Kertas",
+        label: "Input Manual",
         icon: "pencil",
       },
     ],
