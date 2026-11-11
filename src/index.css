@@ -7959,6 +7959,15 @@ textarea {
     white-space: nowrap !important;
   }
 
+  .payroll-segment.page-segment {
+    width: auto !important;
+    display: inline-flex !important;
+  }
+
+  .payroll-segment.page-segment .button {
+    flex: 0 0 auto !important;
+  }
+
   .filters {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;

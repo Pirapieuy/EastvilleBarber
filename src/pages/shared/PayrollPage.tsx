@@ -16,7 +16,7 @@ import {
   HitungGajiResult,
 } from "../../api"
 
-export function KasbonTab() {
+export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: boolean; onExternalAddDone?: () => void }) {
   const [add, setAdd] = useState(false)
   const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
     { id: "u-kapster", nama: "Budi Santoso" },
@@ -50,9 +50,19 @@ export function KasbonTab() {
 
   // Form input
   const [selectedKapsterId, setSelectedKapsterId] = useState("")
-  const [jumlah, setJumlah] = useState<number>(100000)
+  const [jumlah, setJumlah] = useState("")
   const [catatan, setCatatan] = useState("")
   const [saving, setSaving] = useState(false)
+  const [filterKapster, setFilterKapster] = useState("")
+  const [searchKasbon, setSearchKasbon] = useState("")
+
+  useEffect(() => {
+    if (externalAdd) {
+      if (kapsters.length > 0) setSelectedKapsterId(kapsters[0].id)
+      setAdd(true)
+      onExternalAddDone?.()
+    }
+  }, [externalAdd])
 
   async function loadData() {
     if (!getToken()) return
@@ -63,7 +73,7 @@ export function KasbonTab() {
         apiKasbon.list().catch(() => []),
       ])
       if (kaps.length > 0) setKapsters(kaps)
-      if (list.length > 0) setKasbonList(list)
+      setKasbonList(list)
     } finally {
       setLoading(false)
     }
@@ -90,6 +100,7 @@ export function KasbonTab() {
       alert("Kasbon berhasil dicatat.")
       setAdd(false)
       setCatatan("")
+      setJumlah("")
       loadData()
     } catch (err) {
       alert(err instanceof Error ? err.message : "Gagal mencatat kasbon.")
@@ -128,21 +139,11 @@ export function KasbonTab() {
       <PageTitle
         eyebrow="Saldo berjalan"
         title="Kasbon kapster"
-        action={
-          <Button
-            className="primary-button"
-            onClick={() => {
-              if (kapsters.length > 0) setSelectedKapsterId(kapsters[0].id)
-              setAdd(true)
-            }}
-          >
-            <Icon name="plus" /> Catat kasbon
-          </Button>
-        }
       />
 
-      <div className="advance-grid">
-        {Object.entries(ringkasanMap).map(([uid, x]) => (
+      <div className="advance-grid" style={{ gridTemplateColumns: `repeat(${Object.keys(ringkasanMap).length || 2}, 1fr)` }}>
+        {!loading &&
+          Object.entries(ringkasanMap).map(([uid, x]) => (
           <article key={uid}>
             <span>{x.nama.slice(0, 2).toUpperCase()}</span>
             <div>
@@ -163,6 +164,38 @@ export function KasbonTab() {
         >
           <strong style={{ fontSize: 14 }}>Riwayat Kasbon</strong>
         </header>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, padding: "12px 18px" }}>
+          <select
+            value={filterKapster}
+            onChange={(e) => setFilterKapster(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              paddingRight: 24,
+              borderRadius: 8,
+              border: "1.5px solid var(--slate)",
+              background: "var(--paper)",
+              fontSize: 13,
+              minWidth: 140,
+              appearance: "none",
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b645c' stroke-width='2' fill='none'/%3E%3C/svg%3E\")",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 8px center",
+            }}
+          >
+            <option value="">Semua Kapster</option>
+            {kapsters.map((k) => (
+              <option key={k.id} value={k.id}>{k.nama}</option>
+            ))}
+          </select>
+          <label className="search" style={{ flex: 1, minWidth: 180 }}>
+            <Icon name="search" />
+            <input
+              value={searchKasbon}
+              onChange={(e) => setSearchKasbon(e.target.value)}
+              placeholder="Cari catatan/keperluan..."
+            />
+          </label>
+        </div>
         {loading && (
           <div style={{ padding: "8px 18px" }}>
             <LoadingState message="Memuat data kasbon..." compact />
@@ -173,7 +206,17 @@ export function KasbonTab() {
             Belum ada catatan kasbon.
           </p>
         )}
-        {kasbonList.map((k) => (
+        {!loading && kasbonList
+          .filter((k) => {
+            if (filterKapster && k.userId !== filterKapster) return false
+            if (searchKasbon.trim()) {
+              const q = searchKasbon.trim().toLowerCase()
+              const text = `${k.catatan || ""} ${k.nama}`.toLowerCase()
+              if (!text.includes(q)) return false
+            }
+            return true
+          })
+          .map((k) => (
           <div className="advance-row" key={k.id}>
             <strong>{k.nama}</strong>
             <span>{k.tanggal}</span>
@@ -225,7 +268,8 @@ export function KasbonTab() {
                   min={10000}
                   step={10000}
                   value={jumlah}
-                  onChange={(e) => setJumlah(Number(e.target.value))}
+                  onChange={(e) => setJumlah(e.target.value)}
+                  placeholder="0"
                   required
                 />
               </div>
@@ -264,6 +308,7 @@ export function KasbonTab() {
 
 export function PayrollPage() {
   const [tab, setTab] = useState<"Gaji" | "Kasbon">("Gaji")
+  const [triggerAdd, setTriggerAdd] = useState(false)
   const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
     { id: "u-kapster", nama: "Budi Santoso" },
     { id: "u-kapster2", nama: "Zhefitra Ananda" },
@@ -321,8 +366,8 @@ export function PayrollPage() {
   }
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (tab === "Gaji") loadData()
+  }, [tab])
 
   async function handleConfirmPay(e: React.FormEvent) {
     e.preventDefault()
@@ -361,19 +406,29 @@ export function PayrollPage() {
 
   return (
     <div className="content">
-      <div className="segmented page-segment">
-        <Button
-          className={tab === "Gaji" ? "active" : ""}
-          onClick={() => setTab("Gaji")}
-        >
-          Gaji
-        </Button>
-        <Button
-          className={tab === "Kasbon" ? "active" : ""}
-          onClick={() => setTab("Kasbon")}
-        >
-          Kasbon
-        </Button>
+      <div className="payroll-topbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
+        <div className="segmented payroll-segment">
+          <Button
+            className={tab === "Gaji" ? "active" : ""}
+            onClick={() => setTab("Gaji")}
+          >
+            Gaji
+          </Button>
+          <Button
+            className={tab === "Kasbon" ? "active" : ""}
+            onClick={() => setTab("Kasbon")}
+          >
+            Kasbon
+          </Button>
+        </div>
+        {tab === "Kasbon" && (
+          <Button
+            className="primary-button"
+            onClick={() => setTriggerAdd(true)}
+          >
+            <Icon name="plus" /> Catat kasbon
+          </Button>
+        )}
       </div>
 
       {tab === "Gaji" ? (
@@ -382,9 +437,6 @@ export function PayrollPage() {
             <div>
               <p className="eyebrow">Periode pembayaran</p>
               <h2>Periode Berjalan (Live)</h2>
-              <div className="segmented dark-segment">
-                <Button className="active">Komisi Belum Dibayar</Button>
-              </div>
             </div>
             <div>
               <small>Total estimasi gaji bersih</small>
@@ -395,7 +447,7 @@ export function PayrollPage() {
 
           {loading && (
             <LoadingState
-              message="Menghitung komisi dari database..."
+              message="Menghitung komisi..."
               compact
             />
           )}
@@ -475,7 +527,7 @@ export function PayrollPage() {
           </section>
         </>
       ) : (
-        <KasbonTab />
+        <KasbonTab externalAdd={triggerAdd} onExternalAddDone={() => setTriggerAdd(false)} />
       )}
 
       {selectedPayTarget && (

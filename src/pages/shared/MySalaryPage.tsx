@@ -44,7 +44,7 @@ export function MySalaryPage() {
   if (!data && !error) {
     return (
       <div className="loading-state-screen">
-        <LoadingState message="Memuat data gaji..." />
+        <LoadingState message="Menghitung komisi..." />
       </div>
     )
   }
