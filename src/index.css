@@ -11184,3 +11184,9 @@ summary,
   background: transparent;
   font-size: 16px;
 }
+
+/* Footer Input Manual: latar penuh (tidak tembus) */
+.manual-page .sticky-submit {
+  background: var(--paper);
+  box-shadow: 0 0 0 10px var(--bone), 0 -8px 24px rgb(52 40 25 / 7%);
+}
