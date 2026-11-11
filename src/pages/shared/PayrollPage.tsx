@@ -55,6 +55,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
   const [saving, setSaving] = useState(false)
   const [filterKapster, setFilterKapster] = useState("")
   const [searchKasbon, setSearchKasbon] = useState("")
+  const [filterStatus, setFilterStatus] = useState<"" | "Aktif" | "Lunas">("")
 
   useEffect(() => {
     if (externalAdd) {
@@ -158,13 +159,46 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
       <section className="panel list-panel">
         <header
           style={{
-            padding: "12px 18px",
+            padding: "14px 18px",
             borderBottom: "1px solid var(--line)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
           }}
         >
-          <strong style={{ fontSize: 14 }}>Riwayat Kasbon</strong>
+          <strong style={{ fontSize: 14, marginRight: "auto" }}>Riwayat Kasbon</strong>
+          <Button
+            style={{
+              cursor: "pointer",
+              borderRadius: 8,
+              padding: "6px 14px",
+              fontSize: 12,
+              fontWeight: 600,
+              border: filterStatus === "Lunas" ? "1.5px solid var(--sage)" : "1px solid var(--line)",
+              color: filterStatus === "Lunas" ? "var(--sage)" : "var(--slate)",
+              background: filterStatus === "Lunas" ? "var(--sage-soft)" : "var(--paper)",
+            }}
+            onClick={() => setFilterStatus(filterStatus === "Lunas" ? "" : "Lunas")}
+          >
+            Lunas
+          </Button>
+          <Button
+            style={{
+              cursor: "pointer",
+              borderRadius: 8,
+              padding: "6px 14px",
+              fontSize: 12,
+              fontWeight: 600,
+              border: filterStatus === "Aktif" ? "1.5px solid var(--oxblood)" : "1px solid var(--line)",
+              color: filterStatus === "Aktif" ? "var(--oxblood)" : "var(--slate)",
+              background: filterStatus === "Aktif" ? "var(--oxblood-soft)" : "var(--paper)",
+            }}
+            onClick={() => setFilterStatus(filterStatus === "Aktif" ? "" : "Aktif")}
+          >
+            Belum Lunas
+          </Button>
         </header>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, padding: "12px 18px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
           <select
             value={filterKapster}
             onChange={(e) => setFilterKapster(e.target.value)}
@@ -172,7 +206,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
               padding: "8px 12px",
               paddingRight: 24,
               borderRadius: 8,
-              border: "1.5px solid var(--slate)",
+              border: "1px solid var(--line)",
               background: "var(--paper)",
               fontSize: 13,
               minWidth: 140,
@@ -206,39 +240,132 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
             Belum ada catatan kasbon.
           </p>
         )}
-        {!loading && kasbonList
-          .filter((k) => {
-            if (filterKapster && k.userId !== filterKapster) return false
-            if (searchKasbon.trim()) {
-              const q = searchKasbon.trim().toLowerCase()
-              const text = `${k.catatan || ""} ${k.nama}`.toLowerCase()
-              if (!text.includes(q)) return false
-            }
-            return true
-          })
-          .map((k) => (
-          <div className="advance-row" key={k.id}>
-            <strong>{k.nama}</strong>
-            <span>{k.tanggal}</span>
-            <span>{k.catatan || "Kasbon"}</span>
-            <b>{rupiah(k.jumlah)}</b>
-            <i className={`chip ${k.status === "Aktif" ? "lunas" : "manual"}`}>
-              {k.status}
-            </i>
-            {k.status === "Aktif" && (
-              <Button
-                className="danger-link"
-                onClick={() => handleLunasi(k.id)}
-              >
-                Tandai Lunas
-              </Button>
-            )}
-          </div>
-        ))}
+        {!loading && kasbonList.length > 0 && (
+          <>
+            {/* Desktop Table View (≥ 768px) - seperti Image 2 */}
+            <div className="kasbon-desktop-table">
+              <div className="kasbon-table-head">
+                <span>Kapster</span>
+                <span>Tanggal</span>
+                <span>Catatan</span>
+                <span>Jumlah</span>
+                <span>Status</span>
+                <span>Aksi</span>
+              </div>
+              {kasbonList
+                .filter((k) => {
+                  if (filterKapster && k.userId !== filterKapster) return false
+                  if (filterStatus && k.status !== filterStatus) return false
+                  if (searchKasbon.trim()) {
+                    const q = searchKasbon.trim().toLowerCase()
+                    const text = `${k.catatan || ""} ${k.nama}`.toLowerCase()
+                    if (!text.includes(q)) return false
+                  }
+                  return true
+                })
+                .map((k) => (
+                  <article className="kasbon-table-row" key={k.id}>
+                    <span className="kasbon-user-cell">
+                      <i>
+                        <Icon name="cash" />
+                      </i>
+                      <span>
+                        <strong>{k.nama}</strong>
+                        <small>{k.role || "Kapster"}</small>
+                      </span>
+                    </span>
+                    <span>{k.tanggal}</span>
+                    <span className="kasbon-note-cell">{k.catatan || "-"}</span>
+                    <strong className="kasbon-amount-cell">{rupiah(k.jumlah)}</strong>
+                    <span>
+                      <i className={`chip ${k.status === "Aktif" ? "batal" : "lunas"}`}>
+                        {k.status === "Aktif" ? "Belum Lunas" : k.status}
+                      </i>
+                    </span>
+                    <span className="kasbon-action-cell">
+                      {k.status === "Aktif" ? (
+                        <Button
+                          className="secondary-button"
+                          onClick={() => handleLunasi(k.id)}
+                        >
+                          Tandai Lunas
+                        </Button>
+                      ) : (
+                        <span style={{ color: "var(--muted)" }}>-</span>
+                      )}
+                    </span>
+                  </article>
+                ))}
+            </div>
+
+            {/* Mobile Cards View (< 768px) */}
+            <div className="kasbon-mobile-cards">
+              {kasbonList
+                .filter((k) => {
+                  if (filterKapster && k.userId !== filterKapster) return false
+                  if (filterStatus && k.status !== filterStatus) return false
+                  if (searchKasbon.trim()) {
+                    const q = searchKasbon.trim().toLowerCase()
+                    const text = `${k.catatan || ""} ${k.nama}`.toLowerCase()
+                    if (!text.includes(q)) return false
+                  }
+                  return true
+                })
+                .map((k) => (
+                  <article className="kasbon-card" key={k.id}>
+                    <div className="kasbon-card-header">
+                      <span className="kasbon-card-title">
+                        <i>
+                          <Icon name="cash" />
+                        </i>
+                        <strong>{k.nama}</strong>
+                      </span>
+                      <i className={`chip ${k.status === "Aktif" ? "batal" : "lunas"}`}>
+                        {k.status === "Aktif" ? "Belum Lunas" : k.status}
+                      </i>
+                    </div>
+
+                    <div className="kasbon-card-grid">
+                      <div className="kasbon-card-field">
+                        <small>Tanggal</small>
+                        <span>{k.tanggal}</span>
+                      </div>
+                      <div className="kasbon-card-field">
+                        <small>Jumlah kasbon</small>
+                        <strong>{rupiah(k.jumlah)}</strong>
+                      </div>
+                      <div className="kasbon-card-field">
+                        <small>Catatan / Keperluan</small>
+                        <span>{k.catatan || "-"}</span>
+                      </div>
+                      <div className="kasbon-card-field">
+                        <small>Role</small>
+                        <span>{k.role || "Kapster"}</span>
+                      </div>
+                    </div>
+
+                    {k.status === "Aktif" && (
+                      <>
+                        <hr className="kasbon-card-divider" />
+                        <footer className="kasbon-card-footer">
+                          <Button
+                            className="secondary-button"
+                            onClick={() => handleLunasi(k.id)}
+                          >
+                            <Icon name="check" /> Tandai Lunas
+                          </Button>
+                        </footer>
+                      </>
+                    )}
+                  </article>
+                ))}
+            </div>
+          </>
+        )}
       </section>
 
       {add && (
-        <div className="modal-overlay">
+        <div className="modal-overlay modal-centered">
           <form className="simple-modal" onSubmit={handleCreateKasbon}>
             <header>
               <h2>Catat kasbon</h2>
@@ -306,6 +433,14 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
   )
 }
 
+const PILIHAN_CATATAN_GAJI = [
+  "Tunai",
+  "Transfer BCA",
+  "Transfer Mandiri",
+  "Transfer BRI",
+  "Transfer Bank",
+]
+
 export function PayrollPage() {
   const [tab, setTab] = useState<"Gaji" | "Kasbon">("Gaji")
   const [triggerAdd, setTriggerAdd] = useState(false)
@@ -323,7 +458,11 @@ export function PayrollPage() {
     nama: string
   } | null>(null)
   const [payCatatan, setPayCatatan] = useState("")
+  const [customCatatan, setCustomCatatan] = useState(false)
   const [paying, setPaying] = useState(false)
+  const [filterGajiKapster, setFilterGajiKapster] = useState("")
+  const [searchGaji, setSearchGaji] = useState("")
+  const [filterGajiStatus, setFilterGajiStatus] = useState("")
 
   async function loadData() {
     if (!getToken()) return
@@ -389,6 +528,7 @@ export function PayrollPage() {
       alert(`Pembayaran gaji untuk ${selectedPayTarget.nama} berhasil dicatat!`)
       setSelectedPayTarget(null)
       setPayCatatan("")
+      setCustomCatatan(false)
       loadData()
     } catch (err) {
       alert(
@@ -440,7 +580,7 @@ export function PayrollPage() {
             </div>
             <div>
               <small>Total estimasi gaji bersih</small>
-              <strong>{rupiah(totalAllBersih)}</strong>
+              <strong>{loading ? "-" : rupiah(totalAllBersih)}</strong>
               <small>{kapsters.length} kapster terdaftar</small>
             </div>
           </section>
@@ -462,7 +602,7 @@ export function PayrollPage() {
                 transaksiSelesai: 0,
                 kasbonAktif: [],
               }
-              const isPaid = calc.gajiBersih === 0 && calc.totalKomisi === 0
+              const isPaid = !loading && calc.gajiBersih === 0 && calc.totalKomisi === 0
               return (
                 <article className="salary-card" key={k.id}>
                   <header>
@@ -478,21 +618,22 @@ export function PayrollPage() {
                   <dl>
                     <div>
                       <dt>Total komisi berjalan</dt>
-                      <dd>{rupiah(calc.totalKomisi)}</dd>
+                      <dd>{loading ? "-" : rupiah(calc.totalKomisi)}</dd>
                     </div>
                     <div className="deduct">
                       <dt>Potongan kasbon</dt>
-                      <dd>− {rupiah(calc.totalKasbon)}</dd>
+                      <dd>{loading ? "-" : `− ${rupiah(calc.totalKasbon)}`}</dd>
                     </div>
                   </dl>
                   <footer>
                     <span>
                       <small>Gaji bersih</small>
-                      <strong>{rupiah(calc.gajiBersih)}</strong>
+                      <strong>{loading ? "-" : rupiah(calc.gajiBersih)}</strong>
                     </span>
                     {!isPaid && (
                       <Button
                         className="primary-button"
+                        disabled={loading}
                         onClick={() => setSelectedPayTarget(k)}
                       >
                         Bayar
@@ -504,25 +645,239 @@ export function PayrollPage() {
             })}
           </div>
 
-          <section className="panel history-panel" style={{ marginTop: 24 }}>
-            <PageTitle
-              eyebrow="Jejak pembayaran"
-              title="Riwayat pembayaran gaji"
-            />
-            {historyList.length === 0 ? (
+          <section className="panel list-panel" style={{ marginTop: 24 }}>
+            <header
+              style={{
+                padding: "14px 18px",
+                borderBottom: "1px solid var(--line)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <strong style={{ fontSize: 14, marginRight: "auto" }}>
+                Riwayat Pembayaran Gaji
+              </strong>
+              {Array.from(
+                new Set(historyList.map((h) => h.status || "Dibayar")),
+              ).map((st) => {
+                const isSelected = filterGajiStatus === st
+                const isSage = st !== "Draft"
+                return (
+                  <Button
+                    key={st}
+                    style={{
+                      cursor: "pointer",
+                      borderRadius: 8,
+                      padding: "6px 14px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      border: isSelected
+                        ? isSage
+                          ? "1.5px solid var(--sage)"
+                          : "1.5px solid var(--oxblood)"
+                        : "1px solid var(--line)",
+                      color: isSelected
+                        ? isSage
+                          ? "var(--sage)"
+                          : "var(--oxblood)"
+                        : "var(--slate)",
+                      background: isSelected
+                        ? isSage
+                          ? "var(--sage-soft)"
+                          : "var(--oxblood-soft)"
+                        : "var(--paper)",
+                    }}
+                    onClick={() =>
+                      setFilterGajiStatus(isSelected ? "" : st)
+                    }
+                  >
+                    {st}
+                  </Button>
+                )
+              })}
+            </header>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+                padding: "12px 18px",
+                borderBottom: "1px solid var(--line)",
+              }}
+            >
+              <select
+                value={filterGajiKapster}
+                onChange={(e) => setFilterGajiKapster(e.target.value)}
+                style={{
+                  padding: "8px 12px",
+                  paddingRight: 24,
+                  borderRadius: 8,
+                  border: "1px solid var(--line)",
+                  background: "var(--paper)",
+                  fontSize: 13,
+                  minWidth: 140,
+                  appearance: "none",
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b645c' stroke-width='2' fill='none'/%3E%3C/svg%3E\")",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                }}
+              >
+                <option value="">Semua Kapster</option>
+                {kapsters.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.nama}
+                  </option>
+                ))}
+              </select>
+              <label className="search" style={{ flex: 1, minWidth: 180 }}>
+                <Icon name="search" />
+                <input
+                  value={searchGaji}
+                  onChange={(e) => setSearchGaji(e.target.value)}
+                  placeholder="Cari catatan/keperluan..."
+                />
+              </label>
+            </div>
+
+            {loading && (
+              <div style={{ padding: "8px 18px" }}>
+                <LoadingState
+                  message="Memuat riwayat pembayaran gaji..."
+                  compact
+                />
+              </div>
+            )}
+            {historyList.length === 0 && !loading && (
               <p style={{ padding: 18, color: "var(--muted)" }}>
                 Belum ada riwayat pembayaran gaji tercatat di server.
               </p>
-            ) : (
-              historyList.map((h) => (
-                <div className="history-payment" key={h.id}>
-                  <span>{h.nama.slice(0, 2).toUpperCase()}</span>
-                  <strong>{h.nama}</strong>
-                  <span>{h.tanggalBayar}</span>
-                  <b>{rupiah(h.gajiBersih)}</b>
-                  <i className="chip lunas">{h.status}</i>
+            )}
+            {!loading &&
+              historyList.length > 0 &&
+              historyList.filter((h) => {
+                if (filterGajiKapster && h.userId !== filterGajiKapster)
+                  return false
+                if (filterGajiStatus && h.status !== filterGajiStatus)
+                  return false
+                if (searchGaji.trim()) {
+                  const q = searchGaji.trim().toLowerCase()
+                  const text = `${h.catatan || ""} ${h.nama} ${h.tanggalBayar || ""} ${h.periode || ""}`.toLowerCase()
+                  if (!text.includes(q)) return false
+                }
+                return true
+              }).length === 0 && (
+                <p style={{ padding: 18, color: "var(--muted)" }}>
+                  Tidak ada data pembayaran gaji yang cocok dengan filter.
+                </p>
+              )}
+            {!loading && (
+              <>
+                {/* Desktop Table View (≥ 768px) */}
+                <div className="kasbon-desktop-table">
+                  <div className="kasbon-table-head no-action">
+                    <span>Kapster</span>
+                    <span>Tanggal</span>
+                    <span>Catatan</span>
+                    <span>Jumlah</span>
+                    <span>Status</span>
+                  </div>
+                  {historyList
+                    .filter((h) => {
+                      if (filterGajiKapster && h.userId !== filterGajiKapster)
+                        return false
+                      if (filterGajiStatus && h.status !== filterGajiStatus)
+                        return false
+                      if (searchGaji.trim()) {
+                        const q = searchGaji.trim().toLowerCase()
+                        const text = `${h.catatan || ""} ${h.nama} ${h.tanggalBayar || ""} ${h.periode || ""}`.toLowerCase()
+                        if (!text.includes(q)) return false
+                      }
+                      return true
+                    })
+                    .map((h) => (
+                      <article className="kasbon-table-row no-action" key={h.id}>
+                        <span className="kasbon-user-cell">
+                          <i>
+                            <Icon name="cash" />
+                          </i>
+                          <span>
+                            <strong>{h.nama}</strong>
+                            <small>{h.role || "Kapster"}</small>
+                          </span>
+                        </span>
+                        <span>
+                          {h.tanggalBayar
+                            ? h.tanggalBayar.slice(0, 10)
+                            : h.periode || "-"}
+                        </span>
+                        <span className="kasbon-note-cell">
+                          {h.catatan || "-"}
+                        </span>
+                        <strong className="kasbon-amount-cell">
+                          {rupiah(h.gajiBersih)}
+                        </strong>
+                        <span>
+                          <i className="chip lunas">{h.status || "Dibayar"}</i>
+                        </span>
+                      </article>
+                    ))}
                 </div>
-              ))
+
+                {/* Mobile Cards View (< 768px) */}
+                <div className="kasbon-mobile-cards">
+                  {historyList
+                    .filter((h) => {
+                      if (filterGajiKapster && h.userId !== filterGajiKapster)
+                        return false
+                      if (filterGajiStatus && h.status !== filterGajiStatus)
+                        return false
+                      if (searchGaji.trim()) {
+                        const q = searchGaji.trim().toLowerCase()
+                        const text = `${h.catatan || ""} ${h.nama} ${h.tanggalBayar || ""} ${h.periode || ""}`.toLowerCase()
+                        if (!text.includes(q)) return false
+                      }
+                      return true
+                    })
+                    .map((h) => (
+                      <article className="kasbon-card" key={h.id}>
+                        <div className="kasbon-card-header">
+                          <span className="kasbon-card-title">
+                            <i>
+                              <Icon name="cash" />
+                            </i>
+                            <strong>{h.nama}</strong>
+                          </span>
+                          <i className="chip lunas">{h.status || "Dibayar"}</i>
+                        </div>
+
+                        <div className="kasbon-card-grid">
+                          <div className="kasbon-card-field">
+                            <small>Tanggal</small>
+                            <span>
+                              {h.tanggalBayar
+                                ? h.tanggalBayar.slice(0, 10)
+                                : h.periode || "-"}
+                            </span>
+                          </div>
+                          <div className="kasbon-card-field">
+                            <small>Gaji bersih</small>
+                            <strong>{rupiah(h.gajiBersih)}</strong>
+                          </div>
+                          <div className="kasbon-card-field">
+                            <small>Catatan</small>
+                            <span>{h.catatan || "-"}</span>
+                          </div>
+                          <div className="kasbon-card-field">
+                            <small>Role</small>
+                            <span>{h.role || "Kapster"}</span>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                </div>
+              </>
             )}
           </section>
         </>
@@ -531,16 +886,25 @@ export function PayrollPage() {
       )}
 
       {selectedPayTarget && (
-        <div className="modal-overlay">
-          <section className="simple-modal">
+        <div
+          className="modal-overlay modal-centered"
+          onClick={() => {
+            setSelectedPayTarget(null)
+            setPayCatatan("")
+            setCustomCatatan(false)
+          }}
+        >
+          <form
+            className="simple-modal"
+            onSubmit={handleConfirmPay}
+            onClick={(e) => e.stopPropagation()}
+          >
             <header>
               <h2>Bayar Gaji: {selectedPayTarget.nama}</h2>
-              <Button type="button" onClick={() => setSelectedPayTarget(null)}>
-                <Icon name="close" />
-              </Button>
             </header>
-            <form onSubmit={handleConfirmPay}>
-              <div className="pay-preview">
+
+            <div style={{ padding: "16px 18px 14px" }}>
+              <div className="pay-preview" style={{ margin: 0 }}>
                 <div>
                   <span>Total komisi layanan & produk</span>
                   <strong>
@@ -562,35 +926,106 @@ export function PayrollPage() {
                 </div>
               </div>
 
-              <label style={{ margin: "14px 0", display: "block" }}>
-                <span style={{ fontSize: 12, fontWeight: 600 }}>
-                  Catatan pembayaran (opsional)
-                </span>
-                <input
-                  placeholder="Misal: Transfer BCA, Tunai..."
-                  value={payCatatan}
-                  onChange={(e) => setPayCatatan(e.target.value)}
-                />
-              </label>
+              <div style={{ margin: "16px 0 0" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>
+                    Catatan pembayaran (opsional)
+                  </span>
+                  <span
+                    onClick={() => {
+                      setCustomCatatan(!customCatatan)
+                      setPayCatatan("")
+                    }}
+                    style={{
+                      color: "var(--brass)",
+                      fontSize: 12,
+                      cursor: "pointer",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {customCatatan ? "Pilih catatan" : "Catatan lainnya"}
+                  </span>
+                </div>
 
-              <footer>
-                <Button
-                  className="secondary-button"
-                  type="button"
-                  onClick={() => setSelectedPayTarget(null)}
-                >
-                  Batal
-                </Button>
-                <Button
-                  className="primary-button"
-                  type="submit"
-                  disabled={paying}
-                >
-                  {paying ? "Memproses..." : "Konfirmasi Pembayaran"}
-                </Button>
-              </footer>
-            </form>
-          </section>
+                {customCatatan ? (
+                  <input
+                    placeholder="Tuliskan catatan pembayaran..."
+                    value={payCatatan}
+                    onChange={(e) => setPayCatatan(e.target.value)}
+                    style={{
+                      width: "100%",
+                      minHeight: 42,
+                      padding: "0 10px",
+                      border: "1px solid var(--line)",
+                      borderRadius: 8,
+                      outline: "none",
+                      background: "var(--paper)",
+                      fontSize: 13,
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {PILIHAN_CATATAN_GAJI.map((p) => {
+                      const isSelected = payCatatan === p
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setPayCatatan(isSelected ? "" : p)}
+                          style={{
+                            padding: "8px 14px",
+                            borderRadius: 8,
+                            border: isSelected
+                              ? "2px solid var(--brass)"
+                              : "1.5px solid var(--slate)",
+                            background: isSelected
+                              ? "rgba(200, 150, 62, 0.1)"
+                              : "var(--paper)",
+                            color: "var(--ink)",
+                            fontWeight: isSelected ? 700 : 400,
+                            fontSize: 13,
+                            cursor: "pointer",
+                            transition: "all 120ms ease",
+                          }}
+                        >
+                          {p}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <footer>
+              <Button
+                className="secondary-button"
+                type="button"
+                onClick={() => {
+                  setSelectedPayTarget(null)
+                  setPayCatatan("")
+                  setCustomCatatan(false)
+                }}
+              >
+                Batal
+              </Button>
+              <Button
+                className="primary-button"
+                type="submit"
+                disabled={paying}
+              >
+                {paying ? "Memproses..." : "Konfirmasi Pembayaran"}
+              </Button>
+            </footer>
+          </form>
         </div>
       )}
     </div>

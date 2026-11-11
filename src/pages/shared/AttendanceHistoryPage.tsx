@@ -46,7 +46,7 @@ function DetailModal({ row, onClose }: { row: DisplayRow; onClose: () => void })
     .filter((s) => s.startsWith("Koreksi:"))
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay modal-centered" onClick={onClose}>
       <section className="simple-modal" onClick={(e) => e.stopPropagation()}>
         <header>
           <h2>Detail Absensi</h2>
@@ -154,13 +154,10 @@ function KoreksiModal({
   ]
 
   return (
-    <div className="modal-overlay">
-      <section className="simple-modal">
+    <div className="modal-overlay modal-centered" onClick={onClose}>
+      <section className="simple-modal" onClick={(e) => e.stopPropagation()}>
         <header>
           <h2>Koreksi Absensi</h2>
-          <Button onClick={onClose}>
-            <Icon name="close" />
-          </Button>
         </header>
         <label>
           <span>Nama</span>
@@ -208,6 +205,7 @@ function KoreksiModal({
             {pilihanAlasan.map((a) => (
               <button
                 key={a}
+                type="button"
                 onClick={() => setAlasan(alasan === a ? "" : a)}
                 style={{
                   padding: "8px 14px",
