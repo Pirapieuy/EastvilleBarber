@@ -688,12 +688,13 @@ export function CashierPage({ currentUser, onNavigate }: {
   return (
     <div className="cashier-page">
       <section className="catalog">
+        <div className="catalog-sticky">
         <section className="barber-picker">
           <div className="barber-picker-label">
             <span className="item-icon">
               <Icon name="user" />
             </span>
-            <small>Kapster aktif</small>
+            <small>Kapster</small>
           </div>
           <div className="barber-options">
             {barberList.map(({ id, name: barber }) => {
@@ -762,6 +763,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               onChange={(e) => setCari(e.target.value)}
             />
           </div>
+        </div>
         </div>
         <div className="catalog-grid">
           {items.length === 0 && (

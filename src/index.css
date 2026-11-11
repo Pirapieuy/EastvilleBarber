@@ -11129,3 +11129,26 @@ summary,
 .cashier-page .cart-tab-active::after {
   display: none;
 }
+
+/* Kasir: kapster + tab/cari menempel di atas, hanya daftar menu yang menggulir */
+.cashier-page .catalog {
+  padding-top: 0;
+}
+
+.cashier-page .catalog-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 24px 0 4px;
+  background: var(--bone);
+}
+
+@media (max-width: 820px) {
+  .cashier-page .catalog {
+    padding-top: 0;
+  }
+
+  .cashier-page .catalog-sticky {
+    padding-top: 14px;
+  }
+}
