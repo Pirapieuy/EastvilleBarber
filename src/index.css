@@ -11152,3 +11152,17 @@ summary,
     padding-top: 14px;
   }
 }
+
+/* Kasir: jarak + garis pemisah di bawah bagian yang menempel */
+.cashier-page .catalog-sticky {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+
+/* Desktop: header "Pesanan saat ini" dihapus (di mobile tetap ada untuk tombol tutup) */
+@media (min-width: 768px) {
+  .cashier-page .cart-tabs {
+    display: none;
+  }
+}
