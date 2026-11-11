@@ -11166,3 +11166,21 @@ summary,
     display: none;
   }
 }
+
+/* Input Manual: tanda wajib, kuis bertahap, footer ringkas */
+.req-mark {
+  color: #c0392b;
+  margin-left: 2px;
+}
+
+.manual-quick-cash {
+  grid-column: 1 / -1;
+}
+
+.sticky-submit .submit-total {
+  margin: 0 0 0 4px;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  font-size: 16px;
+}

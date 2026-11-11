@@ -137,6 +137,18 @@ export function ManualPage() {
   const paid =
     method === "Tunai" ? cashNum : method === "QRIS" ? total : cashNum + qrisNum
   const cleanNote = note.trim()
+  const notaOk = cleanNote.length >= 3
+  const adaItem = selected.length > 0
+  const pecahanCepat = Array.from(
+    new Set(
+      [10000, 20000, 50000, 100000]
+        .map((k) => Math.ceil(total / k) * k)
+        .concat([50000, 100000, 150000, 200000]),
+    ),
+  )
+    .filter((n) => n > total)
+    .sort((a, b) => a - b)
+    .slice(0, 5)
   const gagalMuat = Boolean(getToken()) && !live
   const qrisBerlebih = method === "Gabungan" && qrisNum > total
   const kembalian = method === "QRIS" ? 0 : Math.max(0, paid - total)
@@ -294,7 +306,9 @@ export function ManualPage() {
         <h3>Data nota</h3>
         <div className="form-grid manual-info-grid">
           <label>
-            <span>Nomor nota di buku</span>
+            <span>
+              Nomor nota di buku <b className="req-mark">*</b>
+            </span>
             <input
               minLength={3}
               onChange={(e) => setNote(e.target.value.toUpperCase())}
@@ -340,9 +354,10 @@ export function ManualPage() {
         </div>
       </section>
 
+      {notaOk && (
       <section className="panel form-panel">
         <div className="section-title">
-          <h3>Layanan dan produk</h3>
+          <h3>Layanan dan produk <b className="req-mark">*</b></h3>
           <span className="nota-count">
             {selected.length > 0 ? `${selected.length} dipilih` : "Belum ada"}
           </span>
@@ -364,7 +379,9 @@ export function ManualPage() {
           )}
         </div>
       </section>
+      )}
 
+      {notaOk && adaItem && (
       <div className="manual-checkout-grid">
       <section className="panel form-panel manual-discount-panel">
         <h3>Diskon</h3>
@@ -486,6 +503,25 @@ export function ManualPage() {
               </div>
             </label>
           )}
+          {method === "Tunai" && total > 0 && (
+            <div className="quick-cash manual-quick-cash">
+              <Button
+                className={cashNum === total ? "active" : ""}
+                onClick={() => setCash(String(total))}
+              >
+                Uang pas
+              </Button>
+              {pecahanCepat.map((n) => (
+                <Button
+                  className={cashNum === n ? "active" : ""}
+                  key={n}
+                  onClick={() => setCash(String(n))}
+                >
+                  {rupiah(n)}
+                </Button>
+              ))}
+            </div>
+          )}
           {method === "Gabungan" && (
             <label>
               <span>Dibayar QRIS</span>
@@ -540,10 +576,20 @@ export function ManualPage() {
         )}
       </section>
       </div>
+      )}
 
       <div className="sticky-submit">
         <span>
-          <b>MANUAL</b> Nota ini ditandai di Riwayat dan laporan.
+          {adaItem && notaOk ? (
+            <>
+              Total <b className="submit-total">{rupiah(total)}</b>
+            </>
+          ) : (
+            !success &&
+            (notaOk
+              ? "Pilih minimal satu layanan atau produk."
+              : "Isi nomor nota dulu untuk melanjutkan.")
+          )}
           {error && <small className="error-text"> {error}</small>}
           {success && <small> {success}</small>}
         </span>
