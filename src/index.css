@@ -2115,7 +2115,7 @@ textarea {
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 11px;
+  gap: 16px;
   margin-top: 22px;
 }
 
@@ -3589,6 +3589,10 @@ textarea {
   padding-bottom: 0;
 }
 
+.expense-form > label:last-of-type {
+  margin-bottom: 22px;
+}
+
 .simple-modal > label,
 .simple-modal > .pay-preview,
 .simple-modal > pre {
@@ -4925,10 +4929,17 @@ textarea {
 
 .expense-table-scroll,
 .commission-table-scroll {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
+  max-width: 100%;
+  margin-inline: 0;
+  max-height: 420px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
 }
 
 .expense-head,
@@ -5002,6 +5013,36 @@ textarea {
 .expense-table-compact > .expense-row {
   grid-template-columns: minmax(80px, 0.6fr) minmax(0, 2fr) minmax(100px, 0.8fr) minmax(90px, 0.6fr);
   min-width: 0;
+}
+
+.report-section {
+  scroll-margin-top: 18px;
+}
+
+.expense-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.expense-toolbar .search {
+  flex: 1;
+}
+
+.expense-page-title + .expense-toolbar {
+  margin-top: 14px;
+}
+
+.owner-profit-panel > .page-title {
+  margin-bottom: 24px;
+}
+
+.owner-profit-panel > div:not(.page-title) {
+  max-width: none !important;
+}
+
+.report-section + .report-section {
+  margin-top: 18px;
 }
 
 /* Payroll */
@@ -5730,6 +5771,26 @@ textarea {
   padding: 17px;
 }
 
+.report-week-range {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.report-week-range-label {
+  color: var(--slate);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .report-table {
   width: 100%;
   min-width: 0;
@@ -5751,7 +5812,7 @@ textarea {
 
 .commission-table-scroll > .report-head,
 .commission-table-scroll > .report-row {
-  min-width: 640px;
+  width: 100%;
 }
 
 .report-head {
@@ -8051,6 +8112,147 @@ textarea {
 }
 
 @media (max-width: 620px) {
+  .report-section + .report-section {
+    margin-top: 12px;
+  }
+
+  .report-section > div > .panel {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 14px !important;
+  }
+
+  .expense-toolbar {
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap !important;
+    gap: 6px;
+  }
+
+  .expense-toolbar .search {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+  }
+
+  .expense-toolbar .search input {
+    min-width: 0;
+  }
+
+  .expense-add-button {
+    flex: 0 1 auto;
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 44%;
+    padding-inline: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .expense-table-scroll,
+  .commission-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    max-height: min(360px, 52svh);
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+  }
+
+  .expense-table-scroll > *,
+  .commission-table-scroll > * {
+    max-width: 100%;
+  }
+
+  .expense-table-compact .expense-row > *,
+  .commission-table-scroll .report-row > * {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .expense-table-scroll > .expense-head,
+  .commission-table-scroll > .report-head {
+    display: none;
+  }
+
+  .expense-table-compact > .expense-row,
+  .commission-table-scroll > .report-row {
+    display: grid !important;
+    box-sizing: border-box;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 7px 10px;
+    padding: 12px;
+  }
+
+  .expense-table-compact > .expense-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start;
+    width: 100%;
+  }
+
+  .expense-table-compact > .expense-row > span:first-child {
+    min-width: 0;
+    color: var(--slate);
+  }
+
+  .expense-table-compact > .expense-row > span:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .expense-table-compact > .expense-row > strong {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .expense-table-compact > .expense-row > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .commission-table-scroll > .report-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    width: 100%;
+  }
+
+  .commission-table-scroll > .report-row > div,
+  .commission-table-scroll > .report-row > span,
+  .commission-table-scroll > .report-row > b {
+    grid-column: 1 / -1;
+  }
+
+  .commission-table-scroll > .report-row > b {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .commission-table-scroll > .report-row > b:nth-child(3)::before {
+    content: "Omzet";
+    color: var(--slate);
+    font-weight: 400;
+  }
+
+  .commission-table-scroll > .report-row > b:nth-child(4)::before {
+    content: "Komisi";
+    color: var(--slate);
+    font-weight: 400;
+  }
+
   .report-subnav-row {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
