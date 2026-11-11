@@ -1,11 +1,11 @@
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
+import { SearchSelect } from "../../components/common/SearchSelect"
 import {
   Button,
   CalendarPicker,
   LoadingState,
-  PageTitle,
   rupiah,
 } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
@@ -464,7 +464,6 @@ export function HistoryPage({ currentUser, role }: {
   return (
     <div className="content history-page-content history-no-scrollbar">
       <DemoNotice live={live} error={liveError} />
-      <PageTitle eyebrow="Transaksi" title="Riwayat transaksi" />
       <div className="filters">
         <CalendarPicker
           value={dateFilter}
@@ -475,7 +474,7 @@ export function HistoryPage({ currentUser, role }: {
           max={TANGGAL_MAKS()}
           min={TANGGAL_MULAI}
         />
-        <select
+        <SearchSelect
           aria-label="Filter kapster"
           className="history-kapster-select"
           onChange={(e) => setBarberFilter(e.target.value)}
@@ -487,7 +486,7 @@ export function HistoryPage({ currentUser, role }: {
               {b}
             </option>
           ))}
-        </select>
+        </SearchSelect>
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
