@@ -11071,3 +11071,21 @@ summary,
     overflow-y: auto;
   }
 }
+
+/* Filter metode di mobile: satu baris penuh, tiga tombol melebar sama rata */
+@media (max-width: 820px) {
+  .history-page-content .filters .history-method-filter {
+    grid-column: 1 / -1;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+  }
+
+  .history-page-content .filters .history-method-filter .button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 6px;
+    justify-content: center;
+  }
+}
