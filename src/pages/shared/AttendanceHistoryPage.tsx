@@ -46,13 +46,10 @@ function DetailModal({ row, onClose }: { row: DisplayRow; onClose: () => void })
     .filter((s) => s.startsWith("Koreksi:"))
 
   return (
-    <div className="modal-overlay">
-      <section className="simple-modal">
+    <div className="modal-overlay" onClick={onClose}>
+      <section className="simple-modal" onClick={(e) => e.stopPropagation()}>
         <header>
           <h2>Detail Absensi</h2>
-          <Button onClick={onClose}>
-            <Icon name="close" />
-          </Button>
         </header>
 
         {row.fotoUrl && (
@@ -406,7 +403,7 @@ export function AttendanceHistoryPage() {
                 minWidth: 60,
                 padding: "8px 4px",
                 borderRadius: 10,
-                border: filterStatus === item.status ? "2px solid var(--brass)" : "1px solid var(--rule)",
+                border: filterStatus === item.status ? "2px solid var(--brass)" : "1.5px solid var(--slate)",
                 background: filterStatus === item.status ? "rgba(200,150,62,0.08)" : "var(--paper)",
                 cursor: "pointer",
                 textAlign: "center",
@@ -431,11 +428,16 @@ export function AttendanceHistoryPage() {
             onChange={(e) => setFilterKapster(e.target.value)}
             style={{
               padding: "8px 12px",
+              paddingRight: 24,
               borderRadius: 8,
-              border: "1px solid var(--rule)",
+              border: "1.5px solid var(--slate)",
               background: "var(--paper)",
               fontSize: 13,
               minWidth: 140,
+              appearance: "none",
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b645c' stroke-width='2' fill='none'/%3E%3C/svg%3E\")",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 8px center",
             }}
           >
             <option value="">Semua Kapster</option>
@@ -504,12 +506,11 @@ export function AttendanceHistoryPage() {
                       setKoreksiRow(row)
                     }}
                     title="Koreksi absensi"
+                    className="primary-button"
                     style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 4,
-                      color: "var(--slate)",
+                      minHeight: 32,
+                      padding: "0 10px",
+                      fontSize: 12,
                     }}
                   >
                     <Icon name="pencil" />
