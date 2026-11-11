@@ -11026,3 +11026,48 @@ summary,
   min-height: 0;
   flex: none;
 }
+
+/* Riwayat: bar filter metode di samping kapster */
+.history-page-content .filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.history-page-content .filters .search-select.history-kapster-select {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.history-method-filter {
+  flex: none;
+}
+
+.history-method-filter .button {
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.history-method-filter .button.active {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+/* Desktop: daftar item memakai sisa tinggi panel (tidak berhenti di 260px), tetap menggulir bila penuh */
+@media (min-width: 1025px) {
+  .history-page-content .desktop-only-detail .detail-items-section {
+    flex: 1 1 auto;
+    flex-shrink: 1;
+    min-height: 88px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .history-page-content .desktop-only-detail .detail-items-section .detail-items-list {
+    flex: 0 1 auto;
+    max-height: none;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}

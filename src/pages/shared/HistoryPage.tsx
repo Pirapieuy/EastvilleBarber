@@ -317,6 +317,9 @@ export function HistoryPage({ currentUser, role }: {
   const [liveError, setLiveError] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [barberFilter, setBarberFilter] = useState("Semua kapster")
+  const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
+    "Semua",
+  )
 
   const barberOptions = Array.from(
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
@@ -327,8 +330,11 @@ export function HistoryPage({ currentUser, role }: {
     : "Semua kapster"
   const visibleTx = txList.filter(
     (tx) =>
-      activeBarber === "Semua kapster" ||
-      tx.barber.split(", ").includes(activeBarber),
+      (activeBarber === "Semua kapster" ||
+        tx.barber.split(", ").includes(activeBarber)) &&
+      (methodFilter === "Semua" ||
+        tx.method === methodFilter ||
+        tx.method === "Gabungan"),
   )
 
   const selected = visibleTx.find((tx) => tx.id === selectedId) || visibleTx[0]
@@ -487,6 +493,17 @@ export function HistoryPage({ currentUser, role }: {
             </option>
           ))}
         </SearchSelect>
+        <div className="segmented history-method-filter" role="group" aria-label="Filter metode">
+          {(["Semua", "Tunai", "QRIS"] as const).map((m) => (
+            <Button
+              className={methodFilter === m ? "active" : ""}
+              key={m}
+              onClick={() => setMethodFilter(m)}
+            >
+              {m}
+            </Button>
+          ))}
+        </div>
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
