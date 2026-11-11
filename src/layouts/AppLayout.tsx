@@ -58,6 +58,8 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   "attendance-admin": "Jam Kerja",
   "attendance-tim": "Jam Kerja",
   AbsensiKapster: "Absensi Kapster",
+  RiwayatAbsensi: "Riwayat Absensi",
+  "attendance-history": "Riwayat Absensi",
   JadwalAbsensi: "Jam Kerja",
   "jadwal-absensi": "Jam Kerja",
   JejakAudit: "Jejak Audit",

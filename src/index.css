@@ -241,6 +241,26 @@ textarea {
   background: var(--bone);
 }
 
+.chip.izin {
+  color: #8c6014;
+  background: rgba(200, 150, 62, 0.15);
+}
+
+.chip.sakit {
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.12);
+}
+
+.chip.cuti {
+  color: #1e5f8a;
+  background: rgba(30, 95, 138, 0.12);
+}
+
+.chip.tidak-hadir {
+  color: var(--oxblood);
+  background: var(--oxblood-soft);
+}
+
 /* Login */
 .login-page {
   min-height: 100svh;
