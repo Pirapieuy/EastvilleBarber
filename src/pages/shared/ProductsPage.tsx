@@ -2,7 +2,6 @@ import { FormEvent, useEffect, useState } from "react"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { ProdukRow, apiProduk, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
-import { formatTanggalWaktu } from "../../utils/tanggal"
 import {
   Button,
   LoadingState,
@@ -15,7 +14,6 @@ const STOK_MENIPIS = 1
 export function ProductsPage({ embedded = false }: {
   embedded?: boolean
 } = {}) {
-  const [tab, setTab] = useState<"Daftar" | "Riwayat perubahan">("Daftar")
   const [productsList, setProductsList] = useState([
     {
       code: "HP-FSD-01",
@@ -96,8 +94,7 @@ export function ProductsPage({ embedded = false }: {
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
-    return Promise.all([apiProduk.list(), apiProduk.log()]).then(
-      ([rows, logs]) => {
+    return apiProduk.list().then((rows) => {
         setProductsList(
           rows.map((p: ProdukRow) => ({
             code: p.kode,
@@ -120,24 +117,8 @@ export function ProductsPage({ embedded = false }: {
             },
           })),
         )
-        setChangeLogs(
-          (logs as {
-            waktu: string
-            produk: string
-            perubahan: string
-            oleh: string
-            alasan: string
-          }[]).map((l) => ({
-            time: formatTanggalWaktu(l.waktu),
-            product: l.produk,
-            change: l.perubahan,
-            by: l.oleh,
-            reason: l.alasan,
-          })),
-        )
         setLive(true)
-      },
-    )
+      })
   }
   useEffect(() => {
     if (!getToken()) {
@@ -150,30 +131,6 @@ export function ProductsPage({ embedded = false }: {
       setLiveError(e instanceof Error ? e.message : "gagal memuat data")
     })
   }, [reloadKey])
-  const [changeLogs, setChangeLogs] = useState([
-    {
-      time: "29 Okt 10.15",
-      product: "Free Style Dust",
-      change: "Komisi kapster 8% → 10%",
-      by: "Ardi Pradana · Owner",
-      reason: "Penyesuaian kesepakatan komisi baru",
-    },
-    {
-      time: "28 Okt 16.40",
-      product: "Water Based Pomade",
-      change: "Status Non-aktif → Aktif",
-      by: "Dian Setiawan · Manajer",
-      reason: "Stok baru diterima dari pemasok",
-    },
-    {
-      time: "27 Okt 09.22",
-      product: "Miracle Treatment",
-      change: "Bagian Pemasok Rp 35rb → Rp 40rb",
-      by: "Ardi Pradana · Owner",
-      reason: "Penyesuaian harga pemasok",
-    },
-  ])
-
   const nominalTotal =
     formData.nominalShares.barber +
     formData.nominalShares.seller +
@@ -277,32 +234,26 @@ export function ProductsPage({ embedded = false }: {
       setProductsList((list) =>
         list.map((p) => (p.code === editingCode ? { ...formData } : p)),
       )
-      if (changeReason) {
-        setChangeLogs((logs) => [
-          {
-            time: "Baru saja",
-            product: formData.name,
-            change: `Update skema ${formData.scheme} · ${formData.status}`,
-            by: "Owner atau Manajer",
-            reason: changeReason,
-          },
-          ...logs,
-        ])
-      }
     } else {
       setProductsList((list) => [{ ...formData }, ...list])
-      setChangeLogs((logs) => [
-        {
-          time: "Baru saja",
-          product: formData.name,
-          change: `Produk baru · ${formData.scheme}, ${formData.status}`,
-          by: "Owner atau Manajer",
-          reason: changeReason || "Penambahan produk baru",
-        },
-        ...logs,
-      ])
     }
     setFormOpen(false)
+  }
+
+  async function handleDelete(product: typeof productsList[number]) {
+    const alasan = window.prompt(`Alasan menghapus produk "${product.name}"?`)
+    if (!alasan || alasan.trim().length < 3) return
+    if (!window.confirm(`Hapus produk "${product.name}" (${product.code})?`)) return
+    try {
+      if (live) {
+        await apiProduk.hapus(product.code, alasan.trim())
+        await loadLive()
+      } else {
+        setProductsList((list) => list.filter((item) => item.code !== product.code))
+      }
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Gagal menghapus produk.")
+    }
   }
 
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
@@ -348,43 +299,34 @@ export function ProductsPage({ embedded = false }: {
   return (
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        eyebrow="Data master & komisi"
-        title="Produk"
-        action={
-          <div className="page-actions">
-            <Button
-              className="secondary-button"
-              onClick={() => {
-                setStockError("")
-                setStockOpen(true)
-              }}
-            >
-              <Icon name="plus" /> Pembelian stok
-            </Button>
-            <Button className="primary-button" onClick={openCreate}>
-              <Icon name="plus" /> Tambah produk
-            </Button>
-          </div>
-        }
-      />
-      <div className="segmented page-segment">
-        <Button
-          className={tab === "Daftar" ? "active" : ""}
-          onClick={() => setTab("Daftar")}
-        >
-          Daftar produk
-        </Button>
-        <Button
-          className={tab === "Riwayat perubahan" ? "active" : ""}
-          onClick={() => setTab("Riwayat perubahan")}
-        >
-          <span>Riwayat perubahan komisi</span>
-          <span className="tab-count-badge">{changeLogs.length}</span>
-        </Button>
+      <div className="products-status-bar">
+        <div className="master-summary">
+          <span>
+            <Icon name="product" />
+            <strong>
+              {productsList.filter((product) => product.status === "Aktif").length} produk aktif
+            </strong>
+            <small>
+              {productsList.filter((product) => product.status !== "Aktif").length} nonaktif
+            </small>
+          </span>
+        </div>
+        <div className="page-actions">
+          <Button
+            className="secondary-button"
+            onClick={() => {
+              setStockError("")
+              setStockOpen(true)
+            }}
+          >
+            <Icon name="plus" /> Restok
+          </Button>
+          <Button className="primary-button" onClick={openCreate}>
+            <Icon name="plus" /> Tambah produk
+          </Button>
+        </div>
       </div>
-      {tab === "Daftar" ? (
-        <section className="panel product-admin-list">
+      <section className="panel product-admin-list">
           <div className="filters">
             <div className="search">
               <Icon name="search" />
@@ -403,6 +345,7 @@ export function ProductsPage({ embedded = false }: {
               <option>Non-aktif</option>
             </select>
           </div>
+          <div className="product-admin-scroll">
           <div className="product-admin-head">
             <span>Produk</span>
             <span>Pemasok</span>
@@ -422,17 +365,46 @@ export function ProductsPage({ embedded = false }: {
                   <small>{product.code}</small>
                 </span>
               </span>
-              <span>{product.seller}</span>
-              <span
-                className={product.stock <= STOK_MENIPIS ? "stock-low" : ""}
-              >
-                {product.stock} unit
-              </span>
-              <span className="scheme-tag">
-                {product.scheme === "Persentase"
-                  ? `Persen (${product.shares.barber}% · ${product.shares.seller}% · ${product.shares.eastville}%)`
-                  : `Nominal (C:${rupiah(product.nominalShares.barber)} · S:${rupiah(product.nominalShares.seller)} · E:${rupiah(product.nominalShares.eastville)})`}
-              </span>
+              <div className="product-admin-details">
+                <span className="product-seller-detail">
+                  <small>Pemasok</small>
+                  <strong>{product.seller}</strong>
+                </span>
+                <span className="product-stock-detail">
+                  <small>Stok</small>
+                  <strong className={product.stock <= STOK_MENIPIS ? "stock-low" : ""}>
+                    {product.stock} unit
+                  </strong>
+                </span>
+                <span className="product-scheme-detail">
+                  <span className="product-share-values">
+                    <span>
+                      <small>Kapster</small>
+                      <strong>
+                        {product.scheme === "Persentase"
+                          ? `${product.shares.barber}%`
+                          : rupiah(product.nominalShares.barber)}
+                      </strong>
+                    </span>
+                    <span>
+                      <small>Pemasok</small>
+                      <strong>
+                        {product.scheme === "Persentase"
+                          ? `${product.shares.seller}%`
+                          : rupiah(product.nominalShares.seller)}
+                      </strong>
+                    </span>
+                    <span>
+                      <small>Eastville</small>
+                      <strong>
+                        {product.scheme === "Persentase"
+                          ? `${product.shares.eastville}%`
+                          : rupiah(product.nominalShares.eastville)}
+                      </strong>
+                    </span>
+                  </span>
+                </span>
+              </div>
               <i
                 className={`chip ${
                   product.status === "Aktif" ? "lunas" : "batal"
@@ -440,41 +412,24 @@ export function ProductsPage({ embedded = false }: {
               >
                 {product.status === "Aktif" ? "Aktif" : "Non-aktif"}
               </i>
-              <Button
-                className="secondary-button"
-                onClick={() => openEdit(product)}
-              >
-                Ubah
-              </Button>
+              <div className="catalog-row-actions">
+                <Button
+                  className="secondary-button"
+                  onClick={() => openEdit(product)}
+                >
+                  Ubah
+                </Button>
+                <Button
+                  className="danger-button"
+                  onClick={() => handleDelete(product)}
+                >
+                  <Icon name="trash" /> Hapus
+                </Button>
+              </div>
             </article>
           ))}
-        </section>
-      ) : (
-        <section className="panel change-log">
-          <table className="change-log-table">
-            <thead>
-              <tr>
-                <th>Waktu</th>
-                <th>Produk</th>
-                <th>Perubahan</th>
-                <th>Oleh</th>
-                <th>Alasan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {changeLogs.map((row, idx) => (
-                <tr key={idx}>
-                  <td>{row.time}</td>
-                  <td><strong>{row.product}</strong></td>
-                  <td>{row.change}</td>
-                  <td>{row.by}</td>
-                  <td>{row.reason}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
+          </div>
+      </section>
       {formOpen && (
         <div className="modal-overlay">
           <form className="product-modal" onSubmit={handleSave}>
@@ -487,9 +442,6 @@ export function ProductsPage({ embedded = false }: {
                     : "Tambah Produk Baru"}
                 </h2>
               </div>
-              <Button onClick={() => setFormOpen(false)}>
-                <Icon name="close" />
-              </Button>
             </header>
             <div className="product-modal-body">
               <div className="form-grid">
@@ -571,32 +523,21 @@ export function ProductsPage({ embedded = false }: {
                     }
                   />
                 </label>
-                <div className="status-toggle-field">
-                  <span>Status produk</span>
-                  <div className="status-toggle-switch">
-                    <button
-                      type="button"
-                      className={`status-btn ${
-                        formData.status === "Aktif" ? "active" : ""
-                      }`}
-                      onClick={() =>
-                        setFormData({ ...formData, status: "Aktif" })
-                      }
-                    >
-                      <i className="status-dot green" /> Aktif
-                    </button>
-                    <button
-                      type="button"
-                      className={`status-btn ${
-                        formData.status === "Nonaktif" ? "inactive" : ""
-                      }`}
-                      onClick={() =>
-                        setFormData({ ...formData, status: "Nonaktif" })
-                      }
-                    >
-                      <i className="status-dot gray" /> Non-aktif
-                    </button>
-                  </div>
+                <div
+                  className="toggle-row product-status-toggle"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setFormData({
+                    ...formData,
+                    status: formData.status === "Aktif" ? "Nonaktif" : "Aktif",
+                  })}
+                >
+                  <span>
+                    <strong>Status produk: {formData.status}</strong>
+                    <small>Produk aktif muncul pada halaman Kasir.</small>
+                  </span>
+                  <i className={`toggle ${formData.status === "Aktif" ? "on" : ""}`}>
+                    <b />
+                  </i>
                 </div>
               </div>
 
@@ -859,7 +800,7 @@ export function ProductsPage({ embedded = false }: {
       {stockOpen && (
         <div className="modal-overlay">
           <form
-            className="simple-modal"
+            className="simple-modal stock-modal"
             onSubmit={async (event) => {
               event.preventDefault()
               if (saving) return
@@ -875,7 +816,7 @@ export function ProductsPage({ embedded = false }: {
                   await apiProduk.adjustStok(
                     code,
                     qty,
-                    `Pembelian stok${stockNote ? ` · ${stockNote}` : ""}`,
+                    `Restok${stockNote ? ` · ${stockNote}` : ""}`,
                   )
                   await loadLive()
                 } catch (err) {
@@ -897,10 +838,7 @@ export function ProductsPage({ embedded = false }: {
             }}
           >
             <header>
-              <h2>Catat pembelian stok</h2>
-              <Button onClick={() => setStockOpen(false)}>
-                <Icon name="close" />
-              </Button>
+              <h2>Restok produk</h2>
             </header>
             <label>
               <span>Produk</span>

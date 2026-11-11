@@ -201,13 +201,7 @@ export function PromoDiscountsTab() {
       {!memuat && !gagalMuat && promos.length === 0 && (
         <div className="promo-discount-empty">Belum ada diskon</div>
       )}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 14,
-        }}
-      >
+      <div className="promo-discount-list">
         {promos.map((p) => {
           const isExpired = p.berlakuSampai < todayStr
           return (
@@ -323,9 +317,6 @@ export function PromoDiscountsTab() {
           >
             <header>
               <h2>{editingId ? "Edit Diskon Event" : "Tambah Diskon Event"}</h2>
-              <Button type="button" onClick={() => setModalOpen(false)}>
-                <Icon name="close" />
-              </Button>
             </header>
 
             {error && (
@@ -402,18 +393,17 @@ export function PromoDiscountsTab() {
               />
             </label>
 
-            <label>
-              <span>Status</span>
-              <select
-                value={status}
-                onChange={(e) =>
-                  setStatus(e.target.value as "Aktif" | "Nonaktif")
-                }
-              >
-                <option value="Aktif">Aktif</option>
-                <option value="Nonaktif">Nonaktif</option>
-              </select>
-            </label>
+            <div
+              className="toggle-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => setStatus((s) => s === "Aktif" ? "Nonaktif" : "Aktif")}
+            >
+              <span>
+                <strong>Status diskon: {status}</strong>
+                <small>Diskon aktif dapat digunakan saat transaksi.</small>
+              </span>
+              <i className={`toggle ${status === "Aktif" ? "on" : ""}`}><b /></i>
+            </div>
 
             <footer>
               <Button

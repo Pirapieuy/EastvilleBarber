@@ -161,6 +161,7 @@ var AKSES = {
   "batalkan-pengeluaran": ["Owner", "Manajer"],
   "aktifkan-pengeluaran": ["Owner", "Manajer"],
   "simpan-produk": ["Owner", "Manajer"],
+  "hapus-produk": ["Owner"],
   "adjust-stok": ["Owner", "Manajer"],
   "log-produk": ["Owner", "Manajer"],
   "get-pengaturan": ["Owner", "Manajer"],
@@ -168,6 +169,7 @@ var AKSES = {
   "set-komisi-kapster": ["Owner", "Manajer"],
   "list-komisi": ["Owner", "Manajer", "Kapster"],
   "simpan-layanan": ["Owner", "Manajer"],
+  "hapus-layanan": ["Owner"],
   "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
   "rekap-kasir": ["Kasir"],
   "tutup-kasir": ["Kasir"],
@@ -364,6 +366,8 @@ function routeBisnis(action, body) {
         return aktifkanPengeluaran_(body, user)
       case "simpan-produk":
         return simpanProduk_(body, user)
+      case "hapus-produk":
+        return hapusProduk_(body, user)
       case "adjust-stok":
         return adjustStok_(body, user)
       case "log-produk":
@@ -378,6 +382,8 @@ function routeBisnis(action, body) {
         return listKomisi_(body, user)
       case "simpan-layanan":
         return simpanLayanan_(body, user)
+      case "hapus-layanan":
+        return hapusLayanan_(body, user)
       case "laporan-keuangan":
         return laporanKeuangan_(body)
       case "laporan-produk":
@@ -753,6 +759,23 @@ function simpanLayanan_(body, user) {
     nama + " Rp " + harga + " " + kategori,
   )
   return ok_({ id: id })
+}
+
+function hapusLayanan_(body, user) {
+  var layanan = readTable_(SHEET_LAYANAN).filter(function (x) {
+    return String(x.id) === String(body.id)
+  })[0]
+  if (!layanan) return fail_("Layanan tidak ditemukan.")
+  var alasan = (body.alasan || "").toString().trim()
+  if (!alasan) return fail_("Alasan penghapusan wajib diisi.")
+  getSheet(SHEET_LAYANAN).deleteRow(layanan._row)
+  writeAuditLog(
+    user.id,
+    user.nama,
+    "HAPUS_LAYANAN",
+    layanan.nama + " · " + alasan,
+  )
+  return ok_({ id: layanan.id })
 }
 
 function listKapster_() {
@@ -2197,6 +2220,31 @@ function simpanProduk_(body, user) {
     writeAuditLog(user.id, user.nama, "TAMBAH_PRODUK", p.kode)
   }
   return ok_({ kode: p.kode })
+}
+
+function hapusProduk_(body, user) {
+  var produk = readTable_(SHEET_PRODUK).filter(function (x) {
+    return String(x.kode).toLowerCase() === String(body.kode || "").toLowerCase()
+  })[0]
+  if (!produk) return fail_("Produk tidak ditemukan.")
+  var alasan = (body.alasan || "").toString().trim()
+  if (!alasan) return fail_("Alasan penghapusan wajib diisi.")
+  getSheet(SHEET_PRODUK).deleteRow(produk._row)
+  appendObj_(SHEET_PRODUK_LOG, {
+    waktu: new Date(),
+    kode: produk.kode,
+    produk: produk.nama,
+    perubahan: "Produk dihapus",
+    oleh: user.nama + " · " + user.role,
+    alasan: alasan,
+  })
+  writeAuditLog(
+    user.id,
+    user.nama,
+    "HAPUS_PRODUK",
+    produk.kode + " · " + alasan,
+  )
+  return ok_({ kode: produk.kode })
 }
 
 /** Body: { kode, delta (+/-), alasan } */

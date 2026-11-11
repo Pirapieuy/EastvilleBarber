@@ -162,6 +162,8 @@ export const apiLayanan = {
     status: "Aktif" | "Nonaktif"
     kategori: string
   }) => api<{ id: number }>("simpan-layanan", { layanan }),
+  hapus: (id: number, alasan: string) =>
+    api<{ id: number }>("hapus-layanan", { id, alasan }),
 }
 
 export const apiKasir = {
@@ -260,6 +262,8 @@ export const apiProduk = {
   /** baru=true: tolak bila kode produk sudah dipakai (tanpa ini, kode yang ada dianggap edit). */
   simpan: (produk: Record<string, unknown>, alasan: string, baru = false) =>
     api("simpan-produk", { produk, alasan, baru }),
+  hapus: (kode: string, alasan: string) =>
+    api<{ kode: string }>("hapus-produk", { kode, alasan }),
   adjustStok: (kode: string, delta: number, alasan: string) =>
     api("adjust-stok", { kode, delta, alasan }),
   log: () => api<unknown[]>("log-produk"),

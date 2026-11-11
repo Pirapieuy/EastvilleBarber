@@ -181,6 +181,22 @@ export function ServicesPage({ embedded = false }: {
     setFormOpen(false)
   }
 
+  async function handleDelete(service: LayananRow) {
+    const alasan = window.prompt(`Alasan menghapus layanan "${service.nama}"?`)
+    if (!alasan || alasan.trim().length < 3) return
+    if (!window.confirm(`Hapus layanan "${service.nama}"?`)) return
+    try {
+      if (live) {
+        await apiLayanan.hapus(service.id, alasan.trim())
+        await loadLive()
+      } else {
+        setRows((prev) => prev.filter((row) => row.id !== service.id))
+      }
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Gagal menghapus layanan.")
+    }
+  }
+
   const aktifCount = rows.filter((r) => r.status === "Aktif").length
   const filtered = rows
     .filter(
@@ -265,10 +281,11 @@ export function ServicesPage({ embedded = false }: {
             <option value="Nonaktif">Nonaktif</option>
           </select>
         </div>
+        <div className="service-list-scroll">
         <div className="service-head">
           <span>Layanan</span>
           <span>Kategori</span>
-          <span>Komisi kapster (default)</span>
+          <span>Komisi kapster</span>
           <span>Harga</span>
           <span>Status</span>
           <span>Aksi</span>
@@ -286,11 +303,28 @@ export function ServicesPage({ embedded = false }: {
               </i>
               <strong>{service.nama}</strong>
             </span>
-            <span>{service.kategori || "-"}</span>
-            <span>
-              {pengaturan.komisiDefault}% · lembur {pengaturan.komisiLembur}%
-            </span>
-            <strong>{rupiah(service.harga)}</strong>
+            <div className="service-details">
+              <span className="service-category-detail">
+                <small>Kategori</small>
+                <strong>{service.kategori || "-"}</strong>
+              </span>
+              <span className="service-commission-detail">
+                <span className="service-commission-values">
+                  <span>
+                    <small>Komisi kapster</small>
+                    <strong>{pengaturan.komisiDefault}%</strong>
+                  </span>
+                  <span>
+                    <small>Komisi lembur</small>
+                    <strong>{pengaturan.komisiLembur}%</strong>
+                  </span>
+                </span>
+              </span>
+              <span className="service-price-detail">
+                <small>Harga layanan</small>
+                <strong>{rupiah(service.harga)}</strong>
+              </span>
+            </div>
             <i
               className={`chip ${
                 service.status === "Aktif" ? "lunas" : "manual"
@@ -298,12 +332,20 @@ export function ServicesPage({ embedded = false }: {
             >
               {service.status}
             </i>
-            <Button
-              className="secondary-button"
-              onClick={() => openForm(service)}
-            >
-              <Icon name="pencil" /> Ubah
-            </Button>
+            <div className="catalog-row-actions">
+              <Button
+                className="secondary-button"
+                onClick={() => openForm(service)}
+              >
+                <Icon name="pencil" /> Ubah
+              </Button>
+              <Button
+                className="danger-button"
+                onClick={() => handleDelete(service)}
+              >
+                <Icon name="trash" /> Hapus
+              </Button>
+            </div>
           </article>
         ))}
         {filtered.length === 0 && (
@@ -317,6 +359,7 @@ export function ServicesPage({ embedded = false }: {
             Tidak ada layanan yang cocok.
           </div>
         )}
+        </div>
       </section>
       {formOpen && (
         <div className="modal-overlay">
@@ -326,9 +369,6 @@ export function ServicesPage({ embedded = false }: {
                 <p className="eyebrow">Data layanan</p>
                 <h2>{editing ? "Ubah layanan" : "Tambah layanan"}</h2>
               </div>
-              <Button onClick={() => setFormOpen(false)} type="button">
-                <Icon name="close" />
-              </Button>
             </header>
             <label>
               <span>Nama layanan</span>
@@ -364,20 +404,16 @@ export function ServicesPage({ embedded = false }: {
                 />
               </div>
             </label>
-            <div className="toggle-row">
+            <div
+              className="toggle-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => setAktif(!aktif)}
+            >
               <span>
-                <strong>Status layanan</strong>
+                <strong>Status layanan: {aktif ? "Aktif" : "Nonaktif"}</strong>
                 <small>Layanan aktif muncul pada halaman Kasir.</small>
               </span>
-              <Button
-                aria-label={aktif ? "Nonaktifkan layanan" : "Aktifkan layanan"}
-                onClick={() => setAktif(!aktif)}
-                type="button"
-              >
-                <i className={`toggle ${aktif ? "on" : ""}`}>
-                  <b />
-                </i>
-              </Button>
+              <i className={`toggle ${aktif ? "on" : ""}`}><b /></i>
             </div>
             <div className="info-banner">
               <Icon name="history" /> Harga baru hanya berlaku untuk transaksi

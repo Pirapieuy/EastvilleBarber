@@ -766,8 +766,8 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
         </span>
       </div>
 
-      <div className="report-subnav-row" style={{ overflowX: "auto" }}>
-        <div className="segmented" style={{ flexWrap: "wrap", gap: 4 }}>
+      <div className="report-subnav-row">
+        <div className="segmented">
           <Button
             className={activeTab === "transaksi" ? "active" : ""}
             onClick={() => setActiveTab("transaksi")}
