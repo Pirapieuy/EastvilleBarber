@@ -11096,3 +11096,31 @@ summary,
   width: 100%;
   max-width: none;
 }
+
+/* Riwayat di mobile/tablet: halaman setinggi layar, kartu nota terkurung dan digulir di dalamnya (seperti desktop) */
+@media (max-width: 1024px) {
+  .content.history-page-content {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 14px !important;
+    overflow: hidden;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto !important;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    min-height: 0;
+    max-height: none !important;
+    margin-bottom: 0 !important;
+    overflow-y: auto !important;
+  }
+}
