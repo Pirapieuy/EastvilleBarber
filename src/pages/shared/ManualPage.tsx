@@ -287,7 +287,7 @@ export function ManualPage() {
   }
 
   return (
-    <form className="content narrow" onSubmit={handleSave}>
+    <form className="content narrow manual-page" onSubmit={handleSave}>
       <DemoNotice live={live} error={liveError} />
 
       <section className="panel form-panel">

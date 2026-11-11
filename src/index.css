@@ -11089,3 +11089,10 @@ summary,
     justify-content: center;
   }
 }
+
+/* Riwayat & Input Manual: isi melebar penuh, hanya menyisakan margin tipis kiri-kanan */
+.content.history-page-content,
+.content.narrow.manual-page {
+  width: 100%;
+  max-width: none;
+}
