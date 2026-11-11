@@ -11006,3 +11006,23 @@ summary,
     margin-top: auto;
   }
 }
+
+/* Detail transaksi: tanpa tinggi paksaan. Daftar item mengikuti isi, digulir bila lebih dari ±3 item;
+   bila layar sangat pendek, seluruh panel yang digulir. */
+.history-page-content .desktop-only-detail .detail-items-section .detail-items-list,
+.detail-items-section .detail-items-list,
+.transaction-modal-body .detail-items-list {
+  min-height: 0;
+  flex: none;
+  max-height: 260px;
+}
+
+.history-page-content .desktop-only-detail > *,
+.transaction-modal-body > * {
+  flex-shrink: 0;
+}
+
+.detail-items-section {
+  min-height: 0;
+  flex: none;
+}
