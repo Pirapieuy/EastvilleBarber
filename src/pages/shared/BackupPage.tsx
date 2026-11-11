@@ -188,9 +188,9 @@ export function BackupPage() {
       <section className="panel backup-actions-card">
         <div>
           <p className="eyebrow">Backup manual</p>
-          <h2>Buat salinan terbaru</h2>
+          <h2>Backup data</h2>
           <p>
-            Menyalin data layanan, produk, transaksi, pengeluaran, stok, dan
+            Mengamankan data layanan, produk, transaksi, pengeluaran, stok, dan
             pengaturan komisi. Data akun tidak ikut.
           </p>
           {message && <small>{message}</small>}

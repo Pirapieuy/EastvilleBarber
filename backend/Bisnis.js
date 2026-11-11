@@ -19,6 +19,7 @@ var SHEET_PRODUK_LOG = "ProdukLog"
 var SHEET_PENGATURAN = "Pengaturan"
 var SHEET_KOMISI_KAPSTER = "KomisiKapster"
 var SHEET_TUTUP_KASIR = "TutupKasir"
+var SHEET_KODE_DISKON = "KodeDiskon"
 
 // Nilai awal pengaturan (bisa diubah lewat action simpan-pengaturan / sheet Pengaturan).
 // Jam disimpan sebagai angka HHMM (1000 = 10:00) supaya Sheets tidak mengubahnya jadi format waktu.
@@ -106,6 +107,17 @@ var HEADERS = {
   ProdukLog: ["waktu", "kode", "produk", "perubahan", "oleh", "alasan"],
   Pengaturan: ["key", "value"],
   KomisiKapster: ["user_id", "persen", "diubah_oleh", "waktu"],
+  KodeDiskon: [
+    "id",
+    "kode",
+    "nama",
+    "persen",
+    "berlaku_sampai",
+    "status",
+    "dibuat_oleh",
+    "waktu",
+    "dipakai",
+  ],
   TutupKasir: [
     "id",
     "waktu",
@@ -159,6 +171,10 @@ var AKSES = {
   "tutup-kasir": ["Kasir"],
   "list-tutup-kasir": ["Owner", "Manajer", "Kasir"],
   "verifikasi-pin-otorisasi": ["Kasir"],
+  "list-kode-diskon": ["Owner", "Manajer"],
+  "cek-kode-diskon": ["Kasir"],
+  "simpan-kode-diskon": ["Owner", "Manajer"],
+  "hapus-kode-diskon": ["Owner", "Manajer"],
   "laporan-keuangan": ["Owner", "Manajer"],
   "laporan-produk": ["Owner", "Manajer", "Kapster"],
   "aktivitas-kapster": ["Kapster"],
@@ -314,6 +330,14 @@ function routeBisnis(action, body) {
         return createTransaksi_(body, user)
       case "create-transaksi-manual":
         return createTransaksi_(body, user, true)
+      case "list-kode-diskon":
+        return ok_(listKodeDiskon_())
+      case "cek-kode-diskon":
+        return cekKodeKasir_(body)
+      case "simpan-kode-diskon":
+        return simpanKodeDiskon_(body, user)
+      case "hapus-kode-diskon":
+        return hapusKodeDiskon_(body, user)
       case "verifikasi-pin-otorisasi":
         return verifikasiPinOtorisasi_(body, user)
       case "rekap-kasir":
@@ -896,18 +920,26 @@ function createTransaksi_(body, user, manual) {
     }
   }
 
-  var diskon = Math.min(Math.max(0, toInt_(body.diskon)), subtotal)
+  // Diskon dihitung server dari kode unik; angka diskon dari klien tidak dipercaya.
+  var diskon = 0
+  var kodeDipakai = ""
+  var kodeInput = (body.kodeDiskon || "").toString().trim()
+  if (kodeInput) {
+    var cek = cekKodeDiskon_(kodeInput, subtotal)
+    if (cek.error) return fail_(cek.error)
+    diskon = cek.diskon
+    kodeDipakai = cek.kode
+  } else if (toInt_(body.diskon) > 0 && user.role === "Kasir") {
+    return fail_("Diskon hanya bisa lewat kode diskon yang valid.")
+  } else {
+    diskon = Math.min(Math.max(0, toInt_(body.diskon)), subtotal)
+  }
   // Transaksi gratis (promo/traktiran) harus eksplisit + beralasan; total Rp0 tanpa itu ditolak.
   var gratis = body.gratis === true
   var alasanGratis = (body.alasan || "").toString().trim()
   if (gratis) {
     if (!alasanGratis) return fail_("Alasan transaksi gratis wajib diisi.")
     diskon = subtotal
-  }
-  // Diskon oleh Kasir wajib disetujui PIN Owner/Manajer (diverifikasi di server).
-  if (diskon > 0 && user.role === "Kasir") {
-    var salahPin = cekPinOtorisasi_(user, body.pinOtorisasi)
-    if (salahPin) return fail_(salahPin)
   }
   var total = subtotal - diskon
   if (total === 0 && !gratis)
@@ -976,6 +1008,7 @@ function createTransaksi_(body, user, manual) {
     kembalian: tunai + qris - total,
     lembur: lembur,
   }
+  catatPemakaianKode_(kodeDipakai)
   if (reqKey)
     CacheService.getScriptCache().put(reqKey, JSON.stringify(hasil), 600)
   return ok_(hasil)
@@ -999,6 +1032,134 @@ function cekPinOtorisasi_(user, pin) {
 }
 
 /** Action verifikasi-pin-otorisasi: Kasir cek PIN diskon lebih awal (saat klik Terapkan), sebelum Bayar. */
+// ============================================================
+// KODE DISKON
+// ============================================================
+
+function normalKode_(k) {
+  return (k || "")
+    .toString()
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+}
+
+function listKodeDiskon_() {
+  return readTable_(SHEET_KODE_DISKON)
+    .map(function (r) {
+      var o = stripRow_(r)
+      o.berlaku_sampai =
+        r.berlaku_sampai instanceof Date
+          ? fmtTanggal_(r.berlaku_sampai, "yyyy-MM-dd")
+          : (r.berlaku_sampai || "").toString()
+      return o
+    })
+    .reverse()
+}
+
+/** Validasi kode untuk checkout. Mengembalikan {kode, diskon} atau {error}. */
+function cekKodeDiskon_(kodeInput, subtotal) {
+  var kode = normalKode_(kodeInput)
+  if (!kode) return { error: "Kode diskon kosong." }
+  var hariIni = fmtTanggal_(new Date(), "yyyy-MM-dd")
+  var ketemu = readTable_(SHEET_KODE_DISKON).filter(function (r) {
+    return normalKode_(r.kode) === kode
+  })[0]
+  if (!ketemu) return { error: "Kode diskon tidak ditemukan." }
+  if (ketemu.status !== "Aktif") return { error: "Kode diskon tidak aktif." }
+  var sampai =
+    ketemu.berlaku_sampai instanceof Date
+      ? fmtTanggal_(ketemu.berlaku_sampai, "yyyy-MM-dd")
+      : (ketemu.berlaku_sampai || "").toString()
+  if (sampai && sampai < hariIni) return { error: "Kode diskon sudah kedaluwarsa." }
+  var persen = Math.min(100, Math.max(0, Number(ketemu.persen) || 0))
+  if (persen <= 0) return { error: "Kode diskon tidak valid." }
+  return {
+    kode: kode,
+    diskon: Math.min(subtotal, Math.round((subtotal * persen) / 100)),
+  }
+}
+
+/** Kasir mengecek kode sebelum Bayar: nama dan persen untuk ditampilkan di keranjang. */
+function cekKodeKasir_(body) {
+  var kode = normalKode_(body.kode)
+  var cek = cekKodeDiskon_(kode, 1000000)
+  if (cek.error) return fail_(cek.error)
+  var r = readTable_(SHEET_KODE_DISKON).filter(function (x) {
+    return normalKode_(x.kode) === kode
+  })[0]
+  return ok_({ kode: kode, nama: String(r.nama), persen: Number(r.persen) })
+}
+
+/** Menambah hitungan pemakaian kode setelah transaksi tersimpan. */
+function catatPemakaianKode_(kode) {
+  if (!kode) return
+  var r = readTable_(SHEET_KODE_DISKON).filter(function (x) {
+    return normalKode_(x.kode) === kode
+  })[0]
+  if (r) setCell_(SHEET_KODE_DISKON, r._row, "dipakai", (Number(r.dipakai) || 0) + 1)
+}
+
+function simpanKodeDiskon_(body, user) {
+  var d = body.kodeDiskon || {}
+  var kode = normalKode_(d.kode)
+  var nama = (d.nama || "").toString().trim()
+  var persen = toInt_(d.persen)
+  var sampai = (d.berlakuSampai || "").toString().trim()
+  var status = d.status === "Nonaktif" ? "Nonaktif" : "Aktif"
+  if (kode.length < 4 || kode.length > 20)
+    return fail_("Kode harus 4-20 huruf atau angka.")
+  if (!nama) return fail_("Nama promo wajib diisi.")
+  if (persen < 1 || persen > 100) return fail_("Persen diskon harus 1-100.")
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sampai))
+    return fail_("Tanggal berlaku sampai tidak valid.")
+
+  var semua = readTable_(SHEET_KODE_DISKON)
+  var bentrok = semua.filter(function (r) {
+    return normalKode_(r.kode) === kode && String(r.id) !== String(d.id)
+  })
+  if (bentrok.length) return fail_("Kode itu sudah dipakai promo lain.")
+
+  var now = new Date()
+  if (d.id) {
+    var lama = semua.filter(function (r) {
+      return String(r.id) === String(d.id)
+    })[0]
+    if (!lama) return fail_("Kode diskon tidak ditemukan.")
+    setCell_(SHEET_KODE_DISKON, lama._row, "kode", kode)
+    setCell_(SHEET_KODE_DISKON, lama._row, "nama", nama)
+    setCell_(SHEET_KODE_DISKON, lama._row, "persen", persen)
+    setCell_(SHEET_KODE_DISKON, lama._row, "berlaku_sampai", sampai)
+    setCell_(SHEET_KODE_DISKON, lama._row, "status", status)
+    writeAuditLog(user.id, user.nama, "UBAH_KODE_DISKON", kode + " " + persen + "% " + status)
+    return ok_({ id: lama.id })
+  }
+  var id = "kd-" + Utilities.getUuid().replace(/-/g, "").slice(0, 8)
+  appendObj_(SHEET_KODE_DISKON, {
+    id: id,
+    kode: kode,
+    nama: nama,
+    persen: persen,
+    berlaku_sampai: sampai,
+    status: status,
+    dibuat_oleh: user.nama,
+    waktu: now,
+    dipakai: 0,
+  })
+  writeAuditLog(user.id, user.nama, "BUAT_KODE_DISKON", kode + " " + persen + "%")
+  return ok_({ id: id })
+}
+
+function hapusKodeDiskon_(body, user) {
+  var r = readTable_(SHEET_KODE_DISKON).filter(function (x) {
+    return String(x.id) === String(body.id)
+  })[0]
+  if (!r) return fail_("Kode diskon tidak ditemukan.")
+  getSheet(SHEET_KODE_DISKON).deleteRow(r._row)
+  writeAuditLog(user.id, user.nama, "HAPUS_KODE_DISKON", String(r.kode))
+  return ok_({ id: r.id })
+}
+
 function verifikasiPinOtorisasi_(body, user) {
   if (user.role !== "Kasir")
     return fail_("Verifikasi PIN otorisasi hanya untuk Kasir.")

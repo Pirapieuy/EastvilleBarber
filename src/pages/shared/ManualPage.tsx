@@ -1,7 +1,6 @@
 import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
-import { apiKasir, apiTransaksi, getToken } from "../../api"
-import { getPromoDiscounts } from "../../utils/promoStorage"
+import { apiKasir, apiKodeDiskon, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import {
@@ -47,6 +46,9 @@ export function ManualPage() {
   const [cari, setCari] = useState("")
   const [diskon, setDiskon] = useState("")
   const [promoId, setPromoId] = useState("")
+  const [promoList, setPromoList] = useState<
+    { id: string; kode: string; nama: string; persen: number; berlakuSampai: string }[]
+  >([])
   const [pin, setPin] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState("")
@@ -60,6 +62,22 @@ export function ManualPage() {
       setLiveError("belum login ke server (token tidak ada)")
       return
     }
+    apiKodeDiskon
+      .list()
+      .then((rows) =>
+        setPromoList(
+          rows
+            .filter((r) => r.status === "Aktif")
+            .map((r) => ({
+              id: r.id,
+              kode: r.kode,
+              nama: r.nama,
+              persen: Number(r.persen),
+              berlakuSampai: r.berlaku_sampai,
+            })),
+        ),
+      )
+      .catch(() => setPromoList([]))
     Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster()])
       .then(([layanan, produk, kap]) => {
         setItems([
@@ -102,9 +120,7 @@ export function ManualPage() {
     (sum, i) => sum + i.price * (qty[keyOf(i)] ?? 0),
     0,
   )
-  const promoAktif = getPromoDiscounts().filter(
-    (p) => p.status === "Aktif" && p.berlakuSampai >= tanggal,
-  )
+  const promoAktif = promoList.filter((p) => p.berlakuSampai >= tanggal)
   const promo = promoAktif.find((p) => p.id === promoId)
   const diskonNum = promo
     ? Math.round((subtotal * promo.persen) / 100)
@@ -166,7 +182,8 @@ export function ManualPage() {
         diskon: diskonNum,
         bayarTunai: method === "QRIS" ? 0 : cashNum,
         bayarQris: method === "Tunai" ? 0 : qrisNum,
-        pinOtorisasi: diskonNum > 0 && pin ? pin : undefined,
+        kodeDiskon: promo ? promo.kode : undefined,
+        pinOtorisasi: !promo && diskonNum > 0 && pin ? pin : undefined,
         items: selected.map((i) => ({
           tipe: i.tipe,
           refId: i.tipe === "Layanan" ? Number(i.id) : i.id,
@@ -210,10 +227,11 @@ export function ManualPage() {
                 </div>
                 {n === 0 ? (
                   <Button
-                    className="secondary-button nota-add"
+                    className={`secondary-button nota-add ${it.tipe === "Produk" ? "nota-add-product" : "nota-add-service"}`}
+                    aria-label={`Tambah ${it.name}`}
                     onClick={() => ubahQty(it, 1)}
                   >
-                    <Icon name="plus" /> Tambah
+                    <Icon name="plus" />
                   </Button>
                 ) : (
                   <div className="nota-stepper">
@@ -247,11 +265,11 @@ export function ManualPage() {
       <DemoNotice live={live} error={liveError} />
       <PageTitle
         eyebrow="Transaksi dari buku fisik"
-        title="Input Nota Kertas"
+        title="Input Manual"
       />
 
       <section className="panel form-panel">
-        <h3>1. Data nota</h3>
+        <h3>Data nota</h3>
         <div className="form-grid manual-info-grid">
           <label>
             <span>Nomor nota di buku</span>
@@ -276,17 +294,18 @@ export function ManualPage() {
               ))}
             </select>
           </label>
-          <label>
+          <div className="form-grid-field manual-date-field">
             <span>Tanggal</span>
             <CalendarPicker
               max={today()}
               min={TANGGAL_MULAI}
+              showToday={false}
               value={tanggal}
               onChange={setTanggal}
             />
-          </label>
+          </div>
           <label>
-            <span>Jam (perkiraan)</span>
+            <span>Jam</span>
             <input
               onChange={(e) => setJam(e.target.value)}
               required
@@ -300,7 +319,7 @@ export function ManualPage() {
 
       <section className="panel form-panel">
         <div className="section-title">
-          <h3>2. Layanan dan produk</h3>
+          <h3>Layanan dan produk</h3>
           <span className="nota-count">
             {selected.length > 0 ? `${selected.length} dipilih` : "Belum ada"}
           </span>
@@ -314,27 +333,30 @@ export function ManualPage() {
             value={cari}
           />
         </div>
-        {daftar("Layanan", "Layanan")}
-        {daftar("Produk", "Produk")}
-        {tampil("Layanan").length + tampil("Produk").length === 0 && (
-          <p className="nota-empty">Tidak ada yang cocok dengan “{cari}”.</p>
-        )}
+        <div className="nota-catalog-columns">
+          {daftar("Layanan", "Layanan")}
+          {daftar("Produk", "Produk")}
+          {tampil("Layanan").length + tampil("Produk").length === 0 && (
+            <p className="nota-empty">Tidak ada yang cocok dengan “{cari}”.</p>
+          )}
+        </div>
       </section>
 
-      <section className="panel form-panel">
-        <h3>3. Diskon</h3>
+      <div className="manual-checkout-grid">
+      <section className="panel form-panel manual-discount-panel">
+        <h3>Diskon</h3>
         <div className="form-grid manual-info-grid">
           {promoAktif.length > 0 && (
             <label>
-              <span>Diskon event (opsional)</span>
+              <span>Kode diskon (opsional)</span>
               <select
                 onChange={(e) => setPromoId(e.target.value)}
                 value={promoId}
               >
-                <option value="">Tanpa diskon event</option>
+                <option value="">Tanpa kode diskon</option>
                 {promoAktif.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.nama} ({p.persen}%)
+                    {p.kode} · {p.nama} ({p.persen}%)
                   </option>
                 ))}
               </select>
@@ -354,7 +376,7 @@ export function ManualPage() {
               </div>
             </label>
           )}
-          {diskonNum > 0 && (
+          {diskonNum > 0 && !promo && (
             <label>
               <span>PIN Owner atau Manajer</span>
               <input
@@ -372,16 +394,26 @@ export function ManualPage() {
         </div>
       </section>
 
-      <section className="panel form-panel">
-        <h3>4. Pembayaran</h3>
-        <div className="segmented nota-method">
+      <section className="panel form-panel manual-payment-panel">
+        <h3>Pembayaran</h3>
+        <div className="method-grid manual-method-grid">
           {(["Tunai", "QRIS", "Gabungan"] as const).map((m) => (
             <Button
               className={method === m ? "active" : ""}
               key={m}
+              style={{
+                minHeight: 44,
+                padding: "6px 4px",
+                justifyContent: "center",
+                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
               onClick={() => setMethod(m)}
             >
-              {m}
+              <Icon name={m === "QRIS" ? "qris" : "cash"} />
+              <strong>{m}</strong>
             </Button>
           ))}
         </div>
@@ -415,6 +447,16 @@ export function ManualPage() {
             </label>
           )}
         </div>
+        {method === "QRIS" && (
+          <p className="manual-qris-notice" role="note">
+            Pastikan pembayaran QRIS berhasil sebelum menyimpan nota.
+          </p>
+        )}
+        {method !== "QRIS" && total > 0 && paid < total && (
+          <p className="manual-payment-warning" role="alert">
+            Uang yang diterima belum mencukupi total pembayaran.
+          </p>
+        )}
         <dl className="nota-summary">
           <div>
             <dt>Subtotal</dt>
@@ -443,6 +485,7 @@ export function ManualPage() {
           </p>
         )}
       </section>
+      </div>
 
       <div className="sticky-submit">
         <span>
