@@ -336,10 +336,59 @@ export function ReportsPage({ currentUser, role }: {
       : mode === "Mingguan"
         ? `${rentang.dari} s/d ${rentang.sampai}`
         : bulan
-  const chart = data.perHari.map((h) => ({
-    label: h.tanggal.slice(8),
-    value: h.total,
-  }))
+
+  const chartData = useMemo(() => {
+    if (mode === "Harian") {
+      const dayData = data.perHari.find((h) => h.tanggal === tanggal)
+      const t = dayData ? dayData.tunai : data.tunai
+      const q = dayData ? dayData.qris : data.qris
+      return [
+        { label: "Tunai", value: t },
+        { label: "QRIS", value: q },
+      ]
+    }
+    if (mode === "Mingguan") {
+      const d = new Date(`${tanggal}T00:00:00`)
+      const senin = new Date(d)
+      senin.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+      const namaHari = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+      return Array.from({ length: 7 }, (_, i) => {
+        const cur = new Date(senin)
+        cur.setDate(senin.getDate() + i)
+        const iso = isoDate(cur)
+        const found = data.perHari.find((h) => h.tanggal === iso)
+        return {
+          label: `${namaHari[i]} ${cur.getDate()}`,
+          value: found ? found.total : 0,
+        }
+      })
+    }
+    if (data.perHari.length > 0) {
+      return data.perHari.map((h) => ({
+        label: h.tanggal.slice(8),
+        value: h.total,
+      }))
+    }
+    return [
+      { label: "01", value: 1200000 },
+      { label: "15", value: 1850000 },
+      { label: "29", value: 2100000 },
+    ]
+  }, [mode, tanggal, data])
+
+  const chartTitle =
+    mode === "Harian"
+      ? "Pemasukan Harian (Tunai vs QRIS)"
+      : mode === "Mingguan"
+        ? "Pemasukan Mingguan"
+        : "Pemasukan Bulanan"
+
+  const chartEyebrow =
+    mode === "Harian"
+      ? tanggal
+      : mode === "Mingguan"
+        ? `${rentang.dari} s/d ${rentang.sampai}`
+        : `Bulan ${bulan}`
   const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${
     isManager ? "Laba Bersih" : "Sisa Owner"
   }: ${juta(data.sisa)}`
@@ -481,6 +530,12 @@ export function ReportsPage({ currentUser, role }: {
               Harian
             </Button>
             <Button
+              className={mode === "Mingguan" ? "active" : ""}
+              onClick={() => setMode("Mingguan")}
+            >
+              Mingguan
+            </Button>
+            <Button
               className={mode === "Bulanan" ? "active" : ""}
               onClick={() => setMode("Bulanan")}
             >
@@ -488,12 +543,25 @@ export function ReportsPage({ currentUser, role }: {
             </Button>
           </div>
           {mode !== "Bulanan" ? (
-            <CalendarPicker
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
-              value={tanggal}
-              onChange={(d) => d && setTanggal(d)}
-            />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <CalendarPicker
+                max={TANGGAL_MAKS()}
+                min={TANGGAL_MULAI}
+                value={tanggal}
+                onChange={(d) => d && setTanggal(d)}
+              />
+              {mode === "Mingguan" && (
+                <span
+                  style={{
+                    fontSize: 13,
+                    color: "var(--slate)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {rentang.dari} s/d {rentang.sampai}
+                </span>
+              )}
+            </div>
           ) : (
             <MonthPicker
               max={TANGGAL_MAKS()}
@@ -543,7 +611,7 @@ export function ReportsPage({ currentUser, role }: {
         >
           <Kpi
             icon="cash"
-            label="Pemasukan (Klik Tab)"
+            label="Pemasukan"
             tone="sage"
             value={rupiah(data.pemasukan)}
             detail={`Tunai ${persenTunai}% · QRIS ${persenQris}%`}
@@ -566,7 +634,7 @@ export function ReportsPage({ currentUser, role }: {
         >
           <Kpi
             icon="expense"
-            label="Pengeluaran (Klik Tab)"
+            label="Pengeluaran"
             tone="amber"
             value={rupiah(data.pengeluaran)}
             detail={`${persenPengeluaran}% dari omzet · ${expensesList.length} transaksi`}
@@ -589,7 +657,7 @@ export function ReportsPage({ currentUser, role }: {
         >
           <Kpi
             icon="people"
-            label="Total Komisi (Klik Tab)"
+            label="Total Komisi"
             tone="brass"
             value={rupiah(data.komisi)}
             detail={`${persenKomisi}% dari omzet · ${data.perKapster.length} kapster`}
@@ -613,7 +681,7 @@ export function ReportsPage({ currentUser, role }: {
           <Kpi
             icon="wallet"
             label={
-              isManager ? "Laba Bersih (Klik Tab)" : "Sisa Owner (Klik Tab)"
+              isManager ? "Laba Bersih" : "Sisa Owner"
             }
             tone="dark"
             value={rupiah(data.sisa)}
@@ -627,11 +695,6 @@ export function ReportsPage({ currentUser, role }: {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20 }}>
             <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
-            <p
-              style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}
-            >
-              Rincian pemasukan berdasarkan metode pembayaran.
-            </p>
             <div
               style={{
                 display: "grid",
@@ -670,15 +733,6 @@ export function ReportsPage({ currentUser, role }: {
                 >
                   {rupiah(data.tunai)}
                 </div>
-                <small
-                  style={{
-                    color: "var(--muted)",
-                    display: "block",
-                    marginTop: 4,
-                  }}
-                >
-                  Kas fisik diterima langsung di laci kasir
-                </small>
               </div>
 
               <div
@@ -713,36 +767,13 @@ export function ReportsPage({ currentUser, role }: {
                 >
                   {rupiah(data.qris)}
                 </div>
-                <small
-                  style={{
-                    color: "var(--muted)",
-                    display: "block",
-                    marginTop: 4,
-                  }}
-                >
-                  Masuk otomatis ke rekening merchant Eastville
-                </small>
               </div>
             </div>
           </section>
 
           <section className="panel report-chart">
-            <PageTitle eyebrow="Tren Pemasukan" title="Pemasukan Per Hari" />
-            {live ? (
-              <BarChart data={chart} />
-            ) : (
-              <BarChart
-                data={
-                  chart.length > 0
-                    ? chart
-                    : [
-                        { label: "01", value: 1200000 },
-                        { label: "15", value: 1850000 },
-                        { label: "29", value: 2100000 },
-                      ]
-                }
-              />
-            )}
+            <PageTitle eyebrow={chartEyebrow} title={chartTitle} />
+            <BarChart data={chartData} />
           </section>
         </div>
       )}
@@ -757,9 +788,6 @@ export function ReportsPage({ currentUser, role }: {
             <div className="page-title expense-page-title">
               <div>
                 <h2>Detail Pengeluaran Toko</h2>
-                <p className="expense-page-description">
-                  Daftar biaya operasional yang tercatat.
-                </p>
               </div>
               <Button
                 className="primary-button"
@@ -847,12 +875,6 @@ export function ReportsPage({ currentUser, role }: {
             style={{ padding: 20, overflow: "hidden" }}
           >
             <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
-            <p
-              style={{ color: "var(--slate)", fontSize: 13, marginBottom: 16 }}
-            >
-              Rincian akumulasi omzet dan bagian komisi yang berhak diterima
-              setiap kapster.
-            </p>
 
             <div className="commission-table-scroll">
               <div className="report-head">
@@ -862,25 +884,16 @@ export function ReportsPage({ currentUser, role }: {
                 <span>Total Komisi</span>
               </div>
 
-              {data.perKapster.map((k) => {
-                const pct =
-                  k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : "40"
-                return (
-                  <div className="report-row" key={k.kapsterId + k.kapster}>
-                    <div>
-                      <strong>{k.kapster}</strong>
-                      <small
-                        style={{ color: "var(--muted)", display: "block" }}
-                      >
-                        Porsi komisi: ~{pct}%
-                      </small>
-                    </div>
-                    <span>{k.pelanggan} transaksi</span>
-                    <b>{rupiah(k.omzet)}</b>
-                    <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
+              {data.perKapster.map((k) => (
+                <div className="report-row" key={k.kapsterId + k.kapster}>
+                  <div>
+                    <strong>{k.kapster}</strong>
                   </div>
-                )
-              })}
+                  <span>{k.pelanggan} transaksi</span>
+                  <b>{rupiah(k.omzet)}</b>
+                  <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
+                </div>
+              ))}
 
               {data.perKapster.length === 0 && (
                 <div
@@ -909,11 +922,6 @@ export function ReportsPage({ currentUser, role }: {
                 : "Kalkulasi Sisa Dana Bersih Owner"
             }
           />
-          <p style={{ color: "var(--slate)", fontSize: 13, marginBottom: 20 }}>
-            Kalkulasi transparan dana bersih yang dikantongi{" "}
-            {isManager ? "Manajemen" : "Owner"} setelah dikurangi seluruh biaya
-            operasional dan komisi kapster.
-          </p>
 
           <div
             style={{
@@ -947,9 +955,6 @@ export function ReportsPage({ currentUser, role }: {
                 >
                   (+) Total Pemasukan Kotor
                 </strong>
-                <small style={{ color: "var(--slate)" }}>
-                  Omzet gabungan tunai &amp; QRIS
-                </small>
               </div>
               <strong style={{ fontSize: 16, color: "#15803d" }}>
                 + {rupiah(data.pemasukan)}
@@ -977,9 +982,6 @@ export function ReportsPage({ currentUser, role }: {
                 >
                   (-) Total Pengeluaran Toko
                 </strong>
-                <small style={{ color: "var(--slate)" }}>
-                  Listrik, air, perlengkapan &amp; sewa ({persenPengeluaran}%)
-                </small>
               </div>
               <strong style={{ fontSize: 16, color: "#b91c1c" }}>
                 - {rupiah(data.pengeluaran)}
@@ -1007,9 +1009,6 @@ export function ReportsPage({ currentUser, role }: {
                 >
                   (-) Total Komisi Kapster
                 </strong>
-                <small style={{ color: "var(--slate)" }}>
-                  Hak komisi kapster layanan &amp; produk ({persenKomisi}%)
-                </small>
               </div>
               <strong style={{ fontSize: 16, color: "#8c6014" }}>
                 - {rupiah(data.komisi)}
@@ -1037,9 +1036,6 @@ export function ReportsPage({ currentUser, role }: {
                     ? "Laba Bersih Akhir"
                     : "Sisa Bersih Dikantongi Owner"}
                 </strong>
-                <small style={{ color: "#cbd5e1" }}>
-                  Margin bersih: {persenSisa}% dari total omzet
-                </small>
               </div>
               <strong style={{ fontSize: 20, color: "#facc15" }}>
                 {rupiah(data.sisa)}
