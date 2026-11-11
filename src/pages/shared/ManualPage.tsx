@@ -32,6 +32,13 @@ function today() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+function notaOtomatis(tanggal: string) {
+  const [y, m, d] = tanggal.split("-")
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `BUKU-${d}${m}${y.slice(2)}-${pad(now.getHours())}${pad(now.getMinutes())}`
+}
+
 export function ManualPage() {
   const [items, setItems] = useState<ManualItem[]>(demoItems)
   const [kapster, setKapster] = useState(demoKapster)
@@ -40,7 +47,8 @@ export function ManualPage() {
 
   const [tanggal, setTanggal] = useState(today)
   const [jam, setJam] = useState("12:00")
-  const [note, setNote] = useState("")
+  const [note, setNote] = useState(() => notaOtomatis(today()))
+  const [notaDiubah, setNotaDiubah] = useState(false)
   const [kapsterId, setKapsterId] = useState("")
   const [qty, setQty] = useState<Record<string, number>>({})
   const [cari, setCari] = useState("")
@@ -131,13 +139,13 @@ export function ManualPage() {
     ? Math.round((subtotal * promo.persen) / 100)
     : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
   const total = subtotal - diskonNum
-  const kapsterAktif = kapsterId || kapster[0]?.id || ""
+  const kapsterAktif = kapsterId
   const cashNum = Number(cash.replace(/\D/g, "")) || 0
   const qrisNum = Number(qris.replace(/\D/g, "")) || 0
   const paid =
     method === "Tunai" ? cashNum : method === "QRIS" ? total : cashNum + qrisNum
   const cleanNote = note.trim()
-  const notaOk = cleanNote.length >= 3
+  const notaOk = cleanNote.length >= 3 && Boolean(kapsterId)
   const adaItem = selected.length > 0
   const pecahanCepat = Array.from(
     new Set(
@@ -238,7 +246,9 @@ export function ManualPage() {
       setDiskon("")
       setPromo(null)
       setPin("")
-      setNote("")
+      setNote(notaOtomatis(tanggal))
+      setNotaDiubah(false)
+      setKapsterId("")
       setCash("")
       setQris("")
     } catch (err) {
@@ -311,19 +321,25 @@ export function ManualPage() {
             </span>
             <input
               minLength={3}
-              onChange={(e) => setNote(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                setNotaDiubah(true)
+                setNote(e.target.value.toUpperCase())
+              }}
               placeholder="Contoh: BUKU-291026-01"
               required
               value={note}
             />
           </label>
           <div className="form-grid-field">
-            <span>Kapster</span>
+            <span>
+              Kapster <b className="req-mark">*</b>
+            </span>
             <SearchSelect
               aria-label="Kapster"
               onChange={(e) => setKapsterId(e.target.value)}
               value={kapsterAktif}
             >
+              <option value="">Pilih kapster</option>
               {kapster.map((k) => (
                 <option key={k.id + k.nama} value={k.id}>
                   {k.nama}
@@ -338,7 +354,10 @@ export function ManualPage() {
               min={TANGGAL_MULAI}
               showToday={false}
               value={tanggal}
-              onChange={setTanggal}
+              onChange={(v) => {
+                setTanggal(v)
+                if (!notaDiubah) setNote(notaOtomatis(v))
+              }}
             />
           </div>
           <label>
@@ -588,7 +607,7 @@ export function ManualPage() {
             !success &&
             (notaOk
               ? "Pilih minimal satu layanan atau produk."
-              : "Isi nomor nota dulu untuk melanjutkan.")
+              : "Pilih kapster dulu untuk melanjutkan.")
           )}
           {error && <small className="error-text"> {error}</small>}
           {success && <small> {success}</small>}
