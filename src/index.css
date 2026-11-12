@@ -11320,3 +11320,22 @@ summary,
   width: auto;
   min-width: 0;
 }
+
+/* Input Manual: kolom kode diskon & potongan manual sama ukuran dengan isian lain */
+.manual-page .manual-discount-panel .input-shell,
+.manual-page .manual-discount-panel .cart-discount-panel > .primary-button {
+  height: 42px;
+  min-height: 42px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel {
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 0 10px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel > label > span {
+  margin: 0 0 6px 2px;
+  font-size: 12px;
+}
