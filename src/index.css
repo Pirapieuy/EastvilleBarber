@@ -11360,3 +11360,71 @@ summary,
   opacity: 1;
   cursor: not-allowed;
 }
+
+/* TimePicker: pemilih jam & menit, serasi dengan CalendarPicker */
+.time-picker-popup {
+  width: 200px;
+}
+
+.time-picker-panel {
+  padding: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.time-picker-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.time-picker-col small {
+  display: block;
+  margin: 0 0 6px 2px;
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.time-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.time-picker-list button {
+  flex: 0 0 auto;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ink);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.time-picker-list button:hover:not(.active) {
+  background: var(--bone);
+}
+
+.time-picker-list button.active {
+  border-color: var(--ink);
+  color: #fff;
+  background: var(--ink);
+  font-weight: 700;
+}
+
+.time-picker-done {
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.manual-page .manual-date-field .time-picker {
+  display: flex;
+  width: 100%;
+}

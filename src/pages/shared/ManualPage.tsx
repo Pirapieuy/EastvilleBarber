@@ -4,6 +4,7 @@ import { apiKasir, apiKodeDiskon, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { TimePicker } from "../../components/common/TimePicker"
 import {
   Button,
   CalendarPicker,
@@ -360,15 +361,10 @@ export function ManualPage() {
               }}
             />
           </div>
-          <label>
+          <div className="form-grid-field manual-date-field">
             <span>Jam</span>
-            <input
-              onChange={(e) => setJam(e.target.value)}
-              required
-              type="time"
-              value={jam}
-            />
-          </label>
+            <TimePicker align="right" onChange={setJam} value={jam} />
+          </div>
           <small className="manual-jam-note">Di luar jam kerja dihitung lembur.</small>
         </div>
       </section>
