@@ -756,8 +756,15 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
       )}
 
       {leaveModalOpen && (
-        <div className="modal-overlay">
-          <form className="simple-modal" onSubmit={handleSaveLeave}>
+        <div
+          className="modal-overlay modal-centered"
+          onClick={() => setLeaveModalOpen(false)}
+        >
+          <form
+            className="simple-modal"
+            onSubmit={handleSaveLeave}
+            onClick={(e) => e.stopPropagation()}
+          >
             <header>
               <h2>Ajukan Libur</h2>
               <Button type="button" onClick={() => setLeaveModalOpen(false)}>

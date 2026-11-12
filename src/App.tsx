@@ -59,7 +59,14 @@ export function App() {
     Boolean(getToken()),
   )
   const [currentRole, setCurrentRole] = useState<Role>("Owner")
-  const [activePage, setActivePage] = useState<string>("BerandaOwner")
+  const [activePage, setActivePageRaw] = useState<string>(() => {
+    return sessionStorage.getItem("activePage") || "BerandaOwner"
+  })
+
+  function setActivePage(page: string) {
+    sessionStorage.setItem("activePage", page)
+    setActivePageRaw(page)
+  }
 
   // User asli dari backend (hasil login). Kalau role diganti lewat pengalih peran demo,
   // kembali ke data demo untuk peran itu.
@@ -86,7 +93,7 @@ export function App() {
           role: user.role,
         })
         setCurrentRole(user.role)
-        setActivePage(ROLE_DEFAULT_PAGES[user.role])
+        setActivePage(sessionStorage.getItem("activePage") || ROLE_DEFAULT_PAGES[user.role])
         setLoggedIn(true)
       }
       setCheckingSession(false)
