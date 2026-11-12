@@ -18,7 +18,7 @@ import {
 
 export function KasbonTab() {
   const [add, setAdd] = useState(false)
-  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
+  const [kapsters, setKapsters] = useState<{ id: string nama: string }[]>([
     { id: "u-kapster", nama: "Budi Santoso" },
     { id: "u-kapster2", nama: "Zhefitra Ananda" },
   ])
@@ -110,7 +110,7 @@ export function KasbonTab() {
   }
 
   // Ringkasan per kapster
-  const ringkasanMap: Record<string, { nama: string; total: number }> = {}
+  const ringkasanMap: Record<string, { nama: string total: number }> = {}
   kapsters.forEach((k) => {
     ringkasanMap[k.id] = { nama: k.nama, total: 0 }
   })
@@ -264,7 +264,7 @@ export function KasbonTab() {
 
 export function PayrollPage() {
   const [tab, setTab] = useState<"Gaji" | "Kasbon">("Gaji")
-  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
+  const [kapsters, setKapsters] = useState<{ id: string nama: string }[]>([
     { id: "u-kapster", nama: "Budi Santoso" },
     { id: "u-kapster2", nama: "Zhefitra Ananda" },
   ])

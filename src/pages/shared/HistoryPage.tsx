@@ -482,7 +482,8 @@ export function HistoryPage({ currentUser, role }: {
             <p className="history-empty">
               Belum ada transaksi
               {dateFilter ? " pada tanggal ini" : ""}
-              {activeBarber !== "Semua kapster" ? ` untuk ${activeBarber}` : ""}.
+              {activeBarber !== "Semua kapster" ? ` untuk ${activeBarber}` : ""}
+              .
             </p>
           )}
           {visibleTx.map((tx) => (
@@ -533,17 +534,17 @@ export function HistoryPage({ currentUser, role }: {
                 </small>
               </div>
               {selected.status !== "Lunas" && (
-                  <i
-                    className={`chip ${
-                      selected.status === "BATAL"
-                        ? "batal"
-                        : selected.status === "Manual"
-                          ? "manual"
-                          : "lunas"
-                    }`}
-                  >
-                    {selected.status === "BATAL" ? "Batal" : selected.status}
-                  </i>
+                <i
+                  className={`chip ${
+                    selected.status === "BATAL"
+                      ? "batal"
+                      : selected.status === "Manual"
+                        ? "manual"
+                        : "lunas"
+                  }`}
+                >
+                  {selected.status === "BATAL" ? "Batal" : selected.status}
+                </i>
               )}
             </div>
 

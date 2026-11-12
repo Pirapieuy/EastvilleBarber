@@ -416,8 +416,12 @@ export function ExpensesPage() {
             className={`expense-row ${row.status === "BATAL" ? "voided" : ""}`}
             key={row.id}
           >
-            <span className="exp-date" data-label="Tanggal">{row.date}</span>
-            <strong className="exp-cat" data-label="Kategori">{row.category}</strong>
+            <span className="exp-date" data-label="Tanggal">
+              {row.date}
+            </span>
+            <strong className="exp-cat" data-label="Kategori">
+              {row.category}
+            </strong>
             <span className="exp-desc" data-label="Keterangan">
               {row.description}
               {row.status === "BATAL" && (
@@ -426,7 +430,9 @@ export function ExpensesPage() {
                 </small>
               )}
             </span>
-            <strong className="exp-amount" data-label="Jumlah">{rupiah(row.amount)}</strong>
+            <strong className="exp-amount" data-label="Jumlah">
+              {rupiah(row.amount)}
+            </strong>
             <i className={`chip ${row.status.toLowerCase()}`}>{row.status}</i>
             {row.status === "BATAL" ? (
               <Button

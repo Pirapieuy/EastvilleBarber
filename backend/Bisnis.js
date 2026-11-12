@@ -1071,7 +1071,8 @@ function cekKodeDiskon_(kodeInput, subtotal) {
     ketemu.berlaku_sampai instanceof Date
       ? fmtTanggal_(ketemu.berlaku_sampai, "yyyy-MM-dd")
       : (ketemu.berlaku_sampai || "").toString()
-  if (sampai && sampai < hariIni) return { error: "Kode diskon sudah kedaluwarsa." }
+  if (sampai && sampai < hariIni)
+    return { error: "Kode diskon sudah kedaluwarsa." }
   var persen = Math.min(100, Math.max(0, Number(ketemu.persen) || 0))
   if (persen <= 0) return { error: "Kode diskon tidak valid." }
   return {
@@ -1097,7 +1098,8 @@ function catatPemakaianKode_(kode) {
   var r = readTable_(SHEET_KODE_DISKON).filter(function (x) {
     return normalKode_(x.kode) === kode
   })[0]
-  if (r) setCell_(SHEET_KODE_DISKON, r._row, "dipakai", (Number(r.dipakai) || 0) + 1)
+  if (r)
+    setCell_(SHEET_KODE_DISKON, r._row, "dipakai", (Number(r.dipakai) || 0) + 1)
 }
 
 function simpanKodeDiskon_(body, user) {
@@ -1131,7 +1133,12 @@ function simpanKodeDiskon_(body, user) {
     setCell_(SHEET_KODE_DISKON, lama._row, "persen", persen)
     setCell_(SHEET_KODE_DISKON, lama._row, "berlaku_sampai", sampai)
     setCell_(SHEET_KODE_DISKON, lama._row, "status", status)
-    writeAuditLog(user.id, user.nama, "UBAH_KODE_DISKON", kode + " " + persen + "% " + status)
+    writeAuditLog(
+      user.id,
+      user.nama,
+      "UBAH_KODE_DISKON",
+      kode + " " + persen + "% " + status,
+    )
     return ok_({ id: lama.id })
   }
   var id = "kd-" + Utilities.getUuid().replace(/-/g, "").slice(0, 8)
@@ -1146,7 +1153,12 @@ function simpanKodeDiskon_(body, user) {
     waktu: now,
     dipakai: 0,
   })
-  writeAuditLog(user.id, user.nama, "BUAT_KODE_DISKON", kode + " " + persen + "%")
+  writeAuditLog(
+    user.id,
+    user.nama,
+    "BUAT_KODE_DISKON",
+    kode + " " + persen + "%",
+  )
   return ok_({ id: id })
 }
 

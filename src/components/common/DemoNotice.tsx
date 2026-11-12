@@ -5,7 +5,7 @@ import { getToken } from "../../api"
  * Tanpa ini kegagalan memuat data terlihat seperti aplikasi normal padahal
  * transaksinya tidak tersimpan.
  */
-export function DemoNotice({ live, error }: { live: boolean; error?: string }) {
+export function DemoNotice({ live, error }: { live: boolean error?: string }) {
   if (live) return null
   // Sudah login ke server dan belum ada error = data masih dimuat, bukan mode demo.
   if (!error && getToken()) return null

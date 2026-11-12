@@ -46,9 +46,13 @@ export function ManualPage() {
   const [cari, setCari] = useState("")
   const [diskon, setDiskon] = useState("")
   const [promoId, setPromoId] = useState("")
-  const [promoList, setPromoList] = useState<
-    { id: string; kode: string; nama: string; persen: number; berlakuSampai: string }[]
-  >([])
+  const [promoList, setPromoList] = useState<{
+    id: string
+    kode: string
+    nama: string
+    persen: number
+    berlakuSampai: string
+  }[]>([])
   const [pin, setPin] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState("")
@@ -220,14 +224,21 @@ export function ManualPage() {
           {rows.map((it) => {
             const n = qty[keyOf(it)] ?? 0
             return (
-              <div className={`nota-item ${n > 0 ? "active" : ""}`} key={keyOf(it)}>
+              <div
+                className={`nota-item ${n > 0 ? "active" : ""}`}
+                key={keyOf(it)}
+              >
                 <div className="nota-item-info">
                   <strong>{it.name}</strong>
                   <span>{rupiah(it.price)}</span>
                 </div>
                 {n === 0 ? (
                   <Button
-                    className={`secondary-button nota-add ${it.tipe === "Produk" ? "nota-add-product" : "nota-add-service"}`}
+                    className={`secondary-button nota-add ${
+                      it.tipe === "Produk"
+                        ? "nota-add-product"
+                        : "nota-add-service"
+                    }`}
                     aria-label={`Tambah ${it.name}`}
                     onClick={() => ubahQty(it, 1)}
                   >
@@ -263,10 +274,7 @@ export function ManualPage() {
   return (
     <form className="content narrow" onSubmit={handleSave}>
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        eyebrow="Transaksi dari buku fisik"
-        title="Input Manual"
-      />
+      <PageTitle eyebrow="Transaksi dari buku fisik" title="Input Manual" />
 
       <section className="panel form-panel">
         <h3>Data nota</h3>
@@ -343,148 +351,150 @@ export function ManualPage() {
       </section>
 
       <div className="manual-checkout-grid">
-      <section className="panel form-panel manual-discount-panel">
-        <h3>Diskon</h3>
-        <div className="form-grid manual-info-grid">
-          {promoAktif.length > 0 && (
-            <label>
-              <span>Kode diskon (opsional)</span>
-              <select
-                onChange={(e) => setPromoId(e.target.value)}
-                value={promoId}
-              >
-                <option value="">Tanpa kode diskon</option>
-                {promoAktif.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.kode} · {p.nama} ({p.persen}%)
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {!promo && (
-            <label>
-              <span>Potongan manual (opsional)</span>
-              <div className="input-shell">
-                <b>Rp</b>
+        <section className="panel form-panel manual-discount-panel">
+          <h3>Diskon</h3>
+          <div className="form-grid manual-info-grid">
+            {promoAktif.length > 0 && (
+              <label>
+                <span>Kode diskon (opsional)</span>
+                <select
+                  onChange={(e) => setPromoId(e.target.value)}
+                  value={promoId}
+                >
+                  <option value="">Tanpa kode diskon</option>
+                  {promoAktif.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.kode} · {p.nama} ({p.persen}%)
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {!promo && (
+              <label>
+                <span>Potongan manual (opsional)</span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    onChange={(e) => setDiskon(e.target.value)}
+                    placeholder="0"
+                    value={diskon}
+                  />
+                </div>
+              </label>
+            )}
+            {diskonNum > 0 && !promo && (
+              <label>
+                <span>PIN Owner atau Manajer</span>
                 <input
+                  autoComplete="off"
                   inputMode="numeric"
-                  onChange={(e) => setDiskon(e.target.value)}
-                  placeholder="0"
-                  value={diskon}
+                  maxLength={6}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="6 digit"
+                  type="password"
+                  value={pin}
                 />
-              </div>
-            </label>
-          )}
-          {diskonNum > 0 && !promo && (
-            <label>
-              <span>PIN Owner atau Manajer</span>
-              <input
-                autoComplete="off"
-                inputMode="numeric"
-                maxLength={6}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="6 digit"
-                type="password"
-                value={pin}
-              />
-              <small>Wajib bila kasir yang menyimpan nota.</small>
-            </label>
-          )}
-        </div>
-      </section>
+                <small>Wajib bila kasir yang menyimpan nota.</small>
+              </label>
+            )}
+          </div>
+        </section>
 
-      <section className="panel form-panel manual-payment-panel">
-        <h3>Pembayaran</h3>
-        <div className="method-grid manual-method-grid">
-          {(["Tunai", "QRIS", "Gabungan"] as const).map((m) => (
-            <Button
-              className={method === m ? "active" : ""}
-              key={m}
-              style={{
-                minHeight: 44,
-                padding: "6px 4px",
-                justifyContent: "center",
-                textAlign: "center",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-              onClick={() => setMethod(m)}
-            >
-              <Icon name={m === "QRIS" ? "qris" : "cash"} />
-              <strong>{m}</strong>
-            </Button>
-          ))}
-        </div>
-        <div className="form-grid manual-info-grid">
-          {method !== "QRIS" && (
-            <label>
-              <span>{method === "Gabungan" ? "Dibayar tunai" : "Uang diterima"}</span>
-              <div className="input-shell">
-                <b>Rp</b>
-                <input
-                  inputMode="numeric"
-                  onChange={(e) => setCash(e.target.value)}
-                  placeholder={method === "Gabungan" ? "0" : String(total)}
-                  value={cash}
-                />
-              </div>
-            </label>
-          )}
-          {method === "Gabungan" && (
-            <label>
-              <span>Dibayar QRIS</span>
-              <div className="input-shell">
-                <b>Rp</b>
-                <input
-                  inputMode="numeric"
-                  onChange={(e) => setQris(e.target.value)}
-                  placeholder="0"
-                  value={qris}
-                />
-              </div>
-            </label>
-          )}
-        </div>
-        {method === "QRIS" && (
-          <p className="manual-qris-notice" role="note">
-            Pastikan pembayaran QRIS berhasil sebelum menyimpan nota.
-          </p>
-        )}
-        {method !== "QRIS" && total > 0 && paid < total && (
-          <p className="manual-payment-warning" role="alert">
-            Uang yang diterima belum mencukupi total pembayaran.
-          </p>
-        )}
-        <dl className="nota-summary">
-          <div>
-            <dt>Subtotal</dt>
-            <dd>{rupiah(subtotal)}</dd>
+        <section className="panel form-panel manual-payment-panel">
+          <h3>Pembayaran</h3>
+          <div className="method-grid manual-method-grid">
+            {(["Tunai", "QRIS", "Gabungan"] as const).map((m) => (
+              <Button
+                className={method === m ? "active" : ""}
+                key={m}
+                style={{
+                  minHeight: 44,
+                  padding: "6px 4px",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+                onClick={() => setMethod(m)}
+              >
+                <Icon name={m === "QRIS" ? "qris" : "cash"} />
+                <strong>{m}</strong>
+              </Button>
+            ))}
           </div>
-          {diskonNum > 0 && (
-            <div>
-              <dt>Diskon</dt>
-              <dd>− {rupiah(diskonNum)}</dd>
-            </div>
-          )}
-          <div className="nota-summary-total">
-            <dt>Total</dt>
-            <dd>{rupiah(total)}</dd>
+          <div className="form-grid manual-info-grid">
+            {method !== "QRIS" && (
+              <label>
+                <span>
+                  {method === "Gabungan" ? "Dibayar tunai" : "Uang diterima"}
+                </span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    onChange={(e) => setCash(e.target.value)}
+                    placeholder={method === "Gabungan" ? "0" : String(total)}
+                    value={cash}
+                  />
+                </div>
+              </label>
+            )}
+            {method === "Gabungan" && (
+              <label>
+                <span>Dibayar QRIS</span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    onChange={(e) => setQris(e.target.value)}
+                    placeholder="0"
+                    value={qris}
+                  />
+                </div>
+              </label>
+            )}
           </div>
-          {method !== "QRIS" && cashNum > 0 && total > 0 && (
-            <div>
-              <dt>Kembalian</dt>
-              <dd>{rupiah(kembalian)}</dd>
-            </div>
+          {method === "QRIS" && (
+            <p className="manual-qris-notice" role="note">
+              Pastikan pembayaran QRIS berhasil sebelum menyimpan nota.
+            </p>
           )}
-        </dl>
-        {qrisBerlebih && (
-          <p className="absensi-error" role="alert">
-            Nominal QRIS melebihi total nota.
-          </p>
-        )}
-      </section>
+          {method !== "QRIS" && total > 0 && paid < total && (
+            <p className="manual-payment-warning" role="alert">
+              Uang yang diterima belum mencukupi total pembayaran.
+            </p>
+          )}
+          <dl className="nota-summary">
+            <div>
+              <dt>Subtotal</dt>
+              <dd>{rupiah(subtotal)}</dd>
+            </div>
+            {diskonNum > 0 && (
+              <div>
+                <dt>Diskon</dt>
+                <dd>− {rupiah(diskonNum)}</dd>
+              </div>
+            )}
+            <div className="nota-summary-total">
+              <dt>Total</dt>
+              <dd>{rupiah(total)}</dd>
+            </div>
+            {method !== "QRIS" && cashNum > 0 && total > 0 && (
+              <div>
+                <dt>Kembalian</dt>
+                <dd>{rupiah(kembalian)}</dd>
+              </div>
+            )}
+          </dl>
+          {qrisBerlebih && (
+            <p className="absensi-error" role="alert">
+              Nominal QRIS melebihi total nota.
+            </p>
+          )}
+        </section>
       </div>
 
       <div className="sticky-submit">
