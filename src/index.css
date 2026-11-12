@@ -13528,3 +13528,19 @@ label .search-select-trigger {
   flex: 1 1 0;
   justify-content: center;
 }
+
+/* Tim Eastville (Owner): sudut kartu lebih kotak, komisi kapster di samping peran */
+.team-grid-owner .team-card {
+  border-radius: 5px;
+}
+
+.team-grid-owner .team-card header > span,
+.team-grid-owner .team-card-actions .button {
+  border-radius: 5px;
+}
+
+.team-grid-owner .roles .role-komisi {
+  color: var(--slate);
+  background: var(--bone);
+  border: 1px solid var(--line);
+}

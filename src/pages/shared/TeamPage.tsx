@@ -262,6 +262,12 @@ export function TeamPage({ currentUser, role, title }: {
     const matchRole = roleFilter === "Semua" || u.role === roleFilter
     return matchSearch && matchRole
   })
+  // Tim Eastville (Owner): anggota nonaktif selalu di paling bawah.
+  if (isOwner)
+    filtered.sort(
+      (a, b) =>
+        Number(a.status === "Nonaktif") - Number(b.status === "Nonaktif"),
+    )
 
   function getInitials(name: string) {
     const parts = name.trim().split(" ")
@@ -363,9 +369,14 @@ export function TeamPage({ currentUser, role, title }: {
             <small>@{x.username}</small>
             <div className="roles">
               <i>{x.role}</i>
+              {isOwner && x.role === "Kapster" && (
+                <i className="role-komisi">
+                  Komisi {komisiMap[x.id] ?? 40}%
+                </i>
+              )}
             </div>
             <dl>
-              {x.role === "Kapster" && (
+              {x.role === "Kapster" && !isOwner && (
                 <div>
                   <Icon name="chart" />
                   <span>Komisi {komisiMap[x.id] ?? 40}%</span>
