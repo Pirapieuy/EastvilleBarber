@@ -11339,3 +11339,24 @@ summary,
   margin: 0 0 6px 2px;
   font-size: 12px;
 }
+
+/* Input Manual: tombol di kartu Diskon bergaya sama dengan tombol pilihan (Tunai/QRIS/Gabungan) */
+.manual-page .manual-discount-panel .cart-discount-panel > .primary-button,
+.manual-page .manual-discount-applied .button {
+  border: 1px solid var(--line);
+  color: var(--slate);
+  background: var(--paper);
+  box-shadow: none;
+  font-weight: 700;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel > .primary-button:not(:disabled) {
+  border-color: var(--brass);
+  color: var(--ink);
+  background: var(--brass-soft);
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel > .primary-button:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
