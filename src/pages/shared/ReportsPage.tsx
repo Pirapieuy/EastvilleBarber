@@ -1,12 +1,11 @@
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
-import { FormEvent, useEffect, useMemo, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import {
   apiLaporan,
   apiPengeluaran,
   getToken,
   LaporanKeuangan,
 } from "../../api"
-import { BarChart } from "../../components/common/BarChart"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import {
@@ -232,9 +231,16 @@ export function ReportsPage({ currentUser, role }: {
   const [fetching, setFetching] = useState(false)
   const [productLiveError, setProductLiveError] = useState("")
 
-  // Interactive Tab: pemasukan | pengeluaran | komisi | sisa
   const [subTab, setSubTab] =
-    useState<"pemasukan" | "pengeluaran" | "komisi" | "sisa">("pemasukan")
+    useState<"pemasukan" | "pengeluaran" | "komisi" | "omzet">("pemasukan")
+
+  const pilihBagian = (bagian: "pemasukan" | "pengeluaran" | "komisi" | "omzet") => {
+    setSubTab(bagian)
+    document.getElementById(`laporan-${bagian}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }
   const [productTab, setProductTab] =
     useState<"transaksi" | "koreksi" | "ringkasan">("transaksi")
   const [productList, setProductList] = useState<ProductTransactionRecord[]>(
@@ -337,58 +343,6 @@ export function ReportsPage({ currentUser, role }: {
         ? `${rentang.dari} s/d ${rentang.sampai}`
         : bulan
 
-  const chartData = useMemo(() => {
-    if (mode === "Harian") {
-      const dayData = data.perHari.find((h) => h.tanggal === tanggal)
-      const t = dayData ? dayData.tunai : data.tunai
-      const q = dayData ? dayData.qris : data.qris
-      return [
-        { label: "Tunai", value: t },
-        { label: "QRIS", value: q },
-      ]
-    }
-    if (mode === "Mingguan") {
-      const d = new Date(`${tanggal}T00:00:00`)
-      const senin = new Date(d)
-      senin.setDate(d.getDate() - ((d.getDay() + 6) % 7))
-      const namaHari = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
-      return Array.from({ length: 7 }, (_, i) => {
-        const cur = new Date(senin)
-        cur.setDate(senin.getDate() + i)
-        const iso = isoDate(cur)
-        const found = data.perHari.find((h) => h.tanggal === iso)
-        return {
-          label: `${namaHari[i]} ${cur.getDate()}`,
-          value: found ? found.total : 0,
-        }
-      })
-    }
-    if (data.perHari.length > 0) {
-      return data.perHari.map((h) => ({
-        label: h.tanggal.slice(8),
-        value: h.total,
-      }))
-    }
-    return [
-      { label: "01", value: 1200000 },
-      { label: "15", value: 1850000 },
-      { label: "29", value: 2100000 },
-    ]
-  }, [mode, tanggal, data])
-
-  const chartTitle =
-    mode === "Harian"
-      ? "Pemasukan Harian (Tunai vs QRIS)"
-      : mode === "Mingguan"
-        ? "Pemasukan Mingguan"
-        : "Pemasukan Bulanan"
-
-  const chartEyebrow =
-    mode === "Harian"
-      ? tanggal
-      : mode === "Mingguan"
-        ? `${rentang.dari} s/d ${rentang.sampai}`
-        : `Bulan ${bulan}`
   const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${
     isManager ? "Laba Bersih" : "Sisa Owner"
   }: ${juta(data.sisa)}`
@@ -551,14 +505,13 @@ export function ReportsPage({ currentUser, role }: {
                 onChange={(d) => d && setTanggal(d)}
               />
               {mode === "Mingguan" && (
-                <span
-                  style={{
-                    fontSize: 13,
-                    color: "var(--slate)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {rentang.dari} s/d {rentang.sampai}
+                <span className="report-week-range" aria-label="Rentang tanggal minggu">
+                  <strong>
+                    {new Date(`${rentang.sampai}T00:00:00`).toLocaleDateString(
+                      "id-ID",
+                      { day: "numeric", month: "long", year: "numeric", weekday: "long" },
+                    )}
+                  </strong>
                 </span>
               )}
             </div>
@@ -596,7 +549,7 @@ export function ReportsPage({ currentUser, role }: {
         style={{ marginBottom: 14, ...(fetching ? { opacity: 0.6 } : {}) }}
       >
         <div
-          onClick={() => setSubTab("pemasukan")}
+          onClick={() => pilihBagian("pemasukan")}
           style={{
             cursor: "pointer",
             borderRadius: 12,
@@ -619,7 +572,7 @@ export function ReportsPage({ currentUser, role }: {
         </div>
 
         <div
-          onClick={() => setSubTab("pengeluaran")}
+          onClick={() => pilihBagian("pengeluaran")}
           style={{
             cursor: "pointer",
             borderRadius: 12,
@@ -642,7 +595,7 @@ export function ReportsPage({ currentUser, role }: {
         </div>
 
         <div
-          onClick={() => setSubTab("komisi")}
+          onClick={() => pilihBagian("komisi")}
           style={{
             cursor: "pointer",
             borderRadius: 12,
@@ -665,24 +618,22 @@ export function ReportsPage({ currentUser, role }: {
         </div>
 
         <div
-          onClick={() => setSubTab("sisa")}
+          onClick={() => pilihBagian("omzet")}
           style={{
             cursor: "pointer",
             borderRadius: 12,
             transition: "all 0.15s ease",
             boxShadow:
-              subTab === "sisa"
+              subTab === "omzet"
                 ? "0 0 0 2px var(--ink), 0 4px 12px rgba(0,0,0,0.08)"
                 : "none",
-            transform: subTab === "sisa" ? "translateY(-2px)" : "none",
+            transform: subTab === "omzet" ? "translateY(-2px)" : "none",
           }}
-          title="Klik untuk melihat kalkulasi sisa bersih owner"
+          title="Klik untuk melihat omzet dan laba bersih"
         >
           <Kpi
             icon="wallet"
-            label={
-              isManager ? "Laba Bersih" : "Sisa Owner"
-            }
+            label="Omzet"
             tone="dark"
             value={rupiah(data.sisa)}
             detail={`Margin laba bersih ${persenSisa}%`}
@@ -691,7 +642,7 @@ export function ReportsPage({ currentUser, role }: {
       </div>
 
       {/* SUB-VIEW 1: TAB PEMASUKAN */}
-      {subTab === "pemasukan" && (
+      <div id="laporan-pemasukan" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section className="panel" style={{ padding: 20 }}>
             <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
@@ -771,15 +722,11 @@ export function ReportsPage({ currentUser, role }: {
             </div>
           </section>
 
-          <section className="panel report-chart">
-            <PageTitle eyebrow={chartEyebrow} title={chartTitle} />
-            <BarChart data={chartData} />
-          </section>
         </div>
-      )}
+      </div>
 
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
-      {subTab === "pengeluaran" && (
+      <div id="laporan-pengeluaran" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section
             className="panel"
@@ -787,26 +734,26 @@ export function ReportsPage({ currentUser, role }: {
           >
             <div className="page-title expense-page-title">
               <div>
-                <h2>Detail Pengeluaran Toko</h2>
+                <h2>Pengeluaran</h2>
               </div>
-              <Button
-                className="primary-button"
-                onClick={() => setExpenseFormOpen(true)}
-              >
-                <Icon name="plus" /> Catat Pengeluaran
-              </Button>
             </div>
 
-            <div className="filters">
-              <div className="search">
-                <Icon name="search" />
-                <input
-                  placeholder="Cari keterangan..."
-                  value={expSearch}
-                  onChange={(e) => setExpSearch(e.target.value)}
-                />
-              </div>
-            </div>
+              <div className="expense-toolbar filters">
+               <div className="search">
+                 <Icon name="search" />
+                 <input
+                   placeholder="Cari keterangan..."
+                   value={expSearch}
+                   onChange={(e) => setExpSearch(e.target.value)}
+                 />
+               </div>
+               <Button
+                 className="primary-button expense-add-button"
+                 onClick={() => setExpenseFormOpen(true)}
+               >
+                 <Icon name="plus" /> Tambah pengeluaran
+               </Button>
+             </div>
 
             <div className="expense-table-scroll expense-table-compact">
               <div className="expense-head">
@@ -865,16 +812,16 @@ export function ReportsPage({ currentUser, role }: {
             </div>
           </section>
         </div>
-      )}
+      </div>
 
       {/* SUB-VIEW 3: TAB TOTAL KOMISI */}
-      {subTab === "komisi" && (
+      <div id="laporan-komisi" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <section
             className="panel"
             style={{ padding: 20, overflow: "hidden" }}
           >
-            <PageTitle eyebrow="Total Komisi" title="Total Komisi Kapster" />
+            <PageTitle eyebrow="Total Komisi" title="Komisi Kapster" />
 
             <div className="commission-table-scroll">
               <div className="report-head">
@@ -909,17 +856,18 @@ export function ReportsPage({ currentUser, role }: {
             </div>
           </section>
         </div>
-      )}
+      </div>
 
-      {/* SUB-VIEW 4: TAB SISA OWNER */}
-      {subTab === "sisa" && (
-        <section className="panel" style={{ padding: 22 }}>
-          <PageTitle
+      {/* SUB-VIEW 4: TAB OMZET */}
+      <div id="laporan-omzet" className="report-section">
+
+          <section className="panel owner-profit-panel" style={{ padding: 22 }}>
+           <PageTitle
             eyebrow="Kalkulasi Keuntungan"
             title={
               isManager
                 ? "Rincian Laba Bersih Operasional"
-                : "Kalkulasi Sisa Dana Bersih Owner"
+                : "Kalkulasi Sisa Bersih"
             }
           />
 
@@ -1034,7 +982,7 @@ export function ReportsPage({ currentUser, role }: {
                   (=){" "}
                   {isManager
                     ? "Laba Bersih Akhir"
-                    : "Sisa Bersih Dikantongi Owner"}
+                    : "Sisa Bersih"}
                 </strong>
               </div>
               <strong style={{ fontSize: 20, color: "#facc15" }}>
@@ -1043,26 +991,15 @@ export function ReportsPage({ currentUser, role }: {
             </div>
           </div>
         </section>
-      )}
+      </div>
 
       {/* Modal Catat Pengeluaran */}
       {expenseFormOpen && (
         <div className="modal-overlay">
-          <form className="simple-modal" onSubmit={handleCreateExpense}>
-            <header>
-              <h2>Catat Pengeluaran</h2>
-              <Button type="button" onClick={() => setExpenseFormOpen(false)}>
-                <Icon name="close" />
-              </Button>
-            </header>
-            <label>
-              <span>Judul Pengeluaran</span>
-              <input
-                value={expCategory}
-                onChange={(e) => setExpCategory(e.target.value)}
-                placeholder="Misal: Perlengkapan, Listrik, Air, Sewa..."
-              />
-            </label>
+          <form
+            className="simple-modal expense-form"
+            onSubmit={handleCreateExpense}
+          >
             <label>
               <span>Tanggal</span>
               <CalendarPicker value={expDate} onChange={setExpDate} />
