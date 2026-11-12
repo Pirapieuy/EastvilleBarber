@@ -13098,3 +13098,20 @@ summary,
   display: flex;
   width: 100%;
 }
+
+/* Input Manual: potongan manual bisa Rp atau persen */
+.manual-discount-manual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.manual-discount-manual .manual-discount-type {
+  height: 42px;
+}
+
+.manual-discount-manual .manual-discount-type .button {
+  min-width: 44px;
+  height: 100%;
+}

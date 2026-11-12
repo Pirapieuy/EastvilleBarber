@@ -54,6 +54,7 @@ export function ManualPage() {
   const [qty, setQty] = useState<Record<string, number>>({})
   const [cari, setCari] = useState("")
   const [diskon, setDiskon] = useState("")
+  const [diskonJenis, setDiskonJenis] = useState<"nominal" | "persen">("nominal")
   const [kodeInput, setKodeInput] = useState("")
   const [kodeError, setKodeError] = useState("")
   const [kodeChecking, setKodeChecking] = useState(false)
@@ -148,7 +149,9 @@ export function ManualPage() {
           ? promo.nilai
           : Math.round((subtotal * promo.nilai) / 100),
       )
-    : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
+    : diskonJenis === "persen"
+      ? Math.round((subtotal * Math.min(100, Number(diskon.replace(/\D/g, "")) || 0)) / 100)
+      : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
   const total = subtotal - diskonNum
   const kapsterAktif = kapsterId
   const cashNum = Number(cash.replace(/\D/g, "")) || 0
@@ -275,6 +278,7 @@ export function ManualPage() {
       )
       setQty({})
       setDiskon("")
+      setDiskonJenis("nominal")
       setPromo(null)
       setPin("")
       setNote(notaOtomatis(tanggal))
@@ -482,15 +486,36 @@ export function ManualPage() {
           {!promo && (
             <label>
               <span>Potongan manual (opsional)</span>
-              <div className="input-shell">
-                <b>Rp</b>
-                <input
-                  inputMode="numeric"
-                  onChange={(e) => setDiskon(e.target.value)}
-                  placeholder="0"
-                  value={diskon}
-                />
+              <div className="manual-discount-manual">
+                <div className="input-shell">
+                  {diskonJenis === "nominal" && <b>Rp</b>}
+                  <input
+                    inputMode="numeric"
+                    maxLength={diskonJenis === "persen" ? 3 : undefined}
+                    onChange={(e) => setDiskon(e.target.value)}
+                    placeholder="0"
+                    value={diskon}
+                  />
+                  {diskonJenis === "persen" && <b>%</b>}
+                </div>
+                <div className="segmented manual-discount-type" role="group" aria-label="Jenis potongan">
+                  {(["nominal", "persen"] as const).map((j) => (
+                    <Button
+                      className={diskonJenis === j ? "active" : ""}
+                      key={j}
+                      onClick={() => {
+                        setDiskonJenis(j)
+                        setDiskon("")
+                      }}
+                    >
+                      {j === "nominal" ? "Rp" : "%"}
+                    </Button>
+                  ))}
+                </div>
               </div>
+              {diskonJenis === "persen" && diskonNum > 0 && (
+                <small>Potongan {rupiah(diskonNum)}.</small>
+              )}
             </label>
           )}
           {diskonNum > 0 && !promo && (
