@@ -334,7 +334,7 @@ export function TeamPage({ currentUser, role, title }: {
         </p>
       )}
 
-      <div className="team-grid">
+      <div className={`team-grid${isOwner ? " team-grid-owner" : ""}`}>
         {filtered.map((x) => (
           <article
             className={`team-card role-${x.role.toLowerCase()} ${x.status === "Nonaktif" ? "inactive" : ""}`}

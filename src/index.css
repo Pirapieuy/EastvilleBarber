@@ -13501,3 +13501,30 @@ label .search-select-trigger {
     padding: 26px 27px 26px;
   }
 }
+
+/* Tim Eastville (Owner): kartu rata dan simetris, tanpa hiasan kotak */
+.team-grid-owner {
+  align-items: stretch;
+}
+
+.team-grid-owner .team-card {
+  align-self: stretch;
+}
+
+.team-grid-owner .team-card::before,
+.team-grid-owner .team-card::after {
+  display: none;
+}
+
+.team-grid-owner .team-card.role-kapster dl:not(:empty) {
+  width: 100% !important;
+}
+
+.team-grid-owner .team-card-actions {
+  width: 100%;
+}
+
+.team-grid-owner .team-card-actions .button {
+  flex: 1 1 0;
+  justify-content: center;
+}
