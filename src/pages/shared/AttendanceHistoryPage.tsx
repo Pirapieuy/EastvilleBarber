@@ -3,6 +3,7 @@ import { Icon } from "../../components/common/Icon"
 import { CalendarPicker, Button } from "../../components/common/UI"
 import { AbsensiRow, apiAbsensi, apiKasir } from "../../api"
 import { AbsensiStatus } from "../../types"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 function todayDate() {
   const now = new Date()
@@ -421,22 +422,9 @@ export function AttendanceHistoryPage() {
             max={today}
             showToday={false}
           />
-          <select
+          <SearchSelect
             value={filterKapster}
             onChange={(e) => setFilterKapster(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              paddingRight: 24,
-              borderRadius: 8,
-              border: "1.5px solid var(--slate)",
-              background: "var(--paper)",
-              fontSize: 13,
-              minWidth: 140,
-              appearance: "none",
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b645c' stroke-width='2' fill='none'/%3E%3C/svg%3E\")",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 8px center",
-            }}
           >
             <option value="">Semua Kapster</option>
             {kapsters.map((k) => (
@@ -444,7 +432,7 @@ export function AttendanceHistoryPage() {
                 {k.nama}
               </option>
             ))}
-          </select>
+          </SearchSelect>
           <label className="search" style={{ flex: 1, minWidth: 180 }}>
             <Icon name="search" />
             <input

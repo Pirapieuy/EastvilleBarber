@@ -393,7 +393,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   async function executeSaveTransaction(): Promise<boolean> {
     if (isTransactionSaved) return true
     if (!live) {
-      setSaveReceiptError("Data kasir belum termuat. Coba lagi sebentar.")
+      setSaveReceiptError("Data kasir belum selesai dimuat. Tunggu sebentar lalu coba lagi.")
       return false
     }
     setSaveReceiptError("")
@@ -529,7 +529,7 @@ export function CashierPage({ currentUser, onNavigate }: {
 
   const payDisabledReason = ((): string | null => {
     if (!cart.length) return null
-    if (gagalMuat) return "Data kasir belum termuat. Tekan Coba lagi di atas."
+    if (gagalMuat) return "Data kasir belum selesai dimuat."
     if (paying) return "Sedang memproses pembayaran..."
     if (method === "Tunai" && cash <= 0) return "Masukkan jumlah tunai."
     if (method === "Gabungan" && tunaiTerpakai + qris <= 0) {
@@ -579,7 +579,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     if (!liveError || liveError === "belum login ke server (token tidak ada)") {
       return (
         <div className="content">
-          <LoadingState message="Memuat kasir…" />
+          <LoadingState message="Memuat data kasir…" />
         </div>
       )
     }

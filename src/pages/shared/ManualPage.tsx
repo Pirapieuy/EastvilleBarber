@@ -8,6 +8,7 @@ import { TimePicker } from "../../components/common/TimePicker"
 import {
   Button,
   CalendarPicker,
+  LoadingState,
   rupiah,
 } from "../../components/common/UI"
 
@@ -339,6 +340,27 @@ export function ManualPage() {
               </div>
             )
           })}
+        </div>
+      </div>
+    )
+  }
+
+  // Sudah login tapi data belum datang: tutup seluruh halaman dengan tulisan memuat.
+  if (Boolean(getToken()) && !live && !liveError) {
+    return (
+      <div className="content narrow manual-page">
+        <LoadingState message="Memuat data Input Manual…" />
+      </div>
+    )
+  }
+
+  // Gagal memuat: bedakan jelas dari "sedang memuat" dan beri jalan keluar.
+  if (Boolean(getToken()) && !live && liveError) {
+    return (
+      <div className="content narrow manual-page">
+        <div className="payment-result danger" role="alert">
+          <span>Data Input Manual gagal dimuat: {liveError}</span>
+          <Button onClick={() => window.location.reload()}>Coba lagi</Button>
         </div>
       </div>
     )

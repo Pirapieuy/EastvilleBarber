@@ -10,6 +10,8 @@ import {
   AbsensiRow,
   PengaturanKomisi,
 } from "../../api"
+import { SearchSelect } from "../../components/common/SearchSelect"
+import { TimePicker } from "../../components/common/TimePicker"
 
 interface LeaveRecord {
   id: string
@@ -359,7 +361,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                 onChange={setFilterTanggal}
               />
 
-              <select
+              <SearchSelect
                 value={filterKapster}
                 onChange={(e) => setFilterKapster(e.target.value)}
               >
@@ -369,7 +371,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                     {k.nama}
                   </option>
                 ))}
-              </select>
+              </SearchSelect>
             </div>
 
             {loading && (
@@ -610,17 +612,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                   <span style={{ fontSize: 13, fontWeight: 600 }}>
                     Jam Mulai
                   </span>
-                  <input
-                    required
-                    type="time"
-                    value={jamMulai}
-                    onChange={(e) => setJamMulai(e.target.value)}
-                    style={{
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      border: "1px solid var(--line)",
-                    }}
-                  />
+                  <TimePicker onChange={setJamMulai} value={jamMulai} />
                 </label>
                 <label
                   style={{ display: "flex", flexDirection: "column", gap: 6 }}
@@ -628,17 +620,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                   <span style={{ fontSize: 13, fontWeight: 600 }}>
                     Jam Selesai
                   </span>
-                  <input
-                    required
-                    type="time"
-                    value={jamSelesai}
-                    onChange={(e) => setJamSelesai(e.target.value)}
-                    style={{
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      border: "1px solid var(--line)",
-                    }}
-                  />
+                  <TimePicker onChange={setJamSelesai} value={jamSelesai} />
                 </label>
               </div>
             </div>
@@ -787,7 +769,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
             )}
             <label>
               <span>Kapster</span>
-              <select
+              <SearchSelect
                 value={leaveKapsterId}
                 onChange={(e) => {
                   setLeaveKapsterId(e.target.value)
@@ -802,7 +784,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                     </option>
                   )
                 })}
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Tanggal</span>
@@ -816,7 +798,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
             </label>
             <label>
               <span>Jenis Izin</span>
-              <select
+              <SearchSelect
                 value={leaveType}
                 onChange={(e) =>
                   setLeaveType(e.target.value as LeaveRecord["tipe"])
@@ -825,7 +807,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                 <option value="Libur Mingguan">Libur Mingguan</option>
                 <option value="Cuti">Cuti Pribadi</option>
                 <option value="Izin">Izin Khusus</option>
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Keterangan</span>

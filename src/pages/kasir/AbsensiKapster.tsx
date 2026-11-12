@@ -541,15 +541,17 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
                 aria-label="Cari riwayat berdasarkan nama kapster"
               />
             </label>
-            <label className="absensi-history-date">
-              <span>Tanggal</span>
-              <input
-                type="date"
+            <div className="absensi-history-date">
+              <CalendarPicker
+                allowClear
+                clearLabel="Semua tanggal"
+                max={TANGGAL_MAKS()}
+                onChange={setFilterTanggalRiwayat}
+                placeholder="Semua tanggal"
+                showToday={false}
                 value={filterTanggalRiwayat}
-                onChange={(event) => setFilterTanggalRiwayat(event.target.value)}
-                aria-label="Filter riwayat berdasarkan tanggal"
               />
-            </label>
+            </div>
           </div>
           {loadingRiwayat ? <LoadingState message="Memuat riwayat absensi..." /> :
             filteredRiwayat.length === 0 ? (

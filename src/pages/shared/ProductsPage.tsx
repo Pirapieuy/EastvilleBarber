@@ -8,6 +8,7 @@ import {
   PageTitle,
   rupiah,
 } from "../../components/common/UI"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 const STOK_MENIPIS = 1
 
@@ -336,14 +337,14 @@ export function ProductsPage({ embedded = false }: {
                 onChange={(e) => setCari(e.target.value)}
               />
             </div>
-            <select
+            <SearchSelect
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option>Semua status</option>
               <option>Aktif</option>
               <option>Non-aktif</option>
-            </select>
+            </SearchSelect>
           </div>
           <div className="product-admin-scroll">
           <div className="product-admin-head">
@@ -842,7 +843,7 @@ export function ProductsPage({ embedded = false }: {
             </header>
             <label>
               <span>Produk</span>
-              <select
+              <SearchSelect
                 value={stockCode || productsList[0]?.code}
                 onChange={(e) => setStockCode(e.target.value)}
               >
@@ -851,7 +852,7 @@ export function ProductsPage({ embedded = false }: {
                     {p.name}
                   </option>
                 ))}
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Jumlah masuk</span>

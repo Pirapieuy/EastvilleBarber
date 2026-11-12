@@ -19,6 +19,7 @@ import {
   TabelEkspor,
 } from "../../components/common/exportTable"
 import { WhatsAppDialog } from "./ReportsPage"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 export interface ProductTransactionRecord {
   id: string
@@ -480,13 +481,13 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
         {!forcedRole && !getToken() && (
           <div className="role-preview">
             <span>Pratinjau peran</span>
-            <select
+            <SearchSelect
               onChange={(e) => setRole(e.target.value as "Owner" | "Kapster")}
               value={role}
             >
               <option>Owner</option>
               <option>Kapster</option>
-            </select>
+            </SearchSelect>
           </div>
         )}
         <DemoNotice live={live} error={liveError} />
@@ -628,13 +629,13 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
         {!forcedRole && !getToken() && (
           <div className="role-preview">
             <span>Peran</span>
-            <select
+            <SearchSelect
               onChange={(e) => setRole(e.target.value as "Owner" | "Kapster")}
               value={role}
             >
               <option>Owner</option>
               <option>Kapster</option>
-            </select>
+            </SearchSelect>
           </div>
         )}
         <div className="report-export-buttons">

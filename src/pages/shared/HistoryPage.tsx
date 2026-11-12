@@ -418,7 +418,7 @@ export function HistoryPage({ currentUser, role }: {
   if (loading) {
     return (
       <div className="content">
-        <LoadingState message="Memuat riwayat transaksi..." />
+        <LoadingState message="Memuat riwayat transaksi…" />
       </div>
     )
   }

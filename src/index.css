@@ -13115,3 +13115,106 @@ summary,
   min-width: 44px;
   height: 100%;
 }
+
+/* =====================================================================
+   Pemilih seragam: tombol tanggal / bulan / jam dan dropdown cari
+   Acuan: tombol di Riwayat (tinggi 40px, sudut 9px, huruf 13px).
+   ===================================================================== */
+.calendar-picker-btn,
+.search-select-trigger {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.search-select-trigger {
+  font-weight: 500;
+}
+
+.calendar-picker-btn:hover,
+.search-select-trigger:hover:not(:disabled) {
+  border-color: var(--brass);
+}
+
+.calendar-picker-btn .icon {
+  width: 16px;
+  color: var(--slate);
+}
+
+.calendar-picker-wrapper > .calendar-picker-btn {
+  width: 100%;
+}
+
+/* Kartu komisi punya tampilan sendiri; biarkan */
+.commission-month-shell .calendar-picker-btn {
+  height: auto;
+  min-height: 56px;
+  padding: 0 14px;
+  border-radius: 13px;
+}
+
+/* Kolom di dalam form: dropdown & pemilih melebar sama seperti isian lain */
+.form-grid .search-select,
+.staff-form .search-select,
+.product-modal .search-select,
+label > .search-select,
+label > .calendar-picker-wrapper {
+  width: 100%;
+}
+
+.form-grid .search-select-trigger,
+.staff-form .search-select-trigger,
+.product-modal .search-select-trigger,
+label .search-select-trigger {
+  height: 42px;
+  min-height: 42px;
+}
+
+/* Bar filter: dropdown ikut tinggi isian di sebelahnya */
+.filters .search-select {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.filters .search-select-trigger {
+  height: 40px;
+}
+
+/* Riwayat Absensi Kasir: pemilih tanggal tanpa bingkai ganda */
+.absensi-history-date {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.absensi-history-date .calendar-picker-wrapper {
+  display: block;
+  width: 100%;
+}
+
+/* Riwayat tanpa transaksi: tidak ada panel detail, jadi daftar melebar penuh */
+.history-page-content .master-detail:not(:has(.desktop-only-detail)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.history-page-content .master-detail:not(:has(.desktop-only-detail)) .transaction-list {
+  width: 100%;
+  max-width: none;
+}
+
+.history-page-content .history-empty {
+  padding: 40px 16px;
+  text-align: center;
+}
+
+/* Tulisan memuat berada di tengah halaman Kasir */
+.content.manual-page > .loading-state {
+  min-height: 60svh;
+}

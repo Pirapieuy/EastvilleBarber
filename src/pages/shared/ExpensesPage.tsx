@@ -12,6 +12,7 @@ import {
   PageTitle,
   rupiah,
 } from "../../components/common/UI"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 export interface ExpenseRecord {
   id: string
@@ -385,7 +386,7 @@ export function ExpensesPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select
+          <SearchSelect
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -395,7 +396,7 @@ export function ExpensesPage() {
             <option value="Air">Air</option>
             <option value="Sewa">Sewa</option>
             <option value="Lain-lain">Lain-lain</option>
-          </select>
+          </SearchSelect>
         </div>
 
         <div className="expense-head">
@@ -475,7 +476,7 @@ export function ExpensesPage() {
             </header>
             <label>
               <span>Kategori</span>
-              <select
+              <SearchSelect
                 value={newCategory}
                 onChange={(e) =>
                   setNewCategory(e.target.value as ExpenseRecord["category"])
@@ -486,7 +487,7 @@ export function ExpensesPage() {
                 <option value="Sewa">Sewa</option>
                 <option value="Perlengkapan">Perlengkapan</option>
                 <option value="Lain-lain">Lain-lain</option>
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Jumlah</span>

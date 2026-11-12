@@ -15,6 +15,7 @@ import {
   GajiRow,
   HitungGajiResult,
 } from "../../api"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: boolean; onExternalAddDone?: () => void }) {
   const [add, setAdd] = useState(false)
@@ -199,28 +200,15 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
           </Button>
         </header>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10, padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
-          <select
+          <SearchSelect
             value={filterKapster}
             onChange={(e) => setFilterKapster(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              paddingRight: 24,
-              borderRadius: 8,
-              border: "1px solid var(--line)",
-              background: "var(--paper)",
-              fontSize: 13,
-              minWidth: 140,
-              appearance: "none",
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b645c' stroke-width='2' fill='none'/%3E%3C/svg%3E\")",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 8px center",
-            }}
           >
             <option value="">Semua Kapster</option>
             {kapsters.map((k) => (
               <option key={k.id} value={k.id}>{k.nama}</option>
             ))}
-          </select>
+          </SearchSelect>
           <label className="search" style={{ flex: 1, minWidth: 180 }}>
             <Icon name="search" />
             <input
@@ -375,7 +363,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
             </header>
             <label>
               <span>Kapster</span>
-              <select
+              <SearchSelect
                 value={selectedKapsterId}
                 onChange={(e) => setSelectedKapsterId(e.target.value)}
               >
@@ -384,7 +372,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                     {k.nama}
                   </option>
                 ))}
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Jumlah kasbon</span>
@@ -706,23 +694,9 @@ export function PayrollPage() {
                 borderBottom: "1px solid var(--line)",
               }}
             >
-              <select
+              <SearchSelect
                 value={filterGajiKapster}
                 onChange={(e) => setFilterGajiKapster(e.target.value)}
-                style={{
-                  padding: "8px 12px",
-                  paddingRight: 24,
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                  background: "var(--paper)",
-                  fontSize: 13,
-                  minWidth: 140,
-                  appearance: "none",
-                  backgroundImage:
-                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b645c' stroke-width='2' fill='none'/%3E%3C/svg%3E\")",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 8px center",
-                }}
               >
                 <option value="">Semua Kapster</option>
                 {kapsters.map((k) => (
@@ -730,7 +704,7 @@ export function PayrollPage() {
                     {k.nama}
                   </option>
                 ))}
-              </select>
+              </SearchSelect>
               <label className="search" style={{ flex: 1, minWidth: 180 }}>
                 <Icon name="search" />
                 <input

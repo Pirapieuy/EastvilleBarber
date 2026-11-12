@@ -4,6 +4,7 @@ import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
 import { apiKodeDiskon, KodeDiskonRow } from "../../api"
 import { LoadingState } from "../../components/common/UI"
 import { formatTanggal, tanggalIsoLokal, TANGGAL_MAKS } from "../../utils/tanggal"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 type PromoDiscount = {
   id: string
@@ -361,13 +362,13 @@ export function PromoDiscountsTab() {
 
             <label>
               <span>Jenis Diskon</span>
-              <select
+              <SearchSelect
                 value={jenis}
                 onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
               >
                 <option value="persen">Persentase (%)</option>
                 <option value="nominal">Nominal (Rp)</option>
-              </select>
+              </SearchSelect>
             </label>
 
             <label>

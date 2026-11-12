@@ -14,6 +14,7 @@ import {
   PageTitle,
   rupiah,
 } from "../../components/common/UI"
+import { SearchSelect } from "../../components/common/SearchSelect"
 
 export const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
 
@@ -261,7 +262,7 @@ export function ServicesPage({ embedded = false }: {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select
+          <SearchSelect
             value={kategoriFilter}
             onChange={(e) => setKategoriFilter(e.target.value)}
           >
@@ -271,15 +272,15 @@ export function ServicesPage({ embedded = false }: {
                 {k}
               </option>
             ))}
-          </select>
-          <select
+          </SearchSelect>
+          <SearchSelect
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="Semua">Semua status</option>
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
-          </select>
+          </SearchSelect>
         </div>
         <div className="service-list-scroll">
         <div className="service-head">
@@ -381,7 +382,7 @@ export function ServicesPage({ embedded = false }: {
             </label>
             <label>
               <span>Kategori</span>
-              <select
+              <SearchSelect
                 value={kategori}
                 onChange={(e) => setKategori(e.target.value)}
               >
@@ -390,7 +391,7 @@ export function ServicesPage({ embedded = false }: {
                     {k}
                   </option>
                 ))}
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Harga</span>
