@@ -24,8 +24,8 @@ const demoItems: ManualItem[] = [
   { tipe: "Layanan", id: "5", name: "Treatment", price: 60000 },
 ]
 const demoKapster = [
-  { id: "u-kapster", nama: "Budi Santoso" },
-  { id: "u-kapster2", nama: "Zhefitra Ananda" },
+  { id: "u-kapster", nama: "Ferdi" },
+  { id: "u-kapster2", nama: "Seva" },
 ]
 
 function today() {

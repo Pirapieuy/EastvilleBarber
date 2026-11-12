@@ -78,7 +78,7 @@
 2. Paste URL API dari Langkah 4 ke kolom input URL
 3. Klik **"Test Koneksi"** - harusnya muncul response JSON sukses
 4. Coba login dengan akun demo:
-   - Username: `ardi.owner`
+   - Username: `owner`
    - PIN: `123456`
 5. Klik **"Login"** - harusnya muncul response dengan token
 
@@ -88,10 +88,15 @@
 
 | Role    | Nama           | Username      | PIN    | Email              |
 |---------|----------------|---------------|--------|--------------------|
-| Owner   | Ardi Pradana   | ardi.owner    | 123456 | ardi@eastville.id  |
-| Manajer | Dian Setiawan  | dian.manajer  | 123456 | dian@eastville.id  |
-| Kasir   | Siti Rahma     | siti.kasir    | 123456 | siti@eastville.id  |
-| Kapster | Budi Santoso   | budi.kapster  | 123456 | budi@eastville.id  |
+| Owner   | Ardi Pradana   | owner    | 123456 | ardi@eastville.id  |
+| Manajer | Dian Setiawan  | manajer  | 123456 | dian@eastville.id  |
+| Kasir   | Siti Rahma     | kasir    | 123456 | siti@eastville.id  |
+| Kapster | Ferdi          | ferdi         | 123456 | ferdi@eastville.id |
+| Kapster | Seva           | seva          | 123456 | seva@eastville.id |
+| Kapster | Tatas          | tatas         | 123456 | tatas@eastville.id |
+| Kapster | Faisal         | faisal        | 123456 | faisal@eastville.id |
+| Kapster | Fadhil         | fadhil        | 123456 | fadhil@eastville.id |
+| Kapster | Kris           | kris          | 123456 | kris@eastville.id |
 
 ---
 
@@ -137,7 +142,7 @@ Semua request POST dikirim ke URL yang sama, dibedakan oleh field `action`:
 
 ### Login
 ```json
-POST { "action": "login", "username": "ardi.owner", "pin": "123456" }
+POST { "action": "login", "username": "owner", "pin": "123456" }
 ```
 
 ### Logout

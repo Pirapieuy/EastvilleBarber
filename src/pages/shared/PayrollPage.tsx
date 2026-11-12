@@ -20,15 +20,15 @@ import { SearchSelect } from "../../components/common/SearchSelect"
 export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: boolean; onExternalAddDone?: () => void }) {
   const [add, setAdd] = useState(false)
   const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
-    { id: "u-kapster", nama: "Budi Santoso" },
-    { id: "u-kapster2", nama: "Zhefitra Ananda" },
+    { id: "u-kapster", nama: "Ferdi" },
+    { id: "u-kapster2", nama: "Seva" },
   ])
   const [kasbonList, setKasbonList] = useState<KasbonRow[]>([
     {
       id: "ksb-01",
       tanggal: "2026-10-24",
       userId: "u-kapster",
-      nama: "Budi Santoso",
+      nama: "Ferdi",
       role: "Kapster",
       jumlah: 350000,
       status: "Aktif",
@@ -39,7 +39,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
       id: "ksb-02",
       tanggal: "2026-10-20",
       userId: "u-kapster2",
-      nama: "Zhefitra Ananda",
+      nama: "Seva",
       role: "Kapster",
       jumlah: 500000,
       status: "Aktif",
@@ -433,8 +433,8 @@ export function PayrollPage() {
   const [tab, setTab] = useState<"Gaji" | "Kasbon">("Gaji")
   const [triggerAdd, setTriggerAdd] = useState(false)
   const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([
-    { id: "u-kapster", nama: "Budi Santoso" },
-    { id: "u-kapster2", nama: "Zhefitra Ananda" },
+    { id: "u-kapster", nama: "Ferdi" },
+    { id: "u-kapster2", nama: "Seva" },
   ])
   const [salaryMap, setSalaryMap] = useState<Record<string, HitungGajiResult>>(
     {},

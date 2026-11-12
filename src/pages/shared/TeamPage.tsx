@@ -14,7 +14,7 @@ export const demoTeamData: UserRow[] = [
   {
     id: "u-owner",
     nama: "Ardi Pradana",
-    username: "ardi.owner",
+    username: "owner",
     role: "Owner",
     cabang: "Semua cabang",
     email: "ardi@eastville.id",
@@ -24,7 +24,7 @@ export const demoTeamData: UserRow[] = [
   {
     id: "u-manajer",
     nama: "Dian Setiawan",
-    username: "dian.manajer",
+    username: "manajer",
     role: "Manajer",
     cabang: "Patihan",
     email: "dian@eastville.id",
@@ -34,7 +34,7 @@ export const demoTeamData: UserRow[] = [
   {
     id: "u-kasir",
     nama: "Siti Rahma",
-    username: "siti.kasir",
+    username: "kasir",
     role: "Kasir",
     cabang: "Patihan",
     email: "siti@eastville.id",
@@ -43,21 +43,61 @@ export const demoTeamData: UserRow[] = [
   },
   {
     id: "u-kapster",
-    nama: "Budi Santoso",
-    username: "budi.kapster",
+    nama: "Ferdi",
+    username: "ferdi",
     role: "Kapster",
     cabang: "Patihan",
-    email: "budi@eastville.id",
+    email: "ferdi@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
   {
     id: "u-kapster2",
-    nama: "Zhefitra Ananda",
-    username: "zhefitra.ananda",
+    nama: "Seva",
+    username: "seva",
     role: "Kapster",
     cabang: "Patihan",
-    email: "zhefitra@eastville.id",
+    email: "seva@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kapster3",
+    nama: "Tatas",
+    username: "tatas",
+    role: "Kapster",
+    cabang: "Patihan",
+    email: "tatas@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kapster4",
+    nama: "Faisal",
+    username: "faisal",
+    role: "Kapster",
+    cabang: "Patihan",
+    email: "faisal@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kapster5",
+    nama: "Fadhil",
+    username: "fadhil",
+    role: "Kapster",
+    cabang: "Patihan",
+    email: "fadhil@eastville.id",
+    status: "Aktif",
+    dibuat: "2026-11-01",
+  },
+  {
+    id: "u-kapster6",
+    nama: "Kris",
+    username: "kris",
+    role: "Kapster",
+    cabang: "Patihan",
+    email: "kris@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -394,7 +434,7 @@ export function TeamPage({ currentUser, role, title }: {
                   <input
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                    placeholder="Contoh: ardi.owner"
+                    placeholder="Contoh: owner"
                     required
                   />
                 </label>

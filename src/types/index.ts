@@ -19,25 +19,25 @@ export const DEMO_USERS: Record<Role, AppUser> = {
   Owner: {
     id: "u-owner",
     name: "Ardi Pradana",
-    username: "ardi.owner",
+    username: "owner",
     role: "Owner",
   },
   Manajer: {
     id: "u-manajer",
     name: "Dian Setiawan",
-    username: "dian.manajer",
+    username: "manajer",
     role: "Manajer",
   },
   Kasir: {
     id: "u-kasir",
     name: "Siti Rahma",
-    username: "siti.kasir",
+    username: "kasir",
     role: "Kasir",
   },
   Kapster: {
     id: "u-kapster",
-    name: "Budi Santoso",
-    username: "budi.kapster",
+    name: "Ferdi",
+    username: "ferdi",
     role: "Kapster",
   },
 }

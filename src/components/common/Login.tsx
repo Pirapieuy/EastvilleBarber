@@ -267,7 +267,7 @@ export function Login({
                   setUsername(e.target.value)
                   setError("")
                 }}
-                placeholder="Contoh: ardi.owner"
+                placeholder="Contoh: owner"
                 value={username}
               />
             </div>
