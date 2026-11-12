@@ -259,19 +259,32 @@ export function TeamPage({ currentUser, role, title }: {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-        >
-          <option value="Semua">Semua peran</option>
-          <option value="Owner">Owner</option>
-          <option value="Manajer">Manajer</option>
-          <option value="Kasir">Kasir</option>
-          <option value="Kapster">Kapster</option>
-        </select>
+        <div className="team-role-filter" role="group" aria-label="Filter peran">
+          {[
+            ["Semua", "Semua peran"],
+            ["Owner", "Owner"],
+            ["Manajer", "Manajer"],
+            ["Kasir", "Kasir"],
+            ["Kapster", "Kapster"],
+          ].map(([value, label]) => (
+            <button
+              className={roleFilter === value ? "active" : ""}
+              type="button"
+              key={value}
+              aria-pressed={roleFilter === value}
+              onClick={() => setRoleFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {loading && <LoadingState message="Memuat data tim..." compact />}
+      {loading && (
+        <div className="team-loading-state">
+          <LoadingState message="Memuat data tim..." compact />
+        </div>
+      )}
       {loadError && (
         <p role="alert" style={{ color: "#dc2626", margin: "10px 0" }}>
           Data tim gagal dimuat: {loadError}{" "}
@@ -284,16 +297,24 @@ export function TeamPage({ currentUser, role, title }: {
       <div className="team-grid">
         {filtered.map((x) => (
           <article
-            className={`team-card ${x.status === "Nonaktif" ? "inactive" : ""}`}
+            className={`team-card role-${x.role.toLowerCase()} ${x.status === "Nonaktif" ? "inactive" : ""}`}
             key={x.id}
           >
             <header>
               <span>{getInitials(x.nama)}</span>
               <i
                 className={x.status === "Aktif" ? "active" : ""}
-                style={{ cursor: isOwner ? "pointer" : "default" }}
-                onClick={() => handleToggleStatus(x)}
-                title={isOwner ? "Klik untuk ganti status" : undefined}
+                style={{
+                  cursor: isOwner && x.role !== "Owner" ? "pointer" : "default",
+                }}
+                onClick={() => {
+                  if (isOwner && x.role !== "Owner") handleToggleStatus(x)
+                }}
+                title={
+                  isOwner && x.role !== "Owner"
+                    ? "Klik untuk ganti status"
+                    : undefined
+                }
               >
                 {x.status}
               </i>
@@ -311,35 +332,37 @@ export function TeamPage({ currentUser, role, title }: {
                 </div>
               )}
             </dl>
-            {!isManager && x.role !== "Owner" && (
-              <div style={{ display: "flex", gap: 8 }}>
+            {!isManager && (
+              <div className="team-card-actions">
                 <Button
                   className="secondary-button"
                   onClick={() => openEdit(x)}
                 >
                   <Icon name="pencil" /> Ubah data
                 </Button>
-                <Button
-                  className="danger-button"
-                  onClick={async () => {
-                    const alasan = window.prompt("Alasan dihapus?")
-                    if (!alasan || alasan.trim().length < 3) return
-                    const yakin = window.confirm("Yakin dihapus?")
-                    if (!yakin) return
-                    try {
-                      if ((apiTim as any).hapus) {
-                        await (apiTim as any).hapus(x.id, alasan.trim())
+                {x.role !== "Owner" && (
+                  <Button
+                    className="danger-button"
+                    onClick={async () => {
+                      const alasan = window.prompt("Alasan dihapus?")
+                      if (!alasan || alasan.trim().length < 3) return
+                      const yakin = window.confirm("Yakin dihapus?")
+                      if (!yakin) return
+                      try {
+                        if ((apiTim as any).hapus) {
+                          await (apiTim as any).hapus(x.id, alasan.trim())
+                        }
+                        loadData()
+                      } catch (err) {
+                        alert(
+                          err instanceof Error ? err.message : "Gagal menghapus.",
+                        )
                       }
-                      loadData()
-                    } catch (err) {
-                      alert(
-                        err instanceof Error ? err.message : "Gagal menghapus.",
-                      )
-                    }
-                  }}
-                >
-                  Hapus
-                </Button>
+                    }}
+                  >
+                    Hapus
+                  </Button>
+                )}
               </div>
             )}
           </article>
@@ -354,9 +377,6 @@ export function TeamPage({ currentUser, role, title }: {
                 <p className="eyebrow">Anggota tim</p>
                 <h2>{editingId ? "Ubah Data Tim" : "Tambah Anggota Tim"}</h2>
               </div>
-              <Button onClick={() => setFormOpen(false)} type="button">
-                <Icon name="close" />
-              </Button>
             </header>
             <div className="staff-form-body">
               <div className="form-grid">

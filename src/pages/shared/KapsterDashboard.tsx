@@ -10,6 +10,7 @@ import {
 } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
+import { formatTanggal } from "../../utils/tanggal"
 import {
   Button,
   Kpi,
@@ -87,12 +88,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   const jam = now.getHours()
   const sapaan =
     jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
-  const hari = now.toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
+  const hari = formatTanggal(now)
   const layananRows = (aktivitas ?? []).filter((r) => r.type === "Layanan")
   const produkRows = (aktivitas ?? []).filter((r) => r.type === "Produk")
   const jumlahPelanggan = live ? (komisi?.jumlahTransaksi ?? 0) : 5

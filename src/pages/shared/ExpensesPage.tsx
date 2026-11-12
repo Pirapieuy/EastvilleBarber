@@ -3,6 +3,7 @@ import { ReasonDialog } from "./HistoryPage"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { apiPengeluaran, getToken } from "../../api"
 import { Icon } from "../../components/common/Icon"
+import { formatTanggal } from "../../utils/tanggal"
 import {
   Button,
   CalendarPicker,
@@ -229,12 +230,7 @@ export function ExpensesPage() {
       }
       return
     }
-    const dateFormatted = newDate
-      ? new Date(newDate).toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "short",
-        })
-      : "Hari ini"
+    const dateFormatted = newDate ? formatTanggal(newDate) : "Hari ini"
 
     const newRec: ExpenseRecord = {
       id: `exp-${Date.now()}`,

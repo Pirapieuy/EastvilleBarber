@@ -3,12 +3,15 @@ import { Icon } from "../../components/common/Icon"
 import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
 import { apiKodeDiskon, KodeDiskonRow } from "../../api"
 import { LoadingState } from "../../components/common/UI"
+import { formatTanggal, tanggalIsoLokal, TANGGAL_MAKS } from "../../utils/tanggal"
 
 type PromoDiscount = {
   id: string
   kode: string
   nama: string
   persen: number
+  jenis: "persen" | "nominal"
+  nilai: number
   berlakuSampai: string
   status: "Aktif" | "Nonaktif"
   dipakai: number
@@ -19,12 +22,15 @@ const dariServer = (r: KodeDiskonRow): PromoDiscount => ({
   kode: r.kode,
   nama: r.nama,
   persen: Number(r.persen),
+  jenis: r.jenis === "nominal" ? "nominal" : "persen",
+  nilai: Number(r.nilai) || Number(r.persen),
   berlakuSampai: r.berlaku_sampai,
   status: r.status,
   dipakai: Number(r.dipakai) || 0,
 })
 
 export function PromoDiscountsTab() {
+  const [showHelp, setShowHelp] = useState(false)
   const [promos, setPromos] = useState<PromoDiscount[]>([])
   const [memuat, setMemuat] = useState(true)
   const [gagalMuat, setGagalMuat] = useState("")
@@ -47,11 +53,12 @@ export function PromoDiscountsTab() {
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const [nama, setNama] = useState("")
-  const [persen, setPersen] = useState<number>(10)
+  const [jenis, setJenis] = useState<"persen" | "nominal">("persen")
+  const [nilai, setNilai] = useState<number>(10)
   const [berlakuSampai, setBerlakuSampai] = useState(() => {
     const d = new Date()
     d.setMonth(d.getMonth() + 1)
-    return d.toISOString().split("T")[0]
+    return tanggalIsoLokal(d)
   })
   const [status, setStatus] = useState<"Aktif" | "Nonaktif">("Aktif")
   const [error, setError] = useState("")
@@ -60,10 +67,11 @@ export function PromoDiscountsTab() {
     setEditingId(null)
     setKode("")
     setNama("")
-    setPersen(10)
+    setJenis("persen")
+    setNilai(10)
     const d = new Date()
     d.setMonth(d.getMonth() + 1)
-    setBerlakuSampai(d.toISOString().split("T")[0])
+    setBerlakuSampai(tanggalIsoLokal(d))
     setStatus("Aktif")
     setError("")
     setModalOpen(true)
@@ -73,7 +81,8 @@ export function PromoDiscountsTab() {
     setEditingId(p.id)
     setKode(p.kode)
     setNama(p.nama)
-    setPersen(p.persen)
+    setJenis(p.jenis)
+    setNilai(p.nilai)
     setBerlakuSampai(p.berlakuSampai)
     setStatus(p.status)
     setError("")
@@ -86,6 +95,8 @@ export function PromoDiscountsTab() {
       kode: p.kode,
       nama: p.nama,
       persen: p.persen,
+      jenis: p.jenis,
+      nilai: p.nilai,
       berlakuSampai: p.berlakuSampai,
       status: p.status,
     })
@@ -103,8 +114,8 @@ export function PromoDiscountsTab() {
       setError("Masukkan keterangan atau nama promo diskon.")
       return
     }
-    if (persen <= 0 || persen > 100) {
-      setError("Persentase diskon harus di antara 1% dan 100%.")
+    if (nilai <= 0 || (jenis === "persen" && nilai > 100)) {
+      setError(jenis === "persen" ? "Persentase diskon harus di antara 1% dan 100%." : "Nominal diskon minimal Rp1.")
       return
     }
     if (!berlakuSampai) {
@@ -117,7 +128,9 @@ export function PromoDiscountsTab() {
         id: editingId ?? "",
         kode: kodeBersih,
         nama: nama.trim(),
-        persen,
+        persen: jenis === "persen" ? nilai : 0,
+        jenis,
+        nilai,
         berlakuSampai,
         status,
       })
@@ -152,11 +165,27 @@ export function PromoDiscountsTab() {
     }
   }
 
-  const todayStr = new Date().toISOString().split("T")[0]
+  const todayStr = TANGGAL_MAKS()
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+    <div className="promo-discounts-tab" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="promo-discount-actions">
+        <div className="promo-discount-help-wrap">
+          <button
+            className="promo-discount-help"
+            type="button"
+            aria-label="Informasi diskon event"
+            aria-expanded={showHelp}
+            onClick={() => setShowHelp((shown) => !shown)}
+          >
+            <Icon name="alert" />
+          </button>
+          {showHelp && (
+            <div className="promo-discount-tooltip" role="tooltip">
+              Belum ada diskon. Klik Tambah Diskon Event untuk membuat kode.
+            </div>
+          )}
+        </div>
         <Button className="primary-button" onClick={openCreate}>
           <Icon name="plus" /> Tambah Diskon Event
         </Button>
@@ -170,17 +199,9 @@ export function PromoDiscountsTab() {
         </div>
       )}
       {!memuat && !gagalMuat && promos.length === 0 && (
-        <p style={{ color: "var(--slate)", fontSize: 13 }}>
-          Belum ada kode diskon. Tekan "Tambah Diskon Event" untuk membuat kode pertama.
-        </p>
+        <div className="promo-discount-empty">Belum ada diskon</div>
       )}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 14,
-        }}
-      >
+      <div className="promo-discount-list">
         {promos.map((p) => {
           const isExpired = p.berlakuSampai < todayStr
           return (
@@ -231,7 +252,7 @@ export function PromoDiscountsTab() {
                     margin: "4px 0",
                   }}
                 >
-                  {p.persen}% OFF
+                  {p.jenis === "nominal" ? `Rp ${p.nilai.toLocaleString("id-ID")} OFF` : `${p.nilai}% OFF`}
                 </div>
                 <small style={{ color: "var(--slate)", display: "block", marginBottom: 4 }}>
                   Kode: <strong style={{ letterSpacing: "0.04em" }}>{p.kode}</strong> · dipakai {p.dipakai}x
@@ -239,10 +260,7 @@ export function PromoDiscountsTab() {
                 <small style={{ color: "var(--muted)", display: "block" }}>
                   Masa berlaku:{" "}
                   <strong>
-                    {new Date(p.berlakuSampai + "T00:00:00").toLocaleDateString(
-                      "id-ID",
-                      { day: "numeric", month: "long", year: "numeric" },
-                    )}
+                    {formatTanggal(p.berlakuSampai)}
                   </strong>
                 </small>
               </div>
@@ -293,15 +311,12 @@ export function PromoDiscountsTab() {
       {modalOpen && (
         <div className="modal-overlay">
           <form
-            className="simple-modal"
+            className="simple-modal promo-discount-modal"
             onSubmit={handleSave}
             style={{ maxWidth: 460 }}
           >
             <header>
               <h2>{editingId ? "Edit Diskon Event" : "Tambah Diskon Event"}</h2>
-              <Button type="button" onClick={() => setModalOpen(false)}>
-                <Icon name="close" />
-              </Button>
             </header>
 
             {error && (
@@ -345,16 +360,27 @@ export function PromoDiscountsTab() {
             </label>
 
             <label>
-              <span>Jumlah Diskon (%)</span>
+              <span>Jenis Diskon</span>
+              <select
+                value={jenis}
+                onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
+              >
+                <option value="persen">Persentase (%)</option>
+                <option value="nominal">Nominal (Rp)</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Jumlah Diskon ({jenis === "persen" ? "%" : "Rp"})</span>
               <div className="input-shell">
-                <b>%</b>
+                <b>{jenis === "persen" ? "%" : "Rp"}</b>
                 <input
-                  max={100}
+                  max={jenis === "persen" ? 100 : undefined}
                   min={1}
                   required
                   type="number"
-                  value={persen}
-                  onChange={(e) => setPersen(Number(e.target.value))}
+                  value={nilai}
+                  onChange={(e) => setNilai(Number(e.target.value))}
                 />
               </div>
             </label>
@@ -367,18 +393,17 @@ export function PromoDiscountsTab() {
               />
             </label>
 
-            <label>
-              <span>Status</span>
-              <select
-                value={status}
-                onChange={(e) =>
-                  setStatus(e.target.value as "Aktif" | "Nonaktif")
-                }
-              >
-                <option value="Aktif">Aktif</option>
-                <option value="Nonaktif">Nonaktif</option>
-              </select>
-            </label>
+            <div
+              className="toggle-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => setStatus((s) => s === "Aktif" ? "Nonaktif" : "Aktif")}
+            >
+              <span>
+                <strong>Status diskon: {status}</strong>
+                <small>Diskon aktif dapat digunakan saat transaksi.</small>
+              </span>
+              <i className={`toggle ${status === "Aktif" ? "on" : ""}`}><b /></i>
+            </div>
 
             <footer>
               <Button

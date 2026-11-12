@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, PageTitle } from "../../components/common/UI"
 import { apiAbsensi, getToken, AbsensiRow } from "../../api"
+import { formatTanggal } from "../../utils/tanggal"
 
 export function AttendancePage() {
   const [state, setState] = useState<"ready" | "camera" | "preview" | "done">(
@@ -73,12 +74,7 @@ export function AttendancePage() {
     }
   }
 
-  const todayStr = new Date().toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+  const todayStr = formatTanggal(new Date())
 
   return (
     <div className="mobile-content attendance-self">

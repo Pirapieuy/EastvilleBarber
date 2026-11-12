@@ -5,6 +5,7 @@ import {
   PageTitle,
 } from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
+import { formatTanggal, formatTanggalWaktu } from "../../utils/tanggal"
 
 const DEMO_LOGS: string[][] = [
   [
@@ -152,19 +153,7 @@ function parseAuditRow(row: AuditLogRow): string[] {
   if (row.waktu && typeof row.waktu === "string" && row.waktu.includes("T")) {
     const d = new Date(row.waktu)
     if (!isNaN(d.getTime())) {
-      const tglStr = d.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-      const jamStr = d
-        .toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-        .replace(".", ":")
-      waktuStr = `${tglStr}, ${jamStr}`
+      waktuStr = formatTanggalWaktu(d)
     }
   }
 
@@ -172,11 +161,7 @@ function parseAuditRow(row: AuditLogRow): string[] {
   if (!waktuStr && row.tanggal && /^\d{4}-\d{2}-\d{2}$/.test(row.tanggal)) {
     const d = new Date(row.tanggal + "T12:00:00")
     const tglStr = !isNaN(d.getTime())
-      ? d.toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
+      ? formatTanggal(d)
       : row.tanggal
     const jamClean = row.jam ? row.jam.replace(".", ":") : ""
     waktuStr = jamClean ? `${tglStr}, ${jamClean}` : tglStr

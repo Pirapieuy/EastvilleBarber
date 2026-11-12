@@ -60,10 +60,11 @@ export function ManualPage() {
   const [promo, setPromo] = useState<{
     kode: string
     nama: string
-    persen: number
+    jenis: "persen" | "nominal"
+    nilai: number
   } | null>(null)
   const [promoList, setPromoList] = useState<
-    { id: string; kode: string; nama: string; persen: number; berlakuSampai: string }[]
+    { id: string; kode: string; nama: string; persen: number; jenis: "persen" | "nominal"; nilai: number; berlakuSampai: string }[]
   >([])
   const [pin, setPin] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
@@ -91,6 +92,8 @@ export function ManualPage() {
               kode: r.kode,
               nama: r.nama,
               persen: Number(r.persen),
+              jenis: r.jenis === "nominal" ? "nominal" : "persen",
+              nilai: Number(r.nilai) || Number(r.persen),
               berlakuSampai: r.berlaku_sampai,
             })),
         ),
@@ -139,7 +142,12 @@ export function ManualPage() {
     0,
   )
   const diskonNum = promo
-    ? Math.round((subtotal * promo.persen) / 100)
+    ? Math.min(
+        subtotal,
+        promo.jenis === "nominal"
+          ? promo.nilai
+          : Math.round((subtotal * promo.nilai) / 100),
+      )
     : Math.min(Number(diskon.replace(/\D/g, "")) || 0, subtotal)
   const total = subtotal - diskonNum
   const kapsterAktif = kapsterId
@@ -204,7 +212,12 @@ export function ManualPage() {
         (p) => p.kode.toUpperCase() === kode && p.berlakuSampai >= tanggal,
       )
       const hasil = lokal ?? (await apiKasir.cekKode(kode))
-      setPromo({ kode: hasil.kode, nama: hasil.nama, persen: hasil.persen })
+      setPromo({
+        kode: hasil.kode,
+        nama: hasil.nama,
+        jenis: hasil.jenis === "nominal" ? "nominal" : "persen",
+        nilai: Number(hasil.nilai) || hasil.persen,
+      })
       setKodeInput("")
     } catch (e) {
       setKodeError(
@@ -422,7 +435,7 @@ export function ManualPage() {
           {promo ? (
             <div className="discount-applied manual-discount-applied">
               <span>
-                <b>{promo.kode}</b> · {promo.nama} ({promo.persen}%)
+                <b>{promo.kode}</b> · {promo.nama} ({promo.jenis === "nominal" ? rupiah(promo.nilai) : `${promo.nilai}%`})
               </span>
               <Button onClick={() => setPromo(null)} title="Batalkan kode">
                 <Icon name="trash" /> Hapus
