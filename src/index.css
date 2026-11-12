@@ -11304,3 +11304,19 @@ summary,
   border-color: var(--brass);
   background: var(--brass-soft);
 }
+
+/* Input Manual: jarak antarkolom sama di semua kartu, uang cepat melebar penuh */
+.manual-page .manual-info-grid {
+  gap: 12px 14px;
+}
+
+.manual-page .manual-quick-cash {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.manual-page .manual-quick-cash button {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
