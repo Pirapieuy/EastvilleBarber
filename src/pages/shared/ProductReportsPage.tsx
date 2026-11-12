@@ -191,12 +191,11 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">(
     "Semua",
   )
-  const [activeTab, setActiveTab] = useState<
-    "transaksi" | "omzet" | "komisi" | "pemasok" | "eastville" | "ringkasan"
-  >("transaksi")
-  const [expandedTx, setExpandedTx] = useState<Record<string, boolean>>({})
+  const activeTab = "transaksi"
+  const setActiveTab = (_tab: string) => undefined
+  const [expandedTxId, setExpandedTxId] = useState<string | null>(null)
   const toggleExpand = (id: string) => {
-    setExpandedTx((prev) => ({ ...prev, [id]: !prev[id] }))
+    setExpandedTxId((prev) => (prev === id ? null : id))
   }
   const [txList, setTxList] = useState<ProductTransactionRecord[]>(
     INITIAL_PRODUCT_TRANSACTIONS,
@@ -250,7 +249,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   }, [rentang.dari, rentang.sampai, reloadKey])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
-    const per: Record<string, { unit: number; omzet: number }> = {}
+    const per: Record<string, { unit: number omzet: number }> = {}
     txList
       .filter((tx) => tx.status === "Lunas")
       .forEach((tx) => {
@@ -294,7 +293,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
       "Bagian Kapster",
       "Bagian Pemasok",
       "Bagian Eastville",
-      "Status",
     ],
     baris: filteredTransactions.map((tx) => [
       tx.id,
@@ -307,7 +305,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
       tx.barberShare,
       tx.sellerShare,
       tx.eastvilleShare,
-      tx.status,
     ]),
   })
 
@@ -329,10 +326,8 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   )
 
   const omzetPerProduk = useMemo(() => {
-    const map: Record<
-      string,
-      { product: string; qty: number; omzet: number }
-    > = {}
+    const map: Record<string, { product: string qty: number omzet: number }> =
+      {}
     validTransactions.forEach((tx) => {
       const item = map[tx.product] ?? {
         product: tx.product,
@@ -347,16 +342,13 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   }, [validTransactions])
 
   const komisiPerKapster = useMemo(() => {
-    const map: Record<
-      string,
-      {
-        barber: string
-        txCount: number
-        qty: number
-        omzet: number
-        komisi: number
-      }
-    > = {}
+    const map: Record<string, {
+      barber: string
+      txCount: number
+      qty: number
+      omzet: number
+      komisi: number
+    }> = {}
     validTransactions.forEach((tx) => {
       const item = map[tx.barber] ?? {
         barber: tx.barber,
@@ -375,16 +367,13 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   }, [validTransactions])
 
   const bagianPerPemasok = useMemo(() => {
-    const map: Record<
-      string,
-      {
-        seller: string
-        qty: number
-        omzet: number
-        sellerShare: number
-        products: Set<string>
-      }
-    > = {}
+    const map: Record<string, {
+      seller: string
+      qty: number
+      omzet: number
+      sellerShare: number
+      products: Set<string>
+    }> = {}
     validTransactions.forEach((tx) => {
       const item = map[tx.seller] ?? {
         seller: tx.seller,
@@ -408,17 +397,14 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   }, [validTransactions])
 
   const bagianEastvillePerProduk = useMemo(() => {
-    const map: Record<
-      string,
-      {
-        product: string
-        qty: number
-        omzet: number
-        barberShare: number
-        sellerShare: number
-        eastvilleShare: number
-      }
-    > = {}
+    const map: Record<string, {
+      product: string
+      qty: number
+      omzet: number
+      barberShare: number
+      sellerShare: number
+      eastvilleShare: number
+    }> = {}
     validTransactions.forEach((tx) => {
       const item = map[tx.product] ?? {
         product: tx.product,
@@ -435,20 +421,10 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
       item.eastvilleShare += tx.eastvilleShare
       map[tx.product] = item
     })
-    return Object.values(map).sort((a, b) => b.eastvilleShare - a.eastvilleShare)
+    return Object.values(map).sort(
+      (a, b) => b.eastvilleShare - a.eastvilleShare,
+    )
   }, [validTransactions])
-
-  const voidCount = useMemo(
-    () => txList.filter((tx) => tx.status === "Batal").length,
-    [txList],
-  )
-  const voidAmount = useMemo(
-    () =>
-      txList
-        .filter((tx) => tx.status === "Batal")
-        .reduce((acc, tx) => acc + tx.totalOmzet, 0),
-    [txList],
-  )
 
   // Dengan token: jangan tampilkan angka demo saat memuat atau gagal memuat.
   if (getToken() && !live && liveError) {
@@ -757,61 +733,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
         </div>
       </div>
 
-      <div className="void-protection-banner">
-        <Icon name="check" />
-        <span>
-          <strong>Sistem Proteksi Omzet & Komisi Aktif:</strong> Transaksi yang
-          dibatalkan otomatis dikecualikan dari perhitungan total omzet dan
-          komisi (tercatat {voidCount} pembatalan: {rupiah(voidAmount)}).
-        </span>
-      </div>
-
-      <div className="report-subnav-row" style={{ overflowX: "auto" }}>
-        <div className="segmented" style={{ flexWrap: "wrap", gap: 4 }}>
-          <Button
-            className={activeTab === "transaksi" ? "active" : ""}
-            onClick={() => setActiveTab("transaksi")}
-          >
-            <Icon name="receipt" />
-            <span>Riwayat Transaksi</span>
-          </Button>
-          <Button
-            className={activeTab === "omzet" ? "active" : ""}
-            onClick={() => setActiveTab("omzet")}
-          >
-            <Icon name="product" />
-            <span>Detail Omzet Produk</span>
-          </Button>
-          <Button
-            className={activeTab === "komisi" ? "active" : ""}
-            onClick={() => setActiveTab("komisi")}
-          >
-            <Icon name="people" />
-            <span>Detail Komisi Kapster</span>
-          </Button>
-          <Button
-            className={activeTab === "pemasok" ? "active" : ""}
-            onClick={() => setActiveTab("pemasok")}
-          >
-            <Icon name="home" />
-            <span>Detail Bagian Pemasok</span>
-          </Button>
-          <Button
-            className={activeTab === "eastville" ? "active" : ""}
-            onClick={() => setActiveTab("eastville")}
-          >
-            <Icon name="wallet" />
-            <span>Detail Bagian Eastville</span>
-          </Button>
-          <Button
-            className={activeTab === "ringkasan" ? "active" : ""}
-            onClick={() => setActiveTab("ringkasan")}
-          >
-            <Icon name="chart" />
-            <span>Ringkasan Performa</span>
-          </Button>
-        </div>
-      </div>
+      <div className="report-subnav-row" style={{ overflowX: "auto" }}></div>
 
       {activeTab === "transaksi" && (
         <section className="panel product-tx-panel">
@@ -831,6 +753,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
           </div>
 
           <div
+            className="product-report-table"
             style={{
               border: "1px solid var(--line)",
               borderRadius: 10,
@@ -838,12 +761,11 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
               marginTop: 14,
             }}
           >
-            <div style={{ overflowX: "auto" }}>
+            <div>
               <div
                 style={{
-                  minWidth: 700,
                   display: "grid",
-                  gridTemplateColumns: "1.3fr 1.8fr 1.2fr 1fr 100px",
+                  gridTemplateColumns: "1.3fr 1.8fr 1.2fr 1.2fr 36px",
                   alignItems: "center",
                   padding: "10px 16px",
                   background: "var(--bone)",
@@ -857,27 +779,57 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
               >
                 <span>Nota &amp; Waktu</span>
                 <span>Produk &amp; Qty</span>
-                <span>Total Omzet</span>
-                <span>Status</span>
-                <span style={{ textAlign: "right" }}>Rincian</span>
+                <span>Pemasok</span>
+                <span style={{ textAlign: "right" }}>Total Omzet</span>
+                <span aria-hidden="true" />
               </div>
 
-              {filteredTransactions.map((tx) => {
-                const isOpen = Boolean(expandedTx[tx.id])
+              {filteredTransactions.map((tx, index) => {
+                const rowId = `${tx.id}-${index}`
+                const isOpen = expandedTxId === rowId
+
                 return (
                   <div
-                    key={tx.id}
+                    key={rowId}
                     style={{
                       borderTop: "1px solid var(--line)",
-                      minWidth: 700,
                     }}
                   >
                     <div
-                      onClick={() => toggleExpand(tx.id)}
+                      className="product-report-mobile-card"
+                      onClick={() => toggleExpand(rowId)}
+                      title="Klik untuk melihat rincian transaksi"
+                    >
+                      <div className="product-report-mobile-top">
+                        <strong>{tx.id}</strong>
+                        <strong
+                          className={
+                            tx.status === "Batal" ? "voided" : undefined
+                          }
+                        >
+                          {rupiah(tx.totalOmzet)}
+                        </strong>
+                      </div>
+                      <div className="product-report-mobile-bottom">
+                        <div>
+                          <strong>{tx.product}</strong>
+                          <span>({tx.qty} unit)</span>
+                        </div>
+                        <div>
+                          <span>{tx.time}</span>
+                          <Icon name="chevron" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className="product-report-desktop-row"
+                      onClick={() => toggleExpand(rowId)}
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1.3fr 1.8fr 1.2fr 1fr 100px",
+                        gridTemplateColumns: "1.3fr 1.8fr 1.2fr 1.2fr 36px",
                         alignItems: "center",
+
                         padding: "12px 16px",
                         gap: 12,
                         cursor: "pointer",
@@ -890,12 +842,13 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                       }}
                       title="Klik untuk melihat rincian transaksi"
                     >
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <strong
                           style={{
                             display: "block",
                             color: "var(--ink)",
                             fontSize: 13,
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {tx.id}
@@ -905,7 +858,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                         </small>
                       </div>
 
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <strong
                           style={{
                             color: "var(--ink)",
@@ -921,6 +874,12 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                       </div>
 
                       <div>
+                        <span style={{ color: "var(--slate)", fontSize: 12 }}>
+                          {tx.seller}
+                        </span>
+                      </div>
+
+                      <div style={{ textAlign: "right" }}>
                         <strong
                           style={{
                             fontSize: 13,
@@ -929,26 +888,21 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                                 ? "var(--muted)"
                                 : "var(--ink)",
                             textDecoration:
-                              tx.status === "Batal"
-                                ? "line-through"
-                                : "none",
+                              tx.status === "Batal" ? "line-through" : "none",
                           }}
                         >
                           {rupiah(tx.totalOmzet)}
                         </strong>
                       </div>
 
-                      <div>
-                        <span
-                          className={`chip ${
-                            tx.status === "Lunas" ? "lunas" : "batal"
-                          }`}
-                        >
-                          {tx.status}
-                        </span>
-                      </div>
-
-                      <div style={{ textAlign: "right" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "flex-end",
+                          minWidth: 0,
+                        }}
+                      >
                         <span
                           style={{
                             display: "inline-flex",
@@ -959,7 +913,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                             fontWeight: 600,
                           }}
                         >
-                          <span>{isOpen ? "Tutup" : "Detail"}</span>
                           <span
                             style={{
                               transform: isOpen
@@ -976,156 +929,112 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                     </div>
 
                     {isOpen && (
+                      <div className="product-report-mobile-detail flex flex-col divide-y divide-stone-200/70 px-4 py-2 w-full">
+                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
+                          <span className="text-xs text-stone-500 text-left">Harga Satuan</span>
+                          <span className="text-sm font-semibold text-stone-900 text-right">{rupiah(tx.unitPrice)} × {tx.qty} unit</span>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
+                          <span className="text-xs text-stone-500 text-left">Kapster Penjual</span>
+                          <span className="flex flex-col items-end text-right">
+                            <span className="text-sm font-semibold text-stone-900">{tx.barber}</span>
+                            <span className="text-xs text-amber-700">Komisi: {rupiah(tx.barberShare)} ({tx.totalOmzet > 0 ? ((tx.barberShare / tx.totalOmzet) * 100).toFixed(0) : 0}%)</span>
+                          </span>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
+                          <span className="text-xs text-stone-500 text-left">Bagian Pemasok</span>
+                          <span className="flex flex-col items-end text-right">
+                            <span className="text-sm font-semibold text-stone-900">{tx.seller}</span>
+                            <span className="text-xs text-amber-700">{rupiah(tx.sellerShare)} ({tx.totalOmzet > 0 ? ((tx.sellerShare / tx.totalOmzet) * 100).toFixed(0) : 0}%)</span>
+                          </span>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
+                          <span className="text-xs text-stone-500 text-left">Bagian Eastville</span>
+                          <span className="flex flex-col items-end text-right">
+                            <span className="text-sm font-semibold text-stone-900">{rupiah(tx.eastvilleShare)} ({tx.totalOmzet > 0 ? ((tx.eastvilleShare / tx.totalOmzet) * 100).toFixed(0) : 0}%)</span>
+                            <span className="text-xs text-stone-500">Laba toko barbershop</span>
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {isOpen && (
                       <div
+                        className="product-report-detail flex flex-col divide-y divide-stone-200/70 px-4 py-2 md:grid md:grid-cols-[1.3fr_1.8fr_1.2fr_1.2fr] md:items-start md:gap-x-6 md:gap-y-4 md:divide-y-0 md:px-6 md:py-4"
                         style={{
-                          padding: "16px 20px",
-                          background: "var(--paper-soft, #f8fafc)",
-                          borderTop: "1px dashed var(--line)",
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fit, minmax(200px, 1fr))",
-                          gap: 16,
+                          background: "#f1eadf",
+                          borderTop: "1px solid #d8c7ae",
                         }}
                       >
-                        <div>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "var(--muted)",
-                              textTransform: "uppercase",
-                              fontWeight: 700,
-                              display: "block",
-                            }}
-                          >
+                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
+                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
                             Harga Satuan
                           </span>
-                          <span
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 600,
-                              color: "var(--ink)",
-                            }}
-                          >
+                          <span className="break-words text-right text-sm font-semibold text-stone-900 md:font-bold md:text-left">
                             {rupiah(tx.unitPrice)} × {tx.qty} unit
                           </span>
                         </div>
 
-                        <div>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "var(--muted)",
-                              textTransform: "uppercase",
-                              fontWeight: 700,
-                              display: "block",
-                            }}
-                          >
+                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
+                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
                             Kapster Penjual
                           </span>
-                          <span
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 600,
-                              color: "var(--ink)",
-                            }}
-                          >
-                            {tx.barber}
-                          </span>
-                          <span
-                            style={{
-                              display: "block",
-                              fontSize: 12,
-                              color: "var(--brass-dark)",
-                              fontWeight: 600,
-                            }}
-                          >
-                            Komisi: {rupiah(tx.barberShare)} (
-                            {tx.totalOmzet > 0
-                              ? (
-                                  (tx.barberShare / tx.totalOmzet) *
-                                  100
-                                ).toFixed(0)
-                              : 0}
-                            %)
+                          <span className="flex min-w-0 flex-col items-end text-right md:items-start md:text-left">
+                            <span className="break-words text-sm font-semibold text-stone-900 md:font-bold">
+                              {tx.barber}
+                            </span>
+                            <span className="break-words text-xs text-amber-700 md:font-medium md:text-[color:var(--brass-dark)]">
+                              Komisi: {rupiah(tx.barberShare)} (
+                              {tx.totalOmzet > 0
+                                ? (
+                                    (tx.barberShare / tx.totalOmzet) *
+                                    100
+                                  ).toFixed(0)
+                                : 0}
+                              %)
+                            </span>
                           </span>
                         </div>
 
-                        <div>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "var(--muted)",
-                              textTransform: "uppercase",
-                              fontWeight: 700,
-                              display: "block",
-                            }}
-                          >
-                            Mitra Pemasok
+                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
+                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
+                            Bagian Pemasok
                           </span>
-                          <span
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 600,
-                              color: "var(--ink)",
-                            }}
-                          >
-                            {tx.seller}
-                          </span>
-                          <span
-                            style={{
-                              display: "block",
-                              fontSize: 12,
-                              color: "var(--amber)",
-                              fontWeight: 600,
-                            }}
-                          >
-                            Hak Pemasok: {rupiah(tx.sellerShare)} (
-                            {tx.totalOmzet > 0
-                              ? (
-                                  (tx.sellerShare / tx.totalOmzet) *
-                                  100
-                                ).toFixed(0)
-                              : 0}
-                            %)
+                          <span className="flex min-w-0 flex-col items-end text-right md:items-start md:text-left">
+                            <span className="break-words text-sm font-semibold text-stone-900 md:font-bold">
+                              {tx.seller}
+                            </span>
+                            <span className="break-words text-xs text-amber-700 md:font-medium md:text-[color:var(--amber)]">
+                              {rupiah(tx.sellerShare)} (
+                              {tx.totalOmzet > 0
+                                ? (
+                                    (tx.sellerShare / tx.totalOmzet) *
+                                    100
+                                  ).toFixed(0)
+                                : 0}
+                              %)
+                            </span>
                           </span>
                         </div>
 
-                        <div>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "var(--muted)",
-                              textTransform: "uppercase",
-                              fontWeight: 700,
-                              display: "block",
-                            }}
-                          >
+                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
+                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
                             Bagian Eastville
                           </span>
-                          <span
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 700,
-                              color: "var(--ink)",
-                            }}
-                          >
-                            {rupiah(tx.eastvilleShare)} (
-                            {tx.totalOmzet > 0
-                              ? (
-                                  (tx.eastvilleShare / tx.totalOmzet) *
-                                  100
-                                ).toFixed(0)
-                              : 0}
-                            %)
-                          </span>
-                          <span
-                            style={{
-                              display: "block",
-                              fontSize: 11,
-                              color: "var(--slate)",
-                            }}
-                          >
-                            Laba toko barbershop
+                          <span className="flex min-w-0 flex-col items-end text-right md:items-start md:text-left">
+                            <span className="break-words text-sm font-bold text-stone-900">
+                              {rupiah(tx.eastvilleShare)} (
+                              {tx.totalOmzet > 0
+                                ? (
+                                    (tx.eastvilleShare / tx.totalOmzet) *
+                                    100
+                                  ).toFixed(0)
+                                : 0}
+                              %)
+                            </span>
+                            <span className="break-words text-xs text-stone-500 md:text-[color:var(--slate)]">
+                              Laba toko barbershop
+                            </span>
                           </span>
                         </div>
 
@@ -1352,7 +1261,10 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                     <strong style={{ color: "var(--ink)" }}>
                       {rupiah(p.omzet)}
                     </strong>
-                    <span className="chip lunas" style={{ width: "fit-content" }}>
+                    <span
+                      className="chip lunas"
+                      style={{ width: "fit-content" }}
+                    >
                       {pct}%
                     </span>
                   </div>
@@ -1522,9 +1434,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
               </div>
               {komisiPerKapster.map((k) => {
                 const pct =
-                  k.omzet > 0
-                    ? ((k.komisi / k.omzet) * 100).toFixed(0)
-                    : 0
+                  k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : 0
                 return (
                   <div
                     key={k.barber}
