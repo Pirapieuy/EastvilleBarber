@@ -11193,7 +11193,8 @@ summary,
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--paper);
-  box-shadow: 0 8px 24px rgb(52 40 25 / 14%);
+  /* bingkai warna halaman: isi form yang menggulir berhenti sebelum menyentuh footer */
+  box-shadow: 0 0 0 10px var(--bone), 0 16px 0 10px var(--bone);
 }
 
 .manual-page .sticky-submit .primary-button {
