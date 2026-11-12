@@ -368,8 +368,8 @@ export function ManualPage() {
               type="time"
               value={jam}
             />
-            <small>Di luar jam kerja dihitung lembur.</small>
           </label>
+          <small className="manual-jam-note">Di luar jam kerja dihitung lembur.</small>
         </div>
       </section>
 
