@@ -69,6 +69,8 @@ export function ManualPage() {
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
   const [cash, setCash] = useState("")
   const [qris, setQris] = useState("")
+  // Gabungan: isi salah satu (tunai atau QRIS), sisanya dihitung otomatis, sama seperti di Kasir.
+  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -143,8 +145,23 @@ export function ManualPage() {
   const kapsterAktif = kapsterId
   const cashNum = Number(cash.replace(/\D/g, "")) || 0
   const qrisNum = Number(qris.replace(/\D/g, "")) || 0
-  const paid =
-    method === "Tunai" ? cashNum : method === "QRIS" ? total : cashNum + qrisNum
+  const qrisPakai =
+    method === "Tunai"
+      ? 0
+      : method === "QRIS"
+        ? total
+        : gabunganDari === "qris"
+          ? Math.min(qrisNum, total)
+          : Math.max(0, total - Math.min(cashNum, total))
+  const tunaiPakai =
+    method === "QRIS"
+      ? 0
+      : method === "Tunai"
+        ? cashNum
+        : gabunganDari === "qris"
+          ? Math.max(0, total - qrisPakai)
+          : Math.min(cashNum, total)
+  const paid = tunaiPakai + qrisPakai
   const cleanNote = note.trim()
   const notaOk = cleanNote.length >= 3 && Boolean(kapsterId)
   const adaItem = selected.length > 0
@@ -159,15 +176,15 @@ export function ManualPage() {
     .sort((a, b) => a - b)
     .slice(0, 5)
   const gagalMuat = Boolean(getToken()) && !live
-  const qrisBerlebih = method === "Gabungan" && qrisNum > total
-  const kembalian = method === "QRIS" ? 0 : Math.max(0, paid - total)
+  const gabunganKosong = method === "Gabungan" && cashNum <= 0 && qrisNum <= 0
+  const kembalian = method === "Tunai" ? Math.max(0, cashNum - total) : 0
   const canSave =
     selected.length > 0 &&
     Boolean(kapsterAktif) &&
     cleanNote.length >= 3 &&
     paid >= total &&
     total > 0 &&
-    !qrisBerlebih &&
+    !gabunganKosong &&
     !gagalMuat &&
     !saving
 
@@ -227,8 +244,8 @@ export function ManualPage() {
         nomorNota: cleanNote,
         metode: method,
         diskon: diskonNum,
-        bayarTunai: method === "QRIS" ? 0 : cashNum,
-        bayarQris: method === "Tunai" ? 0 : qrisNum,
+        bayarTunai: tunaiPakai,
+        bayarQris: qrisPakai,
         kodeDiskon: promo ? promo.kode : undefined,
         pinOtorisasi: !promo && diskonNum > 0 && pin ? pin : undefined,
         items: selected.map((i) => ({
@@ -252,6 +269,7 @@ export function ManualPage() {
       setKapsterId("")
       setCash("")
       setQris("")
+      setGabunganDari("tunai")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal menyimpan.")
     } finally {
@@ -506,14 +524,21 @@ export function ManualPage() {
         <div className="form-grid manual-info-grid">
           {method !== "QRIS" && (
             <label>
-              <span>{method === "Gabungan" ? "Dibayar tunai" : "Uang diterima"}</span>
+              <span>{method === "Gabungan" ? "Jumlah tunai" : "Uang diterima"}</span>
               <div className="input-shell">
                 <b>Rp</b>
                 <input
                   inputMode="numeric"
-                  onChange={(e) => setCash(e.target.value)}
+                  onChange={(e) => {
+                    setGabunganDari("tunai")
+                    setCash(e.target.value)
+                  }}
                   placeholder={method === "Gabungan" ? "0" : String(total)}
-                  value={cash}
+                  value={
+                    method === "Gabungan" && gabunganDari === "qris"
+                      ? tunaiPakai || ""
+                      : cash
+                  }
                 />
               </div>
             </label>
@@ -539,25 +564,34 @@ export function ManualPage() {
           )}
           {method === "Gabungan" && (
             <label>
-              <span>Dibayar QRIS</span>
+              <span>Jumlah QRIS</span>
               <div className="input-shell">
                 <b>Rp</b>
                 <input
                   inputMode="numeric"
-                  onChange={(e) => setQris(e.target.value)}
+                  onChange={(e) => {
+                    setGabunganDari("qris")
+                    setQris(e.target.value)
+                  }}
                   placeholder="0"
-                  value={qris}
+                  value={gabunganDari === "tunai" ? qrisPakai || "" : qris}
                 />
               </div>
             </label>
           )}
         </div>
-        {method === "QRIS" && (
+        {method === "Gabungan" && (
+          <p className="manual-qris-notice" role="note">
+            Isi salah satu saja, sisanya dihitung otomatis.
+            {gabunganKosong ? "" : ` Tunai ${rupiah(tunaiPakai)} + QRIS ${rupiah(qrisPakai)}.`}
+          </p>
+        )}
+        {(method === "QRIS" || (method === "Gabungan" && qrisPakai > 0)) && (
           <p className="manual-qris-notice" role="note">
             Pastikan pembayaran QRIS berhasil sebelum menyimpan nota.
           </p>
         )}
-        {method !== "QRIS" && total > 0 && paid < total && (
+        {method === "Tunai" && total > 0 && paid < total && (
           <p className="manual-payment-warning" role="alert">
             Uang yang diterima belum mencukupi total pembayaran.
           </p>
@@ -577,18 +611,13 @@ export function ManualPage() {
             <dt>Total</dt>
             <dd>{rupiah(total)}</dd>
           </div>
-          {method !== "QRIS" && cashNum > 0 && total > 0 && (
+          {method === "Tunai" && cashNum > 0 && total > 0 && (
             <div>
               <dt>Kembalian</dt>
               <dd>{rupiah(kembalian)}</dd>
             </div>
           )}
         </dl>
-        {qrisBerlebih && (
-          <p className="absensi-error" role="alert">
-            Nominal QRIS melebihi total nota.
-          </p>
-        )}
       </section>
       </div>
       )}
