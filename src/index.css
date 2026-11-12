@@ -13478,3 +13478,26 @@ label .search-select-trigger {
 .content.manual-page > .loading-state {
   min-height: 60svh;
 }
+
+/* =====================================================================
+   Halaman Owner/Manajer: margin sama seperti Riwayat Transaksi
+   (melebar penuh, jarak kiri-kanan 27px, atas dan bawah 26px).
+   Dashboard Kapster tidak ikut diubah.
+   ===================================================================== */
+.content:not(.kapster-dashboard),
+.content.narrow:not(.kapster-dashboard),
+.mobile-content.attendance-history-page {
+  width: 100%;
+  max-width: none;
+}
+
+.app-header-inner {
+  width: 100%;
+}
+
+@media (min-width: 821px) {
+  .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
+  .mobile-content.attendance-history-page {
+    padding: 26px 27px 26px;
+  }
+}
