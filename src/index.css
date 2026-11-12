@@ -11283,3 +11283,24 @@ summary,
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Input Manual: uang cepat sama dengan Kasir (kotak rapi tiga kolom, bukan pil) */
+.manual-page .manual-quick-cash {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.manual-page .manual-quick-cash button {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 4px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.manual-page .manual-quick-cash button.active {
+  border-color: var(--brass);
+  background: var(--brass-soft);
+}
