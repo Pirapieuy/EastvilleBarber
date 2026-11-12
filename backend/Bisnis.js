@@ -925,12 +925,21 @@ function createTransaksi_(body, user, manual) {
   var kodeDipakai = ""
   var kodeInput = (body.kodeDiskon || "").toString().trim()
   if (kodeInput) {
-    var cek = cekKodeDiskon_(kodeInput, subtotal)
+    var cek = cekKodeDiskon_(
+      kodeInput,
+      subtotal,
+      manual ? fmtTanggal_(now, "yyyy-MM-dd") : undefined,
+    )
     if (cek.error) return fail_(cek.error)
     diskon = cek.diskon
     kodeDipakai = cek.kode
   } else if (toInt_(body.diskon) > 0 && user.role === "Kasir") {
-    return fail_("Diskon hanya bisa lewat kode diskon yang valid.")
+    // Potongan manual hanya di Input Manual dan wajib PIN Owner/Manajer.
+    if (!manual)
+      return fail_("Diskon hanya bisa lewat kode diskon yang valid.")
+    var salahPin = cekPinOtorisasi_(user, body.pinOtorisasi)
+    if (salahPin) return fail_(salahPin)
+    diskon = Math.min(Math.max(0, toInt_(body.diskon)), subtotal)
   } else {
     diskon = Math.min(Math.max(0, toInt_(body.diskon)), subtotal)
   }
@@ -956,6 +965,11 @@ function createTransaksi_(body, user, manual) {
   if (gratis) {
     tunai = 0
     qris = 0
+  }
+  if (tunai < 0 || qris < 0) return fail_("Nominal pembayaran tidak valid.")
+  if (body.metode === "Gabungan") {
+    if (qris > total) return fail_("Nominal QRIS melebihi total nota.")
+    if (tunai > total - qris) tunai = total - qris
   }
   if (tunai + qris < total)
     return fail_("Pembayaran kurang Rp " + (total - tunai - qris) + ".")
@@ -1058,10 +1072,11 @@ function listKodeDiskon_() {
 }
 
 /** Validasi kode untuk checkout. Mengembalikan {kode, diskon} atau {error}. */
-function cekKodeDiskon_(kodeInput, subtotal) {
+function cekKodeDiskon_(kodeInput, subtotal, tanggalAcuan) {
   var kode = normalKode_(kodeInput)
   if (!kode) return { error: "Kode diskon kosong." }
-  var hariIni = fmtTanggal_(new Date(), "yyyy-MM-dd")
+  // Nota susulan dari buku dicek terhadap tanggal nota, bukan hari ini.
+  var hariIni = tanggalAcuan || fmtTanggal_(new Date(), "yyyy-MM-dd")
   var ketemu = readTable_(SHEET_KODE_DISKON).filter(function (r) {
     return normalKode_(r.kode) === kode
   })[0]
