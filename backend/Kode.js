@@ -2360,6 +2360,12 @@ function handleCatatAbsensiKapster(body) {
   if (status !== "Hadir" && !catatan) {
     return jsonResponse({ success: false, error: "Keterangan wajib diisi." })
   }
+  if (status !== "Hadir" && tanggal <= formatDateIso_(new Date())) {
+    return jsonResponse({
+      success: false,
+      error: "Izin, sakit, atau cuti hanya bisa diajukan untuk besok atau setelahnya.",
+    })
+  }
 
   var ss = getSpreadsheet()
   var usersSheet = ss.getSheetByName(SHEET_USERS)

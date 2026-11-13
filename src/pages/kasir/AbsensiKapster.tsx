@@ -21,7 +21,11 @@ import {
   getToken,
 } from "../../api"
 import { AbsensiStatus } from "../../types"
-import { formatTanggal, TANGGAL_MAKS } from "../../utils/tanggal"
+import {
+  formatTanggal,
+  TANGGAL_MAKS,
+  tanggalIsoLokal,
+} from "../../utils/tanggal"
 
 type View = "list" | "photo" | "leave"
 
@@ -40,6 +44,13 @@ export function AbsensiKapster({
 } = {}) {
   const todayIso = TANGGAL_MAKS()
   const [tanggal, setTanggal] = useState(todayIso)
+  // Izin, sakit, dan cuti diajukan paling cepat untuk besok (H-1).
+  const besokIso = (() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return tanggalIsoLokal(d)
+  })()
+  const [tanggalIzin, setTanggalIzin] = useState(besokIso)
   const [kapsters, setKapsters] = useState<
     { id: string; nama: string }[]
   >([])
@@ -217,6 +228,7 @@ export function AbsensiKapster({
     setPhotoError("")
     setStatus("Izin")
     setCatatan("")
+    setTanggalIzin(besokIso)
     setView("leave")
   }
 
@@ -285,11 +297,15 @@ export function AbsensiKapster({
       setPhotoError("Keterangan wajib diisi.")
       return
     }
+    if (view === "leave" && tanggalIzin <= todayIso) {
+      setPhotoError("Pengajuan izin paling cepat untuk besok.")
+      return
+    }
     setSubmitting(true)
     try {
       await apiAbsensiKapster.catatAbsensiKapster({
         targetUserId: selectedKapster.id,
-        tanggal,
+        tanggal: view === "leave" ? tanggalIzin : tanggal,
         status,
         fotoUrl: fotoWajah,
         catatan: catatan.trim(),
@@ -722,7 +738,7 @@ export function AbsensiKapster({
                 <div className="absensi-modal-title">Absensi Kapster</div>
                 <div className="absensi-modal-subtitle">
                   {selectedKapster.nama} <span aria-hidden="true">·</span>{" "}
-                  {tanggal}
+                  {view === "leave" ? tanggalIzin : tanggal}
                 </div>
               </div>
             </div>
@@ -731,7 +747,12 @@ export function AbsensiKapster({
                 <div style={{ marginBottom: 14 }}>
                   <label className="pay-field">
                     <span>Tanggal pengajuan</span>
-                    <CalendarPicker value={tanggal} onChange={setTanggal} />
+                    <CalendarPicker
+                      min={besokIso}
+                      onChange={setTanggalIzin}
+                      showToday={false}
+                      value={tanggalIzin}
+                    />
                   </label>
                 </div>
                 <div className="commission-choice" style={{ marginBottom: 14 }}>
