@@ -13544,3 +13544,88 @@ label .search-select-trigger {
   background: var(--bone);
   border: 1px solid var(--line);
 }
+
+/* Kasir: halaman Kasbon Kapster */
+.kasbon-kapster-hint {
+  margin: 6px 0 0;
+  color: var(--slate);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.kasbon-kapster-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+  margin-top: 14px;
+}
+
+.kasbon-kapster-grid .kasbon-kapster-note {
+  grid-column: 1 / -1;
+}
+
+.kasbon-kapster-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.kasbon-kapster-success {
+  margin: 12px 0 0;
+  color: var(--sage);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.kasbon-kapster-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.kasbon-kapster-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+.kasbon-kapster-info {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.kasbon-kapster-info small {
+  overflow: hidden;
+  color: var(--slate);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kasbon-kapster-amount {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .kasbon-kapster-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kasbon-kapster-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .kasbon-kapster-row .chip {
+    grid-column: 1 / -1;
+  }
+
+  .kasbon-kapster-actions .button {
+    width: 100%;
+  }
+}

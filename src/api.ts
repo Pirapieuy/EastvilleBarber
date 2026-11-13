@@ -449,7 +449,7 @@ export interface KasbonRow {
   nama: string
   role: string
   jumlah: number
-  status: "Aktif" | "Lunas"
+  status: "Aktif" | "Lunas" | "Menunggu" | "Ditolak"
   catatan: string
   dibuatOleh: string
   lunasWaktu?: string
@@ -490,6 +490,9 @@ export const apiKasbon = {
     tanggal?: string
   }) => api<KasbonRow>("create-kasbon", { ...p }),
   lunasi: (id: string) => api<{ success: boolean }>("lunasi-kasbon", { id }),
+  /** Owner/Manajer memutuskan pengajuan kasbon berstatus Menunggu. */
+  setujui: (id: string) => api<unknown>("setujui-kasbon", { id }),
+  tolak: (id: string) => api<unknown>("tolak-kasbon", { id }),
 }
 
 export const apiGaji = {

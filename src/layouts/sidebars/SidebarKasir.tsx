@@ -31,6 +31,18 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
       },
     ],
   },
+  {
+    id: "tim",
+    title: "TIM",
+    items: [
+      {
+        page: "KasbonKapster",
+        alias: "kasbon-kapster",
+        label: "Kasbon Kapster",
+        icon: "wallet",
+      },
+    ],
+  },
 ]
 
 export function SidebarKasir(props: SidebarProps) {

@@ -480,6 +480,10 @@ function doPost(e) {
         return handleCreateKasbon(body)
       case "lunasi-kasbon":
         return handleLunasiKasbon(body)
+      case "setujui-kasbon":
+        return handleKeputusanKasbon_(body, "Aktif")
+      case "tolak-kasbon":
+        return handleKeputusanKasbon_(body, "Ditolak")
       case "hitung-gaji":
         return handleHitungGaji(body)
       case "bayar-gaji":
@@ -1337,6 +1341,8 @@ function handleListKasbon(body) {
   for (var i = 1; i < data.length; i++) {
     if (!data[i][0]) continue
     if (user.role === "Kapster" && data[i][2] !== user.id) continue
+    // Kasir hanya melihat pengajuan yang dibuatnya sendiri.
+    if (user.role === "Kasir" && data[i][8] !== user.nama) continue
 
     list.push({
       id: data[i][0],
@@ -1392,6 +1398,28 @@ function handleCreateKasbon(body) {
     })
   }
 
+  // Kasir hanya mengajukan: kapster dicek di server, kasbon baru berlaku setelah disetujui Owner/Manajer.
+  var status = "Aktif"
+  if (user.role === "Kasir") {
+    status = "Menunggu"
+    var uRows = getSheet(SHEET_USERS).getDataRange().getValues()
+    var kapsterRow = null
+    for (var u = 1; u < uRows.length; u++) {
+      if (uRows[u][0] === userId) {
+        kapsterRow = uRows[u]
+        break
+      }
+    }
+    if (!kapsterRow || kapsterRow[4] !== "Kapster" || kapsterRow[7] !== "Aktif") {
+      return jsonResponse({
+        success: false,
+        error: "Kapster tidak ditemukan atau tidak aktif.",
+      })
+    }
+    nama = kapsterRow[1]
+    role = "Kapster"
+  }
+
   ensureTimBSheets_()
   var ss = getSpreadsheet()
   var sheet = ss.getSheetByName("Kasbon")
@@ -1404,7 +1432,7 @@ function handleCreateKasbon(body) {
     nama,
     role,
     jumlah,
-    "Aktif",
+    status,
     catatan,
     user.nama,
     "",
@@ -1412,7 +1440,7 @@ function handleCreateKasbon(body) {
   writeAuditLog(
     user.id,
     user.nama,
-    "TAMBAH_KASBON",
+    status === "Menunggu" ? "AJUKAN_KASBON" : "TAMBAH_KASBON",
     "Kasbon baru untuk " + nama + " sebesar Rp " + jumlah,
   )
 
@@ -1426,7 +1454,7 @@ function handleCreateKasbon(body) {
       nama: nama,
       role: role,
       jumlah: jumlah,
-      status: "Aktif",
+      status: status,
       catatan: catatan,
     },
   })
@@ -1475,6 +1503,54 @@ function handleLunasiKasbon(body) {
     }
   }
 
+  return jsonResponse({ success: false, error: "Kasbon tidak ditemukan." })
+}
+
+/** Owner/Manajer menyetujui (Aktif) atau menolak (Ditolak) pengajuan kasbon berstatus Menunggu. */
+function handleKeputusanKasbon_(body, keputusan) {
+  var user = getUserFromToken_(body.token)
+  if (!user)
+    return jsonResponse({
+      success: false,
+      error: "Session tidak valid.",
+      code: "UNAUTHORIZED",
+    })
+  if (user.role !== "Owner" && user.role !== "Manajer") {
+    return jsonResponse({
+      success: false,
+      error: "Akses ditolak.",
+      code: "FORBIDDEN",
+    })
+  }
+  var id = (body.id || "").trim()
+  var sheet = getSpreadsheet().getSheetByName("Kasbon")
+  if (!sheet)
+    return jsonResponse({
+      success: false,
+      error: "Sheet Kasbon tidak ditemukan.",
+    })
+  var data = sheet.getDataRange().getValues()
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] !== id) continue
+    if (data[i][6] !== "Menunggu") {
+      return jsonResponse({
+        success: false,
+        error: "Hanya pengajuan berstatus Menunggu yang bisa diputuskan.",
+      })
+    }
+    sheet.getRange(i + 1, 7).setValue(keputusan)
+    writeAuditLog(
+      user.id,
+      user.nama,
+      keputusan === "Aktif" ? "SETUJUI_KASBON" : "TOLAK_KASBON",
+      "Kasbon " + data[i][3] + " Rp " + data[i][5] + " (" + id + ")",
+    )
+    return jsonResponse({
+      success: true,
+      message:
+        keputusan === "Aktif" ? "Kasbon disetujui." : "Pengajuan kasbon ditolak.",
+    })
+  }
   return jsonResponse({ success: false, error: "Kasbon tidak ditemukan." })
 }
 

@@ -56,7 +56,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
   const [saving, setSaving] = useState(false)
   const [filterKapster, setFilterKapster] = useState("")
   const [searchKasbon, setSearchKasbon] = useState("")
-  const [filterStatus, setFilterStatus] = useState<"" | "Aktif" | "Lunas">("")
+  const [filterStatus, setFilterStatus] = useState<"" | "Aktif" | "Lunas" | "Menunggu" | "Ditolak">("")
 
   useEffect(() => {
     if (externalAdd) {
@@ -119,6 +119,18 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
       } catch (err) {
         alert(err instanceof Error ? err.message : "Gagal melunasi kasbon.")
       }
+    }
+  }
+
+  async function handleKeputusan(id: string, setuju: boolean) {
+    if (!confirm(setuju ? "Setujui pengajuan kasbon ini?" : "Tolak pengajuan kasbon ini?"))
+      return
+    try {
+      if (setuju) await apiKasbon.setujui(id)
+      else await apiKasbon.tolak(id)
+      loadData()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gagal memproses pengajuan.")
     }
   }
 
@@ -266,12 +278,27 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                     <span className="kasbon-note-cell">{k.catatan || "-"}</span>
                     <strong className="kasbon-amount-cell">{rupiah(k.jumlah)}</strong>
                     <span>
-                      <i className={`chip ${k.status === "Aktif" ? "batal" : "lunas"}`}>
-                        {k.status === "Aktif" ? "Belum Lunas" : k.status}
+                      <i className={`chip ${k.status === "Aktif" ? "batal" : k.status === "Menunggu" ? "pending" : k.status === "Ditolak" ? "batal" : "lunas"}`}>
+                        {k.status === "Aktif" ? "Belum Lunas" : k.status === "Menunggu" ? "Menunggu persetujuan" : k.status}
                       </i>
                     </span>
                     <span className="kasbon-action-cell">
-                      {k.status === "Aktif" ? (
+                      {k.status === "Menunggu" ? (
+                        <>
+                          <Button
+                            className="secondary-button"
+                            onClick={() => handleKeputusan(k.id, true)}
+                          >
+                            Setujui
+                          </Button>
+                          <Button
+                            className="secondary-button"
+                            onClick={() => handleKeputusan(k.id, false)}
+                          >
+                            Tolak
+                          </Button>
+                        </>
+                      ) : k.status === "Aktif" ? (
                         <Button
                           className="secondary-button"
                           onClick={() => handleLunasi(k.id)}
@@ -308,8 +335,8 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                         </i>
                         <strong>{k.nama}</strong>
                       </span>
-                      <i className={`chip ${k.status === "Aktif" ? "batal" : "lunas"}`}>
-                        {k.status === "Aktif" ? "Belum Lunas" : k.status}
+                      <i className={`chip ${k.status === "Aktif" ? "batal" : k.status === "Menunggu" ? "pending" : k.status === "Ditolak" ? "batal" : "lunas"}`}>
+                        {k.status === "Aktif" ? "Belum Lunas" : k.status === "Menunggu" ? "Menunggu persetujuan" : k.status}
                       </i>
                     </div>
 
@@ -331,6 +358,26 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                         <span>{k.role || "Kapster"}</span>
                       </div>
                     </div>
+
+                    {k.status === "Menunggu" && (
+                      <>
+                        <hr className="kasbon-card-divider" />
+                        <footer className="kasbon-card-footer">
+                          <Button
+                            className="secondary-button"
+                            onClick={() => handleKeputusan(k.id, true)}
+                          >
+                            <Icon name="check" /> Setujui
+                          </Button>
+                          <Button
+                            className="secondary-button"
+                            onClick={() => handleKeputusan(k.id, false)}
+                          >
+                            Tolak
+                          </Button>
+                        </footer>
+                      </>
+                    )}
 
                     {k.status === "Aktif" && (
                       <>
