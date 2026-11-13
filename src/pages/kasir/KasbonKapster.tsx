@@ -37,7 +37,6 @@ export function KasbonKapster() {
   const [success, setSuccess] = useState("")
 
   const jumlahNum = Number(jumlah.replace(/\D/g, "")) || 0
-  const daftarKapster = daftar.filter((k) => k.userId === kapsterId)
   const bisaKirim = Boolean(kapsterId) && jumlahNum > 0 && !saving
 
   async function muat() {
@@ -84,6 +83,7 @@ export function KasbonKapster() {
       setSuccess(
         `Pengajuan kasbon ${target.nama} sebesar ${rupiah(jumlahNum)} tercatat. Menunggu persetujuan Owner atau Manajer.`,
       )
+      setKapsterId("")
       setJumlah("")
       setCatatan("")
       await muat()
@@ -171,17 +171,16 @@ export function KasbonKapster() {
         </div>
       </form>
 
-      {kapsterId && (
-        <section className="panel form-panel kasbon-kapster-history">
+      <section className="panel form-panel kasbon-kapster-history">
           <div className="section-title">
             <h3>Pengajuan tim</h3>
-            <span className="nota-count">{daftarKapster.length} pengajuan</span>
+            <span className="nota-count">{daftar.length} pengajuan</span>
           </div>
-          {daftarKapster.length === 0 ? (
-            <p className="history-empty">Belum ada pengajuan untuk kapster ini.</p>
+          {daftar.length === 0 ? (
+            <p className="history-empty">Belum ada pengajuan kasbon.</p>
           ) : (
             <div className="kasbon-kapster-list">
-              {daftarKapster.map((k) => (
+              {daftar.map((k) => (
                 <article className="kasbon-kapster-row" key={k.id}>
                   <div className="kasbon-kapster-info">
                     <strong>{k.nama}</strong>
@@ -200,8 +199,7 @@ export function KasbonKapster() {
               ))}
             </div>
           )}
-        </section>
-      )}
+      </section>
     </div>
   )
 }
