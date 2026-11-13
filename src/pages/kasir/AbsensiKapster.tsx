@@ -22,7 +22,7 @@ import {
 } from "../../api"
 import { AbsensiStatus } from "../../types"
 
-type View = "list" | "photo"
+type View = "list" | "photo" | "leave"
 
 export function AbsensiKapster({
   onNavigate,
@@ -68,7 +68,7 @@ export function AbsensiKapster({
   } | null>(null)
 
   useEffect(() => {
-    if (view !== "photo" || fotoWajah) return
+    if (view !== "photo" || fotoWajah || status !== "Hadir") return
     let active = true
     let stream: MediaStream | null = null
     setCameraReady(false)
@@ -210,6 +210,15 @@ export function AbsensiKapster({
     setView("photo")
   }
 
+  function openLeave(kapster: { id: string; nama: string }) {
+    setSelectedKapster(kapster)
+    setFotoWajah("")
+    setPhotoError("")
+    setStatus("Izin")
+    setCatatan("")
+    setView("leave")
+  }
+
   async function handlePhotoSelected(file?: File) {
     if (!file) return
     const imageUrl = URL.createObjectURL(file)
@@ -271,18 +280,22 @@ export function AbsensiKapster({
 
   async function handleCatat() {
     if (!selectedKapster) return
+    if (view === "leave" && !catatan.trim()) {
+      setPhotoError("Keterangan wajib diisi.")
+      return
+    }
     setSubmitting(true)
     try {
       await apiAbsensiKapster.catatAbsensiKapster({
         targetUserId: selectedKapster.id,
         tanggal,
-        status: "Hadir",
+        status,
         fotoUrl: fotoWajah,
-        catatan: "",
+        catatan: catatan.trim(),
       })
       setToast({
         type: "success",
-        message: `Absensi ${selectedKapster.nama} berhasil dicatat (Hadir).`,
+        message: `Absensi ${selectedKapster.nama} berhasil dicatat (${status}).`,
       })
       setRiwayatAbsensi([])
       setView("list")
@@ -604,10 +617,21 @@ export function AbsensiKapster({
                           {cfg.label}
                         </div>
                       </div>
-                      <Icon
-                        name="chevron"
-                        style={{ width: 16, height: 16, color: "var(--muted)" }}
-                      />
+                       <button
+                         type="button"
+                         className="secondary-button"
+                         style={{ minHeight: 36, padding: "6px 10px", fontSize: 12 }}
+                         onClick={(event) => {
+                           event.stopPropagation()
+                           openLeave(k)
+                         }}
+                       >
+                         Izin
+                       </button>
+                       <Icon
+                         name="chevron"
+                         style={{ width: 16, height: 16, color: "var(--muted)" }}
+                       />
                     </div>
                   )
                 })}
@@ -681,7 +705,7 @@ export function AbsensiKapster({
         )}
       </div>
 
-      {view === "photo" && selectedKapster && (
+      {(view === "photo" || view === "leave") && selectedKapster && (
         <div
           className="modal-overlay"
           onClick={closeModal}
@@ -713,7 +737,46 @@ export function AbsensiKapster({
                 </div>
               </div>
             </div>
-            {fotoWajah ? (
+            {view === "leave" && (
+              <>
+                <div style={{ marginBottom: 14 }}>
+                  <label className="pay-field">
+                    <span>Tanggal pengajuan</span>
+                    <CalendarPicker value={tanggal} onChange={setTanggal} />
+                  </label>
+                </div>
+                <div className="commission-choice" style={{ marginBottom: 14 }}>
+                  <span>Jenis pengajuan</span>
+                  <div
+                    className="method-grid"
+                    style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+                    role="group"
+                    aria-label="Pilih jenis izin"
+                  >
+                    {(["Izin", "Sakit", "Cuti"] as const).map((value) => (
+                      <Button
+                        className={status === value ? "active" : ""}
+                        key={value}
+                        onClick={() => setStatus(value)}
+                        disabled={submitting}
+                      >
+                        <strong>{value}</strong>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <label className="pay-field" style={{ marginBottom: 14 }}>
+                  <span>Keterangan</span>
+                  <input
+                    value={catatan}
+                    onChange={(event) => setCatatan(event.target.value)}
+                    placeholder="Tulis alasan pengajuan"
+                    disabled={submitting}
+                  />
+                </label>
+              </>
+            )}
+            {view === "photo" && (fotoWajah ? (
               <div style={{ textAlign: "center", marginBottom: 14 }}>
                 <img
                   src={fotoWajah}
@@ -745,8 +808,8 @@ export function AbsensiKapster({
                 )}
                 <div className="absensi-camera-guide" aria-hidden="true" />
               </div>
-            )}
-            {photoError && (
+            ))}
+            {view === "photo" && photoError && (
               <p role="alert" className="absensi-error">
                 {photoError}
               </p>
@@ -768,13 +831,13 @@ export function AbsensiKapster({
               </div>
             )}
             <div className="absensi-actions">
-              {fotoWajah ? (
+              {fotoWajah || status !== "Hadir" ? (
                 <Button
                   className="absensi-primary"
                   onClick={handleCatat}
-                  disabled={submitting}
+                  disabled={submitting || (status !== "Hadir" && !catatan.trim())}
                 >
-                  {submitting ? "Mengirim…" : "Kirim Absensi"}
+                  {submitting ? "Mengirim…" : `Catat ${status}`}
                 </Button>
               ) : (
                 <Button

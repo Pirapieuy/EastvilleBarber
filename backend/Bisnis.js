@@ -845,9 +845,17 @@ function createTransaksi_(body, user, manual) {
       return t.id === notaBuku || t.nota_buku === notaBuku
     })
     if (dipakai) return fail_("Nomor nota sudah dipakai.")
-    now = new Date(tgl + "T" + jamIn + ":00+07:00")
-  }
-  var nowJam = Number(fmtTanggal_(now, "HHmm"))
+     now = new Date(tgl + "T" + jamIn + ":00+07:00")
+   } else if (body.tanggal) {
+     var tanggalKasir = String(body.tanggal)
+     if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggalKasir))
+       return fail_("Tanggal transaksi tidak valid.")
+     var jamKasir = fmtTanggal_(now, "HH:mm:ss")
+     now = new Date(tanggalKasir + "T" + jamKasir + "+07:00")
+     if (fmtTanggal_(now, "yyyy-MM-dd") !== tanggalKasir)
+       return fail_("Tanggal transaksi tidak valid.")
+   }
+   var nowJam = Number(fmtTanggal_(now, "HHmm"))
   var pilihanKomisi = body.komisiLayanan
   if (pilihanKomisi && pilihanKomisi !== "Normal" && pilihanKomisi !== "OT")
     return fail_("Pilihan komisi layanan tidak valid.")

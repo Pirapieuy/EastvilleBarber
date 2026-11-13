@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  LoadingState,
+  rupiah,
+} from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
@@ -271,6 +276,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [selectedBarber, setSelectedBarber] = useState("")
   const [cart, setCart] = useState<CartLine[]>([])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
+  const [tanggalTransaksi, setTanggalTransaksi] = useState(TANGGAL_MAKS())
   const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
   const [cash, setCash] = useState(0)
   const [qrisInput, setQrisInput] = useState(0)
@@ -431,6 +437,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         kodeDiskon: effectiveDiscount > 0 ? kodeTerpakai : undefined,
         clientRequestId: requestId.current,
         komisiLayanan,
+        tanggal: tanggalTransaksi,
         bayarTunai: tunaiTerpakai,
         bayarQris: qris,
         items: cart.map((l) => ({
@@ -641,6 +648,7 @@ export function CashierPage({ currentUser, onNavigate }: {
           ) || selectedBarber
         }
         invoice={invoice}
+        tanggal={tanggalTransaksi}
         saving={savingReceipt}
         saveError={saveReceiptError}
         onEdit={() => {
@@ -1206,6 +1214,13 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <small>Pembayaran</small>
                 <Icon name="wallet" />
               </div>
+              <label className="pay-field" style={{ marginBottom: 12 }}>
+                <span>Tanggal transaksi</span>
+                <CalendarPicker
+                  value={tanggalTransaksi}
+                  onChange={setTanggalTransaksi}
+                />
+              </label>
               <div className="method-grid">
                 {(["Tunai", "QRIS", "Gabungan"] as const).map((value) => (
                   <Button
