@@ -5,7 +5,6 @@ import { SearchSelect } from "../../components/common/SearchSelect"
 import {
   Button,
   LoadingState,
-  PageTitle,
   rupiah,
 } from "../../components/common/UI"
 
@@ -97,15 +96,14 @@ export function KasbonKapster() {
 
   if (loading) {
     return (
-      <div className="content narrow kasbon-kapster-page">
+      <div className="content kasbon-kapster-page">
         <LoadingState message="Memuat data kasbon…" />
       </div>
     )
   }
 
   return (
-    <div className="content narrow kasbon-kapster-page">
-      <PageTitle eyebrow="Kasir" title="Kasbon Kapster" />
+    <div className="content kasbon-kapster-page">
       <DemoNotice live={!loadError} error={loadError} />
 
       <form className="panel form-panel" onSubmit={kirim}>
@@ -114,7 +112,7 @@ export function KasbonKapster() {
           Catat permintaan kasbon kapster di sini. Kasbon baru dipotong dari
           gaji setelah disetujui Owner atau Manajer.
         </p>
-        <div className="form-grid kasbon-kapster-grid">
+        <div className="form-grid manual-info-grid kasbon-kapster-grid">
           <div className="form-grid-field">
             <span>
               Kapster <b className="req-mark">*</b>

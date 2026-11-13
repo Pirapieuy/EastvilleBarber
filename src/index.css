@@ -13629,3 +13629,51 @@ label .search-select-trigger {
     width: 100%;
   }
 }
+
+/* Kasbon Kapster (Kasir): isian dan jarak sama dengan Input Manual */
+.kasbon-kapster-page > .panel:first-of-type {
+  margin-top: 0;
+}
+
+.kasbon-kapster-page .form-panel h3 {
+  margin: 0;
+}
+
+.kasbon-kapster-page .kasbon-kapster-grid {
+  gap: 12px 14px;
+  margin-top: 14px;
+}
+
+.kasbon-kapster-page .input-shell input,
+.kasbon-kapster-page .input-shell input:focus {
+  height: 100%;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.kasbon-kapster-page .input-shell {
+  height: 42px;
+  border-radius: 8px;
+}
+
+.kasbon-kapster-page .input-shell:focus-within {
+  border-color: var(--brass);
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions {
+  margin-top: 14px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions .button {
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: 8px;
+}
+
+.kasbon-kapster-page .section-title {
+  margin-bottom: 0;
+}
