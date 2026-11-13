@@ -13677,3 +13677,16 @@ label .search-select-trigger {
 .kasbon-kapster-page .section-title {
   margin-bottom: 0;
 }
+
+/* Kasbon Kapster: jarak antara kartu Ajukan dan Pengajuan tim */
+.kasbon-kapster-page > .panel + .panel {
+  margin-top: 16px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-history {
+  padding: 18px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+  margin-top: 14px;
+}

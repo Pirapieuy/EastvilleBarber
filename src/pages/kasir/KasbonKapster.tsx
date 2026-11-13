@@ -37,6 +37,7 @@ export function KasbonKapster() {
   const [success, setSuccess] = useState("")
 
   const jumlahNum = Number(jumlah.replace(/\D/g, "")) || 0
+  const daftarKapster = daftar.filter((k) => k.userId === kapsterId)
   const bisaKirim = Boolean(kapsterId) && jumlahNum > 0 && !saving
 
   async function muat() {
@@ -83,7 +84,6 @@ export function KasbonKapster() {
       setSuccess(
         `Pengajuan kasbon ${target.nama} sebesar ${rupiah(jumlahNum)} tercatat. Menunggu persetujuan Owner atau Manajer.`,
       )
-      setKapsterId("")
       setJumlah("")
       setCatatan("")
       await muat()
@@ -171,35 +171,37 @@ export function KasbonKapster() {
         </div>
       </form>
 
-      <section className="panel form-panel">
-        <div className="section-title">
-          <h3>Pengajuan saya</h3>
-          <span className="nota-count">{daftar.length} pengajuan</span>
-        </div>
-        {daftar.length === 0 ? (
-          <p className="history-empty">Belum ada pengajuan kasbon.</p>
-        ) : (
-          <div className="kasbon-kapster-list">
-            {daftar.map((k) => (
-              <article className="kasbon-kapster-row" key={k.id}>
-                <div className="kasbon-kapster-info">
-                  <strong>{k.nama}</strong>
-                  <small>
-                    {k.tanggal}
-                    {k.catatan ? ` · ${k.catatan}` : ""}
-                  </small>
-                </div>
-                <strong className="kasbon-kapster-amount">
-                  {rupiah(k.jumlah)}
-                </strong>
-                <i className={`chip ${STATUS_CHIP[k.status] ?? ""}`}>
-                  {STATUS_LABEL[k.status] ?? k.status}
-                </i>
-              </article>
-            ))}
+      {kapsterId && (
+        <section className="panel form-panel kasbon-kapster-history">
+          <div className="section-title">
+            <h3>Pengajuan tim</h3>
+            <span className="nota-count">{daftarKapster.length} pengajuan</span>
           </div>
-        )}
-      </section>
+          {daftarKapster.length === 0 ? (
+            <p className="history-empty">Belum ada pengajuan untuk kapster ini.</p>
+          ) : (
+            <div className="kasbon-kapster-list">
+              {daftarKapster.map((k) => (
+                <article className="kasbon-kapster-row" key={k.id}>
+                  <div className="kasbon-kapster-info">
+                    <strong>{k.nama}</strong>
+                    <small>
+                      {k.tanggal}
+                      {k.catatan ? ` · ${k.catatan}` : ""}
+                    </small>
+                  </div>
+                  <strong className="kasbon-kapster-amount">
+                    {rupiah(k.jumlah)}
+                  </strong>
+                  <i className={`chip ${STATUS_CHIP[k.status] ?? ""}`}>
+                    {STATUS_LABEL[k.status] ?? k.status}
+                  </i>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   )
 }
