@@ -137,11 +137,13 @@ export function BaseSidebar({
                   </div>
                   <div className="user-info-text">
                     <strong>{user.name}</strong>
-                    {user.roleBadge && <span
-                      className={`role-chip role-${user.role.toLowerCase()}`}
-                    >
-                      {user.roleBadge}
-                    </span>}
+                    {user.roleBadge && (
+                      <span
+                        className={`role-chip role-${user.role.toLowerCase()}`}
+                      >
+                        {user.roleBadge}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <Button
@@ -171,7 +173,11 @@ export function BaseSidebar({
       {logoutModalOpen &&
         createPortal(
           <div className="modal-overlay logout-modal-overlay">
-            <div className="logout-confirm-card" role="dialog" aria-modal="true">
+            <div
+              className="logout-confirm-card"
+              role="dialog"
+              aria-modal="true"
+            >
               <div className="logout-card-header">
                 <div className="logout-icon-shell">
                   <Icon name="logout" />

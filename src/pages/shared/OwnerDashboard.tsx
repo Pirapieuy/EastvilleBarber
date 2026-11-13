@@ -322,7 +322,14 @@ export function OwnerDashboard({ onNavigate, navigate }: {
                               ? "pending"
                               : ""
                         }`}
-                        style={k.status === "Tidak Hadir" ? { background: "var(--line)", color: "var(--muted)" } : undefined}
+                        style={
+                          k.status === "Tidak Hadir"
+                            ? {
+                                background: "var(--line)",
+                                color: "var(--muted)",
+                              }
+                            : undefined
+                        }
                       >
                         {k.status === "Tidak Hadir" ? "Belum Hadir" : k.status}
                       </i>

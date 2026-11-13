@@ -23,9 +23,15 @@ import {
 import { AbsensiStatus } from "../../types"
 import { formatTanggal, TANGGAL_MAKS } from "../../utils/tanggal"
 
-type View = "list" | "photo"
+type View = "list" | "photo" | "leave"
 
-export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, initialKapsterName, onComplete }: {
+export function AbsensiKapster({
+  onNavigate,
+  inline = false,
+  initialKapsterId,
+  initialKapsterName,
+  onComplete,
+}: {
   onNavigate?: (page: string) => void
   inline?: boolean
   initialKapsterId?: string
@@ -34,7 +40,9 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
 } = {}) {
   const todayIso = TANGGAL_MAKS()
   const [tanggal, setTanggal] = useState(todayIso)
-  const [kapsters, setKapsters] = useState<{ id: string; nama: string }[]>([])
+  const [kapsters, setKapsters] = useState<
+    { id: string; nama: string }[]
+  >([])
   const [absensi, setAbsensi] = useState<AbsensiRow[]>([])
   const [riwayatAbsensi, setRiwayatAbsensi] = useState<AbsensiRow[]>([])
   const [activeTab, setActiveTab] = useState<"absensi" | "riwayat">("absensi")
@@ -50,6 +58,7 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
   const [fotoWajah, setFotoWajah] = useState("")
   const [photoError, setPhotoError] = useState("")
   const [cameraReady, setCameraReady] = useState(false)
+  const [cameraRetry, setCameraRetry] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [status, setStatus] = useState<AbsensiStatus>("Hadir")
   const [catatan, setCatatan] = useState("")
@@ -60,37 +69,57 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
   } | null>(null)
 
   useEffect(() => {
-    if (view !== "photo" || fotoWajah) return
+    if (view !== "photo" || fotoWajah || status !== "Hadir") return
     let active = true
     let stream: MediaStream | null = null
     setCameraReady(false)
     setPhotoError("")
     if (!navigator.mediaDevices?.getUserMedia) {
-      setPhotoError("Kamera tidak tersedia. Buka aplikasi melalui HTTPS atau localhost.")
+      setPhotoError(
+        "Kamera tidak tersedia. Buka aplikasi melalui HTTPS atau localhost.",
+      )
       return
     }
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 800 } },
-      audio: false,
-    }).then((cameraStream) => {
-      stream = cameraStream
-      if (!active) {
-        cameraStream.getTracks().forEach((track) => track.stop())
-        return
-      }
-      if (videoRef.current) videoRef.current.srcObject = cameraStream
-    }).catch((error: unknown) => {
-      if (!active) return
-      setPhotoError(error instanceof DOMException && error.name === "NotAllowedError"
-        ? "Izin kamera ditolak. Izinkan akses kamera di browser lalu coba lagi."
-        : "Kamera tidak dapat dibuka. Pastikan kamera tersedia dan tidak sedang dipakai aplikasi lain.")
-    })
+    navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 800 },
+        },
+        audio: false,
+      })
+      .then((cameraStream) => {
+        stream = cameraStream
+        if (!active) {
+          cameraStream.getTracks().forEach((track) => track.stop())
+          return
+        }
+        const video = videoRef.current
+        if (!video) return
+        video.srcObject = cameraStream
+        void video.play().catch(() => {
+          if (active) {
+            setPhotoError(
+              "Pratinjau kamera diblokir. Ketuk Coba Kamera untuk menghubungkan ulang.",
+            )
+          }
+        })
+      })
+      .catch((error: unknown) => {
+        if (!active) return
+        setPhotoError(
+          error instanceof DOMException && error.name === "NotAllowedError"
+            ? "Izin kamera ditolak. Izinkan akses kamera di browser lalu coba lagi."
+            : "Kamera tidak dapat dibuka. Pastikan kamera tersedia dan tidak sedang dipakai aplikasi lain.",
+        )
+      })
     return () => {
       active = false
       stream?.getTracks().forEach((track) => track.stop())
       if (videoRef.current) videoRef.current.srcObject = null
     }
-  }, [view, fotoWajah])
+  }, [view, fotoWajah, cameraRetry])
 
   const statusByUser = useMemo(() => {
     const map = new Map<string, AbsensiRow>()
@@ -128,10 +157,13 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
 
   useEffect(() => {
     if (loading || kapsters.length === 0) return
-    const requestedId = initialKapsterId || sessionStorage.getItem("eastville-attendance-kapster")
+    const requestedId =
+      initialKapsterId || sessionStorage.getItem("eastville-attendance-kapster")
     if (!requestedId) return
     sessionStorage.removeItem("eastville-attendance-kapster")
-    const requestedKapster = kapsters.find((kapster) => kapster.id === requestedId)
+    const requestedKapster = kapsters.find(
+      (kapster) => kapster.id === requestedId,
+    )
     if (requestedKapster) openKapster(requestedKapster)
   }, [loading, kapsters])
 
@@ -139,17 +171,27 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
     if (activeTab !== "riwayat" || riwayatAbsensi.length > 0) return
     let active = true
     setLoadingRiwayat(true)
-    apiAbsensi.list().then((rows) => {
-      if (active) setRiwayatAbsensi(rows)
-    }).catch((err: unknown) => {
-      if (active) setToast({
-        type: "error",
-        message: err instanceof Error ? err.message : "Gagal memuat riwayat absensi.",
+    apiAbsensi
+      .list()
+      .then((rows) => {
+        if (active) setRiwayatAbsensi(rows)
       })
-    }).finally(() => {
-      if (active) setLoadingRiwayat(false)
-    })
-    return () => { active = false }
+      .catch((err: unknown) => {
+        if (active)
+          setToast({
+            type: "error",
+            message:
+              err instanceof Error
+                ? err.message
+                : "Gagal memuat riwayat absensi.",
+          })
+      })
+      .finally(() => {
+        if (active) setLoadingRiwayat(false)
+      })
+    return () => {
+      active = false
+    }
   }, [activeTab, riwayatAbsensi.length])
 
   const statusFor = useCallback(
@@ -167,6 +209,15 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
     setStatus("Hadir")
     setCatatan("")
     setView("photo")
+  }
+
+  function openLeave(kapster: { id: string; nama: string }) {
+    setSelectedKapster(kapster)
+    setFotoWajah("")
+    setPhotoError("")
+    setStatus("Izin")
+    setCatatan("")
+    setView("leave")
   }
 
   async function handlePhotoSelected(file?: File) {
@@ -216,28 +267,36 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
     context.translate(canvas.width, 0)
     context.scale(-1, 1)
     context.drawImage(video, 0, 0, canvas.width, canvas.height)
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.55))
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.55),
+    )
     if (!blob) {
       setPhotoError("Foto tidak dapat diproses. Coba lagi.")
       return
     }
-    await handlePhotoSelected(new File([blob], "absensi.jpg", { type: "image/jpeg" }))
+    await handlePhotoSelected(
+      new File([blob], "absensi.jpg", { type: "image/jpeg" }),
+    )
   }
 
   async function handleCatat() {
     if (!selectedKapster) return
+    if (view === "leave" && !catatan.trim()) {
+      setPhotoError("Keterangan wajib diisi.")
+      return
+    }
     setSubmitting(true)
     try {
       await apiAbsensiKapster.catatAbsensiKapster({
         targetUserId: selectedKapster.id,
         tanggal,
-        status: "Hadir",
+        status,
         fotoUrl: fotoWajah,
-        catatan: "",
+        catatan: catatan.trim(),
       })
       setToast({
         type: "success",
-        message: `Absensi ${selectedKapster.nama} berhasil dicatat (Hadir).`,
+        message: `Absensi ${selectedKapster.nama} berhasil dicatat (${status}).`,
       })
       setRiwayatAbsensi([])
       setView("list")
@@ -290,12 +349,19 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
   }
 
   const filteredRiwayat = riwayatAbsensi
-    .filter((row) =>
-      row.role?.toLocaleLowerCase("id-ID") === "kapster" ||
-      kapsters.some((kapster) => kapster.id === row.userId),
+    .filter(
+      (row) =>
+        row.role?.toLocaleLowerCase("id-ID") === "kapster" ||
+        kapsters.some((kapster) => kapster.id === row.userId),
     )
-    .filter((row) => !filterTanggalRiwayat || row.tanggal === filterTanggalRiwayat)
-    .filter((row) => row.nama.toLocaleLowerCase("id-ID").includes(cariKapster.trim().toLocaleLowerCase("id-ID")))
+    .filter(
+      (row) => !filterTanggalRiwayat || row.tanggal === filterTanggalRiwayat,
+    )
+    .filter((row) =>
+      row.nama
+        .toLocaleLowerCase("id-ID")
+        .includes(cariKapster.trim().toLocaleLowerCase("id-ID")),
+    )
     .sort((a, b) => b.waktu.localeCompare(a.waktu))
 
   const modalOverlayStyle: CSSProperties = {
@@ -327,11 +393,16 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
         <div className="modal-overlay" role="status">
           <div className="modal-panel absensi-modal absensi-loading-panel">
             <div className="absensi-loading-heading">
-              <span className="absensi-modal-icon"><Icon name="camera" /></span>
+              <span className="absensi-modal-icon">
+                <Icon name="camera" />
+              </span>
               <div>
                 <div className="absensi-loading-title">Absensi Kapster</div>
                 <div className="absensi-loading-meta">
-                  {initialKapsterName || kapsters.find((kapster) => kapster.id === initialKapsterId)?.nama || "Memuat nama kapster"}
+                  {initialKapsterName ||
+                    kapsters.find((kapster) => kapster.id === initialKapsterId)
+                      ?.nama ||
+                    "Memuat nama kapster"}
                   <span aria-hidden="true">·</span>
                   {tanggal}
                 </div>
@@ -352,7 +423,11 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
   }
 
   return (
-    <div className={`mobile-content absensi-kasir ${inline ? "absensi-inline" : ""}`}>
+    <div
+      className={`mobile-content absensi-kasir ${
+        inline ? "absensi-inline" : ""
+      }`}
+    >
       <PageTitle
         eyebrow={todayStr}
         title="Absensi Kapster"
@@ -388,194 +463,238 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
           type="button"
           role="tab"
           aria-selected={activeTab === "absensi"}
-          className={activeTab === "absensi" ? "absensi-tab active" : "absensi-tab"}
+          className={
+            activeTab === "absensi" ? "absensi-tab active" : "absensi-tab"
+          }
           onClick={() => setActiveTab("absensi")}
-        >Absensi</button>
+        >
+          Absensi
+        </button>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === "riwayat"}
-          className={activeTab === "riwayat" ? "absensi-tab active" : "absensi-tab"}
+          className={
+            activeTab === "riwayat" ? "absensi-tab active" : "absensi-tab"
+          }
           onClick={() => setActiveTab("riwayat")}
-        >Riwayat</button>
+        >
+          Riwayat
+        </button>
       </div>
 
       <div style={{ padding: "0 16px 20px" }}>
-      {activeTab === "absensi" ? <>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            marginBottom: 16,
-          }}
-        >
-          <CalendarPicker
-            value={tanggal}
-            onChange={setTanggal}
-            compact
-            style={{ flex: 1 }}
-          />
-          <Button
-            className="secondary-button"
-            onClick={() => setTanggal(todayIso)}
-            disabled={tanggal === todayIso}
-          >
-            <Icon
-              name="calendar"
-              style={{ width: 14, height: 14, marginRight: 6 }}
-            />
-            Hari Ini
-          </Button>
-        </div>
-
-        {kapsters.length === 0 ? (
-          <div
-            className="panel"
-            style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}
-          >
-            <Icon
-              name="user"
-              style={{
-                width: 32,
-                height: 32,
-                marginBottom: 10,
-                color: "var(--muted)",
-              }}
-            />
+        {activeTab === "absensi" ? (
+          <>
             <div
-              style={{ fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 16,
+              }}
             >
-              Belum ada data kapster
-            </div>
-            <div style={{ fontSize: 13 }}>
-              Tambah data kapster melalui Owner atau Manajer.
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: "grid", gap: 10 }}>
-            {kapsters.map((k) => {
-              const st = statusFor(k.id)
-              const attendance = statusByUser.get(`${k.id}|${tanggal}`)
-              const cfg = STATUS_CONFIG[st]
-              const hadir = st === "Hadir"
-              return (
-                <div
-                  key={k.id}
-                  className="panel absensi-row"
-                  style={{
-                    padding: "14px 16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    cursor: "pointer",
-                    border: `1px solid ${hadir ? cfg.color : "var(--line)"}`,
-                    background: hadir ? cfg.bg : "var(--paper)",
-                  }}
-                  onClick={() => openKapster(k)}
-                >
-                  {attendance?.fotoUrl ? (
-                    <img
-                      src={attendance.fotoUrl}
-                      alt={`Foto absensi ${k.nama}`}
-                      style={{
-                        width: 46,
-                        height: 46,
-                        flex: "none",
-                        objectFit: "cover",
-                        borderRadius: 12,
-                      }}
-                    />
-                  ) : null}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        color: "var(--ink)",
-                        fontSize: 15,
-                      }}
-                    >
-                      {k.nama}
-                    </div>
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: cfg.color,
-                        background: cfg.bg,
-                        borderRadius: 20,
-                        padding: "3px 10px",
-                        marginTop: 8,
-                        border: `1px solid ${cfg.color}`,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.4,
-                        width: "fit-content",
-                      }}
-                    >
-                      {cfg.label}
-                    </div>
-                  </div>
-                  <Icon
-                    name="chevron"
-                    style={{ width: 16, height: 16, color: "var(--muted)" }}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </> : (
-        <div className="absensi-history-list" role="tabpanel">
-          <div className="absensi-history-filters">
-            <label className="absensi-history-search">
-              <Icon name="search" />
-              <input
-                type="search"
-                value={cariKapster}
-                onChange={(event) => setCariKapster(event.target.value)}
-                placeholder="Cari nama kapster..."
-                aria-label="Cari riwayat berdasarkan nama kapster"
-              />
-            </label>
-            <div className="absensi-history-date">
               <CalendarPicker
-                allowClear
-                clearLabel="Semua tanggal"
-                max={TANGGAL_MAKS()}
-                onChange={setFilterTanggalRiwayat}
-                placeholder="Semua tanggal"
-                showToday={false}
-                value={filterTanggalRiwayat}
+                value={tanggal}
+                onChange={setTanggal}
+                compact
+                style={{ flex: 1 }}
               />
+              <Button
+                className="secondary-button"
+                onClick={() => setTanggal(todayIso)}
+                disabled={tanggal === todayIso}
+              >
+                <Icon
+                  name="calendar"
+                  style={{ width: 14, height: 14, marginRight: 6 }}
+                />
+                Hari Ini
+              </Button>
             </div>
-          </div>
-          {loadingRiwayat ? <LoadingState message="Memuat riwayat absensi..." /> :
-            filteredRiwayat.length === 0 ? (
+
+            {kapsters.length === 0 ? (
+              <div
+                className="panel"
+                style={{
+                  padding: 24,
+                  textAlign: "center",
+                  color: "var(--muted)",
+                }}
+              >
+                <Icon
+                  name="user"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    marginBottom: 10,
+                    color: "var(--muted)",
+                  }}
+                />
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "var(--ink)",
+                    marginBottom: 4,
+                  }}
+                >
+                  Belum ada data kapster
+                </div>
+                <div style={{ fontSize: 13 }}>
+                  Tambah data kapster melalui Owner atau Manajer.
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gap: 10 }}>
+                {kapsters.map((k) => {
+                  const st = statusFor(k.id)
+                  const attendance = statusByUser.get(`${k.id}|${tanggal}`)
+                  const cfg = STATUS_CONFIG[st]
+                  const hadir = st === "Hadir"
+                  return (
+                    <div
+                      key={k.id}
+                      className="panel absensi-row"
+                      style={{
+                        padding: "14px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        cursor: "pointer",
+                        border: `1px solid ${
+                          hadir ? cfg.color : "var(--line)"
+                        }`,
+                        background: hadir ? cfg.bg : "var(--paper)",
+                      }}
+                      onClick={() => openKapster(k)}
+                    >
+                      {attendance?.fotoUrl ? (
+                        <img
+                          src={attendance.fotoUrl}
+                          alt={`Foto absensi ${k.nama}`}
+                          style={{
+                            width: 46,
+                            height: 46,
+                            flex: "none",
+                            objectFit: "cover",
+                            borderRadius: 12,
+                          }}
+                        />
+                      ) : null}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            color: "var(--ink)",
+                            fontSize: 15,
+                          }}
+                        >
+                          {k.nama}
+                        </div>
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: cfg.color,
+                            background: cfg.bg,
+                            borderRadius: 20,
+                            padding: "3px 10px",
+                            marginTop: 8,
+                            border: `1px solid ${cfg.color}`,
+                            textTransform: "uppercase",
+                            letterSpacing: 0.4,
+                            width: "fit-content",
+                          }}
+                        >
+                          {cfg.label}
+                        </div>
+                      </div>
+                       <button
+                         type="button"
+                         className="secondary-button"
+                         style={{ minHeight: 36, padding: "6px 10px", fontSize: 12 }}
+                         onClick={(event) => {
+                           event.stopPropagation()
+                           openLeave(k)
+                         }}
+                       >
+                         Izin
+                       </button>
+                       <Icon
+                         name="chevron"
+                         style={{ width: 16, height: 16, color: "var(--muted)" }}
+                       />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="absensi-history-list" role="tabpanel">
+            <div className="absensi-history-filters">
+              <label className="absensi-history-search">
+                <Icon name="search" />
+                <input
+                  type="search"
+                  value={cariKapster}
+                  onChange={(event) => setCariKapster(event.target.value)}
+                  placeholder="Cari nama kapster..."
+                  aria-label="Cari riwayat berdasarkan nama kapster"
+                />
+              </label>
+              <div className="absensi-history-date">
+                <CalendarPicker
+                  allowClear
+                  clearLabel="Semua tanggal"
+                  max={TANGGAL_MAKS()}
+                  onChange={setFilterTanggalRiwayat}
+                  placeholder="Semua tanggal"
+                  showToday={false}
+                  value={filterTanggalRiwayat}
+                />
+              </div>
+            </div>
+            {loadingRiwayat ? (
+              <LoadingState message="Memuat riwayat absensi..." />
+            ) : filteredRiwayat.length === 0 ? (
               <div className="panel absensi-history-empty">
                 {filterTanggalRiwayat || cariKapster.trim()
                   ? "Tidak ada absensi kapster yang cocok dengan filter ini."
                   : "Belum ada riwayat absensi kapster."}
               </div>
-            ) : filteredRiwayat.map((row) => (
-              <article className="panel absensi-history-row" key={row.id}>
-                {row.fotoUrl ? <img src={row.fotoUrl} alt={`Foto absensi ${row.nama}`} /> :
-                  <span className="absensi-history-avatar"><Icon name="calendar" /></span>}
-                <div className="absensi-history-info">
-                  <strong>{row.nama}</strong>
-                  <span>{formatTanggal(row.tanggal)}{row.jam ? `, ${row.jam.replace(".", ":")}` : ""}</span>
-                </div>
-                <span className="absensi-history-status">{row.status || row.tipe || "Tercatat"}</span>
-              </article>
-            ))}
-        </div>
-      )}
+            ) : (
+              filteredRiwayat.map((row) => (
+                <article className="panel absensi-history-row" key={row.id}>
+                  {row.fotoUrl ? (
+                    <img src={row.fotoUrl} alt={`Foto absensi ${row.nama}`} />
+                  ) : (
+                    <span className="absensi-history-avatar">
+                      <Icon name="calendar" />
+                    </span>
+                  )}
+                  <div className="absensi-history-info">
+                    <strong>{row.nama}</strong>
+                    <span>
+                      {formatTanggal(row.tanggal)}
+                      {row.jam ? `, ${row.jam.replace(".", ":")}` : ""}
+                    </span>
+                  </div>
+                  <span className="absensi-history-status">
+                    {row.status || row.tipe || "Tercatat"}
+                  </span>
+                </article>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
-      {view === "photo" && selectedKapster && (
+      {(view === "photo" || view === "leave") && selectedKapster && (
         <div
           className="modal-overlay"
           onClick={closeModal}
@@ -596,20 +715,67 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
                 marginBottom: 16,
               }}
             >
-              <span className="absensi-modal-icon"><Icon name="camera" /></span>
+              <span className="absensi-modal-icon">
+                <Icon name="camera" />
+              </span>
               <div className="absensi-modal-heading">
                 <div className="absensi-modal-title">Absensi Kapster</div>
                 <div className="absensi-modal-subtitle">
-                  {selectedKapster.nama} <span aria-hidden="true">·</span> {tanggal}
+                  {selectedKapster.nama} <span aria-hidden="true">·</span>{" "}
+                  {tanggal}
                 </div>
               </div>
             </div>
-            {fotoWajah ? (
+            {view === "leave" && (
+              <>
+                <div style={{ marginBottom: 14 }}>
+                  <label className="pay-field">
+                    <span>Tanggal pengajuan</span>
+                    <CalendarPicker value={tanggal} onChange={setTanggal} />
+                  </label>
+                </div>
+                <div className="commission-choice" style={{ marginBottom: 14 }}>
+                  <span>Jenis pengajuan</span>
+                  <div
+                    className="method-grid"
+                    style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+                    role="group"
+                    aria-label="Pilih jenis izin"
+                  >
+                    {(["Izin", "Sakit", "Cuti"] as const).map((value) => (
+                      <Button
+                        className={status === value ? "active" : ""}
+                        key={value}
+                        onClick={() => setStatus(value)}
+                        disabled={submitting}
+                      >
+                        <strong>{value}</strong>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <label className="pay-field" style={{ marginBottom: 14 }}>
+                  <span>Keterangan</span>
+                  <input
+                    value={catatan}
+                    onChange={(event) => setCatatan(event.target.value)}
+                    placeholder="Tulis alasan pengajuan"
+                    disabled={submitting}
+                  />
+                </label>
+              </>
+            )}
+            {view === "photo" && (fotoWajah ? (
               <div style={{ textAlign: "center", marginBottom: 14 }}>
                 <img
                   src={fotoWajah}
                   alt={`Foto wajah ${selectedKapster.nama}`}
-                  style={{ width: "100%", maxHeight: 300, objectFit: "cover", borderRadius: 12 }}
+                  style={{
+                    width: "100%",
+                    maxHeight: 300,
+                    objectFit: "cover",
+                    borderRadius: 12,
+                  }}
                 />
               </div>
             ) : (
@@ -621,25 +787,46 @@ export function AbsensiKapster({ onNavigate, inline = false, initialKapsterId, i
                   muted
                   playsInline
                   onLoadedMetadata={() => setCameraReady(true)}
+                  onPlaying={() => setCameraReady(true)}
                   aria-label="Pratinjau kamera wajah kapster"
                 />
-                {!cameraReady && !photoError && <div className="absensi-camera-message">Menghubungkan kamera…</div>}
+                {!cameraReady && !photoError && (
+                  <div className="absensi-camera-message">
+                    Menghubungkan kamera…
+                  </div>
+                )}
                 <div className="absensi-camera-guide" aria-hidden="true" />
               </div>
-            )}
-            {photoError && (
+            ))}
+            {view === "photo" && photoError && (
               <p role="alert" className="absensi-error">
                 {photoError}
               </p>
             )}
+            {!fotoWajah && photoError && (
+              <div style={{ textAlign: "center", marginBottom: 12 }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "8px 16px" }}
+                  onClick={() => {
+                    setPhotoError("")
+                    setCameraReady(false)
+                    setCameraRetry((n) => n + 1)
+                  }}
+                >
+                  Coba Kamera
+                </button>
+              </div>
+            )}
             <div className="absensi-actions">
-              {fotoWajah ? (
+              {fotoWajah || status !== "Hadir" ? (
                 <Button
                   className="absensi-primary"
                   onClick={handleCatat}
-                  disabled={submitting}
+                  disabled={submitting || (status !== "Hadir" && !catatan.trim())}
                 >
-                  {submitting ? "Mengirim…" : "Kirim Absensi"}
+                  {submitting ? "Mengirim…" : `Catat ${status}`}
                 </Button>
               ) : (
                 <Button

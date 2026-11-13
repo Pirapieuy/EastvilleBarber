@@ -128,7 +128,9 @@ function AuditFilterSelect({
           {options.map((option) => (
             <button
               aria-pressed={value === option}
-              className={`audit-filter-option${value === option ? " selected" : ""}`}
+              className={`audit-filter-option${
+                value === option ? " selected" : ""
+              }`}
               key={option}
               onClick={() => {
                 onChange(option)
@@ -348,7 +350,11 @@ export function AuditPage() {
             <article className="audit-row" key={`${row[0]}-${row[1]}-${idx}`}>
               {row.map((value, index) => (
                 <span
-                  data-label={["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][index]}
+                  data-label={
+                    ["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][
+                      index
+                    ]
+                  }
                   key={`${value}-${index}`}
                 >
                   <span className={index === 2 ? "audit-action" : undefined}>

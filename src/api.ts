@@ -151,6 +151,8 @@ export interface CheckoutPayload {
   kodeDiskon?: string
   /** Id unik per percobaan bayar: server tidak membuat nota ganda bila dikirim ulang */
   clientRequestId?: string
+  komisiLayanan?: "Normal" | "OT"
+  tanggal?: string
 }
 
 export const apiLayanan = {

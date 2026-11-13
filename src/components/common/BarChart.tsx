@@ -5,10 +5,13 @@ export function BarChart({
   data,
   height = 140,
 }: {
-  data: { label: string; value: number }[]
+  data: { label: string; value: number; tunai?: number; qris?: number }[]
   height?: number
 }) {
-  const max = Math.max(1, ...data.map((d) => d.value))
+  const max = Math.max(
+    1,
+    ...data.map((d) => Math.max(d.value, d.tunai ?? 0, d.qris ?? 0)),
+  )
   if (!data.length) {
     return (
       <p style={{ color: "var(--slate)", fontSize: 12 }}>
@@ -35,13 +38,42 @@ export function BarChart({
         >
           <div
             style={{
-              background: "var(--brass)",
-              borderRadius: "4px 4px 0 0",
+              alignItems: "stretch",
+              display: "flex",
               height: `${Math.max(3, (d.value / max) * 100)}%`,
               maxWidth: 48,
               width: "100%",
             }}
-          />
+          >
+            {d.tunai !== undefined && d.qris !== undefined ? (
+              <>
+                <div
+                  style={{
+                    background: "var(--brass)",
+                    flex: d.tunai,
+                    minWidth: d.tunai > 0 ? 2 : 0,
+                  }}
+                  title={`Tunai: ${rupiah(d.tunai)}`}
+                />
+                <div
+                  style={{
+                    background: "var(--ink)",
+                    flex: d.qris,
+                    minWidth: d.qris > 0 ? 2 : 0,
+                  }}
+                  title={`QRIS: ${rupiah(d.qris)}`}
+                />
+              </>
+            ) : (
+              <div
+                style={{
+                  background: "var(--brass)",
+                  borderRadius: "4px 4px 0 0",
+                  flex: 1,
+                }}
+              />
+            )}
+          </div>
           <small style={{ color: "var(--slate)", fontSize: 10 }}>
             {d.label}
           </small>

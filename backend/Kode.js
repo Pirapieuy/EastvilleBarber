@@ -2338,12 +2338,11 @@ function handleCatatAbsensiKapster(body) {
     return jsonResponse({ success: false, error: "Tanggal wajib diisi." })
   if (!status)
     return jsonResponse({ success: false, error: "Status wajib diisi." })
-  if (!/^data:image\/jpeg;base64,/.test(fotoUrl) || fotoUrl.length > 45000) {
-    return jsonResponse({
-      success: false,
-      error: "Foto wajah wajib diambil ulang dengan ukuran lebih kecil.",
-    })
-  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal))
+    return jsonResponse({ success: false, error: "Format tanggal tidak valid." })
+  var tanggalDate = new Date(tanggal + "T00:00:00+07:00")
+  if (isNaN(tanggalDate.getTime()) || formatDateIso_(tanggalDate) !== tanggal)
+    return jsonResponse({ success: false, error: "Tanggal tidak valid." })
 
   var allowedStatus = ["Hadir", "Izin", "Sakit", "Cuti"]
   if (allowedStatus.indexOf(status) === -1) {
@@ -2351,6 +2350,15 @@ function handleCatatAbsensiKapster(body) {
       success: false,
       error: "Status tidak valid. Pilih Hadir / Izin / Sakit / Cuti.",
     })
+  }
+  if (status === "Hadir" && (!/^data:image\/jpeg;base64,/.test(fotoUrl) || fotoUrl.length > 45000)) {
+    return jsonResponse({
+      success: false,
+      error: "Foto wajah wajib diambil ulang dengan ukuran lebih kecil.",
+    })
+  }
+  if (status !== "Hadir" && !catatan) {
+    return jsonResponse({ success: false, error: "Keterangan wajib diisi." })
   }
 
   var ss = getSpreadsheet()
@@ -2386,7 +2394,7 @@ function handleCatatAbsensiKapster(body) {
     })
 
   var now = new Date()
-  var tglStr = formatDateIso_(now)
+  var tglStr = tanggal
   var jamStr = formatTimeHhmm_(now)
   var id = "abs-" + Utilities.getUuid().replace(/-/g, "").slice(0, 8)
 

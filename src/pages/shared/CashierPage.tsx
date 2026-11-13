@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, rupiah } from "../../components/common/UI"
+import {
+  Button,
+  CalendarPicker,
+  LoadingState,
+  rupiah,
+} from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
@@ -260,6 +265,8 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [selectedBarber, setSelectedBarber] = useState("")
   const [cart, setCart] = useState<CartLine[]>([])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
+  const [tanggalTransaksi, setTanggalTransaksi] = useState(TANGGAL_MAKS())
+  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
   const [cash, setCash] = useState(0)
   const [qrisInput, setQrisInput] = useState(0)
   const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
@@ -283,7 +290,9 @@ export function CashierPage({ currentUser, onNavigate }: {
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
   const [catalogData, setCatalogData] = useState<CatalogItem[]>([])
-  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>([])
+  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
+    [],
+  )
   const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(new Set())
   const [attendanceTarget, setAttendanceTarget] = useState("")
   const [invoice, setInvoice] = useState<string | undefined>()
@@ -315,7 +324,12 @@ export function CashierPage({ currentUser, onNavigate }: {
       return
     }
     setLiveError("")
-    Promise.all([apiKasir.layanan(), apiKasir.produk(), apiKasir.kapster(), apiAbsensi.list({ tanggal: TANGGAL_MAKS() })])
+    Promise.all([
+      apiKasir.layanan(),
+      apiKasir.produk(),
+      apiKasir.kapster(),
+      apiAbsensi.list({ tanggal: TANGGAL_MAKS() }),
+    ])
       .then(([layanan, produk, kapster, attendance]) => {
         setCatalogData([
           ...layanan
@@ -340,12 +354,17 @@ export function CashierPage({ currentUser, onNavigate }: {
               }),
             ),
         ])
-        const latestAttendance = new Map<string, (typeof attendance)[number]>()
+        const latestAttendance = new Map<string, typeof attendance[number]>()
         attendance.forEach((row) => {
           const existing = latestAttendance.get(row.userId)
-          if (!existing || row.waktu > existing.waktu) latestAttendance.set(row.userId, row)
+          if (!existing || row.waktu > existing.waktu)
+            latestAttendance.set(row.userId, row)
         })
-        const present = new Set([...latestAttendance.values()].filter((row) => row.status === "Hadir").map((row) => row.userId))
+        const present = new Set(
+          [...latestAttendance.values()]
+            .filter((row) => row.status === "Hadir")
+            .map((row) => row.userId),
+        )
         setAttendedBarbers(present)
         const eligible = kapster.filter((k) => present.has(k.id))
         setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
@@ -406,6 +425,8 @@ export function CashierPage({ currentUser, onNavigate }: {
         alasan: discountReason || undefined,
         kodeDiskon: effectiveDiscount > 0 ? kodeTerpakai : undefined,
         clientRequestId: requestId.current,
+        komisiLayanan,
+        tanggal: tanggalTransaksi,
         bayarTunai: tunaiTerpakai,
         bayarQris: qris,
         items: cart.map((l) => ({
@@ -480,7 +501,9 @@ export function CashierPage({ currentUser, onNavigate }: {
       setKodeDiskon("")
     } catch (e) {
       setKodeError(
-        e instanceof Error ? e.message : "Kode tidak dapat diperiksa. Coba lagi.",
+        e instanceof Error
+          ? e.message
+          : "Kode tidak dapat diperiksa. Coba lagi.",
       )
     } finally {
       setKodeChecking(false)
@@ -617,10 +640,12 @@ export function CashierPage({ currentUser, onNavigate }: {
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
         barber={
-          Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
-          selectedBarber
+          Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(
+            ", ",
+          ) || selectedBarber
         }
         invoice={invoice}
+        tanggal={tanggalTransaksi}
         saving={savingReceipt}
         saveError={saveReceiptError}
         onEdit={() => {
@@ -644,6 +669,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     setCart([])
     setCash(0)
     setQrisInput(0)
+    setKomisiLayanan("Normal")
     setDiscount(0)
     setAppliedDiscountPercent(null)
     setDiscountReason("")
@@ -697,37 +723,48 @@ export function CashierPage({ currentUser, onNavigate }: {
             {barberList.map(({ id, name: barber }) => {
               const isAttended = Boolean(id && attendedBarbers.has(id))
               return (
-              <Button
-                className={`barber-btn ${!isAttended ? "disabled" : ""} ${
-                  selectedBarber === barber ? "active" : ""
-                }`}
-                key={barber}
-                aria-disabled={!isAttended}
-                title={!isAttended ? "Kapster perlu absensi foto terlebih dahulu" : undefined}
-                onClick={() => {
-                  if (!isAttended) {
-                    if (id) setAttendanceTarget(id)
-                    return
+                <Button
+                  className={`barber-btn ${!isAttended ? "disabled" : ""} ${
+                    selectedBarber === barber ? "active" : ""
+                  }`}
+                  key={barber}
+                  aria-disabled={!isAttended}
+                  title={
+                    !isAttended
+                      ? "Kapster perlu absensi foto terlebih dahulu"
+                      : undefined
                   }
-                  setSelectedBarber(barber)
-                  setCart((items) => assignCartToBarber(items, barber))
-                }}
-              >
-                <i>{barber.charAt(0)}</i>
-                <span>{barber}</span>
-              </Button>
-            )})}
+                  onClick={() => {
+                    if (!isAttended) {
+                      if (id) setAttendanceTarget(id)
+                      return
+                    }
+                    setSelectedBarber(barber)
+                    setCart((items) => assignCartToBarber(items, barber))
+                  }}
+                >
+                  <i>{barber.charAt(0)}</i>
+                  <span>{barber}</span>
+                </Button>
+              )
+            })}
           </div>
         </section>
         {attendanceTarget && (
           <AbsensiKapster
             inline
             initialKapsterId={attendanceTarget}
-            initialKapsterName={barberList.find((barber) => barber.id === attendanceTarget)?.name}
+            initialKapsterName={
+              barberList.find((barber) => barber.id === attendanceTarget)?.name
+            }
             onComplete={(success) => {
               if (success) {
-                const kapster = barberList.find((barber) => barber.id === attendanceTarget)
-                setAttendedBarbers((current) => new Set(current).add(attendanceTarget))
+                const kapster = barberList.find(
+                  (barber) => barber.id === attendanceTarget,
+                )
+                setAttendedBarbers((current) =>
+                  new Set(current).add(attendanceTarget),
+                )
                 if (kapster) {
                   setSelectedBarber(kapster.name)
                   setCart((items) => assignCartToBarber(items, kapster.name))
@@ -839,40 +876,40 @@ export function CashierPage({ currentUser, onNavigate }: {
         </div>
       </section>
       {cart.length > 0 && (
-      <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] md:hidden">
-        <button
-          type="button"
-          onClick={() => setIsCartOpen(true)}
-          className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--ink)] text-white shadow-md active:scale-[0.99] transition cursor-pointer"
-          aria-label="Buka Pesanan Saat Ini"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-[var(--brass)]">
-              <Icon name="receipt" />
-            </div>
-            <span className="font-semibold text-sm text-white">
-              Pesanan saat ini
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--brass)] text-[var(--ink)]">
-              {itemCount} item
-            </span>
-            {payableTotal > 0 && (
-              <span className="font-bold text-sm text-[var(--brass-soft)]">
-                {rupiah(payableTotal)}
+        <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] md:hidden">
+          <button
+            type="button"
+            onClick={() => setIsCartOpen(true)}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--ink)] text-white shadow-md active:scale-[0.99] transition cursor-pointer"
+            aria-label="Buka Pesanan Saat Ini"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-[var(--brass)]">
+                <Icon name="receipt" />
+              </div>
+              <span className="font-semibold text-sm text-white">
+                Pesanan saat ini
               </span>
-            )}
-            <span
-              className="flex items-center justify-center w-6 h-6 text-white/80"
-              style={{ transform: "rotate(180deg)" }}
-              aria-hidden="true"
-            >
-              <Icon name="chevron" />
-            </span>
-          </div>
-        </button>
-      </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-[var(--brass)] text-[var(--ink)]">
+                {itemCount} item
+              </span>
+              {payableTotal > 0 && (
+                <span className="font-bold text-sm text-[var(--brass-soft)]">
+                  {rupiah(payableTotal)}
+                </span>
+              )}
+              <span
+                className="flex items-center justify-center w-6 h-6 text-white/80"
+                style={{ transform: "rotate(180deg)" }}
+                aria-hidden="true"
+              >
+                <Icon name="chevron" />
+              </span>
+            </div>
+          </button>
+        </div>
       )}
 
       <div
@@ -1180,6 +1217,13 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <small>Pembayaran</small>
                 <Icon name="wallet" />
               </div>
+              <label className="pay-field" style={{ marginBottom: 12 }}>
+                <span>Tanggal transaksi</span>
+                <CalendarPicker
+                  value={tanggalTransaksi}
+                  onChange={setTanggalTransaksi}
+                />
+              </label>
               <div className="method-grid">
                 {(["Tunai", "QRIS", "Gabungan"] as const).map((value) => (
                   <Button
@@ -1198,6 +1242,27 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </Button>
                 ))}
               </div>
+              {cart.some((line) => line.type === "Layanan") && (
+                <div className="commission-choice">
+                  <span>Komisi layanan</span>
+                  <div
+                    className="method-grid"
+                    role="group"
+                    aria-label="Pilih komisi layanan"
+                  >
+                    {(["Normal", "OT"] as const).map((value) => (
+                      <Button
+                        className={komisiLayanan === value ? "active" : ""}
+                        key={value}
+                        onClick={() => setKomisiLayanan(value)}
+                      >
+                        <strong>{value}</strong>
+                        <small>{value === "Normal" ? "40%" : "50%"}</small>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {method === "Tunai" && (
                 <>
@@ -1236,11 +1301,17 @@ export function CashierPage({ currentUser, onNavigate }: {
                   )}
                   {cash > 0 && (
                     <div
-                      className={`payment-result ${shortage ? "danger" : "success"}`}
+                      className={`payment-result ${
+                        shortage ? "danger" : "success"
+                      }`}
                     >
-                      <span>{shortage ? "Pembayaran kurang" : "Kembalian"}</span>
+                      <span>
+                        {shortage ? "Pembayaran kurang" : "Kembalian"}
+                      </span>
                       <strong>
-                        {shortage ? `Kurang ${rupiah(shortage)}` : rupiah(change)}
+                        {shortage
+                          ? `Kurang ${rupiah(shortage)}`
+                          : rupiah(change)}
                       </strong>
                     </div>
                   )}

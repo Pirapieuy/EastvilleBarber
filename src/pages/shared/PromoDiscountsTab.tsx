@@ -45,7 +45,9 @@ export function PromoDiscountsTab() {
       .list()
       .then((rows) => setPromos(rows.map(dariServer)))
       .catch((e) =>
-        setGagalMuat(e instanceof Error ? e.message : "Gagal memuat kode diskon."),
+        setGagalMuat(
+          e instanceof Error ? e.message : "Gagal memuat kode diskon.",
+        ),
       )
       .finally(() => setMemuat(false))
   }
@@ -106,7 +108,10 @@ export function PromoDiscountsTab() {
 
   async function handleSave(e: FormEvent) {
     e.preventDefault()
-    const kodeBersih = kode.trim().toUpperCase().replace(/[^A-Z0-9]/g, "")
+    const kodeBersih = kode
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
     if (kodeBersih.length < 4 || kodeBersih.length > 20) {
       setError("Kode harus 4-20 huruf atau angka, tanpa spasi.")
       return
@@ -152,7 +157,9 @@ export function PromoDiscountsTab() {
         status: p.status === "Aktif" ? "Nonaktif" : "Aktif",
       })
     } catch (err) {
-      setGagalMuat(err instanceof Error ? err.message : "Gagal mengubah status.")
+      setGagalMuat(
+        err instanceof Error ? err.message : "Gagal mengubah status.",
+      )
     }
   }
 
@@ -255,8 +262,16 @@ export function PromoDiscountsTab() {
                 >
                   {p.jenis === "nominal" ? `Rp ${p.nilai.toLocaleString("id-ID")} OFF` : `${p.nilai}% OFF`}
                 </div>
-                <small style={{ color: "var(--slate)", display: "block", marginBottom: 4 }}>
-                  Kode: <strong style={{ letterSpacing: "0.04em" }}>{p.kode}</strong> · dipakai {p.dipakai}x
+                <small
+                  style={{
+                    color: "var(--slate)",
+                    display: "block",
+                    marginBottom: 4,
+                  }}
+                >
+                  Kode:{" "}
+                  <strong style={{ letterSpacing: "0.04em" }}>{p.kode}</strong>{" "}
+                  · dipakai {p.dipakai}x
                 </small>
                 <small style={{ color: "var(--muted)", display: "block" }}>
                   Masa berlaku:{" "}
@@ -414,7 +429,11 @@ export function PromoDiscountsTab() {
               >
                 Batal
               </Button>
-              <Button className="primary-button" disabled={menyimpan} type="submit">
+              <Button
+                className="primary-button"
+                disabled={menyimpan}
+                type="submit"
+              >
                 {menyimpan ? "Menyimpan…" : "Simpan Diskon"}
               </Button>
             </footer>

@@ -870,10 +870,21 @@ function createTransaksi_(body, user, manual) {
       return t.id === notaBuku || t.nota_buku === notaBuku
     })
     if (dipakai) return fail_("Nomor nota sudah dipakai.")
-    now = new Date(tgl + "T" + jamIn + ":00+07:00")
-  }
-  var nowJam = Number(fmtTanggal_(now, "HHmm"))
-  var lembur = isLembur_(nowJam, peng)
+     now = new Date(tgl + "T" + jamIn + ":00+07:00")
+   } else if (body.tanggal) {
+     var tanggalKasir = String(body.tanggal)
+     if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggalKasir))
+       return fail_("Tanggal transaksi tidak valid.")
+     var jamKasir = fmtTanggal_(now, "HH:mm:ss")
+     now = new Date(tanggalKasir + "T" + jamKasir + "+07:00")
+     if (fmtTanggal_(now, "yyyy-MM-dd") !== tanggalKasir)
+       return fail_("Tanggal transaksi tidak valid.")
+   }
+   var nowJam = Number(fmtTanggal_(now, "HHmm"))
+  var pilihanKomisi = body.komisiLayanan
+  if (pilihanKomisi && pilihanKomisi !== "Normal" && pilihanKomisi !== "OT")
+    return fail_("Pilihan komisi layanan tidak valid.")
+  var lembur = pilihanKomisi ? pilihanKomisi === "OT" : isLembur_(nowJam, peng)
   var kapsterMap = {}
   getSheet(SHEET_USERS)
     .getDataRange()
@@ -899,11 +910,15 @@ function createTransaksi_(body, user, manual) {
       var l = layananMap[it.refId]
       if (!l || l.status !== "Aktif") return fail_("Layanan tidak tersedia.")
       var hargaL = Number(l.harga) * qty
-      var persenL = lembur
-        ? peng.komisi_lembur
-        : override[it.kapsterId] !== undefined
-          ? override[it.kapsterId]
-          : peng.komisi_default
+       var persenL = pilihanKomisi
+         ? pilihanKomisi === "OT"
+           ? 50
+           : 40
+         : lembur
+           ? peng.komisi_lembur
+           : override[it.kapsterId] !== undefined
+             ? override[it.kapsterId]
+             : peng.komisi_default
       var kom = Math.round((hargaL * persenL) / 100)
       subtotal += hargaL
       komisiTotal += kom
@@ -1148,7 +1163,8 @@ function catatPemakaianKode_(kode) {
   var r = readTable_(SHEET_KODE_DISKON).filter(function (x) {
     return normalKode_(x.kode) === kode
   })[0]
-  if (r) setCell_(SHEET_KODE_DISKON, r._row, "dipakai", (Number(r.dipakai) || 0) + 1)
+  if (r)
+    setCell_(SHEET_KODE_DISKON, r._row, "dipakai", (Number(r.dipakai) || 0) + 1)
 }
 
 function simpanKodeDiskon_(body, user) {

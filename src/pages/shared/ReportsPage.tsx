@@ -234,7 +234,9 @@ export function ReportsPage({ currentUser, role }: {
   const [subTab, setSubTab] =
     useState<"pemasukan" | "pengeluaran" | "komisi" | "omzet">("pemasukan")
 
-  const pilihBagian = (bagian: "pemasukan" | "pengeluaran" | "komisi" | "omzet") => {
+  const pilihBagian = (
+    bagian: "pemasukan" | "pengeluaran" | "komisi" | "omzet",
+  ) => {
     setSubTab(bagian)
     document.getElementById(`laporan-${bagian}`)?.scrollIntoView({
       behavior: "smooth",
@@ -505,11 +507,19 @@ export function ReportsPage({ currentUser, role }: {
                 onChange={(d) => d && setTanggal(d)}
               />
               {mode === "Mingguan" && (
-                <span className="report-week-range" aria-label="Rentang tanggal minggu">
+                <span
+                  className="report-week-range"
+                  aria-label="Rentang tanggal minggu"
+                >
                   <strong>
                     {new Date(`${rentang.sampai}T00:00:00`).toLocaleDateString(
                       "id-ID",
-                      { day: "numeric", month: "long", year: "numeric", weekday: "long" },
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        weekday: "long",
+                      },
                     )}
                   </strong>
                 </span>
@@ -721,7 +731,6 @@ export function ReportsPage({ currentUser, role }: {
               </div>
             </div>
           </section>
-
         </div>
       </div>
 
@@ -738,22 +747,22 @@ export function ReportsPage({ currentUser, role }: {
               </div>
             </div>
 
-              <div className="expense-toolbar filters">
-               <div className="search">
-                 <Icon name="search" />
-                 <input
-                   placeholder="Cari keterangan..."
-                   value={expSearch}
-                   onChange={(e) => setExpSearch(e.target.value)}
-                 />
-               </div>
-               <Button
-                 className="primary-button expense-add-button"
-                 onClick={() => setExpenseFormOpen(true)}
-               >
-                 <Icon name="plus" /> Tambah pengeluaran
-               </Button>
-             </div>
+            <div className="expense-toolbar filters">
+              <div className="search">
+                <Icon name="search" />
+                <input
+                  placeholder="Cari keterangan..."
+                  value={expSearch}
+                  onChange={(e) => setExpSearch(e.target.value)}
+                />
+              </div>
+              <Button
+                className="primary-button expense-add-button"
+                onClick={() => setExpenseFormOpen(true)}
+              >
+                <Icon name="plus" /> Tambah pengeluaran
+              </Button>
+            </div>
 
             <div className="expense-table-scroll expense-table-compact">
               <div className="expense-head">
@@ -860,9 +869,8 @@ export function ReportsPage({ currentUser, role }: {
 
       {/* SUB-VIEW 4: TAB OMZET */}
       <div id="laporan-omzet" className="report-section">
-
-          <section className="panel owner-profit-panel" style={{ padding: 22 }}>
-           <PageTitle
+        <section className="panel owner-profit-panel" style={{ padding: 22 }}>
+          <PageTitle
             eyebrow="Kalkulasi Keuntungan"
             title={
               isManager
@@ -979,10 +987,7 @@ export function ReportsPage({ currentUser, role }: {
                 <strong
                   style={{ display: "block", fontSize: 15, color: "#fff" }}
                 >
-                  (=){" "}
-                  {isManager
-                    ? "Laba Bersih Akhir"
-                    : "Sisa Bersih"}
+                  (=) {isManager ? "Laba Bersih Akhir" : "Sisa Bersih"}
                 </strong>
               </div>
               <strong style={{ fontSize: 20, color: "#facc15" }}>

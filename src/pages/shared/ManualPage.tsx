@@ -305,14 +305,21 @@ export function ManualPage() {
           {rows.map((it) => {
             const n = qty[keyOf(it)] ?? 0
             return (
-              <div className={`nota-item ${n > 0 ? "active" : ""}`} key={keyOf(it)}>
+              <div
+                className={`nota-item ${n > 0 ? "active" : ""}`}
+                key={keyOf(it)}
+              >
                 <div className="nota-item-info">
                   <strong>{it.name}</strong>
                   <span>{rupiah(it.price)}</span>
                 </div>
                 {n === 0 ? (
                   <Button
-                    className={`secondary-button nota-add ${it.tipe === "Produk" ? "nota-add-product" : "nota-add-service"}`}
+                    className={`secondary-button nota-add ${
+                      it.tipe === "Produk"
+                        ? "nota-add-product"
+                        : "nota-add-service"
+                    }`}
                     aria-label={`Tambah ${it.name}`}
                     onClick={() => ubahQty(it, 1)}
                   >
@@ -661,15 +668,37 @@ export function ManualPage() {
             <dt>Subtotal</dt>
             <dd>{rupiah(subtotal)}</dd>
           </div>
-          {diskonNum > 0 && (
-            <div>
-              <dt>Diskon</dt>
-              <dd>− {rupiah(diskonNum)}</dd>
-            </div>
-          )}
-          <div className="nota-summary-total">
-            <dt>Total</dt>
-            <dd>{rupiah(total)}</dd>
+          <div className="form-grid manual-info-grid">
+            {method !== "QRIS" && (
+              <label>
+                <span>
+                  {method === "Gabungan" ? "Dibayar tunai" : "Uang diterima"}
+                </span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    onChange={(e) => setCash(e.target.value)}
+                    placeholder={method === "Gabungan" ? "0" : String(total)}
+                    value={cash}
+                  />
+                </div>
+              </label>
+            )}
+            {method === "Gabungan" && (
+              <label>
+                <span>Dibayar QRIS</span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    onChange={(e) => setQris(e.target.value)}
+                    placeholder="0"
+                    value={qris}
+                  />
+                </div>
+              </label>
+            )}
           </div>
           {method === "Tunai" && cashNum > 0 && total > 0 && (
             <div>
