@@ -190,6 +190,8 @@ export function IzinKapster() {
         <div className="izin-layout">
           <div className="izin-layout-cal">
             <KalenderBesar min={besokIso} onChange={setTanggal} value={tanggal} />
+          </div>
+          <div className="izin-layout-form">
             <div className="izin-pilihan">
               <b>{tgl.getDate()}</b>
               <strong>
@@ -197,8 +199,6 @@ export function IzinKapster() {
               </strong>
               <small>{selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}</small>
             </div>
-          </div>
-          <div className="izin-layout-form">
         <div className="form-grid manual-info-grid kasbon-kapster-grid">
           <div className="form-grid-field">
             <span>
