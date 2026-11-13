@@ -860,15 +860,6 @@ export function AbsensiKapster({
                 </Button>
               )}
               <div className="absensi-actions-secondary">
-                {view === "photo" && !fotoWajah && (
-                  <Button
-                    className="secondary-button"
-                    onClick={() => openLeave(selectedKapster)}
-                    disabled={submitting}
-                  >
-                    Izin / Sakit / Cuti
-                  </Button>
-                )}
                 {fotoWajah && (
                   <Button
                     className="secondary-button"
