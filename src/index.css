@@ -13690,3 +13690,52 @@ label .search-select-trigger {
 .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
   margin-top: 14px;
 }
+
+/* Kasir POS: kartu katalog diam, hanya tombol + yang memasukkan ke keranjang */
+.catalog-item {
+  position: relative;
+  cursor: default;
+}
+
+.catalog-item:hover:not(.disabled) {
+  transform: none;
+}
+
+.catalog-item > .catalog-add {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--brass);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--brass);
+}
+
+.catalog-item > .catalog-add:hover:not(:disabled) {
+  border-color: var(--brass-dark);
+  background: var(--brass-dark);
+}
+
+.catalog-item > .catalog-add:disabled {
+  border-color: var(--line);
+  color: var(--muted);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.catalog-item > .catalog-add .icon {
+  width: 16px;
+}
+
+/* Beri ruang agar nama dan harga tidak tertimpa tombol + */
+.catalog-item > strong,
+.catalog-item > b {
+  max-width: calc(100% - 46px);
+}

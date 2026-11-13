@@ -774,66 +774,68 @@ export function CashierPage({ currentUser, onNavigate }: {
               Tidak ada {tab.toLowerCase()} yang cocok.
             </p>
           )}
-          {items.map((item) => (
-            <Button
-              className={`catalog-item ${
-                item.stock === 0 || stokHabis(item.id, item.stock) || !selectedBarber
-                  ? "disabled"
-                  : ""
-              }`}
-              disabled={
-                item.stock === 0 ||
-                stokHabis(item.id, item.stock) ||
-                !selectedBarber
-              }
-              title={
-                !selectedBarber
-                  ? "Kapster belum absen"
-                  : stokHabis(item.id, item.stock)
-                    ? "Stok habis di keranjang"
-                    : undefined
-              }
-              key={item.id}
-              onClick={() =>
-                setCart((c) => {
-                  const found = c.find(
-                    (x) => x.id === item.id && x.barber === selectedBarber,
-                  )
-                  return found
-                    ? c.map((x) =>
-                        x.lineId === found.lineId
-                          ? { ...x, qty: x.qty + 1 }
-                          : x,
-                      )
-                    : [
-                        ...c,
-                        {
-                          ...item,
-                          lineId: `${item.id}-${selectedBarber}`,
-                          qty: 1,
-                          barber: selectedBarber,
-                        },
-                      ]
-                })
-              }
-            >
-              <span className="item-icon">
-                <Icon name={item.type === "Produk" ? "product" : "cashier"} />
-              </span>
-              <strong>{item.name}</strong>
-              <b>{rupiah(item.price)}</b>
-              {item.type === "Produk" && (
-                <small>
-                  <i>
-                    {(item.stock ?? 0) - qtyDiKeranjang(item.id) <= 0
-                      ? "Stok habis"
-                      : `Stok ${(item.stock ?? 0) - qtyDiKeranjang(item.id)}`}
-                  </i>
-                  {item.consignment && <em>Titipan</em>}
-                </small>
-              )}
-            </Button>
-          ))}
+          {items.map((item) => {
+            const tidakBisa =
+              item.stock === 0 ||
+              stokHabis(item.id, item.stock) ||
+              !selectedBarber
+            const alasan = !selectedBarber
+              ? "Kapster belum absen"
+              : stokHabis(item.id, item.stock)
+                ? "Stok habis di keranjang"
+                : undefined
+            const tambah = () =>
+              setCart((c) => {
+                const found = c.find(
+                  (x) => x.id === item.id && x.barber === selectedBarber,
+                )
+                return found
+                  ? c.map((x) =>
+                      x.lineId === found.lineId ? { ...x, qty: x.qty + 1 } : x,
+                    )
+                  : [
+                      ...c,
+                      {
+                        ...item,
+                        lineId: `${item.id}-${selectedBarber}`,
+                        qty: 1,
+                        barber: selectedBarber,
+                      },
+                    ]
+              })
+            return (
+              <div
+                className={`catalog-item ${tidakBisa ? "disabled" : ""}`}
+                key={item.id}
+                title={alasan}
+              >
+                <span className="item-icon">
+                  <Icon name={item.type === "Produk" ? "product" : "cashier"} />
+                </span>
+                <strong>{item.name}</strong>
+                <b>{rupiah(item.price)}</b>
+                {item.type === "Produk" && (
+                  <small>
+                    <i>
+                      {(item.stock ?? 0) - qtyDiKeranjang(item.id) <= 0
+                        ? "Stok habis"
+                        : `Stok ${(item.stock ?? 0) - qtyDiKeranjang(item.id)}`}
+                    </i>
+                    {item.consignment && <em>Titipan</em>}
+                  </small>
+                )}
+                <Button
+                  aria-label={`Tambah ${item.name} ke keranjang`}
+                  className="catalog-add"
+                  disabled={tidakBisa}
+                  onClick={tambah}
+                  title={alasan ?? "Tambah ke keranjang"}
+                >
+                  <Icon name="plus" />
+                </Button>
+              </div>
+            )
+          })}
         </div>
       </section>
       {cart.length > 0 && (
