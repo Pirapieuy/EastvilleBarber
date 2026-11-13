@@ -212,6 +212,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   const [liveError, setLiveError] = useState("")
   const [fetching, setFetching] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
+  const [komisiInfoTerbuka, setKomisiInfoTerbuka] = useState(false)
   const isKapsterView =
     role === "Kapster" ||
     forcedRole === "Kapster" ||
@@ -477,7 +478,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
 
   if (isKapsterView) {
     return (
-      <div className="mobile-content">
+      <div className="mobile-content kapster-product-commission">
         {!forcedRole && !getToken() && (
           <div className="role-preview">
             <span>Pratinjau peran</span>
@@ -504,7 +505,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
         </div>
         {mode === "Bulanan" ? (
           <div className="commission-month-shell">
-            <span className="commission-month-label">Periode komisi</span>
             <MonthPicker
               max={TANGGAL_MAKS()}
               min={TANGGAL_MULAI}
@@ -513,12 +513,14 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
             />
           </div>
         ) : (
-          <CalendarPicker
-            max={TANGGAL_MAKS()}
-            min={TANGGAL_MULAI}
-            value={tanggal}
-            onChange={(d) => d && setTanggal(d)}
-          />
+          <div className="commission-month-shell">
+            <CalendarPicker
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              value={tanggal}
+              onChange={(d) => d && setTanggal(d)}
+            />
+          </div>
         )}
         {(() => {
           const lunas = live ? txList.filter((t) => t.status === "Lunas") : null
@@ -564,7 +566,29 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
               <section className="panel customer-list">
                 <PageTitle
                   eyebrow="Penjualan pribadi"
-                  title="Komisi per produk"
+                  title={
+                    <span className="product-commission-title">
+                      <span>Komisi per produk</span>
+                      <span className="product-commission-info-anchor">
+                        <button
+                          type="button"
+                          className="product-commission-info-button"
+                          aria-label="Informasi komisi per produk"
+                          aria-expanded={komisiInfoTerbuka}
+                          onClick={() =>
+                            setKomisiInfoTerbuka((open) => !open)
+                          }
+                        >
+                          <Icon name="alert" />
+                        </button>
+                        {komisiInfoTerbuka && (
+                          <span className="product-commission-info-popover" role="status">
+                            Bagian seller dan Eastville tidak ditampilkan.
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                  }
                 />
                 {daftar.map((x) => (
                   <div key={x[0]}>
@@ -584,9 +608,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
             </>
           )
         })()}
-        <div className="privacy">
-          <Icon name="lock" /> Bagian seller dan Eastville tidak ditampilkan.
-        </div>
       </div>
     )
   }

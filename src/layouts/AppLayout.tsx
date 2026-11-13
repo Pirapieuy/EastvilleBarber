@@ -115,7 +115,7 @@ export function AppLayout({
 
   return (
     <div
-      className={`app-shell ${
+      className={`app-shell app-shell-${roleKey} ${
         sidebarExpanded ? "sidebar-expanded" : "sidebar-collapsed"
       }`}
     >

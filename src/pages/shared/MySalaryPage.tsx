@@ -9,6 +9,7 @@ import {
 import { apiGaji, getToken, HitungGajiResult } from "../../api"
 
 export function MySalaryPage() {
+  const [infoTerbuka, setInfoTerbuka] = useState(false)
   const punyaToken = Boolean(getToken())
   const [data, setData] = useState<HitungGajiResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -34,7 +35,7 @@ export function MySalaryPage() {
 
   if (!punyaToken) {
     return (
-      <div className="mobile-content">
+      <div className="mobile-content my-salary-page">
         <PageTitle eyebrow="Pendapatan pribadi" title="Gaji Saya" />
         <p>Silakan login untuk melihat gaji dan komisi Anda.</p>
       </div>
@@ -51,7 +52,7 @@ export function MySalaryPage() {
 
   if (!data) {
     return (
-      <div className="mobile-content">
+      <div className="mobile-content my-salary-page">
         <PageTitle eyebrow="Pendapatan pribadi" title="Gaji Saya" />
         <p>Data gaji gagal dimuat: {error}</p>
         <Button className="primary-button" onClick={fetchData}>
@@ -62,7 +63,7 @@ export function MySalaryPage() {
   }
 
   return (
-    <div className="mobile-content">
+    <div className="mobile-content my-salary-page">
       <PageTitle
         eyebrow="Pendapatan pribadi"
         title="Gaji Saya"
@@ -94,7 +95,27 @@ export function MySalaryPage() {
       <section className="panel salary-breakdown">
         <PageTitle
           eyebrow="Perincian pendapatan"
-          title="Rincian gaji & kasbon"
+          title={
+            <span className="product-commission-title">
+              <span>Rincian gaji & kasbon</span>
+              <span className="product-commission-info-anchor">
+                <button
+                  type="button"
+                  className="product-commission-info-button"
+                  aria-label="Informasi gaji dan komisi"
+                  aria-expanded={infoTerbuka}
+                  onClick={() => setInfoTerbuka((open) => !open)}
+                >
+                  <Icon name="alert" />
+                </button>
+                {infoTerbuka && (
+                  <span className="product-commission-info-popover" role="status">
+                    Hanya data komisi dan transaksi milik akun Anda yang ditampilkan.
+                  </span>
+                )}
+              </span>
+            </span>
+          }
         />
         <div key="komisi">
           <span>
@@ -135,10 +156,6 @@ export function MySalaryPage() {
         </section>
       )}
 
-      <div className="privacy" style={{ marginTop: 20 }}>
-        <Icon name="lock" /> Hanya data komisi dan transaksi milik akun Anda
-        yang ditampilkan.
-      </div>
     </div>
   )
 }
