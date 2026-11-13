@@ -39,7 +39,9 @@ export function AbsensiKapster({
 } = {}) {
   const todayIso = new Date().toISOString().slice(0, 10)
   const [tanggal, setTanggal] = useState(todayIso)
-  const [kapsters, setKapsters] = useState<{ id: string nama: string }[]>([])
+  const [kapsters, setKapsters] = useState<
+    { id: string; nama: string }[]
+  >([])
   const [absensi, setAbsensi] = useState<AbsensiRow[]>([])
   const [riwayatAbsensi, setRiwayatAbsensi] = useState<AbsensiRow[]>([])
   const [activeTab, setActiveTab] = useState<"absensi" | "riwayat">("absensi")
@@ -55,6 +57,7 @@ export function AbsensiKapster({
   const [fotoWajah, setFotoWajah] = useState("")
   const [photoError, setPhotoError] = useState("")
   const [cameraReady, setCameraReady] = useState(false)
+  const [cameraRetry, setCameraRetry] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [status, setStatus] = useState<AbsensiStatus>("Hadir")
   const [catatan, setCatatan] = useState("")
@@ -91,7 +94,16 @@ export function AbsensiKapster({
           cameraStream.getTracks().forEach((track) => track.stop())
           return
         }
-        if (videoRef.current) videoRef.current.srcObject = cameraStream
+        const video = videoRef.current
+        if (!video) return
+        video.srcObject = cameraStream
+        void video.play().catch(() => {
+          if (active) {
+            setPhotoError(
+              "Pratinjau kamera diblokir. Ketuk Coba Kamera untuk menghubungkan ulang.",
+            )
+          }
+        })
       })
       .catch((error: unknown) => {
         if (!active) return
@@ -106,7 +118,7 @@ export function AbsensiKapster({
       stream?.getTracks().forEach((track) => track.stop())
       if (videoRef.current) videoRef.current.srcObject = null
     }
-  }, [view, fotoWajah])
+  }, [view, fotoWajah, cameraRetry])
 
   const statusByUser = useMemo(() => {
     const map = new Map<string, AbsensiRow>()
@@ -189,7 +201,7 @@ export function AbsensiKapster({
     [statusByUser, tanggal],
   )
 
-  function openKapster(kapster: { id: string nama: string }) {
+  function openKapster(kapster: { id: string; nama: string }) {
     setSelectedKapster(kapster)
     setFotoWajah("")
     setPhotoError("")
@@ -723,6 +735,7 @@ export function AbsensiKapster({
                   muted
                   playsInline
                   onLoadedMetadata={() => setCameraReady(true)}
+                  onPlaying={() => setCameraReady(true)}
                   aria-label="Pratinjau kamera wajah kapster"
                 />
                 {!cameraReady && !photoError && (
@@ -737,6 +750,22 @@ export function AbsensiKapster({
               <p role="alert" className="absensi-error">
                 {photoError}
               </p>
+            )}
+            {!fotoWajah && photoError && (
+              <div style={{ textAlign: "center", marginBottom: 12 }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ padding: "8px 16px" }}
+                  onClick={() => {
+                    setPhotoError("")
+                    setCameraReady(false)
+                    setCameraRetry((n) => n + 1)
+                  }}
+                >
+                  Coba Kamera
+                </button>
+              </div>
             )}
             <div className="absensi-actions">
               {fotoWajah ? (

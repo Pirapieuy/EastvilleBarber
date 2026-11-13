@@ -271,6 +271,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [selectedBarber, setSelectedBarber] = useState("")
   const [cart, setCart] = useState<CartLine[]>([])
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
+  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
   const [cash, setCash] = useState(0)
   const [qrisInput, setQrisInput] = useState(0)
   const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
@@ -294,7 +295,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
   const [catalogData, setCatalogData] = useState<CatalogItem[]>([])
-  const [barberList, setBarberList] = useState<{ id?: string name: string }[]>(
+  const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
     [],
   )
   const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(new Set())
@@ -307,7 +308,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [saveReceiptError, setSaveReceiptError] = useState("")
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
-  const cartSwipeStart = useRef<{ lineId: string x: number y: number } | null>(
+  const cartSwipeStart = useRef<{ lineId: string; x: number; y: number } | null>(
     null,
   )
   const cartWheelSwipe = useRef<{
@@ -429,6 +430,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         alasan: discountReason || undefined,
         kodeDiskon: effectiveDiscount > 0 ? kodeTerpakai : undefined,
         clientRequestId: requestId.current,
+        komisiLayanan,
         bayarTunai: tunaiTerpakai,
         bayarQris: qris,
         items: cart.map((l) => ({
@@ -662,6 +664,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     setCart([])
     setCash(0)
     setQrisInput(0)
+    setKomisiLayanan("Normal")
     setDiscount(0)
     setAppliedDiscountPercent(null)
     setDiscountReason("")
@@ -1221,6 +1224,27 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </Button>
                 ))}
               </div>
+              {cart.some((line) => line.type === "Layanan") && (
+                <div className="commission-choice">
+                  <span>Komisi layanan</span>
+                  <div
+                    className="method-grid"
+                    role="group"
+                    aria-label="Pilih komisi layanan"
+                  >
+                    {(["Normal", "OT"] as const).map((value) => (
+                      <Button
+                        className={komisiLayanan === value ? "active" : ""}
+                        key={value}
+                        onClick={() => setKomisiLayanan(value)}
+                      >
+                        <strong>{value}</strong>
+                        <small>{value === "Normal" ? "40%" : "50%"}</small>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {method === "Tunai" && (
                 <>

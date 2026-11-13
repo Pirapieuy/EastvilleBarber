@@ -151,6 +151,7 @@ export interface CheckoutPayload {
   kodeDiskon?: string
   /** Id unik per percobaan bayar: server tidak membuat nota ganda bila dikirim ulang */
   clientRequestId?: string
+  komisiLayanan?: "Normal" | "OT"
 }
 
 export const apiLayanan = {
@@ -167,9 +168,9 @@ export const apiLayanan = {
 export const apiKasir = {
   layanan: () => api<LayananRow[]>("list-layanan"),
   produk: () => api<ProdukRow[]>("list-produk"),
-  kapster: () => api<{ id: string nama: string }[]>("list-kapster"),
+  kapster: () => api<{ id: string; nama: string }[]>("list-kapster"),
   checkout: (p: CheckoutPayload) =>
-    api<{ id: string total: number kembalian: number }>("create-transaksi", {
+    api<{ id: string; total: number; kembalian: number }>("create-transaksi", {
       ...p,
     }),
   /** Cek PIN Owner/Manajer lebih awal (khusus Kasir; 5x salah = tunggu 5 menit). Gagal -> melempar Error. */
@@ -177,7 +178,7 @@ export const apiKasir = {
     api<{ valid: boolean }>("verifikasi-pin-otorisasi", { pin }),
   /** Cek kode diskon unik ke server (nama dan persen untuk ditampilkan di keranjang) */
   cekKode: (kode: string) =>
-    api<{ kode: string nama: string persen: number }>("cek-kode-diskon", {
+    api<{ kode: string; nama: string; persen: number }>("cek-kode-diskon", {
       kode,
     }),
 }
@@ -216,23 +217,23 @@ export const apiTutupKasir = {
   /** Ringkasan sistem shift berjalan (Kasir). */
   rekap: () => api<RekapShift>("rekap-kasir"),
   tutup: (uangFisik: number, catatan: string) =>
-    api<{ id: string selisih: number tunaiSistem: number uangFisik: number }>(
+    api<{ id: string; selisih: number; tunaiSistem: number; uangFisik: number }>(
       "tutup-kasir",
       { uangFisik, catatan },
     ),
   /** Kasir: miliknya sendiri; Owner/Manajer: semua kasir. */
-  list: (range: { dari?: string sampai?: string } = {}) =>
+  list: (range: { dari?: string; sampai?: string } = {}) =>
     api<TutupKasirRow[]>("list-tutup-kasir", range),
 }
 
 export const apiTransaksi = {
-  list: (range: { dari?: string sampai?: string } = {}) =>
+  list: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("list-transaksi", range),
   /** Rekap manual: transaksi susulan dari buku. Nomor nota = nomor buku. */
   manual: (
-    p: CheckoutPayload & { tanggal: string nomorNota: string jam?: string },
+    p: CheckoutPayload & { tanggal: string; nomorNota: string; jam?: string },
   ) =>
-    api<{ id: string total: number lembur?: boolean }>(
+    api<{ id: string; total: number; lembur?: boolean }>(
       "create-transaksi-manual",
       { ...p },
     ),
@@ -270,7 +271,7 @@ export interface PengaturanKomisi {
   jamSelesai: string
   komisiDefault: number
   komisiLembur: number
-  kapster: { id: string nama: string persen: number | null }[]
+  kapster: { id: string; nama: string; persen: number | null }[]
 }
 
 export const apiPengaturan = {
@@ -300,7 +301,7 @@ export interface KomisiKapsterRow {
 
 export const apiKomisi = {
   /** Komisi per kapster untuk satu periode (yyyy-MM-dd). Kapster hanya mendapat dirinya sendiri. */
-  list: (range: { dari?: string sampai?: string kapsterId?: string } = {}) =>
+  list: (range: { dari?: string; sampai?: string; kapsterId?: string } = {}) =>
     api<KomisiKapsterRow[]>("list-komisi", range),
 }
 
@@ -333,7 +334,7 @@ export interface LaporanKeuangan {
   /** pemasukan - pengeluaran - komisi kapster */
   sisa: number
   jumlahTransaksi: number
-  perHari: { tanggal: string total: number tunai: number qris: number }[]
+  perHari: { tanggal: string; total: number; tunai: number; qris: number }[]
   perKapster: {
     kapsterId: string
     kapster: string
@@ -341,28 +342,28 @@ export interface LaporanKeuangan {
     omzet: number
     komisi: number
   }[]
-  stokMenipis: { kode: string nama: string stok: number }[]
+  stokMenipis: { kode: string; nama: string; stok: number }[]
 }
 
 export const apiLaporan = {
   /** Ringkasan versi Tim B (ringkasan-laporan, Kode.js) */
-  ringkasan: (filter: { dari?: string sampai?: string } = {}) =>
+  ringkasan: (filter: { dari?: string; sampai?: string } = {}) =>
     api<RingkasanLaporan>("ringkasan-laporan", filter),
-  keuangan: (range: { dari?: string sampai?: string } = {}) =>
+  keuangan: (range: { dari?: string; sampai?: string } = {}) =>
     api<LaporanKeuangan>("laporan-keuangan", range),
-  produk: (range: { dari?: string sampai?: string } = {}) =>
+  produk: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("laporan-produk", range),
 }
 
 export const apiBackup = {
   list: () =>
-    api<{ nama: string dibuat: string sheet: number baris: number }[]>(
+    api<{ nama: string; dibuat: string; sheet: number; baris: number }[]>(
       "backup-list",
     ),
   buat: () => api<{ nama: string }>("backup-buat"),
   /** Mengganti isi sheet bisnis dengan isi backup; server membuat backup pengaman dulu. */
   pulihkan: (nama: string) =>
-    api<{ nama: string sheet: number pengaman: string }>("backup-pulihkan", {
+    api<{ nama: string; sheet: number; pengaman: string }>("backup-pulihkan", {
       nama,
     }),
   hapus: (nama: string) => api<{ nama: string }>("backup-hapus", { nama }),
@@ -379,14 +380,14 @@ export const apiBackup = {
 
 export const apiAuth = {
   forgotPin: (email: string) =>
-    api<{ resetToken: string email: string }>("forgot-pin", { email }),
+    api<{ resetToken: string; email: string }>("forgot-pin", { email }),
   resetPin: (email: string, resetToken: string, newPin: string) =>
-    api<{ success: boolean message: string }>("reset-pin", {
+    api<{ success: boolean; message: string }>("reset-pin", {
       email,
       resetToken,
       newPin,
     }),
-  logout: () => api<{ success: boolean message: string }>("logout"),
+  logout: () => api<{ success: boolean; message: string }>("logout"),
 }
 
 export interface UserRow {
@@ -472,7 +473,7 @@ export interface HitungGajiResult {
   totalKasbon: number
   gajiBersih: number
   transaksiSelesai: number
-  kasbonAktif: { id: string tanggal: string jumlah: number catatan: string }[]
+  kasbonAktif: { id: string; tanggal: string; jumlah: number; catatan: string }[]
 }
 
 export const apiKasbon = {
@@ -500,7 +501,7 @@ export const apiGaji = {
     gajiBersih?: number
     catatan?: string
   }) =>
-    api<{ id: string gajiBersih: number status: string }>("bayar-gaji", {
+    api<{ id: string; gajiBersih: number; status: string }>("bayar-gaji", {
       ...p,
     }),
   list: () => api<GajiRow[]>("list-gaji"),
@@ -540,12 +541,12 @@ export interface AbsensiRow {
 }
 
 export const apiAbsensi = {
-  catat: (p: { tipe: "Masuk" | "Pulang" fotoUrl?: string catatan?: string }) =>
+  catat: (p: { tipe: "Masuk" | "Pulang"; fotoUrl?: string; catatan?: string }) =>
     api<AbsensiRow>("catat-absensi", { ...p }),
-  list: (filter: { tanggal?: string userId?: string } = {}) =>
+  list: (filter: { tanggal?: string; userId?: string } = {}) =>
     api<AbsensiRow[]>("list-absensi", filter),
-  koreksi: (p: { id: string status: string catatan?: string }) =>
-    api<{ id: string status: string koreksiOleh: string }>(
+  koreksi: (p: { id: string; status: string; catatan?: string }) =>
+    api<{ id: string; status: string; koreksiOleh: string }>(
       "koreksi-absensi",
       p,
     ),
@@ -586,7 +587,7 @@ export interface AuditLogRow {
 }
 
 export const apiAudit = {
-  list: (filter: { tanggal?: string aksi?: string user?: string } = {}) =>
+  list: (filter: { tanggal?: string; aksi?: string; user?: string } = {}) =>
     api<AuditLogRow[]>("list-audit", filter),
 }
 

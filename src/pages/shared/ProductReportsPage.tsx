@@ -191,8 +191,10 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">(
     "Semua",
   )
-  const activeTab = "transaksi"
-  const setActiveTab = (_tab: string) => undefined
+  const [activeTab, setActiveTab] =
+    useState<"transaksi" | "omzet" | "komisi" | "pemasok" | "eastville" | "ringkasan">(
+      "transaksi",
+    )
   const [expandedTxId, setExpandedTxId] = useState<string | null>(null)
   const toggleExpand = (id: string) => {
     setExpandedTxId((prev) => (prev === id ? null : id))
@@ -249,7 +251,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   }, [rentang.dari, rentang.sampai, reloadKey])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
-    const per: Record<string, { unit: number omzet: number }> = {}
+    const per: Record<string, { unit: number; omzet: number }> = {}
     txList
       .filter((tx) => tx.status === "Lunas")
       .forEach((tx) => {
@@ -326,7 +328,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   )
 
   const omzetPerProduk = useMemo(() => {
-    const map: Record<string, { product: string qty: number omzet: number }> =
+    const map: Record<string, { product: string; qty: number; omzet: number }> =
       {}
     validTransactions.forEach((tx) => {
       const item = map[tx.product] ?? {
@@ -931,28 +933,71 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
                     {isOpen && (
                       <div className="product-report-mobile-detail flex flex-col divide-y divide-stone-200/70 px-4 py-2 w-full">
                         <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">Harga Satuan</span>
-                          <span className="text-sm font-semibold text-stone-900 text-right">{rupiah(tx.unitPrice)} × {tx.qty} unit</span>
-                        </div>
-                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">Kapster Penjual</span>
-                          <span className="flex flex-col items-end text-right">
-                            <span className="text-sm font-semibold text-stone-900">{tx.barber}</span>
-                            <span className="text-xs text-amber-700">Komisi: {rupiah(tx.barberShare)} ({tx.totalOmzet > 0 ? ((tx.barberShare / tx.totalOmzet) * 100).toFixed(0) : 0}%)</span>
+                          <span className="text-xs text-stone-500 text-left">
+                            Harga Satuan
+                          </span>
+                          <span className="text-sm font-semibold text-stone-900 text-right">
+                            {rupiah(tx.unitPrice)} × {tx.qty} unit
                           </span>
                         </div>
                         <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">Bagian Pemasok</span>
+                          <span className="text-xs text-stone-500 text-left">
+                            Kapster Penjual
+                          </span>
                           <span className="flex flex-col items-end text-right">
-                            <span className="text-sm font-semibold text-stone-900">{tx.seller}</span>
-                            <span className="text-xs text-amber-700">{rupiah(tx.sellerShare)} ({tx.totalOmzet > 0 ? ((tx.sellerShare / tx.totalOmzet) * 100).toFixed(0) : 0}%)</span>
+                            <span className="text-sm font-semibold text-stone-900">
+                              {tx.barber}
+                            </span>
+                            <span className="text-xs text-amber-700">
+                              Komisi: {rupiah(tx.barberShare)} (
+                              {tx.totalOmzet > 0
+                                ? (
+                                    (tx.barberShare / tx.totalOmzet) *
+                                    100
+                                  ).toFixed(0)
+                                : 0}
+                              %)
+                            </span>
                           </span>
                         </div>
                         <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">Bagian Eastville</span>
+                          <span className="text-xs text-stone-500 text-left">
+                            Bagian Pemasok
+                          </span>
                           <span className="flex flex-col items-end text-right">
-                            <span className="text-sm font-semibold text-stone-900">{rupiah(tx.eastvilleShare)} ({tx.totalOmzet > 0 ? ((tx.eastvilleShare / tx.totalOmzet) * 100).toFixed(0) : 0}%)</span>
-                            <span className="text-xs text-stone-500">Laba toko barbershop</span>
+                            <span className="text-sm font-semibold text-stone-900">
+                              {tx.seller}
+                            </span>
+                            <span className="text-xs text-amber-700">
+                              {rupiah(tx.sellerShare)} (
+                              {tx.totalOmzet > 0
+                                ? (
+                                    (tx.sellerShare / tx.totalOmzet) *
+                                    100
+                                  ).toFixed(0)
+                                : 0}
+                              %)
+                            </span>
+                          </span>
+                        </div>
+                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
+                          <span className="text-xs text-stone-500 text-left">
+                            Bagian Eastville
+                          </span>
+                          <span className="flex flex-col items-end text-right">
+                            <span className="text-sm font-semibold text-stone-900">
+                              {rupiah(tx.eastvilleShare)} (
+                              {tx.totalOmzet > 0
+                                ? (
+                                    (tx.eastvilleShare / tx.totalOmzet) *
+                                    100
+                                  ).toFixed(0)
+                                : 0}
+                              %)
+                            </span>
+                            <span className="text-xs text-stone-500">
+                              Laba toko barbershop
+                            </span>
                           </span>
                         </div>
                       </div>

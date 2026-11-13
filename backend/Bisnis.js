@@ -848,7 +848,10 @@ function createTransaksi_(body, user, manual) {
     now = new Date(tgl + "T" + jamIn + ":00+07:00")
   }
   var nowJam = Number(fmtTanggal_(now, "HHmm"))
-  var lembur = isLembur_(nowJam, peng)
+  var pilihanKomisi = body.komisiLayanan
+  if (pilihanKomisi && pilihanKomisi !== "Normal" && pilihanKomisi !== "OT")
+    return fail_("Pilihan komisi layanan tidak valid.")
+  var lembur = pilihanKomisi ? pilihanKomisi === "OT" : isLembur_(nowJam, peng)
   var kapsterMap = {}
   getSheet(SHEET_USERS)
     .getDataRange()
@@ -874,11 +877,15 @@ function createTransaksi_(body, user, manual) {
       var l = layananMap[it.refId]
       if (!l || l.status !== "Aktif") return fail_("Layanan tidak tersedia.")
       var hargaL = Number(l.harga) * qty
-      var persenL = lembur
-        ? peng.komisi_lembur
-        : override[it.kapsterId] !== undefined
-          ? override[it.kapsterId]
-          : peng.komisi_default
+       var persenL = pilihanKomisi
+         ? pilihanKomisi === "OT"
+           ? 50
+           : 40
+         : lembur
+           ? peng.komisi_lembur
+           : override[it.kapsterId] !== undefined
+             ? override[it.kapsterId]
+             : peng.komisi_default
       var kom = Math.round((hargaL * persenL) / 100)
       subtotal += hargaL
       komisiTotal += kom

@@ -65,7 +65,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
   const [filterTanggal, setFilterTanggal] = useState(today)
   const [filterKapster, setFilterKapster] = useState("Semua")
   const [kapsters, setKapsters] =
-    useState<{ id: string nama: string }[]>(DEFAULT_KAPSTERS)
+    useState<{ id: string; nama: string }[]>(DEFAULT_KAPSTERS)
   const [absensiList, setAbsensiList] = useState<AbsensiRow[]>([
     {
       id: "a-01",
