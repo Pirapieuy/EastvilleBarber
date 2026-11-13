@@ -1547,6 +1547,13 @@ textarea {
   grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
 }
 
+@media (max-width: 700px) {
+  .kapster-dashboard .kpi-grid {
+    gap: 8px;
+    margin-top: 14px;
+  }
+}
+
 .kapster-shift-panel,
 .kapster-activity-panel {
   min-width: 0;
@@ -10336,6 +10343,122 @@ textarea {
     flex-wrap: wrap;
   }
 
+  .app-shell-kapster .my-salary-page {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding-bottom: 24px;
+  }
+
+  .app-shell-kapster .my-salary-page > .page-title,
+  .app-shell-kapster .my-salary-page > .my-salary-hero,
+  .app-shell-kapster .my-salary-page > .salary-breakdown,
+  .app-shell-kapster .my-salary-page > .customer-list,
+  .app-shell-kapster .my-salary-page > .privacy {
+    margin-top: 0 !important;
+  }
+
+  .app-shell-kapster .my-salary-page > .salary-breakdown {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-shell-kapster .my-salary-page > .customer-list {
+    max-height: max(180px, calc(100svh - 560px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-shell-kapster .salary-breakdown > .page-title {
+    margin-bottom: 4px;
+  }
+
+  .app-shell-kapster .salary-breakdown > div:not(.page-title) {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding-block: 5px;
+  }
+
+  .app-shell-kapster .salary-breakdown > div > strong {
+    line-height: 1.35;
+  }
+
+  .app-shell-kapster .salary-breakdown > div > b {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .app-shell-kapster .salary-breakdown footer {
+    align-items: center;
+    gap: 12px;
+    margin: 8px 4px 0;
+  }
+
+  .app-shell-kapster .customer-list > div:not(.page-title) {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "icon title amount"
+      "icon date amount";
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 3px;
+    min-height: 62px;
+    margin-top: 9px;
+    padding: 10px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #fffdf9 0%, #f4f8f3 100%);
+    box-shadow:
+      0 4px 12px rgb(20 17 15 / 7%),
+      inset 3px 0 0 var(--sage-soft);
+  }
+
+  .app-shell-kapster .customer-list > div > span {
+    grid-area: date;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .app-shell-kapster .customer-list > div > i {
+    grid-area: icon;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .app-shell-kapster .customer-list > div > strong {
+    grid-area: title;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .app-shell-kapster .customer-list > div > b {
+    grid-area: amount;
+    justify-self: end;
+    padding: 7px 9px;
+    border-radius: 8px;
+    background: var(--sage-soft);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 380px) {
+    .app-shell-kapster .customer-list > div:not(.page-title) {
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      column-gap: 7px;
+    }
+
+    .app-shell-kapster .customer-list > div > b {
+      padding: 6px 7px;
+      font-size: 11px;
+    }
+  }
+
   .kapster-shift-panel,
   .kapster-activity-panel {
     padding: 16px;
@@ -10523,6 +10646,20 @@ textarea {
 }
 
 @media (max-width: 1024px) {
+  /* Kapster already has the page name in the fixed mobile navbar. Keep the
+     page actions, but remove the duplicate title beneath it. */
+  .app-shell-kapster .content > .page-title > div:first-child,
+  .app-shell-kapster .mobile-content > .page-title > div:first-child {
+    display: none !important;
+  }
+
+  .app-shell-kapster .content > .page-title,
+  .app-shell-kapster .mobile-content > .page-title {
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 36px;
+  }
+
   .app-shell {
     display: block;
   }
@@ -10883,7 +11020,7 @@ textarea {
 }
 
 .commission-month-shell {
-  width: min(100%, 340px);
+  width: 100%;
   display: grid;
   gap: 6px;
   margin: 10px 0 18px;
@@ -10904,7 +11041,7 @@ textarea {
 .commission-month-shell .calendar-picker-btn {
   width: 100%;
   min-height: 56px;
-  justify-content: flex-start;
+  justify-content: center;
   border-radius: 13px;
   color: var(--ink);
   background: var(--paper);
@@ -10925,10 +11062,100 @@ textarea {
   font-weight: 700;
 }
 
+.product-commission-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.product-commission-info-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-commission-info-button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--brass);
+  background: transparent;
+  cursor: pointer;
+}
+
+.product-commission-info-button .icon {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.product-commission-info-popover {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: calc(100% + 8px);
+  width: min(190px, calc(100vw - 100px));
+  padding: 10px 12px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 9px;
+  color: var(--paper);
+  background: var(--ink);
+  box-shadow: 0 8px 22px rgb(20 17 15 / 16%);
+  font: 500 12px/1.4 var(--body);
+}
+
 @media (max-width: 480px) {
   .commission-month-shell {
     width: 100%;
     margin-top: 8px;
+  }
+
+  .product-commission-title {
+    position: relative;
+    width: 100%;
+  }
+
+  .product-commission-info-anchor {
+    position: relative;
+  }
+
+  .product-commission-info-button {
+    width: 28px;
+  }
+
+  .product-commission-info-popover {
+    top: 50%;
+    right: auto;
+    left: calc(100% + 4px);
+    width: clamp(100px, 36vw, 150px);
+    max-width: calc(100vw - 220px);
+    padding: 8px 9px;
+    transform: translateY(-50%);
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 700px) {
+  .kapster-dashboard .progress-meta {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-shell-kapster .kapster-product-commission > .calendar-picker-wrapper,
+  .app-shell-kapster .kapster-product-commission > .commission-month-shell,
+  .app-shell-kapster .kapster-product-commission .commission-month-shell .calendar-picker-wrapper,
+  .app-shell-kapster .kapster-product-commission > .calendar-picker-wrapper > .calendar-picker-btn,
+  .app-shell-kapster .kapster-product-commission .commission-month-shell .calendar-picker-btn {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
   }
 }
 
