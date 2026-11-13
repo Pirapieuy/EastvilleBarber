@@ -13777,57 +13777,125 @@ label .search-select-trigger {
 .izin-kapster-page > .panel + .panel {
   margin-top: 16px;
 }
-.izin-date-hero {
+.izin-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 14px;
+  align-items: start;
+}
+.izin-cal {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+.izin-cal-head {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-top: 14px;
-  padding: 16px 18px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.izin-cal-head strong {
+  font-size: 18px;
+  color: var(--ink);
+}
+.izin-cal-nav {
+  display: flex;
+  gap: 8px;
+}
+.izin-cal-nav button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.izin-cal-nav button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.izin-cal-week,
+.izin-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+.izin-cal-week {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--slate);
+}
+.izin-cal-grid button {
+  height: 42px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.izin-cal-grid button:hover:not(:disabled):not(.sel) {
+  background: var(--bone);
+}
+.izin-cal-grid button.today {
+  background: rgba(200, 150, 62, 0.12);
+}
+.izin-cal-grid button.sel {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: 800;
+}
+.izin-cal-grid button:disabled {
+  color: var(--muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.izin-pilihan {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--bone);
 }
-.izin-date-day {
-  font-size: 56px;
+.izin-pilihan b {
+  min-width: 48px;
+  font-size: 36px;
   line-height: 1;
-  font-weight: 800;
-  color: var(--brass);
-  min-width: 72px;
   text-align: center;
+  color: var(--brass);
 }
-.izin-date-meta {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-.izin-date-meta strong {
-  font-size: 18px;
+.izin-pilihan strong {
+  display: block;
+  font-size: 14px;
   color: var(--ink);
 }
-.izin-date-meta span {
-  font-size: 14px;
-  color: var(--slate);
-}
-.izin-date-meta small {
-  font-size: 12px;
+.izin-pilihan small {
   color: var(--muted);
+  font-size: 12px;
 }
-.izin-date-picker {
-  width: 190px;
-  flex: none;
+.izin-layout-form .kasbon-kapster-grid {
+  margin-top: 0;
+  grid-template-columns: 1fr;
+}
+@media (max-width: 820px) {
+  .izin-layout {
+    grid-template-columns: 1fr;
+  }
 }
 .izin-kapster-page .segmented {
   width: 100%;
 }
 .izin-kapster-page .segmented > * {
   flex: 1;
-}
-@media (max-width: 768px) {
-  .izin-date-hero {
-    flex-wrap: wrap;
-  }
-  .izin-date-picker {
-    width: 100%;
-  }
 }

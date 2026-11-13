@@ -1,21 +1,98 @@
 import { FormEvent, useEffect, useMemo, useState } from "react"
 import { AbsensiRow, apiAbsensi, apiAbsensiKapster, apiKasir, getToken } from "../../api"
-import { CalendarPicker } from "../../components/common/CalendarPicker"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { Icon } from "../../components/common/Icon"
 import { Button, LoadingState } from "../../components/common/UI"
 import { formatTanggal, tanggalIsoLokal } from "../../utils/tanggal"
 
 const JENIS = ["Izin", "Sakit", "Cuti"] as const
 type Jenis = (typeof JENIS)[number]
 
-const HARI = new Intl.DateTimeFormat("id-ID", { weekday: "long" })
-const BULAN_TAHUN = new Intl.DateTimeFormat("id-ID", {
-  month: "long",
-  year: "numeric",
-})
-
+const NAMA_BULAN = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+]
+const HARI_SINGKAT = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
+const HARI_PANJANG = new Intl.DateTimeFormat("id-ID", { weekday: "long" })
+const pad = (n: number) => String(n).padStart(2, "0")
 const dariIso = (iso: string) => new Date(`${iso}T12:00:00`)
+
+// Kalender bulanan yang langsung tampil di halaman; tanggal sebelum `min` abu-abu.
+function KalenderBesar({
+  value,
+  min,
+  onChange,
+}: {
+  value: string
+  min: string
+  onChange: (iso: string) => void
+}) {
+  const [tahun, setTahun] = useState(() => Number(value.slice(0, 4)))
+  const [bulan, setBulan] = useState(() => Number(value.slice(5, 7)) - 1)
+  const hariIni = tanggalIsoLokal(new Date())
+  const offset = (new Date(tahun, bulan, 1).getDay() + 6) % 7
+  const jumlahHari = new Date(tahun, bulan + 1, 0).getDate()
+  const geser = (arah: number) => {
+    const d = new Date(tahun, bulan + arah, 1)
+    setTahun(d.getFullYear())
+    setBulan(d.getMonth())
+  }
+  const bisaMundur = `${tahun}-${pad(bulan + 1)}` > min.slice(0, 7)
+
+  return (
+    <div className="izin-cal">
+      <div className="izin-cal-head">
+        <strong>
+          {NAMA_BULAN[bulan]} {tahun}
+        </strong>
+        <div className="izin-cal-nav">
+          <button
+            aria-label="Bulan sebelumnya"
+            disabled={!bisaMundur}
+            onClick={() => geser(-1)}
+            type="button"
+          >
+            <Icon name="chevron" />
+          </button>
+          <button
+            aria-label="Bulan berikutnya"
+            onClick={() => geser(1)}
+            style={{ transform: "rotate(180deg)" }}
+            type="button"
+          >
+            <Icon name="chevron" />
+          </button>
+        </div>
+      </div>
+      <div className="izin-cal-week">
+        {HARI_SINGKAT.map((h) => (
+          <span key={h}>{h}</span>
+        ))}
+      </div>
+      <div className="izin-cal-grid">
+        {Array.from({ length: offset }).map((_, i) => (
+          <span key={`k-${i}`} />
+        ))}
+        {Array.from({ length: jumlahHari }).map((_, i) => {
+          const iso = `${tahun}-${pad(bulan + 1)}-${pad(i + 1)}`
+          const mati = iso < min
+          return (
+            <button
+              className={`${iso === value ? "sel" : ""} ${iso === hariIni ? "today" : ""}`}
+              disabled={mati}
+              key={iso}
+              onClick={() => onChange(iso)}
+              type="button"
+            >
+              {i + 1}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 // Kasir mencatat izin/sakit/cuti kapster. Berlaku untuk besok atau setelahnya (H-1),
 // dan tidak terkait absen foto, jadi bisa dicatat kapan saja.
@@ -116,26 +193,22 @@ export function IzinKapster() {
           foto dan bisa dicatat kapan saja.
         </p>
 
-        <div className="izin-date-hero">
-          <b className="izin-date-day">{tgl.getDate()}</b>
-          <div className="izin-date-meta">
-            <strong>{HARI.format(tgl)}</strong>
-            <span>{BULAN_TAHUN.format(tgl)}</span>
-            <small>
-              {selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}
-            </small>
+        <div className="izin-layout">
+          <div className="izin-layout-cal">
+            <KalenderBesar min={besokIso} onChange={setTanggal} value={tanggal} />
+            <div className="izin-pilihan">
+              <b>{tgl.getDate()}</b>
+              <div>
+                <strong>
+                  {HARI_PANJANG.format(tgl)}, {formatTanggal(tanggal)}
+                </strong>
+                <small>
+                  {selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}
+                </small>
+              </div>
+            </div>
           </div>
-          <div className="izin-date-picker">
-            <CalendarPicker
-              align="right"
-              min={besokIso}
-              onChange={setTanggal}
-              showToday={false}
-              value={tanggal}
-            />
-          </div>
-        </div>
-
+          <div className="izin-layout-form">
         <div className="form-grid manual-info-grid kasbon-kapster-grid">
           <div className="form-grid-field">
             <span>
@@ -194,6 +267,8 @@ export function IzinKapster() {
           <Button className="primary-button" disabled={!bisaKirim} type="submit">
             {saving ? "Menyimpan…" : `Catat ${jenis}`}
           </Button>
+        </div>
+          </div>
         </div>
       </form>
 
