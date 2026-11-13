@@ -187,12 +187,6 @@ export function IzinKapster() {
       <DemoNotice live={!loadError} error={loadError} />
 
       <form className="panel form-panel" onSubmit={kirim}>
-        <h3>Catat izin kapster</h3>
-        <p className="kasbon-kapster-hint">
-          Izin, sakit, dan cuti dicatat paling cepat untuk besok. Tidak perlu
-          foto dan bisa dicatat kapan saja.
-        </p>
-
         <div className="izin-layout">
           <div className="izin-layout-cal">
             <KalenderBesar min={besokIso} onChange={setTanggal} value={tanggal} />
@@ -265,7 +259,7 @@ export function IzinKapster() {
         )}
         <div className="kasbon-kapster-actions">
           <Button className="primary-button" disabled={!bisaKirim} type="submit">
-            {saving ? "Menyimpan…" : `Catat ${jenis}`}
+            {saving ? "Menyimpan…" : "Simpan"}
           </Button>
         </div>
           </div>
@@ -274,11 +268,11 @@ export function IzinKapster() {
 
       <section className="panel form-panel kasbon-kapster-history">
         <div className="section-title">
-          <h3>Izin tercatat</h3>
-          <span className="nota-count">{daftar.length} catatan</span>
+          <h3>Riwayat</h3>
+          <span className="nota-count">{daftar.length}</span>
         </div>
         {daftar.length === 0 ? (
-          <p className="history-empty">Belum ada izin tercatat.</p>
+          <p className="history-empty">Belum ada catatan.</p>
         ) : (
           <div className="kasbon-kapster-list">
             {daftar.map((r) => (
