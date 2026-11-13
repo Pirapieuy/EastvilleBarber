@@ -14,7 +14,6 @@ const NAMA_BULAN = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ]
 const HARI_SINGKAT = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]
-const HARI_PANJANG = new Intl.DateTimeFormat("id-ID", { weekday: "long" })
 const pad = (n: number) => String(n).padStart(2, "0")
 const dariIso = (iso: string) => new Date(`${iso}T12:00:00`)
 
@@ -194,7 +193,7 @@ export function IzinKapster() {
           <div className="izin-layout-form">
             <div className="izin-pilihan">
               <b>{tgl.getDate()}</b>
-              <strong>{HARI_PANJANG.format(tgl)}</strong>
+              <strong>{NAMA_BULAN[tgl.getMonth()]} {tgl.getFullYear()}</strong>
               <small>{selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}</small>
             </div>
         <div className="form-grid manual-info-grid kasbon-kapster-grid">

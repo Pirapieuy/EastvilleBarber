@@ -13877,7 +13877,7 @@ label .search-select-trigger {
 }
 .izin-pilihan strong {
   display: block;
-  font-size: 14px;
+  font-size: 22px;
   color: var(--ink);
 }
 .izin-pilihan strong {
@@ -13886,9 +13886,9 @@ label .search-select-trigger {
 }
 .izin-pilihan small {
   margin-left: auto;
-  color: var(--slate);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
   white-space: nowrap;
 }
 .izin-layout-form .kasbon-kapster-grid {
