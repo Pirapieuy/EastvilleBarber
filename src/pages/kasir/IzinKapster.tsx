@@ -194,9 +194,7 @@ export function IzinKapster() {
           <div className="izin-layout-form">
             <div className="izin-pilihan">
               <b>{tgl.getDate()}</b>
-              <strong>
-                {HARI_PANJANG.format(tgl)}, {formatTanggal(tanggal)}
-              </strong>
+              <strong>{HARI_PANJANG.format(tgl)}</strong>
               <small>{selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}</small>
             </div>
         <div className="form-grid manual-info-grid kasbon-kapster-grid">
