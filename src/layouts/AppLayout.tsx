@@ -60,6 +60,8 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   AbsensiKapster: "Absensi Kapster",
   KasbonKapster: "Kasbon Kapster",
   "kasbon-kapster": "Kasbon Kapster",
+  IzinKapster: "Izin Kapster",
+  "izin-kapster": "Izin Kapster",
   RiwayatAbsensi: "Riwayat Absensi",
   "attendance-history": "Riwayat Absensi",
   JadwalAbsensi: "Jam Kerja",

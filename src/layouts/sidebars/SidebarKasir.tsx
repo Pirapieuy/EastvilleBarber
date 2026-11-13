@@ -41,6 +41,12 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
         label: "Kasbon Kapster",
         icon: "wallet",
       },
+      {
+        page: "IzinKapster",
+        alias: "izin-kapster",
+        label: "Izin Kapster",
+        icon: "calendar",
+      },
     ],
   },
 ]

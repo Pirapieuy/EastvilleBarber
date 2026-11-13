@@ -11,6 +11,7 @@ import { RiwayatTransaksi as RiwayatTransaksiKasir } from "./pages/kasir/Riwayat
 import { RekapManual as RekapManualKasir } from "./pages/kasir/RekapManual"
 import { AbsensiKapster } from "./pages/kasir/AbsensiKapster"
 import { KasbonKapster } from "./pages/kasir/KasbonKapster"
+import { IzinKapster } from "./pages/kasir/IzinKapster"
 
 // Manajer Pages
 import { BerandaManajer } from "./pages/manajer/BerandaManajer"
@@ -142,6 +143,9 @@ export function App() {
       }
       if (activePage === "KasbonKapster" || activePage === "kasbon-kapster") {
         return <KasbonKapster />
+      }
+      if (activePage === "IzinKapster" || activePage === "izin-kapster") {
+        return <IzinKapster />
       }
       return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
     }

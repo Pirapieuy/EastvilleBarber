@@ -13766,3 +13766,68 @@ label .search-select-trigger {
 .catalog-item > b {
   max-width: calc(100% - 46px);
 }
+
+/* ── Izin Kapster (Kasir): tanggal besar ── */
+.izin-kapster-page > .panel:first-of-type {
+  margin-top: 0;
+}
+.izin-kapster-page .form-panel h3 {
+  margin: 0;
+}
+.izin-kapster-page > .panel + .panel {
+  margin-top: 16px;
+}
+.izin-date-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bone);
+}
+.izin-date-day {
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--brass);
+  min-width: 72px;
+  text-align: center;
+}
+.izin-date-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.izin-date-meta strong {
+  font-size: 18px;
+  color: var(--ink);
+}
+.izin-date-meta span {
+  font-size: 14px;
+  color: var(--slate);
+}
+.izin-date-meta small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.izin-date-picker {
+  width: 190px;
+  flex: none;
+}
+.izin-kapster-page .segmented {
+  width: 100%;
+}
+.izin-kapster-page .segmented > * {
+  flex: 1;
+}
+@media (max-width: 768px) {
+  .izin-date-hero {
+    flex-wrap: wrap;
+  }
+  .izin-date-picker {
+    width: 100%;
+  }
+}
