@@ -13853,6 +13853,20 @@ label .search-select-trigger {
   color: #fff;
   font-weight: 800;
 }
+.izin-cal-grid button {
+  position: relative;
+}
+.izin-cal-grid button.ada-izin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #dc2626;
+  transform: translateX(-50%);
+}
 .izin-cal-grid button:disabled {
   color: var(--muted);
   opacity: 0.4;

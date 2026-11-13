@@ -21,10 +21,12 @@ const dariIso = (iso: string) => new Date(`${iso}T12:00:00`)
 function KalenderBesar({
   value,
   min,
+  izin,
   onChange,
 }: {
   value: string
   min: string
+  izin: Record<string, string[]>
   onChange: (iso: string) => void
 }) {
   const [tahun, setTahun] = useState(() => Number(value.slice(0, 4)))
@@ -76,12 +78,14 @@ function KalenderBesar({
         {Array.from({ length: jumlahHari }).map((_, i) => {
           const iso = `${tahun}-${pad(bulan + 1)}-${pad(i + 1)}`
           const mati = iso < min
+          const yangIzin = izin[iso]
           return (
             <button
-              className={`${iso === value ? "sel" : ""} ${iso === hariIni ? "today" : ""}`}
+              className={`${iso === value ? "sel" : ""} ${iso === hariIni ? "today" : ""} ${yangIzin ? "ada-izin" : ""}`}
               disabled={mati}
               key={iso}
               onClick={() => onChange(iso)}
+              title={yangIzin?.join(", ")}
               type="button"
             >
               {i + 1}
@@ -112,6 +116,14 @@ export function IzinKapster() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  const izinPerTanggal = useMemo(() => {
+    const peta: Record<string, string[]> = {}
+    daftar.forEach((r) => {
+      ;(peta[r.tanggal] ??= []).push(`${r.nama} (${r.status})`)
+    })
+    return peta
+  }, [daftar])
 
   const bisaKirim = Boolean(kapsterId) && catatan.trim() !== "" && !saving
   const tgl = dariIso(tanggal)
@@ -188,7 +200,12 @@ export function IzinKapster() {
       <form className="panel form-panel" onSubmit={kirim}>
         <div className="izin-layout">
           <div className="izin-layout-cal">
-            <KalenderBesar min={besokIso} onChange={setTanggal} value={tanggal} />
+            <KalenderBesar
+              izin={izinPerTanggal}
+              min={besokIso}
+              onChange={setTanggal}
+              value={tanggal}
+            />
           </div>
           <div className="izin-layout-form">
             <div className="izin-pilihan">
