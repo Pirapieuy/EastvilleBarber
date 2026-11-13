@@ -13880,9 +13880,16 @@ label .search-select-trigger {
   font-size: 14px;
   color: var(--ink);
 }
+.izin-pilihan strong {
+  flex: 1;
+  min-width: 0;
+}
 .izin-pilihan small {
-  color: var(--muted);
-  font-size: 12px;
+  margin-left: auto;
+  color: var(--slate);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 .izin-layout-form .kasbon-kapster-grid {
   margin-top: 0;

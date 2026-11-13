@@ -192,14 +192,10 @@ export function IzinKapster() {
             <KalenderBesar min={besokIso} onChange={setTanggal} value={tanggal} />
             <div className="izin-pilihan">
               <b>{tgl.getDate()}</b>
-              <div>
-                <strong>
-                  {HARI_PANJANG.format(tgl)}, {formatTanggal(tanggal)}
-                </strong>
-                <small>
-                  {selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}
-                </small>
-              </div>
+              <strong>
+                {HARI_PANJANG.format(tgl)}, {formatTanggal(tanggal)}
+              </strong>
+              <small>{selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}</small>
             </div>
           </div>
           <div className="izin-layout-form">
