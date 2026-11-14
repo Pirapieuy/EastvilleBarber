@@ -14121,9 +14121,15 @@ label .search-select-trigger {
   font-size: 22px;
   color: var(--ink);
 }
-.izin-pilihan strong {
+.izin-pilihan-teks {
   flex: 1;
   min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.izin-pilihan-teks span {
+  color: var(--slate);
+  font-size: 13px;
 }
 .izin-pilihan small {
   margin-left: auto;
