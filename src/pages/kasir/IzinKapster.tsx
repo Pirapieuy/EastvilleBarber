@@ -210,7 +210,6 @@ export function IzinKapster() {
           </div>
           <div className="izin-layout-form">
             <div className="izin-pilihan">
-              <b>{tgl.getDate()}</b>
               <div className="izin-pilihan-teks">
                 <strong>{HARI_PANJANG.format(tgl)}</strong>
                 <span>
