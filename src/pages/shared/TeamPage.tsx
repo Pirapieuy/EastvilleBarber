@@ -22,16 +22,6 @@ export const demoTeamData: UserRow[] = [
     dibuat: "2026-11-01",
   },
   {
-    id: "u-manajer",
-    nama: "Dian Setiawan",
-    username: "manajer",
-    role: "Manajer",
-    cabang: "Patihan",
-    email: "dian@eastville.id",
-    status: "Aktif",
-    dibuat: "2026-11-01",
-  },
-  {
     id: "u-kasir",
     nama: "Siti Rahma",
     username: "kasir",
@@ -127,9 +117,8 @@ export function TeamPage({ currentUser, role, title }: {
   const [commissionReason, setCommissionReason] = useState("")
   const [komisiMap, setKomisiMap] = useState<Record<string, number>>({})
 
-  const isManager = (role ?? currentUser?.role) === "Manajer"
   const isOwner = (role ?? currentUser?.role) === "Owner"
-  const pageTitle = title ?? (isManager ? "Tim Manajer" : "Tim Eastville")
+  const pageTitle = title ?? "Tim Eastville"
 
   async function loadData() {
     if (!getToken()) return
@@ -281,21 +270,11 @@ export function TeamPage({ currentUser, role, title }: {
         eyebrow="Akun dan hak akses"
         title={pageTitle}
         action={
-          isManager ? (
-            <span className="chip active">Mode Lihat</span>
-          ) : (
-            <Button className="primary-button" onClick={openCreate}>
-              <Icon name="plus" /> Tambah anggota
-            </Button>
-          )
+          <Button className="primary-button" onClick={openCreate}>
+            <Icon name="plus" /> Tambah anggota
+          </Button>
         }
       />
-      {isManager && (
-        <div className="danger-banner" style={{ marginBottom: 14 }}>
-          <Icon name="lock" /> Penambahan, pengubahan, dan penonaktifan anggota
-          tim hanya dapat dilakukan oleh Owner.
-        </div>
-      )}
       <div className="filters">
         <div className="search">
           <Icon name="search" />
@@ -309,7 +288,6 @@ export function TeamPage({ currentUser, role, title }: {
           {[
             ["Semua", "Semua peran"],
             ["Owner", "Owner"],
-            ["Manajer", "Manajer"],
             ["Kasir", "Kasir"],
             ["Kapster", "Kapster"],
           ].map(([value, label]) => (
@@ -383,7 +361,6 @@ export function TeamPage({ currentUser, role, title }: {
                 </div>
               )}
             </dl>
-            {!isManager && (
               <div className="team-card-actions">
                 <Button
                   className="secondary-button"
@@ -415,7 +392,6 @@ export function TeamPage({ currentUser, role, title }: {
                   </Button>
                 )}
               </div>
-            )}
           </article>
         ))}
       </div>
@@ -479,7 +455,7 @@ export function TeamPage({ currentUser, role, title }: {
 
               <span className="form-label">Pilih peran</span>
               <div className="role-options">
-                {(["Manajer", "Kasir", "Kapster"] as Role[]).map((r) => (
+                {(["Kasir", "Kapster"] as Role[]).map((r) => (
                   <Button
                     className={selectedRole === r ? "active" : ""}
                     key={r}

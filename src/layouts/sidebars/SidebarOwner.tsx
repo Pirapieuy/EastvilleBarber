@@ -35,6 +35,12 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
         label: "Laporan Produk",
         icon: "settings",
       },
+      {
+        page: "RekapManual",
+        alias: "manual",
+        label: "Input Manual",
+        icon: "pencil",
+      },
     ],
   },
   {

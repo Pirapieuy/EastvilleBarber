@@ -2,7 +2,6 @@ import { ReactNode, useEffect, useState } from "react"
 import { Icon } from "../components/common/Icon"
 import { Button } from "../components/common/UI"
 import { SidebarKasir } from "./sidebars/SidebarKasir"
-import { SidebarManajer } from "./sidebars/SidebarManajer"
 import { SidebarOwner } from "./sidebars/SidebarOwner"
 import { SidebarKapster } from "./sidebars/SidebarKapster"
 import { Role, RoleType, toRoleKey } from "../types"
@@ -19,7 +18,6 @@ export interface AppLayoutProps {
 
 const PAGE_TITLE_MAP: Record<string, string> = {
   BerandaOwner: "Beranda",
-  BerandaManajer: "Beranda",
   BerandaKapster: "Beranda",
   KasirPOS: "Kasir POS",
   cashier: "Kasir POS",
@@ -43,7 +41,6 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   MasterProduk: "Layanan & Produk",
   products: "Layanan & Produk",
   TimEastville: "Tim Eastville",
-  TimManajer: "Tim Manajer",
   team: "Tim",
   GajiKasbon: "Gaji & Kasbon",
   payroll: "Gaji & Kasbon",
@@ -131,16 +128,6 @@ export function AppLayout({
       <div className={`sidebar-wrap ${mobileNav ? "open" : ""}`}>
         {roleKey === "kasir" && (
           <SidebarKasir
-            activePage={activePage}
-            expanded={sidebarExpanded}
-            onLogout={onLogout}
-            userName={userName}
-            onNavigate={handleNavigate}
-            onToggleExpanded={() => setSidebarExpanded(!sidebarExpanded)}
-          />
-        )}
-        {roleKey === "manajer" && (
-          <SidebarManajer
             activePage={activePage}
             expanded={sidebarExpanded}
             onLogout={onLogout}

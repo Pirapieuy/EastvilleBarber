@@ -218,7 +218,6 @@ export function ReportsPage({ currentUser, role }: {
   role?: Role
 } = {}) {
   const [wa, setWa] = useState(false)
-  const isManager = (role ?? currentUser?.role) === "Manajer"
   const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
   const [reloadKey, setReloadKey] = useState(0)
   const [tanggal, setTanggal] = useState(() => isoDate(new Date()))
@@ -346,14 +345,14 @@ export function ReportsPage({ currentUser, role }: {
         : bulan
 
   const ringkasWa = `Periode: ${periode}\nPemasukan: ${juta(data.pemasukan)}\nPengeluaran: ${juta(data.pengeluaran)}\nKomisi: ${juta(data.komisi)}\n${
-    isManager ? "Laba Bersih" : "Sisa Owner"
+    "Sisa Owner"
   }: ${juta(data.sisa)}`
 
   const tabelEkspor = (): TabelEkspor => ({
     berkas: `laporan-keuangan-${periode}`,
     judul: "Laporan Keuangan",
     keterangan: `Periode ${periode} · ${data.jumlahTransaksi} transaksi · Pemasukan ${data.pemasukan} · Pengeluaran ${data.pengeluaran} · Komisi ${data.komisi} · ${
-      isManager ? "Laba Bersih" : "Sisa Owner"
+      "Sisa Owner"
     } ${data.sisa}`,
     kolom: ["Kapster", "Transaksi", "Omzet", "Komisi"],
     baris: [
@@ -368,7 +367,7 @@ export function ReportsPage({ currentUser, role }: {
       ["Pemasukan", data.tunai, data.qris, data.pemasukan],
       ["Pengeluaran", "", "", data.pengeluaran],
       ["Komisi", "", "", data.komisi],
-      [isManager ? "Laba Bersih" : "Sisa Owner", "", "", data.sisa],
+      ["Sisa Owner", "", "", data.sisa],
       ["", "", "", ""],
       ["Tanggal", "Pemasukan", "", ""],
       ...data.perHari.map((h): (string | number)[] => [
@@ -872,11 +871,7 @@ export function ReportsPage({ currentUser, role }: {
         <section className="panel owner-profit-panel" style={{ padding: 22 }}>
           <PageTitle
             eyebrow="Kalkulasi Keuntungan"
-            title={
-              isManager
-                ? "Rincian Laba Bersih Operasional"
-                : "Kalkulasi Sisa Bersih"
-            }
+            title="Kalkulasi Sisa Bersih"
           />
 
           <div
@@ -987,7 +982,7 @@ export function ReportsPage({ currentUser, role }: {
                 <strong
                   style={{ display: "block", fontSize: 15, color: "#fff" }}
                 >
-                  (=) {isManager ? "Laba Bersih Akhir" : "Sisa Bersih"}
+                  (=) Sisa Bersih
                 </strong>
               </div>
               <strong style={{ fontSize: 20, color: "#facc15" }}>

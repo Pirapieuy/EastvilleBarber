@@ -557,7 +557,7 @@ export function AbsensiKapster({
                   Belum ada data kapster
                 </div>
                 <div style={{ fontSize: 13 }}>
-                  Tambah data kapster melalui Owner atau Manajer.
+                  Tambah data kapster melalui Owner.
                 </div>
               </div>
             ) : (

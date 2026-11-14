@@ -25,7 +25,7 @@ export interface LoginUser {
   id: string
   name: string
   username: string
-  role: "Owner" | "Manajer" | "Kasir" | "Kapster"
+  role: "Owner" | "Kasir" | "Kapster"
 }
 
 /** Login ke backend; menyimpan token dan mengembalikan data user. Melempar ApiError bila gagal. */
@@ -145,7 +145,7 @@ export interface CheckoutPayload {
   /** Transaksi gratis (promo/traktiran): total Rp0 hanya diterima server bila true + alasan */
   gratis?: boolean
   alasan?: string
-  /** PIN Owner/Manajer untuk menyetujui diskon (diverifikasi server) */
+  /** PIN Owner untuk menyetujui diskon (diverifikasi server) */
   pinOtorisasi?: string
   /** Kode unik diskon yang diketik kasir (diverifikasi server bila backend sudah mendukung) */
   kodeDiskon?: string
@@ -176,7 +176,7 @@ export const apiKasir = {
     api<{ id: string; total: number; kembalian: number }>("create-transaksi", {
       ...p,
     }),
-  /** Cek PIN Owner/Manajer lebih awal (khusus Kasir; 5x salah = tunggu 5 menit). Gagal -> melempar Error. */
+  /** Cek PIN Owner lebih awal (khusus Kasir; 5x salah = tunggu 5 menit). Gagal -> melempar Error. */
   verifikasiPin: (pin: string) =>
     api<{ valid: boolean }>("verifikasi-pin-otorisasi", { pin }),
   /** Cek kode diskon unik ke server. */
@@ -224,7 +224,7 @@ export const apiTutupKasir = {
       "tutup-kasir",
       { uangFisik, catatan },
     ),
-  /** Kasir: miliknya sendiri; Owner/Manajer: semua kasir. */
+  /** Kasir: miliknya sendiri; Owner: semua kasir. */
   list: (range: { dari?: string; sampai?: string } = {}) =>
     api<TutupKasirRow[]>("list-tutup-kasir", range),
 }
@@ -399,7 +399,7 @@ export interface UserRow {
   id: string
   nama: string
   username: string
-  role: "Owner" | "Manajer" | "Kasir" | "Kapster"
+  role: "Owner" | "Kasir" | "Kapster"
   cabang: string
   email: string
   status: "Aktif" | "Nonaktif"
@@ -492,7 +492,7 @@ export const apiKasbon = {
     tanggal?: string
   }) => api<KasbonRow>("create-kasbon", { ...p }),
   lunasi: (id: string) => api<{ success: boolean }>("lunasi-kasbon", { id }),
-  /** Owner/Manajer memutuskan pengajuan kasbon berstatus Menunggu. */
+  /** Owner memutuskan pengajuan kasbon berstatus Menunggu. */
   setujui: (id: string) => api<unknown>("setujui-kasbon", { id }),
   tolak: (id: string) => api<unknown>("tolak-kasbon", { id }),
 }
@@ -599,7 +599,7 @@ export const apiAudit = {
     api<AuditLogRow[]>("list-audit", filter),
 }
 
-/** Kode diskon unik (dibuat Owner/Manajer; kasir hanya mengetik kodenya). */
+/** Kode diskon unik (dibuat Owner; kasir hanya mengetik kodenya). */
 export interface KodeDiskonRow {
   id: string
   kode: string

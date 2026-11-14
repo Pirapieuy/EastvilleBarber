@@ -89,7 +89,6 @@
 | Role    | Nama           | Username      | PIN    | Email              |
 |---------|----------------|---------------|--------|--------------------|
 | Owner   | Ardi Pradana   | owner    | 123456 | ardi@eastville.id  |
-| Manajer | Dian Setiawan  | manajer  | 123456 | dian@eastville.id  |
 | Kasir   | Siti Rahma     | kasir    | 123456 | siti@eastville.id  |
 | Kapster | Ferdi          | ferdi         | 123456 | ferdi@eastville.id |
 | Kapster | Seva           | seva          | 123456 | seva@eastville.id |
@@ -109,7 +108,7 @@
 | nama      | Nama lengkap                     |
 | username  | Username untuk login             |
 | pin_hash  | PIN yang sudah di-hash (SHA-256) |
-| role      | Owner / Manajer / Kasir / Kapster|
+| role      | Owner / Kasir / Kapster|
 | cabang    | Cabang user                      |
 | email     | Email untuk reset PIN            |
 | status    | Aktif / Nonaktif                 |

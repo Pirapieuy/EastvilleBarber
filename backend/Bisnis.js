@@ -149,38 +149,38 @@ var KATEGORI_PENGELUARAN = [
 
 // ---- Hak akses per action ----
 var AKSES = {
-  "list-layanan": ["Owner", "Manajer", "Kasir", "Kapster"],
-  "list-produk": ["Owner", "Manajer", "Kasir", "Kapster"],
-  "list-kapster": ["Owner", "Manajer", "Kasir"],
+  "list-layanan": ["Owner", "Kasir", "Kapster"],
+  "list-produk": ["Owner", "Kasir", "Kapster"],
+  "list-kapster": ["Owner", "Kasir"],
   "create-transaksi": ["Kasir"],
-  "list-transaksi": ["Owner", "Manajer", "Kasir"],
-  "batalkan-transaksi": ["Owner", "Manajer", "Kasir"],
-  "pulihkan-transaksi": ["Owner", "Manajer"],
-  "list-pengeluaran": ["Owner", "Manajer"],
-  "create-pengeluaran": ["Owner", "Manajer"],
-  "batalkan-pengeluaran": ["Owner", "Manajer"],
-  "aktifkan-pengeluaran": ["Owner", "Manajer"],
-  "simpan-produk": ["Owner", "Manajer"],
+  "list-transaksi": ["Owner", "Kasir"],
+  "batalkan-transaksi": ["Owner", "Kasir"],
+  "pulihkan-transaksi": ["Owner"],
+  "list-pengeluaran": ["Owner"],
+  "create-pengeluaran": ["Owner"],
+  "batalkan-pengeluaran": ["Owner"],
+  "aktifkan-pengeluaran": ["Owner"],
+  "simpan-produk": ["Owner"],
   "hapus-produk": ["Owner"],
-  "adjust-stok": ["Owner", "Manajer"],
-  "log-produk": ["Owner", "Manajer"],
-  "get-pengaturan": ["Owner", "Manajer"],
-  "simpan-pengaturan": ["Owner", "Manajer"],
-  "set-komisi-kapster": ["Owner", "Manajer"],
-  "list-komisi": ["Owner", "Manajer", "Kapster"],
-  "simpan-layanan": ["Owner", "Manajer"],
+  "adjust-stok": ["Owner"],
+  "log-produk": ["Owner"],
+  "get-pengaturan": ["Owner"],
+  "simpan-pengaturan": ["Owner"],
+  "set-komisi-kapster": ["Owner"],
+  "list-komisi": ["Owner", "Kapster"],
+  "simpan-layanan": ["Owner"],
   "hapus-layanan": ["Owner"],
-  "create-transaksi-manual": ["Owner", "Manajer", "Kasir"],
+  "create-transaksi-manual": ["Owner", "Kasir"],
   "rekap-kasir": ["Kasir"],
   "tutup-kasir": ["Kasir"],
-  "list-tutup-kasir": ["Owner", "Manajer", "Kasir"],
+  "list-tutup-kasir": ["Owner", "Kasir"],
   "verifikasi-pin-otorisasi": ["Kasir"],
-  "list-kode-diskon": ["Owner", "Manajer"],
+  "list-kode-diskon": ["Owner"],
   "cek-kode-diskon": ["Kasir"],
-  "simpan-kode-diskon": ["Owner", "Manajer"],
-  "hapus-kode-diskon": ["Owner", "Manajer"],
-  "laporan-keuangan": ["Owner", "Manajer"],
-  "laporan-produk": ["Owner", "Manajer", "Kapster"],
+  "simpan-kode-diskon": ["Owner"],
+  "hapus-kode-diskon": ["Owner"],
+  "laporan-keuangan": ["Owner"],
+  "laporan-produk": ["Owner", "Kapster"],
   "aktivitas-kapster": ["Kapster"],
   "backup-buat": ["Owner"],
   "backup-list": ["Owner"],
@@ -974,7 +974,7 @@ function createTransaksi_(body, user, manual) {
     diskon = cek.diskon
     kodeDipakai = cek.kode
   } else if (toInt_(body.diskon) > 0 && user.role === "Kasir") {
-    // Potongan manual hanya di Input Manual dan wajib PIN Owner/Manajer.
+    // Potongan manual hanya di Input Manual dan wajib PIN Owner.
     if (!manual)
       return fail_("Diskon hanya bisa lewat kode diskon yang valid.")
     var salahPin = cekPinOtorisasi_(user, body.pinOtorisasi)
@@ -1069,7 +1069,7 @@ function createTransaksi_(body, user, manual) {
 }
 
 /**
- * Cek PIN Owner/Manajer untuk Kasir dengan batas 5x salah per 5 menit (per user).
+ * Cek PIN Owner untuk Kasir dengan batas 5x salah per 5 menit (per user).
  * Mengembalikan pesan error, atau "" bila PIN sah (penghitung salah direset).
  */
 function cekPinOtorisasi_(user, pin) {
@@ -1079,7 +1079,7 @@ function cekPinOtorisasi_(user, pin) {
   if (gagal >= 5) return "Terlalu banyak PIN salah. Coba lagi dalam 5 menit."
   if (!pinAtasanValid_(pin)) {
     cache.put(kunci, String(gagal + 1), 300)
-    return "PIN Owner/Manajer salah atau belum diisi. Diskon tidak diizinkan."
+    return "PIN Owner salah atau belum diisi. Diskon tidak diizinkan."
   }
   cache.remove(kunci)
   return ""
@@ -1241,7 +1241,7 @@ function verifikasiPinOtorisasi_(body, user) {
   return salah ? fail_(salah) : ok_({ valid: true })
 }
 
-/** True bila PIN cocok dengan salah satu akun Owner/Manajer yang aktif. */
+/** True bila PIN cocok dengan salah satu akun Owner yang aktif. */
 function pinAtasanValid_(pin) {
   pin = (pin || "").toString()
   if (!pin) return false
@@ -1249,7 +1249,7 @@ function pinAtasanValid_(pin) {
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i]
     if (
-      (r[4] === "Owner" || r[4] === "Manajer") &&
+      r[4] === "Owner" &&
       r[7] === "Aktif" &&
       verifyPin(pin, r[3])
     )

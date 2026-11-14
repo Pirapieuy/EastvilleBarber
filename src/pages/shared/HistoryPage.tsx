@@ -92,7 +92,7 @@ export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
     createdTime: "29 Okt 2026, 09:05 WIB",
     createdBy: "Siti Rahma · Kasir",
     voidReason: "Salah input varian produk pomade oleh kasir saat pembayaran",
-    voidBy: "Dian Setiawan · Manajer",
+    voidBy: "Ardi Pradana · Owner",
     voidTime: "29 Okt 2026, 09:12 WIB",
   },
   {

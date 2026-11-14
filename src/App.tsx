@@ -13,18 +13,7 @@ import { AbsensiKapster } from "./pages/kasir/AbsensiKapster"
 import { KasbonKapster } from "./pages/kasir/KasbonKapster"
 import { IzinKapster } from "./pages/kasir/IzinKapster"
 
-// Manajer Pages
-import { BerandaManajer } from "./pages/manajer/BerandaManajer"
 import { CatalogPage } from "./pages/shared/CatalogPage"
-import { RiwayatTransaksi as RiwayatTransaksiManajer } from "./pages/manajer/RiwayatTransaksi"
-import { LaporanKeuangan as LaporanKeuanganManajer } from "./pages/manajer/LaporanKeuangan"
-import { LaporanProduk as LaporanProdukManajer } from "./pages/manajer/LaporanProduk"
-import { Pengeluaran as PengeluaranManajer } from "./pages/manajer/Pengeluaran"
-import { RekapManual as RekapManualManajer } from "./pages/manajer/RekapManual"
-import { LayananHarga as LayananHargaManajer } from "./pages/manajer/LayananHarga"
-import { MasterProduk as MasterProdukManajer } from "./pages/manajer/MasterProduk"
-import { TimManajer } from "./pages/manajer/TimManajer"
-import { GajiKasbon as GajiKasbonManajer } from "./pages/manajer/GajiKasbon"
 
 // Owner Pages
 import { BerandaOwner } from "./pages/owner/BerandaOwner"
@@ -48,7 +37,6 @@ import { KomisiProdukSaya } from "./pages/kapster/KomisiProdukSaya"
 
 const ROLE_DEFAULT_PAGES: Record<Role, string> = {
   Owner: "BerandaOwner",
-  Manajer: "BerandaManajer",
   Kasir: "KasirPOS",
   Kapster: "BerandaKapster",
 }
@@ -148,71 +136,6 @@ export function App() {
         return <IzinKapster />
       }
       return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
-    }
-
-    if (roleKey === "manajer") {
-      if (activePage === "BerandaManajer" || activePage === "dashboard") {
-        return (
-          <BerandaManajer onNavigate={setActivePage} navigate={setActivePage} />
-        )
-      }
-      if (activePage === "RiwayatTransaksi" || activePage === "history") {
-        return <RiwayatTransaksiManajer currentUser={currentUser} />
-      }
-      if (activePage === "LaporanKeuangan" || activePage === "reports") {
-        return <LaporanKeuanganOwner currentUser={currentUser} />
-      }
-      if (
-        activePage === "LaporanProduk" ||
-        activePage === "product-reports" ||
-        activePage === "laporan-produk"
-      ) {
-        return <LaporanProdukOwner currentUser={currentUser} />
-      }
-      if (activePage === "Pengeluaran" || activePage === "expenses") {
-        return <PengeluaranManajer />
-      }
-      if (activePage === "RekapManual" || activePage === "manual") {
-        return <RekapManualManajer />
-      }
-      if (
-        activePage === "KatalogLayananProduk" ||
-        activePage === "catalog" ||
-        activePage === "LayananHarga" ||
-        activePage === "services" ||
-        activePage === "MasterProduk" ||
-        activePage === "products"
-      ) {
-        const initialTab =
-          activePage === "MasterProduk" || activePage === "products"
-            ? "produk"
-            : "layanan"
-        return <CatalogPage initialTab={initialTab} />
-      }
-      if (activePage === "TimManajer" || activePage === "team") {
-        return <TimManajer currentUser={currentUser} />
-      }
-      if (activePage === "GajiKasbon" || activePage === "payroll") {
-        return <GajiKasbonManajer />
-      }
-      if (
-        activePage === "RiwayatAbsensi" ||
-        activePage === "attendance-history" ||
-        activePage === "AbsensiTim" ||
-        activePage === "attendance-admin" ||
-        activePage === "attendance-tim" ||
-        activePage === "JadwalAbsensi" ||
-        activePage === "jadwal-absensi"
-      ) {
-        return <AttendanceHistoryPage />
-      }
-      return (
-        <BerandaManajer
-          user={currentUser}
-          onNavigate={setActivePage}
-          navigate={setActivePage}
-        />
-      )
     }
 
     if (roleKey === "kapster") {

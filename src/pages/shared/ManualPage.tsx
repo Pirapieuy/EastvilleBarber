@@ -549,7 +549,7 @@ export function ManualPage() {
           )}
           {diskonNum > 0 && !promo && (
             <label>
-              <span>PIN Owner atau Manajer</span>
+              <span>PIN Owner</span>
               <input
                 autoComplete="off"
                 inputMode="numeric"

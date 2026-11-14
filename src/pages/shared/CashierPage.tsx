@@ -569,11 +569,7 @@ export function CashierPage({ currentUser, onNavigate }: {
 
   if (currentUser && currentUser.role !== "Kasir") {
     const homePage =
-      currentUser.role === "Owner"
-        ? "BerandaOwner"
-        : currentUser.role === "Kapster"
-          ? "BerandaKapster"
-          : "BerandaManajer"
+      currentUser.role === "Kapster" ? "BerandaKapster" : "BerandaOwner"
     return (
       <div className="content">
         <div className="role-denied-box">

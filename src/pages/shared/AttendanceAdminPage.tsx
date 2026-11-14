@@ -59,7 +59,6 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
   role?: Role
   title?: string
 } = {}) {
-  const isManager = (role ?? currentUser?.role) === "Manajer"
   const pageTitle = title ?? "Jam Kerja"
 
   const today = new Date().toISOString().slice(0, 10)
@@ -315,7 +314,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
 
   return (
     <div className="content">
-      <PageTitle eyebrow={isManager ? "Manajer" : "Owner"} title={pageTitle} />
+      <PageTitle eyebrow="Owner" title={pageTitle} />
 
       <div className="segmented page-segment">
         {(["Jadwal", "Pengaturan"] as const).map((value) => (

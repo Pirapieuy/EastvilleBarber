@@ -96,7 +96,7 @@ export const INITIAL_PRODUCT_TRANSACTIONS: ProductTransactionRecord[] = [
     eastvilleShare: 20000,
     status: "Batal",
     voidReason: "Salah input varian produk pomade oleh kasir saat pembayaran",
-    voidBy: "Dian Setiawan · Manajer",
+    voidBy: "Ardi Pradana · Owner",
     voidAt: "29 Okt 14.30",
   },
 ]
@@ -221,7 +221,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
 
   const rentang = rentangProduk(mode, tanggal, bulan)
 
-  // Tampilan Owner/Manajer memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
+  // Tampilan Owner memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
   useEffect(() => {
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")

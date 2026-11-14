@@ -300,17 +300,6 @@ function setupSheets() {
       new Date(),
     ],
     [
-      "u-manajer",
-      "Dian Setiawan",
-      "manajer",
-      pinHash,
-      "Manajer",
-      "Patihan",
-      "dian@eastville.id",
-      "Aktif",
-      new Date(),
-    ],
-    [
       "u-kasir",
       "Siti Rahma",
       "kasir",
@@ -852,11 +841,11 @@ function handleListUsers(body) {
     })
   }
   var roleKey = (user.role || "").toString().trim().toLowerCase()
-  if (roleKey !== "owner" && roleKey !== "manajer") {
+  if (roleKey !== "owner") {
     return jsonResponse({
       success: false,
       error:
-        "Akses ditolak. Hanya Owner dan Manajer yang dapat melihat daftar tim.",
+        "Akses ditolak. Hanya Owner yang dapat melihat daftar tim.",
       code: "FORBIDDEN",
     })
   }
@@ -917,10 +906,10 @@ function handleCreateUser(body) {
       error: "PIN awal harus 6 digit angka.",
     })
   }
-  if (["Owner", "Manajer", "Kasir", "Kapster"].indexOf(role) === -1) {
+  if (["Owner", "Kasir", "Kapster"].indexOf(role) === -1) {
     return jsonResponse({
       success: false,
-      error: "Peran tidak valid. Pilih Owner, Manajer, Kasir, atau Kapster.",
+      error: "Peran tidak valid. Pilih Owner, Kasir, atau Kapster.",
     })
   }
   if (!email || email.indexOf("@") === -1) {
@@ -1027,7 +1016,7 @@ function handleUpdateUser(body) {
     return jsonResponse({ success: false, error: "Nama lengkap wajib diisi." })
   if (!username)
     return jsonResponse({ success: false, error: "Username wajib diisi." })
-  if (["Owner", "Manajer", "Kasir", "Kapster"].indexOf(role) === -1) {
+  if (["Owner", "Kasir", "Kapster"].indexOf(role) === -1) {
     return jsonResponse({ success: false, error: "Peran tidak valid." })
   }
   if (!email || email.indexOf("@") === -1) {
@@ -1163,7 +1152,7 @@ function handleCreateLayanan(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error: "Akses ditolak.",
@@ -1215,7 +1204,7 @@ function handleUpdateLayanan(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error: "Akses ditolak.",
@@ -1280,7 +1269,7 @@ function handleToggleLayanan(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error: "Akses ditolak.",
@@ -1398,7 +1387,7 @@ function handleCreateKasbon(body) {
     })
   }
 
-  // Kasir hanya mengajukan: kapster dicek di server, kasbon baru berlaku setelah disetujui Owner/Manajer.
+  // Kasir hanya mengajukan: kapster dicek di server, kasbon baru berlaku setelah disetujui Owner.
   var status = "Aktif"
   if (user.role === "Kasir") {
     status = "Menunggu"
@@ -1468,7 +1457,7 @@ function handleLunasiKasbon(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error: "Akses ditolak.",
@@ -1506,7 +1495,7 @@ function handleLunasiKasbon(body) {
   return jsonResponse({ success: false, error: "Kasbon tidak ditemukan." })
 }
 
-/** Owner/Manajer menyetujui (Aktif) atau menolak (Ditolak) pengajuan kasbon berstatus Menunggu. */
+/** Owner menyetujui (Aktif) atau menolak (Ditolak) pengajuan kasbon berstatus Menunggu. */
 function handleKeputusanKasbon_(body, keputusan) {
   var user = getUserFromToken_(body.token)
   if (!user)
@@ -1515,7 +1504,7 @@ function handleKeputusanKasbon_(body, keputusan) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error: "Akses ditolak.",
@@ -1673,10 +1662,10 @@ function handleBayarGaji(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
-      error: "Hanya Owner dan Manajer yang dapat memproses pembayaran gaji.",
+      error: "Hanya Owner yang dapat memproses pembayaran gaji.",
       code: "FORBIDDEN",
     })
   }
@@ -1802,7 +1791,7 @@ function handleRingkasanLaporan(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error: "Akses ditolak.",
@@ -2029,11 +2018,11 @@ function handleKoreksiAbsensi(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
       error:
-        "Akses ditolak. Koreksi absensi hanya dapat dilakukan oleh Owner atau Manajer.",
+        "Akses ditolak. Koreksi absensi hanya dapat dilakukan oleh Owner.",
       code: "FORBIDDEN",
     })
   }
@@ -2126,10 +2115,10 @@ function handleListAudit(body) {
       error: "Session tidak valid.",
       code: "UNAUTHORIZED",
     })
-  if (user.role !== "Owner" && user.role !== "Manajer") {
+  if (user.role !== "Owner") {
     return jsonResponse({
       success: false,
-      error: "Akses ditolak. Jejak audit hanya untuk Owner dan Manajer.",
+      error: "Akses ditolak. Jejak audit hanya untuk Owner.",
       code: "FORBIDDEN",
     })
   }

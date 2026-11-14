@@ -1,5 +1,5 @@
-export type Role = "Owner" | "Manajer" | "Kasir" | "Kapster"
-export type RoleKey = "owner" | "manajer" | "kasir" | "kapster"
+export type Role = "Owner" | "Kasir" | "Kapster"
+export type RoleKey = "owner" | "kasir" | "kapster"
 export type RoleType = Role | RoleKey
 
 export interface AppUser {
@@ -11,7 +11,7 @@ export interface AppUser {
 
 export type AbsensiStatus = "Hadir" | "Izin" | "Sakit" | "Cuti" | "Tidak Hadir"
 
-export type Page = "dashboard" | "cashier" | "history" | "manual" | "expenses" | "payroll" | "my-salary" | "reports" | "product-reports" | "team" | "services" | "products" | "attendance" | "attendance-admin" | "attendance-tim" | "attendance-history" | "audit" | "backup" | "KasirPOS" | "RiwayatTransaksi" | "RekapManual" | "BerandaManajer" | "LaporanKeuangan" | "LaporanProduk" | "Pengeluaran" | "catalog" | "KatalogLayananProduk" | "LayananHarga" | "MasterProduk" | "TimManajer" | "GajiKasbon" | "AbsensiTim" | "BerandaOwner" | "TimEastville" | "AbsensiAdmin" | "JejakAudit" | "BackupData" | "BerandaKapster" | "GajiKomisiSaya" | "KomisiProdukSaya" | "AbsensiJadwalSaya" | "AbsensiKapster" | "KasbonKapster" | "kasbon-kapster" | "IzinKapster" | "izin-kapster" | "RiwayatAbsensi" | "JadwalAbsensi"
+export type Page = "dashboard" | "cashier" | "history" | "manual" | "expenses" | "payroll" | "my-salary" | "reports" | "product-reports" | "team" | "services" | "products" | "attendance" | "attendance-admin" | "attendance-tim" | "attendance-history" | "audit" | "backup" | "KasirPOS" | "RiwayatTransaksi" | "RekapManual" | "LaporanKeuangan" | "LaporanProduk" | "Pengeluaran" | "catalog" | "KatalogLayananProduk" | "LayananHarga" | "MasterProduk" | "GajiKasbon" | "AbsensiTim" | "BerandaOwner" | "TimEastville" | "AbsensiAdmin" | "JejakAudit" | "BackupData" | "BerandaKapster" | "GajiKomisiSaya" | "KomisiProdukSaya" | "AbsensiJadwalSaya" | "AbsensiKapster" | "KasbonKapster" | "kasbon-kapster" | "IzinKapster" | "izin-kapster" | "RiwayatAbsensi" | "JadwalAbsensi"
 
 export type IconName = "alert" | "arrow" | "back" | "calendar" | "camera" | "cash" | "cashier" | "chart" | "check" | "chevron" | "clock" | "close" | "expense" | "eye" | "file" | "history" | "home" | "lock" | "logout" | "mail" | "menu" | "minus" | "pencil" | "people" | "plus" | "print" | "product" | "qris" | "receipt" | "restore" | "search" | "settings" | "team" | "trash" | "user" | "wallet" | "whatsapp"
 
@@ -21,12 +21,6 @@ export const DEMO_USERS: Record<Role, AppUser> = {
     name: "Ardi Pradana",
     username: "owner",
     role: "Owner",
-  },
-  Manajer: {
-    id: "u-manajer",
-    name: "Dian Setiawan",
-    username: "manajer",
-    role: "Manajer",
   },
   Kasir: {
     id: "u-kasir",
@@ -45,7 +39,6 @@ export const DEMO_USERS: Record<Role, AppUser> = {
 export function toRoleKey(role: string): RoleKey {
   const lower = role.toLowerCase()
   if (lower === "owner") return "owner"
-  if (lower === "manajer") return "manajer"
   if (lower === "kasir") return "kasir"
   return "kapster"
 }
@@ -53,7 +46,6 @@ export function toRoleKey(role: string): RoleKey {
 export function normalizeRole(role: string): Role {
   const key = toRoleKey(role)
   if (key === "owner") return "Owner"
-  if (key === "manajer") return "Manajer"
   if (key === "kasir") return "Kasir"
   return "Kapster"
 }
