@@ -118,10 +118,10 @@ create table if not exists transaksi (
   void_alasan text default '',
   void_oleh text default '',
   void_waktu timestamptz,
-  lembur boolean default false,
-  manual boolean default false,
+  lembur text default 'Tidak',      -- 'Ya' / 'Tidak' seperti di Sheet
+  manual text default '',           -- 'Ya' bila rekap manual
   nota_buku text default '',
-  gratis boolean default false
+  gratis text default ''            -- alasan bila transaksi gratis
 );
 create index if not exists transaksi_tanggal_idx on transaksi(tanggal);
 

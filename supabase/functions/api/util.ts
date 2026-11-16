@@ -110,3 +110,28 @@ export async function wajibRole(token: string | undefined, role: Role[]) {
     throw new ApiError("Akses ditolak untuk peran " + u.role + ".", "FORBIDDEN")
   return u
 }
+
+// ---- Format tampilan (meniru Utilities.formatDate di GAS, zona Asia/Jakarta) ----
+const BULAN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+function wib(d: Date) {
+  const b = bagian(d)
+  return { y: b.y, m: Number(b.m), d: Number(b.d), h: b.h, mi: b.mi }
+}
+/** "d MMM yyyy" mis. 12 Nov 2026 */
+export const fmtTglPanjang = (d: Date) => { const b = wib(d); return `${b.d} ${BULAN[b.m - 1]} ${b.y}` }
+/** "d MMM" */
+export const fmtTglPendek = (d: Date) => { const b = wib(d); return `${b.d} ${BULAN[b.m - 1]}` }
+/** "HH.mm" */
+export const fmtJamTitik = (d: Date) => { const b = wib(d); return `${b.h}.${b.mi}` }
+/** "d MMM HH.mm" */
+export const fmtTglJam = (d: Date) => `${fmtTglPendek(d)} ${fmtJamTitik(d)}`
+/** "d MMM yyyy, HH.mm" */
+export const fmtTglJamPanjang = (d: Date) => `${fmtTglPanjang(d)}, ${fmtJamTitik(d)}`
+/** "ddMMyy" untuk nomor invoice */
+export const fmtDdMmYy = (d: Date) => { const b = bagian(d); return `${b.d}${b.m}${b.y.slice(2)}` }
+/** Jam sebagai angka HHMM (1930) */
+export const jamAngka = (d: Date) => { const b = bagian(d); return Number(b.h + b.mi) }
+/** "HH:mm:ss" */
+export function jamDetik(d: Date) {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: WIB, hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(d)
+}
