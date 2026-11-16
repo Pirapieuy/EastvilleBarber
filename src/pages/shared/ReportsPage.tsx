@@ -28,6 +28,7 @@ import {
   ProductTransactionRecord,
   INITIAL_PRODUCT_TRANSACTIONS,
 } from "./ProductReportsPage"
+import { ReasonDialog } from "./HistoryPage"
 
 export const barberReport = [
   ["Seva", 124, 12480000, 4992000],
@@ -259,6 +260,7 @@ export function ReportsPage({ currentUser, role }: {
   const [expDescription, setExpDescription] = useState("")
   const [expDate, setExpDate] = useState(() => isoDate(new Date()))
   const [expSearch, setExpSearch] = useState("")
+  const [expenseCancelId, setExpenseCancelId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!getToken()) return
@@ -426,12 +428,10 @@ export function ReportsPage({ currentUser, role }: {
       if (!item) return
       try {
         if (item.status === "Aktif") {
-          const alasan = window.prompt("Alasan pembatalan pengeluaran?")?.trim()
-          if (!alasan) return
-          await apiPengeluaran.batalkan(id, alasan)
-        } else {
-          await apiPengeluaran.aktifkan(id)
+          setExpenseCancelId(id)
+          return
         }
+        await apiPengeluaran.aktifkan(id)
         const updated = await apiPengeluaran.list()
         setExpensesList(updated as ExpenseRecord[])
       } catch (err) {
@@ -1039,6 +1039,19 @@ export function ReportsPage({ currentUser, role }: {
             </footer>
           </form>
         </div>
+      )}
+
+      {expenseCancelId && (
+        <ReasonDialog
+          title="Batalkan pengeluaran?"
+          warning="Pengeluaran tidak dihapus, hanya ditandai BATAL dan bisa dipulihkan."
+          onClose={() => setExpenseCancelId(null)}
+          onConfirm={async (alasan) => {
+            await apiPengeluaran.batalkan(expenseCancelId, alasan)
+            const updated = await apiPengeluaran.list()
+            setExpensesList(updated as ExpenseRecord[])
+          }}
+        />
       )}
 
       {wa && (
