@@ -56,7 +56,7 @@ create table if not exists gaji (
   total_kasbon numeric default 0,
   gaji_bersih numeric default 0,
   status text not null,
-  tanggal_bayar text default '',
+  tanggal_bayar timestamptz,
   dibayar_oleh text default '',
   catatan text default ''
 );
