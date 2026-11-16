@@ -293,7 +293,7 @@ begin
   -- urutan penting: transaksi dihapus dulu (item ikut terhapus), lalu dimasukkan lagi sebelum item
   foreach t in array array['transaksi_item','transaksi','layanan','produk','pengeluaran','stok_mutasi',
                            'produk_log','pengaturan','komisi_kapster','tutup_kasir'] loop
-    execute format('delete from %I', t);
+    execute format('delete from %I where true', t);
   end loop;
   foreach t in array array['pengaturan','layanan','produk','transaksi','transaksi_item','pengeluaran',
                            'stok_mutasi','produk_log','komisi_kapster','tutup_kasir'] loop
@@ -301,8 +301,10 @@ begin
       execute format('insert into %I overriding system value select * from jsonb_populate_recordset(null::%I, $1)', t, t) using d->t;
       jml := jml + 1;
     end if;
-    seq := pg_get_serial_sequence(t, 'id');
-    if seq is not null then execute format('select setval(%L, greatest((select coalesce(max(id),0) from %I),1))', seq, t); end if;
+    if exists (select 1 from information_schema.columns where table_schema='public' and table_name=t and column_name='id' and is_identity='YES') then
+      seq := pg_get_serial_sequence(t, 'id');
+      execute format('select setval(%L, greatest((select coalesce(max(id),0) from %I),1))', seq, t);
+    end if;
   end loop;
   return jml;
 end $$;
