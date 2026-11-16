@@ -21,6 +21,6 @@ npx supabase functions deploy api --remote=zejaqgqpyrjvlarnxyaq --no-verify-jwt 
 - Kunci rahasia (`service_role`) hanya ada di server Supabase, tidak pernah di kode atau `.env`.
 - `LockService` diganti fungsi SQL atomik (`mutasi_stok`); `CacheService` diganti tabel (`login_gagal`, `reset_pin`)
   dan memori fungsi (`clientRequestId`, hanya sebagai jaring pengaman tambahan).
-- Backup: snapshot JSON di tabel `backup` (5 terakhir). Supabase juga punya backup harian sendiri.
+- Backup: snapshot JSON di tabel `backup` (5 terakhir), dibuat dari menu Backup di aplikasi. Paket gratis Supabase TIDAK punya backup otomatis sendiri, dan snapshot ini tersimpan di database yang sama, jadi unduh berkala sebagai salinan di luar Supabase.
 - `ringkasan-laporan` (versi lama Tim B) membaca status "Lunas" dan "Selesai" (di GAS hanya "Selesai" sehingga selalu kosong).
 - Foto absensi disimpan di Storage (bucket publik `absensi`, JPEG maks 200 KB); `absensi.foto_url` berisi alamatnya.
