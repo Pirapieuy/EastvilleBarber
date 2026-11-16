@@ -1,8 +1,15 @@
-// Klien API ke Google Apps Script (apps-script/Bisnis.js).
-// URL Web App diisi lewat .env: VITE_API_URL=https://script.google.com/macros/s/.../exec
+// Klien API. Backend bisa Supabase (Edge Function, supabase/functions/api) atau Google Apps Script (backend/).
+// Bentuk permintaan dan balasannya sama, jadi halaman tidak perlu tahu backend mana yang dipakai.
+//   Supabase: VITE_SUPABASE_URL=https://xxxx.supabase.co  (dipakai bila diisi)
+//   GAS:      VITE_API_URL=https://script.google.com/macros/s/.../exec
 // Token session disimpan oleh halaman Login di localStorage["eastville_token"].
 
-const API_URL = import.meta.env.VITE_API_URL as string | undefined
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
+const API_URL = (
+  SUPABASE_URL
+    ? `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/api`
+    : import.meta.env.VITE_API_URL
+) as string | undefined
 export const TOKEN_KEY = "eastville_token"
 
 export class ApiError extends Error {
@@ -34,7 +41,7 @@ export async function loginBackend(
   pin: string,
 ): Promise<LoginUser> {
   clearToken()
-  if (!API_URL) throw new ApiError("VITE_API_URL belum diisi di file .env.")
+  if (!API_URL) throw new ApiError("Alamat server belum diisi di file .env.")
   let json
   try {
     const res = await fetch(API_URL, {
@@ -89,7 +96,7 @@ export async function api<T>(
   action: string,
   payload: Record<string, unknown> = {},
 ): Promise<T> {
-  if (!API_URL) throw new ApiError("VITE_API_URL belum diisi di file .env.")
+  if (!API_URL) throw new ApiError("Alamat server belum diisi di file .env.")
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
