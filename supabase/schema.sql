@@ -173,7 +173,7 @@ on conflict (key) do nothing;
 
 create table if not exists komisi_kapster (
   user_id text primary key references users(id),
-  persen numeric not null,
+  persen numeric,                   -- kosong = pakai komisi default
   diubah_oleh text,
   waktu timestamptz not null default now()
 );
@@ -258,3 +258,58 @@ begin
 end $$;
 revoke all on function mutasi_stok(text,integer,text,text,text) from public, anon, authenticated;
 grant execute on function mutasi_stok(text,integer,text,text,text) to service_role;
+
+-- Backup (padanan sheet BAK_ di GAS): snapshot JSON tabel bisnis. Akun (users/sessions) tidak disentuh.
+create table if not exists backup (
+  nama text primary key,            -- BAK_yyyyMMdd_HHmm
+  dibuat timestamptz not null default now(),
+  sheet integer not null,
+  baris integer not null,
+  data jsonb not null
+);
+alter table backup enable row level security;
+grant all on backup to service_role;
+
+create or replace function buat_backup(p_nama text, p_simpan integer)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare t text; d jsonb := '{}'::jsonb; j jsonb; n integer; total integer := 0; jml integer := 0;
+begin
+  foreach t in array array['layanan','produk','transaksi','transaksi_item','pengeluaran','stok_mutasi',
+                           'produk_log','pengaturan','komisi_kapster','tutup_kasir'] loop
+    execute format('select coalesce(jsonb_agg(to_jsonb(x)), ''[]''::jsonb), count(*) from %I x', t) into j, n;
+    d := d || jsonb_build_object(t, j); total := total + n; jml := jml + 1;
+  end loop;
+  insert into backup(nama, sheet, baris, data) values (p_nama, jml, total, d);
+  delete from backup where nama not in (select nama from backup order by nama desc limit p_simpan);
+  return jsonb_build_object('nama', p_nama, 'baris', total);
+end $$;
+
+create or replace function pulihkan_backup(p_nama text)
+returns integer language plpgsql security definer set search_path = public as $$
+declare t text; d jsonb; jml integer := 0; seq text;
+begin
+  select data into d from backup where nama = p_nama;
+  if d is null then return null; end if;
+  -- urutan penting: transaksi dihapus dulu (item ikut terhapus), lalu dimasukkan lagi sebelum item
+  foreach t in array array['transaksi_item','transaksi','layanan','produk','pengeluaran','stok_mutasi',
+                           'produk_log','pengaturan','komisi_kapster','tutup_kasir'] loop
+    execute format('delete from %I', t);
+  end loop;
+  foreach t in array array['pengaturan','layanan','produk','transaksi','transaksi_item','pengeluaran',
+                           'stok_mutasi','produk_log','komisi_kapster','tutup_kasir'] loop
+    if d ? t then
+      execute format('insert into %I overriding system value select * from jsonb_populate_recordset(null::%I, $1)', t, t) using d->t;
+      jml := jml + 1;
+    end if;
+    seq := pg_get_serial_sequence(t, 'id');
+    if seq is not null then execute format('select setval(%L, greatest((select coalesce(max(id),0) from %I),1))', seq, t); end if;
+  end loop;
+  return jml;
+end $$;
+revoke all on function buat_backup(text,integer), pulihkan_backup(text) from public, anon, authenticated;
+grant execute on function buat_backup(text,integer), pulihkan_backup(text) to service_role;
+-- Urutan masuk (pengganti nomor baris di Sheet) untuk tabel yang tampil "terbaru dulu"/"urut sheet".
+alter table produk add column if not exists urut bigint generated always as identity;
+alter table kasbon add column if not exists urut bigint generated always as identity;
+alter table gaji add column if not exists urut bigint generated always as identity;
+alter table kode_diskon add column if not exists urut bigint generated always as identity;

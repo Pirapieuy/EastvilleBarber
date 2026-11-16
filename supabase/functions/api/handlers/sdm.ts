@@ -20,9 +20,8 @@ export async function listKasbon(body: B) {
   let q = db.from("kasbon").select("*")
   if (user.role === "Kapster") q = q.eq("user_id", user.id)
   if (user.role === "Kasir") q = q.eq("dibuat_oleh", user.nama)
-  const { data } = await q.order("id")
-  // Urutan GAS: baris terbaru dulu (kebalikan urutan masuk). Pakai waktu pembuatan sebagai pengganti nomor baris.
-  return ok((data ?? []).reverse().map((r) => ({
+  const { data } = await q.order("urut", { ascending: false }) // terbaru dulu, seperti GAS
+  return ok((data ?? []).map((r) => ({
     id: r.id, tanggal: r.tanggal || "", userId: r.user_id, nama: r.nama, role: r.role,
     jumlah: toInt(r.jumlah) || 0, status: r.status, catatan: r.catatan || "", dibuatOleh: r.dibuat_oleh || "",
     lunasWaktu: r.lunas_waktu ? tanggalIso(new Date(r.lunas_waktu)) : "",
@@ -138,7 +137,7 @@ export async function bayarGaji(body: B) {
 
 export async function listGaji(body: B) {
   const user = await wajibLogin(body.token)
-  let q = db.from("gaji").select("*").order("tanggal_bayar", { ascending: false, nullsFirst: false })
+  let q = db.from("gaji").select("*").order("urut", { ascending: false })
   if (user.role === "Kapster") q = q.eq("user_id", user.id)
   const { data } = await q
   return ok((data ?? []).map((r) => ({

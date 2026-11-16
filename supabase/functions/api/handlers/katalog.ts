@@ -21,7 +21,7 @@ export async function listKapster() {
 }
 
 export async function listProduk() {
-  const { data } = await db.from("produk").select("*").order("kode")
+  const { data } = await db.from("produk").select("kode,nama,penjual,stok,skema,status,harga,harga_modal,persen_kapster,persen_penjual,persen_eastville,nominal_kapster,nominal_penjual,nominal_eastville").order("urut")
   return ok(data ?? [])
 }
 

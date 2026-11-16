@@ -6,7 +6,7 @@ const toInt = (v: unknown) => { const n = Math.round(Number(v)); return isNaN(n)
 export const normalKode = (k: unknown) => String(k ?? "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "")
 
 export async function listKodeDiskon() {
-  const { data } = await db.from("kode_diskon").select("*").order("waktu", { ascending: false })
+  const { data } = await db.from("kode_diskon").select("id,kode,nama,persen,berlaku_sampai,status,dibuat_oleh,waktu,dipakai,jenis,nilai").order("urut", { ascending: false })
   return ok(data ?? [])
 }
 
