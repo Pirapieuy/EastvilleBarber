@@ -233,3 +233,28 @@ grant all on all tables in schema public to service_role;
 grant all on all sequences in schema public to service_role;
 alter default privileges in schema public grant all on tables to service_role;
 alter default privileges in schema public grant all on sequences to service_role;
+
+-- Token reset PIN (pengganti CacheService, berlaku 15 menit).
+create table if not exists reset_pin (token text primary key, email text not null, kadaluarsa timestamptz not null); alter table reset_pin enable row level security; grant all on reset_pin to service_role;
+
+-- Ubah stok secara atomik (pengganti LockService di GAS). Stok habis -> Nonaktif,
+-- diisi lagi dari 0 -> Aktif. Mengembalikan stok akhir, atau null bila produk tidak ada.
+create or replace function mutasi_stok(p_kode text, p_delta integer, p_alasan text, p_trx text, p_oleh text)
+returns integer language plpgsql security definer set search_path = public as $$
+declare lama integer; akhir integer; st text;
+begin
+  select stok, status into lama, st from produk where kode = p_kode for update;
+  if not found then return null; end if;
+  akhir := lama + p_delta;
+  update produk set stok = akhir,
+    status = case
+      when akhir <= 0 and st = 'Aktif' then 'Nonaktif'
+      when p_delta > 0 and lama <= 0 and akhir > 0 and st = 'Nonaktif' then 'Aktif'
+      else st end
+  where kode = p_kode;
+  insert into stok_mutasi(kode, delta, stok_akhir, alasan, trx_id, oleh)
+    values (p_kode, p_delta, akhir, p_alasan, coalesce(p_trx,''), p_oleh);
+  return akhir;
+end $$;
+revoke all on function mutasi_stok(text,integer,text,text,text) from public, anon, authenticated;
+grant execute on function mutasi_stok(text,integer,text,text,text) to service_role;
