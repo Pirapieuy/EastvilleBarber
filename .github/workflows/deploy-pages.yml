@@ -1,10 +1,10 @@
-# Build dan publikasikan ke GitHub Pages setiap ada push ke branch dev.
+# Build dan publikasikan ke GitHub Pages setiap ada push ke branch mergesemua.
 # Alamat: https://<akun>.github.io/EastvilleBarber/
 name: Deploy ke GitHub Pages
 
 on:
   push:
-    branches: [dev]
+    branches: [mergesemua]
   workflow_dispatch:
 
 permissions:
