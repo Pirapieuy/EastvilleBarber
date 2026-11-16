@@ -315,3 +315,9 @@ alter table produk add column if not exists urut bigint generated always as iden
 alter table kasbon add column if not exists urut bigint generated always as identity;
 alter table gaji add column if not exists urut bigint generated always as identity;
 alter table kode_diskon add column if not exists urut bigint generated always as identity;
+
+-- Foto absensi disimpan di Storage (bucket publik 'absensi'); kolom absensi.foto_url hanya berisi alamatnya.
+-- Bucket hanya menerima JPEG maksimal 200 KB. Upload hanya lewat Edge Function (service_role).
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('absensi','absensi', true, 200000, array['image/jpeg'])
+on conflict (id) do update set public=true, file_size_limit=200000, allowed_mime_types=array['image/jpeg'];

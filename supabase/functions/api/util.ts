@@ -135,3 +135,16 @@ export const jamAngka = (d: Date) => { const b = bagian(d); return Number(b.h + 
 export function jamDetik(d: Date) {
   return new Intl.DateTimeFormat("en-GB", { timeZone: WIB, hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(d)
 }
+
+/**
+ * Simpan foto absensi (data URL JPEG) ke Storage dan kembalikan alamat publiknya.
+ * Nilai kosong atau yang sudah berupa alamat http dikembalikan apa adanya.
+ */
+export async function simpanFoto(fotoUrl: string, awalan: string): Promise<string> {
+  if (!fotoUrl || !fotoUrl.startsWith("data:image/jpeg;base64,")) return fotoUrl
+  const biner = Uint8Array.from(atob(fotoUrl.split(",")[1]), (c) => c.charCodeAt(0))
+  const path = `${tanggalIso()}/${awalan}-${crypto.randomUUID().slice(0, 8)}.jpg`
+  const { error } = await db.storage.from("absensi").upload(path, biner, { contentType: "image/jpeg" })
+  if (error) throw new Error("Foto gagal disimpan: " + error.message)
+  return db.storage.from("absensi").getPublicUrl(path).data.publicUrl
+}

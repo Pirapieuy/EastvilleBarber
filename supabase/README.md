@@ -22,4 +22,5 @@ npx supabase functions deploy api --remote=zejaqgqpyrjvlarnxyaq --no-verify-jwt 
 - `LockService` diganti fungsi SQL atomik (`mutasi_stok`); `CacheService` diganti tabel (`login_gagal`, `reset_pin`)
   dan memori fungsi (`clientRequestId`, hanya sebagai jaring pengaman tambahan).
 - Backup: snapshot JSON di tabel `backup` (5 terakhir). Supabase juga punya backup harian sendiri.
-- `ringkasan-laporan` (versi lama Tim B) masih memakai status "Selesai" seperti di GAS, sehingga hasilnya 0/kosong.
+- `ringkasan-laporan` (versi lama Tim B) membaca status "Lunas" dan "Selesai" (di GAS hanya "Selesai" sehingga selalu kosong).
+- Foto absensi disimpan di Storage (bucket publik `absensi`, JPEG maks 200 KB); `absensi.foto_url` berisi alamatnya.

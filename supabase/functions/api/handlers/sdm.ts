@@ -1,6 +1,6 @@
 // Padanan KASBON, GAJI, RINGKASAN LAPORAN, ABSENSI, AUDIT di Kode.js.
 import {
-  ApiError, db, gagal, jamHhmm, ok, penggunaDariToken, tanggalIso, tulisAudit, verifyPin, wajibRole, type Pengguna,
+  ApiError, db, gagal, jamHhmm, ok, penggunaDariToken, simpanFoto, tanggalIso, tulisAudit, verifyPin, wajibRole, type Pengguna,
 } from "../util.ts"
 
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
@@ -152,7 +152,7 @@ export async function listGaji(body: B) {
 export async function ringkasanLaporan(body: B) {
   await wajibRole(body.token, ["Owner"])
   const dari = String(body.dari ?? "").trim(), sampai = String(body.sampai ?? "").trim()
-  let qt = db.from("transaksi").select("tanggal,total,diskon,bayar_tunai,bayar_qris,komisi_total").eq("status", "Selesai")
+  let qt = db.from("transaksi").select("tanggal,total,diskon,bayar_tunai,bayar_qris,komisi_total").in("status", ["Lunas", "Selesai"])
   if (dari) qt = qt.gte("tanggal", dari)
   if (sampai) qt = qt.lte("tanggal", sampai)
   const { data: trx } = await qt.limit(20000)
@@ -195,9 +195,10 @@ export async function catatAbsensi(body: B) {
   const catatan = String(body.catatan ?? "").trim()
   const now = new Date(), tgl = tanggalIso(now), jam = jamHhmm(now)
   const id = ID("abs")
+  const foto = await simpanFoto(fotoUrl, user.id)
   const { error } = await db.from("absensi").insert({
     id, waktu: now.toISOString(), tanggal: tgl, jam, user_id: user.id, nama: user.nama, role: user.role,
-    tipe, foto_url: fotoUrl, status: "Hadir", catatan,
+    tipe, foto_url: foto, status: "Hadir", catatan,
   })
   if (error) throw new Error(error.message)
   await tulisAudit(user.id, user.nama, "ABSENSI", `Absensi ${tipe} pada ${jam}`)
@@ -282,15 +283,16 @@ export async function catatAbsensiKapster(body: B) {
   if (t.role !== "Kapster") return gagal("Akun yang dipilih bukan Kapster.")
 
   const now = new Date(), jam = jamHhmm(now), id = ID("abs")
+  const foto = await simpanFoto(fotoUrl, target)
   const { error } = await db.from("absensi").insert({
     id, waktu: now.toISOString(), tanggal, jam, user_id: target, nama: t.nama, role: "Kapster", tipe: "",
-    foto_url: fotoUrl, status, catatan,
+    foto_url: foto, status, catatan,
   })
   if (error) throw new Error(error.message)
   await tulisAudit(user.id, user.nama, "ABSENSI_KASIR",
     `Kasir mencatat absensi Kapster ${t.nama} (${status}) pada ${tanggal}`, catatan || "Absensi harian Kapster")
   return ok({ id, waktu: now.toISOString(), tanggal, jam, userId: target, nama: t.nama, role: "Kapster", tipe: "",
-    fotoUrl, status, catatan }, `Absensi ${t.nama} berhasil dicatat (${status}).`)
+    fotoUrl: foto, status, catatan }, `Absensi ${t.nama} berhasil dicatat (${status}).`)
 }
 
 // ================= AUDIT =================
