@@ -170,12 +170,8 @@ export function ProductsPage({ embedded = false }: {
     e.preventDefault()
     if (saving) return
     setFormError("")
-    if (
-      !formData.name.trim() ||
-      !formData.code.trim() ||
-      !formData.seller.trim()
-    ) {
-      return setFormError("Nama, kode, dan pemasok wajib diisi.")
+    if (!formData.name.trim() || !formData.code.trim()) {
+      return setFormError("Nama dan kode produk wajib diisi.")
     }
     if (!(formData.price > 0))
       return setFormError("Harga jual harus lebih dari 0.")
@@ -369,7 +365,7 @@ export function ProductsPage({ embedded = false }: {
               <div className="product-admin-details">
                 <span className="product-seller-detail">
                   <small>Pemasok</small>
-                  <strong>{product.seller}</strong>
+                  <strong>{product.seller || "-"}</strong>
                 </span>
                 <span className="product-stock-detail">
                   <small>Stok</small>
@@ -470,9 +466,8 @@ export function ProductsPage({ embedded = false }: {
                   <small className="valid-text">Kode unik produk</small>
                 </label>
                 <label>
-                  <span>Nama Pemasok</span>
+                  <span>Nama pemasok (opsional)</span>
                   <input
-                    required
                     value={formData.seller}
                     onChange={(e) =>
                       setFormData({ ...formData, seller: e.target.value })
