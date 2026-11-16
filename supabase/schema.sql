@@ -217,3 +217,19 @@ begin
     execute format('alter table public.%I enable row level security', t);
   end loop;
 end $$;
+
+-- Pembatas salah PIN (pengganti CacheService di GAS): 5x salah = kunci 5 menit.
+create table if not exists login_gagal (
+  username text primary key,
+  jumlah integer not null default 0,
+  kunci_sampai timestamptz,
+  terakhir timestamptz not null default now()
+);
+alter table login_gagal enable row level security;
+
+-- Hanya Edge Function (service_role) yang boleh menyentuh tabel; browser (anon/authenticated) tidak.
+grant usage on schema public to service_role;
+grant all on all tables in schema public to service_role;
+grant all on all sequences in schema public to service_role;
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on sequences to service_role;
