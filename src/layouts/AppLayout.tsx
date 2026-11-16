@@ -173,6 +173,9 @@ export function AppLayout({
           </div>
           <div className="mobile-navbar-spacer" />
         </header>
+        <div className="desktop-page-head">
+          <h1>{pageTitle}</h1>
+        </div>
         {children}
       </main>
     </div>

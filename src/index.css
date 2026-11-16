@@ -26,6 +26,12 @@
 }
 
 @layer base {
+  /* Cegah efek tarik/mentok di ujung scroll yang memperlihatkan warna lain */
+  html {
+    background: var(--bone);
+    overscroll-behavior-y: none;
+  }
+
   body {
     min-width: 320px;
     min-height: 100vh;
@@ -2096,6 +2102,40 @@ textarea {
 
 .catalog-embedded-view {
   width: 100%;
+}
+
+/* Judul halaman di desktop; di layar dengan navbar atas judulnya sudah ada di navbar */
+.desktop-page-head {
+  width: 100%;
+  margin: 0;
+  padding: 26px 27px 0;
+}
+
+.desktop-page-head h1 {
+  font: 600 24px/1.1 var(--heading);
+  letter-spacing: -0.035em;
+}
+
+@media (min-width: 1025px) {
+  .desktop-page-head + .content,
+  .desktop-page-head + .mobile-content {
+    padding-top: 16px !important;
+  }
+}
+
+/* Halaman yang sudah punya judul sendiri di paling atas tidak perlu judul ganda */
+.workspace:has(> .content > .page-title:first-child) > .desktop-page-head,
+.workspace:has(> .kapster-dashboard) > .desktop-page-head,
+.workspace:has(> .mobile-content) > .desktop-page-head,
+.workspace:has(> .flow-page) > .desktop-page-head,
+.workspace:has(> .content > .page-title-mobile:first-child) > .desktop-page-head {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-page-head {
+    display: none;
+  }
 }
 
 .page-title {
@@ -13749,7 +13789,7 @@ label .search-select-trigger {
   width: 100%;
 }
 
-@media (min-width: 821px) {
+@media (min-width: 1025px) {
   .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
   .mobile-content.attendance-history-page {
     padding: 26px 27px 26px;
