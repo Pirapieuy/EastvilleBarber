@@ -282,6 +282,11 @@ export async function catatAbsensiKapster(body: B) {
   if (!t) return gagal("Kapster tidak ditemukan.")
   if (t.role !== "Kapster") return gagal("Akun yang dipilih bukan Kapster.")
 
+  if (status !== "Hadir") {
+    const { data: ganda } = await db.from("absensi").select("status").eq("user_id", target).eq("tanggal", tanggal)
+      .neq("status", "Hadir").limit(1)
+    if (ganda?.length) return gagal(`${t.nama} sudah tercatat ${ganda[0].status} pada tanggal itu.`)
+  }
   const now = new Date(), jam = jamHhmm(now), id = ID("abs")
   const foto = await simpanFoto(fotoUrl, target)
   const { error } = await db.from("absensi").insert({

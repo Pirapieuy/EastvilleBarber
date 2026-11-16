@@ -63,11 +63,6 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
     const { data: pakai } = await db.from("transaksi").select("id").or(`id.eq.${notaBuku},nota_buku.eq.${notaBuku}`).limit(1)
     if (pakai?.length) return gagal("Nomor nota sudah dipakai.")
     now = new Date(`${tgl}T${jamIn.padStart(5, "0")}:00+07:00`)
-  } else if (body.tanggal) {
-    const tglKasir = String(body.tanggal)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(tglKasir)) return gagal("Tanggal transaksi tidak valid.")
-    now = new Date(`${tglKasir}T${jamDetik(now)}+07:00`)
-    if (isNaN(now.getTime()) || tanggalIso(now) !== tglKasir) return gagal("Tanggal transaksi tidak valid.")
   }
   const nowJam = jamAngka(now)
   const pilihan = body.komisiLayanan
