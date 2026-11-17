@@ -364,9 +364,8 @@ export function CashierPage({ currentUser, onNavigate }: {
             .map((row) => row.userId),
         )
         setAttendedBarbers(present)
-        const eligible = kapster.filter((k) => present.has(k.id))
         setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
-        setSelectedBarber(eligible[0]?.nama ?? "")
+        setSelectedBarber("")
         setCart([])
         setCash(0)
         setLive(true)
@@ -549,6 +548,7 @@ export function CashierPage({ currentUser, onNavigate }: {
 
   const payDisabledReason = ((): string | null => {
     if (!cart.length) return null
+    if (!selectedBarber) return "Pilih nama kapster terlebih dahulu."
     if (gagalMuat) return "Data kasir belum selesai dimuat."
     if (paying) return "Sedang memproses pembayaran..."
     if (method === "Tunai" && cash <= 0) return "Masukkan jumlah tunai."
@@ -658,6 +658,7 @@ export function CashierPage({ currentUser, onNavigate }: {
   }
 
   function clearCart() {
+    setSelectedBarber("")
     setCart([])
     setCash(0)
     setQrisInput(0)
@@ -704,12 +705,19 @@ export function CashierPage({ currentUser, onNavigate }: {
     <div className="cashier-page">
       <section className="catalog">
         <div className="catalog-sticky">
-        <section className="barber-picker">
+        <section
+          className={`barber-picker ${!selectedBarber ? "needs-selection" : ""}`}
+        >
           <div className="barber-picker-label">
             <span className="item-icon">
               <Icon name="user" />
             </span>
             <small>Kapster</small>
+            {!selectedBarber ? (
+              <span className="barber-status-badge warn">Wajib Pilih</span>
+            ) : (
+              <span className="barber-status-badge active">{selectedBarber}</span>
+            )}
           </div>
           <div className="barber-options">
             {barberList.map(({ id, name: barber }) => {
@@ -791,7 +799,22 @@ export function CashierPage({ currentUser, onNavigate }: {
           </div>
         </div>
         </div>
-        <div className="catalog-grid">
+        {!selectedBarber && (
+          <div className="catalog-locked-card" role="alert">
+            <div className="catalog-locked-content">
+              <div className="catalog-locked-header">
+                <span className="catalog-locked-icon">
+                  <Icon name="user" />
+                </span>
+                <strong>👉 Pilih Nama Anda Dulu</strong>
+              </div>
+              <p>
+                Katalog layanan &amp; produk dikunci sementara. Ketuk tombol nama kapster Anda di atas untuk mulai mencatat transaksi.
+              </p>
+            </div>
+          </div>
+        )}
+        <div className={`catalog-grid ${!selectedBarber ? "catalog-locked" : ""}`}>
           {items.length === 0 && (
             <p
               style={{
@@ -809,7 +832,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               stokHabis(item.id, item.stock) ||
               !selectedBarber
             const alasan = !selectedBarber
-              ? "Kapster belum absen"
+              ? "Pilih nama kapster Anda di atas terlebih dahulu"
               : stokHabis(item.id, item.stock)
                 ? "Stok habis di keranjang"
                 : undefined
@@ -1393,7 +1416,8 @@ export function CashierPage({ currentUser, onNavigate }: {
                 disabled={Boolean(payDisabledReason) || !cart.length}
                 onClick={pay}
               >
-                Bayar <Icon name="cash" />
+                <span>Bayar {selectedBarber ? `(${selectedBarber})` : ""}</span>
+                <Icon name="cash" />
               </Button>
               {gagalMuat && (
                 <div className="payment-result danger" role="alert">

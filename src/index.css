@@ -2488,6 +2488,47 @@ textarea {
   border-radius: 10px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  transition: all 180ms ease;
+}
+
+.barber-picker.needs-selection {
+  border-color: #d97706;
+  background: #fffdfa;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.16);
+  animation: pulse-barber-picker 2s infinite ease-in-out;
+}
+
+@keyframes pulse-barber-picker {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(217, 119, 6, 0.32);
+  }
+}
+
+.barber-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.barber-status-badge.warn {
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fed7aa;
+}
+
+.barber-status-badge.active {
+  color: var(--brass-dark);
+  background: var(--brass-soft);
+  border: 1px solid var(--brass);
 }
 
 .barber-picker-label {
@@ -2739,6 +2780,53 @@ textarea {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-top: 15px;
+}
+
+.catalog-locked-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: #fffbeb;
+  border: 1.5px dashed #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+}
+
+.catalog-locked-card .catalog-locked-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.catalog-locked-card .catalog-locked-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #fde68a;
+  color: #b45309;
+  flex-shrink: 0;
+}
+
+.catalog-locked-card .catalog-locked-header strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: #92400e;
+}
+
+.catalog-locked-card p {
+  margin: 6px 0 0 38px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #78350f;
+}
+
+.catalog-grid.catalog-locked {
+  opacity: 0.45;
+  filter: grayscale(35%);
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .catalog-item {
