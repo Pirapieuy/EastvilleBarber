@@ -9,6 +9,7 @@ import {
   rupiah,
 } from "../../components/common/UI"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ReasonDialog } from "./HistoryPage"
 
 const STOK_MENIPIS = 1
 
@@ -68,6 +69,7 @@ export function ProductsPage({ embedded = false }: {
   const [cari, setCari] = useState("")
   const [statusFilter, setStatusFilter] = useState("Semua status")
   const [editingCode, setEditingCode] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<(typeof productsList)[number] | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [stockOpen, setStockOpen] = useState(false)
   const [formData, setFormData] = useState({
@@ -238,19 +240,7 @@ export function ProductsPage({ embedded = false }: {
   }
 
   async function handleDelete(product: typeof productsList[number]) {
-    const alasan = window.prompt(`Alasan menghapus produk "${product.name}"?`)
-    if (!alasan || alasan.trim().length < 3) return
-    if (!window.confirm(`Hapus produk "${product.name}" (${product.code})?`)) return
-    try {
-      if (live) {
-        await apiProduk.hapus(product.code, alasan.trim())
-        await loadLive()
-      } else {
-        setProductsList((list) => list.filter((item) => item.code !== product.code))
-      }
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Gagal menghapus produk.")
-    }
+    setDeleting(product)
   }
 
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
@@ -792,6 +782,23 @@ export function ProductsPage({ embedded = false }: {
             </footer>
           </form>
         </div>
+      )}
+      {deleting && (
+        <ReasonDialog
+          title={`Hapus produk "${deleting.name}"?`}
+          warning="Produk akan dihapus dari katalog."
+          onClose={() => setDeleting(null)}
+          onConfirm={async (alasan) => {
+            if (live) {
+              await apiProduk.hapus(deleting.code, alasan)
+              await loadLive()
+            } else {
+              setProductsList((list) =>
+                list.filter((item) => item.code !== deleting.code),
+              )
+            }
+          }}
+        />
       )}
       {stockOpen && (
         <div className="modal-overlay">

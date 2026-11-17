@@ -9,6 +9,7 @@ import {
   UserRow,
   PengaturanKomisi,
 } from "../../api"
+import { ReasonDialog } from "./HistoryPage"
 
 export const demoTeamData: UserRow[] = [
   {
@@ -105,6 +106,7 @@ export function TeamPage({ currentUser, role, title }: {
   const [roleFilter, setRoleFilter] = useState("Semua")
 
   const [formOpen, setFormOpen] = useState(false)
+  const [deleting, setDeleting] = useState<UserRow | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [nama, setNama] = useState("")
   const [username, setUsername] = useState("")
@@ -371,22 +373,7 @@ export function TeamPage({ currentUser, role, title }: {
                 {x.role !== "Owner" && (
                   <Button
                     className="danger-button"
-                    onClick={async () => {
-                      const alasan = window.prompt("Alasan dihapus?")
-                      if (!alasan || alasan.trim().length < 3) return
-                      const yakin = window.confirm("Yakin dihapus?")
-                      if (!yakin) return
-                      try {
-                        if ((apiTim as any).hapus) {
-                          await (apiTim as any).hapus(x.id, alasan.trim())
-                        }
-                        loadData()
-                      } catch (err) {
-                        alert(
-                          err instanceof Error ? err.message : "Gagal menghapus.",
-                        )
-                      }
-                    }}
+                    onClick={() => setDeleting(x)}
                   >
                     Hapus
                   </Button>
@@ -395,6 +382,22 @@ export function TeamPage({ currentUser, role, title }: {
           </article>
         ))}
       </div>
+
+      {deleting && (
+        <ReasonDialog
+          title={`Hapus anggota "${deleting.nama}"?`}
+          warning="Akun akan dinonaktifkan dan disembunyikan dari daftar tim. Riwayat transaksi dan data terkait tetap tersimpan."
+          onClose={() => setDeleting(null)}
+          onConfirm={async (alasan) => {
+            if (getToken()) {
+              await apiTim.hapus(deleting.id, alasan)
+              await loadData()
+            } else {
+              setUsers((list) => list.filter((user) => user.id !== deleting.id))
+            }
+          }}
+        />
+      )}
 
       {formOpen && (
         <div className="modal-overlay">

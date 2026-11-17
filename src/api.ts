@@ -434,6 +434,8 @@ export const apiTim = {
   }) => api<{ success: boolean }>("update-user", { ...p }),
   toggleStatus: (id: string, status: "Aktif" | "Nonaktif") =>
     api<{ success: boolean }>("toggle-user-status", { id, status }),
+  hapus: (id: string, alasan: string) =>
+    api<{ success: boolean }>("delete-user", { id, alasan }),
 }
 
 /** CRUD layanan versi Fitra. Halaman Layanan & Harga memakai apiLayanan (simpan-layanan, Bisnis.js). */

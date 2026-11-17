@@ -1046,6 +1046,7 @@ export function ReportsPage({ currentUser, role }: {
           title="Batalkan pengeluaran?"
           warning="Pengeluaran tidak dihapus, hanya ditandai BATAL dan bisa dipulihkan."
           onClose={() => setExpenseCancelId(null)}
+          showCloseButton={false}
           onConfirm={async (alasan) => {
             await apiPengeluaran.batalkan(expenseCancelId, alasan)
             const updated = await apiPengeluaran.list()

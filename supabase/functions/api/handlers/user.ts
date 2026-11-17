@@ -40,7 +40,11 @@ export async function resetPin(body: Record<string, string>) {
 export async function listUsers(body: Record<string, string>) {
   await wajibRole(body.token, ["Owner"])
   const { data } = await db.from("users").select("id,nama,username,role,cabang,email,status,dibuat").order("dibuat")
-  return ok((data ?? []).map((u) => ({ ...u, dibuat: tanggalIso(new Date(u.dibuat)) })))
+  return ok(
+    (data ?? [])
+      .filter((u) => u.status !== "Dihapus")
+      .map((u) => ({ ...u, dibuat: tanggalIso(new Date(u.dibuat)) })),
+  )
 }
 
 export async function createUser(body: Record<string, string>) {
@@ -118,4 +122,33 @@ export async function toggleUserStatus(body: Record<string, string>) {
   await db.from("users").update({ status }).eq("id", id)
   await tulisAudit(admin.id, admin.nama, "TOGGLE_USER_STATUS", `Status user ${t.nama} diubah jadi: ${status}`)
   return ok(undefined, `Status ${t.nama} berhasil diubah menjadi ${status}.`)
+}
+
+export async function deleteUser(body: Record<string, string>) {
+  const admin = await wajibRole(body.token, ["Owner"])
+  const id = (body.id || "").trim()
+  const alasan = (body.alasan || "").trim()
+  if (!id) return gagal("ID anggota wajib diisi.")
+  if (alasan.length < 5)
+    return gagal("Alasan penghapusan wajib diisi (minimal 5 karakter).")
+  if (id === admin.id) return gagal("Anda tidak dapat menghapus akun sendiri.")
+
+  const { data: target } = await db.from("users")
+    .select("id,nama,role,status")
+    .eq("id", id)
+    .maybeSingle()
+  if (!target || target.status === "Dihapus") return gagal("Anggota tidak ditemukan.")
+  if (target.role === "Owner") return gagal("Akun Owner tidak dapat dihapus.")
+
+  const { error } = await db.from("users").update({ status: "Dihapus" }).eq("id", id)
+  if (error) throw new ApiError(error.message)
+  await db.from("sessions").update({ status: "Nonaktif" }).eq("user_id", id)
+  await tulisAudit(
+    admin.id,
+    admin.nama,
+    "HAPUS_USER",
+    `Menghapus anggota tim: ${target.nama} (${id})`,
+    alasan,
+  )
+  return ok(undefined, `Anggota ${target.nama} berhasil dihapus.`)
 }

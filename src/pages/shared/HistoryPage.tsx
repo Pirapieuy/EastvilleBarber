@@ -133,11 +133,13 @@ export function ReasonDialog({
   warning,
   onClose,
   onConfirm,
+  showCloseButton = true,
 }: {
   title: string
   warning: string
   onClose: () => void
   onConfirm?: (reason: string) => void | Promise<void>
+  showCloseButton?: boolean
 }) {
   const [reason, setReason] = useState("")
   const [busy, setBusy] = useState(false)
@@ -150,9 +152,11 @@ export function ReasonDialog({
             <p className="eyebrow">Aksi berisiko</p>
             <h2>{title}</h2>
           </div>
-          <Button onClick={onClose}>
-            <Icon name="close" />
-          </Button>
+          {showCloseButton && (
+            <Button onClick={onClose}>
+              <Icon name="close" />
+            </Button>
+          )}
         </header>
         <div className="info-banner">
           <Icon name="alert" />
