@@ -405,7 +405,7 @@ export function ExpensesPage() {
           <span>Keterangan</span>
           <span>Jumlah</span>
           <span>Status</span>
-          <span>Aksi</span>
+          <span style={{ textAlign: "center" }}>Aksi</span>
         </div>
 
         {filteredRecords.map((row) => (

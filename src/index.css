@@ -5451,6 +5451,10 @@ textarea {
   text-transform: uppercase;
 }
 
+.expense-head > :last-child {
+  text-align: center;
+}
+
 .expense-row {
   min-height: 59px;
   padding: 9px 14px;
