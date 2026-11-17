@@ -895,7 +895,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <span className="catalog-locked-icon">
                   <Icon name="user" />
                 </span>
-                <strong>👉 Pilih Nama Anda Dulu</strong>
+                <strong>Pilih Nama Anda Dulu</strong>
               </div>
               <p>
                 Katalog layanan &amp; produk dikunci sementara. Ketuk tombol nama kapster Anda di atas untuk mulai mencatat transaksi.

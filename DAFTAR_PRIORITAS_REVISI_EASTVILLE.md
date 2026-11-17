@@ -12,7 +12,7 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 | Tingkat Prioritas | Definisi & Dampak | Jumlah Temuan | Status Pengerjaan |
 |---|---|:---:|---|
 | **P0 (Kritis / Blocker)** | Transaksi macet total, kasir lumpuh, atau nota salah tidak bisa dibatalkan dari sistem. | 2 | 1 Selesai (`P0.2` Void Transaksi), 1 Dilewati (`P0.1` Kamera) |
-| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 3 Selesai (`P1.1`, `P1.2`, `P1.3`), 3 Menunggu |
+| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 4 Selesai (`P1.1`, `P1.2`, `P1.3`, `P1.4`), 2 Menunggu |
 | **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | ⚠️ Menunggu Eksekusi |
 | **P3 (Rendah / Estetika)** | Popup browser kuno (`prompt`/`confirm`) dan badge dekoratif semu di HP kapster. | 2 | ⚠️ Menunggu Eksekusi |
 
@@ -76,13 +76,14 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
   - Menampilkan banner hijau "Kembalian tunai: Rp ..." di kasir dan mencetak rincian (Tunai Diterima, QRIS, Kembalian) di struk thermal kasir.
 
 ### 6. [P1.4] Validasi Kaku: Tidak Bisa Catat Izin / Sakit di Hari Ini (Hari H)
-* **Status:** ⏳ **Siap Dikerjakan (1 Jam)**
-* **Lokasi File:** `src/pages/kasir/IzinKapster.tsx` & Backend `supabase/functions/api/handlers/sdm.ts` (baris 280)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/kasir/IzinKapster.tsx`, `src/pages/kasir/AbsensiKapster.tsx`, & Backend `supabase/functions/api/handlers/sdm.ts` (baris 278-282)
 * **Akar Masalah:** Form input tanggal mematikan hari ini (`min = besokIso`) dan backend menolak: *"Izin, sakit, atau cuti hanya bisa diajukan untuk besok atau setelahnya"*.
 * **Dampak:** Kapster yang mendadak demam/sakit saat bangun tidur jam 7 pagi tidak bisa dicatat izinnya oleh kasir; data status absensi kapster menggantung.
-* **Solusi Teknis:**
-  - Di `IzinKapster.tsx`: ubah nilai minimal datepicker dari `besokIso` menjadi `hariIniIso`.
-  - Di backend `sdm.ts`: izinkan `tanggal >= tanggalIso()` khusus untuk status `"Sakit"` dan `"Izin"`.
+* **Solusi yang Diterapkan:**
+  - Di backend `sdm.ts`: Membuka pencatatan status `"Sakit"` dan `"Izin"` untuk hari ini (`tanggal >= tanggalIso()`), menolak tanggal lampau (`tanggal < tanggalIso()`), dan tetap menjaga status `"Cuti"` hanya untuk besok ke atas (`tanggal > tanggalIso()`).
+  - Di `IzinKapster.tsx`: Mengatur default tanggal ke hari ini (`hariIniIso`), membuka tanggal hari ini pada kalender untuk Izin & Sakit, memperbaiki label selisih (`Hari ini`, `Besok`, `X hari lagi`), dan otomatis memindahkan tanggal ke besok jika kasir beralih memilih opsi Cuti.
+  - Di `AbsensiKapster.tsx`: Menyelaraskan modal cuti/izin cepat pada halaman absensi kasir agar konsisten mengizinkan sakit dan izin pada hari H.
 
 ### 7. [P1.5] Tombol "Download / Unduh Backup" dan "Hapus" Hilang dari Tabel
 * **Status:** ⏳ **Siap Dikerjakan (Quick Win / 30 Menit)**
