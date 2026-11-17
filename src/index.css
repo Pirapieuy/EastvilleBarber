@@ -5058,6 +5058,56 @@ textarea {
   flex-shrink: 0;
 }
 
+.detail-void-notice {
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.detail-void-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.detail-void-header .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.detail-void-reason {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #7f1d1d;
+}
+
+.detail-void-reason span {
+  font-weight: 600;
+}
+
+.detail-void-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #991b1b;
+  opacity: 0.85;
+}
+
+.detail-actions-group .restore-btn {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.detail-actions-group .restore-btn:hover {
+  background: #dbeafe;
+}
+
 /* Forms/manual */
 .manual-ribbon {
   width: fit-content;

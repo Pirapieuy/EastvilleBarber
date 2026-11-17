@@ -205,13 +205,40 @@ function TransactionDetailBody({
   selected,
   userRole,
   onPrintReceipt,
+  onVoid,
+  onRestore,
 }: {
   selected: HistoryTransactionRecord
   userRole: string
   onPrintReceipt: () => void
+  onVoid?: () => void
+  onRestore?: () => void
 }) {
+  const isVoided = selected.status === "BATAL"
+  const canVoid = userRole === "Owner" || userRole === "Kasir" || userRole === "Manajer"
+  const canRestore = userRole === "Owner"
+
   return (
     <>
+      {isVoided && (
+        <div className="detail-void-notice" role="alert">
+          <div className="detail-void-header">
+            <Icon name="alert" />
+            <strong>Transaksi Ini Telah Dibatalkan</strong>
+          </div>
+          {selected.voidReason && (
+            <p className="detail-void-reason">
+              Alasan: <span>{selected.voidReason}</span>
+            </p>
+          )}
+          {(selected.voidBy || selected.voidTime) && (
+            <small className="detail-void-meta">
+              Dibatalkan oleh {selected.voidBy ?? "-"} · {selected.voidTime ?? ""}
+            </small>
+          )}
+        </div>
+      )}
+
       <div className="detail-section detail-items-section">
         <h3>Item Layanan & Produk ({selected.items.length})</h3>
         <div className="detail-items-list">
@@ -292,6 +319,16 @@ function TransactionDetailBody({
           <Button className="secondary-button" onClick={onPrintReceipt}>
             <Icon name="print" /> Cetak Struk
           </Button>
+          {!isVoided && canVoid && onVoid && (
+            <Button className="danger-button" onClick={onVoid}>
+              <Icon name="alert" /> Batalkan Transaksi
+            </Button>
+          )}
+          {isVoided && canRestore && onRestore && (
+            <Button className="secondary-button restore-btn" onClick={onRestore}>
+              <Icon name="restore" /> Pulihkan Transaksi
+            </Button>
+          )}
         </div>
       </div>
     </>
@@ -310,6 +347,7 @@ export function HistoryPage({ currentUser, role }: {
     INITIAL_HISTORY_TRANSACTIONS[0].id,
   )
   const [action, setAction] = useState<null | "void" | "restore">(null)
+  const [returnToMobileDetail, setReturnToMobileDetail] = useState(false)
   const [showReceipt, setShowReceipt] = useState(false)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
 
@@ -589,6 +627,8 @@ export function HistoryPage({ currentUser, role }: {
               selected={selected}
               userRole={userRole}
               onPrintReceipt={() => setShowReceipt(true)}
+              onVoid={() => setAction("void")}
+              onRestore={() => setAction("restore")}
             />
           </aside>
         )}
@@ -646,6 +686,16 @@ export function HistoryPage({ currentUser, role }: {
                   setMobileDetailOpen(false)
                   setShowReceipt(true)
                 }}
+                onVoid={() => {
+                  setReturnToMobileDetail(true)
+                  setMobileDetailOpen(false)
+                  setAction("void")
+                }}
+                onRestore={() => {
+                  setReturnToMobileDetail(true)
+                  setMobileDetailOpen(false)
+                  setAction("restore")
+                }}
               />
             </div>
           </div>
@@ -661,8 +711,17 @@ export function HistoryPage({ currentUser, role }: {
               ? "Laporan periode lama akan berubah."
               : "Data tetap tersimpan dalam riwayat."
           }
-          onClose={() => setAction(null)}
-          onConfirm={handleConfirmAction}
+          onClose={() => {
+            setAction(null)
+            if (returnToMobileDetail) {
+              setReturnToMobileDetail(false)
+              setMobileDetailOpen(true)
+            }
+          }}
+          onConfirm={async (reason) => {
+            setReturnToMobileDetail(false)
+            await handleConfirmAction(reason)
+          }}
         />
       )}
     </div>
