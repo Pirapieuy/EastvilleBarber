@@ -2116,28 +2116,30 @@ textarea {
   letter-spacing: -0.035em;
 }
 
-/* Kasir harus muat 1 layar: header makan tinggi, jadi Kasir mengisi sisa tinggi (bukan 100svh penuh) */
+/* Kasir harus muat 1 layar: judul melayang di atas kolom katalog, keranjang tetap penuh setinggi layar */
 @media (min-width: 1025px) {
   .workspace:has(> .cashier-page) {
-    display: flex;
-    flex-direction: column;
+    position: relative;
     height: 100svh;
     overflow: hidden;
   }
 
   .workspace:has(> .cashier-page) > .desktop-page-head {
-    flex: 0 0 auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: calc((100% - max(340px, 25%)) );
     padding: 16px 24px 0;
+    pointer-events: none;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page {
-    flex: 1 1 auto;
-    height: auto;
-    min-height: 0;
+    height: 100%;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding-top: 14px;
+    padding-top: 56px;
   }
 }
 
@@ -14522,5 +14524,17 @@ label .search-select-trigger {
   .cashier-page .cart-total .button,
   .cashier-page .cart-total .primary-button {
     min-height: 36px;
+  }
+}
+
+/* Keranjang kosong: pesan di tengah, bagian pembayaran tidak dipaksa */
+@media (min-width: 1025px) {
+  .cashier-page .cart-lines:has(> .empty) {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+
+  .cashier-page .cart-lines:has(> .empty) + .cart-total {
+    flex: 0 0 auto;
   }
 }
