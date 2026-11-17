@@ -2116,6 +2116,31 @@ textarea {
   letter-spacing: -0.035em;
 }
 
+/* Kasir harus muat 1 layar: header makan tinggi, jadi Kasir mengisi sisa tinggi (bukan 100svh penuh) */
+@media (min-width: 1025px) {
+  .workspace:has(> .cashier-page) {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .workspace:has(> .cashier-page) > .desktop-page-head {
+    flex: 0 0 auto;
+    padding: 16px 24px 0;
+  }
+
+  .workspace:has(> .cashier-page) > .cashier-page {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .workspace:has(> .cashier-page) > .cashier-page .catalog {
+    padding-top: 14px;
+  }
+}
+
 @media (min-width: 1025px) {
   .desktop-page-head + .content,
   .desktop-page-head + .mobile-content {
@@ -14393,4 +14418,57 @@ label .search-select-trigger {
 }
 .izin-kapster-page .segmented > * {
   flex: 1;
+}
+
+/* Kasbon & Izin Kapster (Kasir): form tetap, daftar riwayat scroll sendiri agar halaman muat 1 layar di desktop */
+@media (min-width: 1025px) {
+  .workspace:has(> .kasbon-kapster-page),
+  .workspace:has(> .izin-kapster-page) {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .workspace:has(> .kasbon-kapster-page) > .desktop-page-head,
+  .workspace:has(> .izin-kapster-page) > .desktop-page-head {
+    flex: 0 0 auto;
+  }
+
+  .kasbon-kapster-page,
+  .izin-kapster-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: min(1280px, 100%);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding-bottom: 22px !important;
+  }
+
+  .kasbon-kapster-page > .panel,
+  .izin-kapster-page > .panel {
+    flex: 0 0 auto;
+  }
+
+  .kasbon-kapster-page > .kasbon-kapster-history,
+  .izin-kapster-page > .kasbon-kapster-history {
+    flex: 1 1 200px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kasbon-kapster-history .section-title {
+    flex: 0 0 auto;
+  }
+
+  .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    overscroll-behavior: contain;
+  }
 }
