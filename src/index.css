@@ -14554,3 +14554,19 @@ label .search-select-trigger {
     padding-top: 12px;
   }
 }
+
+/* Keranjang Kasir desktop: bagian pembayaran seukuran isinya, daftar item mengisi sisa tinggi (scroll bila banyak) */
+@media (min-width: 1025px) {
+  .cashier-page .cart-lines {
+    flex: 1 1 0;
+    min-height: 76px;
+    max-height: none;
+  }
+
+  .cashier-page .cart-total {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    max-height: calc(100svh - 96px);
+  }
+}
