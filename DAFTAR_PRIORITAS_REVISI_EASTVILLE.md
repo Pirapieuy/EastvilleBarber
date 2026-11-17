@@ -12,7 +12,7 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 | Tingkat Prioritas | Definisi & Dampak | Jumlah Temuan | Status Pengerjaan |
 |---|---|:---:|---|
 | **P0 (Kritis / Blocker)** | Transaksi macet total, kasir lumpuh, atau nota salah tidak bisa dibatalkan dari sistem. | 2 | 1 Selesai (`P0.2` Void Transaksi), 1 Dilewati (`P0.1` Kamera) |
-| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | ⚠️ Menunggu Eksekusi |
+| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 2 Selesai (`P1.1`, `P1.2`), 4 Menunggu |
 | **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | ⚠️ Menunggu Eksekusi |
 | **P3 (Rendah / Estetika)** | Popup browser kuno (`prompt`/`confirm`) dan badge dekoratif semu di HP kapster. | 2 | ⚠️ Menunggu Eksekusi |
 
@@ -44,27 +44,25 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 > *Kategori ini tidak menghentikan checkout langsung, namun merusak akurasi laporan Owner, salah pembagian komisi, atau memicu selisih uang laci kasir.*
 
 ### 3. [P1.1] Bug Anomali Kehadiran: Seluruh Kapster Terdeteksi "0 Hadir" (Tidak Hadir)
-* **Status:** ⏳ **Siap Dikerjakan (Quick Win / 10 Menit)**
-* **Lokasi File:** `src/pages/shared/OwnerDashboard.tsx` (baris 115–125)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/OwnerDashboard.tsx` (baris 116)
 * **Akar Masalah:** Dashboard Owner mencari `r.tipe === "Masuk"`, sedangkan endpoint absensi kasir menyimpan `status: "Hadir"` dan `tipe: ""`. Akibatnya variabel `masuk` selalu `undefined`.
 * **Dampak:** Dashboard Owner menampilkan kartu indikator merah seolah toko kosong tanpa pekerja, padahal transaksi berjalan normal.
-* **Solusi Teknis:**
-  ```ts
-  // Ganti baris 116 dari:
-  const masuk = rows.find((r) => r.tipe === "Masuk")
-  // Menjadi:
-  const masuk = rows.find((r) => r.status === "Hadir" || r.tipe === "Masuk")
-  ```
+* **Solusi yang Diterapkan:**
+  Mengganti filter pencarian jam masuk menjadi:
+  `rows.find((r) => r.status === "Hadir" || r.tipe === "Masuk")`.
 
 ### 4. [P1.2] Bug Timpa Kapster di Keranjang (Cart Overwrite / 1 Struk Multi-Kapster)
-* **Status:** ⏳ **Siap Dikerjakan (Permintaan Mas Fadil / 3–4 Jam)**
-* **Lokasi File:** `src/pages/shared/CashierPage.tsx` (baris 28–43)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/CashierPage.tsx` & `src/index.css`
 * **Akar Masalah:** Fungsi `assignCartToBarber` otomatis menimpa kapster seluruh item di keranjang dengan kapster yang baru diklik di bagian atas.
 * **Dampak:** Kasir tidak bisa melayani 1 nota dengan 2 kapster berbeda (misal: Ayah dipotong Ferdi, Anak dipotong Seva). Seluruh komisi salah sasaran ke 1 kapster saja.
-* **Solusi Teknis:**
-  - Hapus penimpaan massal pada keranjang saat tombol kapster atas ditekan.
-  - Simpan atribut `barber` dan `kapsterId` per baris item keranjang.
-  - Tampilkan nama kapster per item di baris keranjang belanja kasir.
+* **Solusi yang Diterapkan:**
+  - Menghapus fungsi penimpaan massal `assignCartToBarber` saat tombol kapster atas diklik.
+  - Mempertahankan kapster independen per baris item di keranjang (`CartLine`).
+  - Menambahkan badge & dropdown pemilih kapster per baris item di keranjang (`.cart-line-kapster`), sehingga kasir bisa melihat dan mengubah kapster per layanan langsung dari keranjang.
+  - Tombol bayar kasir otomatis menampilkan seluruh kapster yang bertugas dalam nota tersebut, misal: `Bayar (Ferdi, Seva)`.
+  - Struk thermal kasir mencantumkan nama kapster per layanan/produk, misal: `Haircut (Ferdi)` dan `Haircut Anak (Seva)`.
 
 ### 5. [P1.3] Kalkulasi Kembalian Uang Tunai Hilang pada Metode Pembayaran Gabungan (Split Bill)
 * **Status:** ⏳ **Siap Dikerjakan (Quick Win / 30 Menit)**

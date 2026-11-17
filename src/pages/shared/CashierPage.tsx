@@ -25,23 +25,6 @@ export type CartLine = CatalogItem & {
   barber: string
 }
 
-function assignCartToBarber(lines: CartLine[], barber: string): CartLine[] {
-  const byItem = new Map<string | number, CartLine>()
-  lines.forEach((line) => {
-    const existing = byItem.get(line.id)
-    if (existing) {
-      existing.qty += line.qty
-      return
-    }
-    byItem.set(line.id, {
-      ...line,
-      lineId: `${line.id}-${barber}`,
-      barber,
-    })
-  })
-  return [...byItem.values()]
-}
-
 export function ReceiptView({
   cart,
   subtotal,
@@ -190,7 +173,10 @@ export function ReceiptView({
           {cart.map((line) => (
             <div className="receipt-item" key={line.lineId}>
               <span>
-                <strong>{line.name}</strong>
+                <strong>
+                  {line.name}
+                  {line.barber ? ` (${line.barber})` : ""}
+                </strong>
                 <small>
                   {line.qty} ×{" "}
                   {new Intl.NumberFormat("id-ID").format(line.price)}
@@ -548,7 +534,9 @@ export function CashierPage({ currentUser, onNavigate }: {
 
   const payDisabledReason = ((): string | null => {
     if (!cart.length) return null
-    if (!selectedBarber) return "Pilih nama kapster terlebih dahulu."
+    if (cart.some((l) => !l.barber?.trim()) && !selectedBarber) {
+      return "Pilih nama kapster terlebih dahulu."
+    }
     if (gagalMuat) return "Data kasir belum selesai dimuat."
     if (paying) return "Sedang memproses pembayaran..."
     if (method === "Tunai" && cash <= 0) return "Masukkan jumlah tunai."
@@ -559,7 +547,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       return `Pembayaran masih kurang ${rupiah(shortage)}.`
     }
     if (payableTotal === 0 && !discountReason.trim()) {
-      return "Tagihan Rp 0. Masukkan keterangan diskon di menu Beri Diskon."
+      return "Tagihan Rp 0. Centang Gratis dan isi kolom alasan transaksi gratis."
     }
     return null
   })()
@@ -671,6 +659,34 @@ export function CashierPage({ currentUser, onNavigate }: {
     setKodeError("")
   }
 
+  /** Ganti kapster untuk baris item tertentu di keranjang */
+  function changeLineBarber(lineId: string, newBarber: string) {
+    setCart((current) => {
+      const target = current.find((x) => x.lineId === lineId)
+      if (!target || target.barber === newBarber) return current
+
+      const existing = current.find(
+        (x) => x.id === target.id && x.barber === newBarber && x.lineId !== lineId,
+      )
+
+      if (existing) {
+        return current
+          .filter((x) => x.lineId !== lineId)
+          .map((x) =>
+            x.lineId === existing.lineId
+              ? { ...x, qty: x.qty + target.qty }
+              : x,
+          )
+      }
+
+      return current.map((x) =>
+        x.lineId === lineId
+          ? { ...x, barber: newBarber, lineId: `${x.id}-${newBarber}` }
+          : x,
+      )
+    })
+  }
+
   /** Atur jumlah item langsung (ketik); produk dibatasi sisa stok. */
   function setLineQty(line: CartLine, raw: string) {
     const digits = raw.replace(/\D/g, "")
@@ -739,8 +755,11 @@ export function CashierPage({ currentUser, onNavigate }: {
                       if (id) setAttendanceTarget(id)
                       return
                     }
+                    if (selectedBarber === barber) {
+                      setSelectedBarber("")
+                      return
+                    }
                     setSelectedBarber(barber)
-                    setCart((items) => assignCartToBarber(items, barber))
                   }}
                 >
                   <i>{barber.charAt(0)}</i>
@@ -767,7 +786,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                 )
                 if (kapster) {
                   setSelectedBarber(kapster.name)
-                  setCart((items) => assignCartToBarber(items, kapster.name))
                 }
               }
               setAttendanceTarget("")
@@ -1083,7 +1101,31 @@ export function CashierPage({ currentUser, onNavigate }: {
                   >
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
-                      <small>{rupiah(line.price)}</small>
+                      <div className="cart-line-meta">
+                        {line.barber && (
+                          <label
+                            className="cart-line-kapster"
+                            title="Kapster untuk layanan ini (ketuk untuk mengubah)"
+                          >
+                            <Icon name="user" />
+                            <select
+                              aria-label={`Kapster untuk ${line.name}`}
+                              onChange={(e) =>
+                                changeLineBarber(line.lineId, e.target.value)
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                              value={line.barber}
+                            >
+                              {barberList.map((b) => (
+                                <option key={b.name} value={b.name}>
+                                  {b.name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                        <small>{rupiah(line.price)}</small>
+                      </div>
                     </span>
                     <div className="stepper">
                       <Button
@@ -1416,7 +1458,14 @@ export function CashierPage({ currentUser, onNavigate }: {
                 disabled={Boolean(payDisabledReason) || !cart.length}
                 onClick={pay}
               >
-                <span>Bayar {selectedBarber ? `(${selectedBarber})` : ""}</span>
+                <span>
+                  Bayar{" "}
+                  {cart.length > 0
+                    ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
+                    : selectedBarber
+                      ? `(${selectedBarber})`
+                      : ""}
+                </span>
                 <Icon name="cash" />
               </Button>
               {gagalMuat && (
