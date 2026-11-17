@@ -154,18 +154,18 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 * **Solusi Teknis:** Buka kembali akses halaman jadwal dan riwayat kehadiran pribadi di sidebar Kapster.
 
 ### 14. [P2.6] Ukuran Tombol Stepper Kuantitas Terlalu Kecil di Layar Sentuh
-* **Status:** ⏳ **Siap Dikerjakan (30 Menit)**
+* **Status:** ✅ **SELESAI (18 Nov 2026)**
 * **Lokasi File:** `src/pages/shared/CashierPage.tsx` & `src/index.css`
 * **Akar Masalah:** Tombol + dan - pada stepper kuantitas keranjang berukuran 30px x 32px (di bawah standar ergonomis sentuh minimal 44px x 44px).
 * **Dampak:** Sering salah pencet (*miss-tap*) di tablet/smartphone kasir, terutama saat jari basah minyak pomade.
-* **Solusi Teknis:** Perbesar target sentuh tombol stepper menjadi minimal 44px x 44px pada file CSS.
+* **Solusi Teknis:** Perbesar target sentuh tombol stepper menjadi minimal 44px x 44px pada file CSS dengan grid layout 44px 1fr 44px.
 
 ### 15. [P2.7] Tidak Ada Fitur Edit Item Transaksi Pasca-Simpan
-* **Status:** ⏳ **Rencana Jangka Panjang (1 Hari Kerja)**
-* **Lokasi File:** `src/pages/shared/HistoryPage.tsx`
+* **Status:** ✅ **SELESAI (18 Nov 2026)**
+* **Lokasi File:** `src/pages/shared/HistoryPage.tsx`, `src/api.ts`, `supabase/functions/api/handlers/transaksi.ts` & `src/index.css`
 * **Akar Masalah:** Jika kasir salah memilih varian pomade, satu-satunya cara adalah membatalkan nota dan menginput ulang dari awal.
 * **Dampak:** Memperlambat operasional kasir saat antrean mengular.
-* **Solusi Teknis:** Buat fitur edit item transaksi sebelum tutup shift kasir.
+* **Solusi Teknis:** Dibuat modal dialog kustom `EditTransactionModal` di riwayat transaksi untuk mengubah item layanan/produk, kuantitas, kapster, atau metode pembayaran, didukung endpoint backend `update-transaksi` dengan penyesuaian otomatis stok dan kalkulasi komisi kapster.
 
 ---
 
@@ -207,7 +207,8 @@ TAHAP 2: FITUR UTAMA POS & KOMISI (1-2 Hari Kerja)
 
 TAHAP 3: POLISH & ERGONOMI (1-2 Hari Kerja)
 ├── [P2.5] Buka Akses Jadwal Mandiri di HP Kapster
-├── [P2.6] Perbesar Tombol Stepper Kuantitas (+ dan -) Jadi 44px
+├── [P2.6] Perbesar Tombol Stepper Kuantitas (+ dan -) Jadi 44px (SELESAI)
+├── [P2.7] Fitur Edit Item Transaksi Pasca-Simpan di HistoryPage (SELESAI)
 ├── [P3.1] Ganti Window Prompt/Confirm dengan Modal Kustom
 └── [P3.2] Hapus Badge Semu Antrean di Beranda Kapster
 ```

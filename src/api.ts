@@ -251,6 +251,28 @@ export const apiTransaksi = {
     api("batalkan-transaksi", { id, alasan }),
   pulihkan: (id: string, alasan: string) =>
     api("pulihkan-transaksi", { id, alasan }),
+  update: (p: {
+    id: string
+    items: {
+      refId?: string
+      nama?: string
+      name?: string
+      qty: number
+      price?: number
+      harga?: number
+      type?: "Layanan" | "Produk"
+      tipe?: "Layanan" | "Produk"
+      kapsterId?: string
+      kapster?: string
+    }[]
+    metode?: "Tunai" | "QRIS" | "Gabungan"
+    bayarTunai?: number
+    bayarQris?: number
+    alasanEdit?: string
+  }) =>
+    api<{ id: string; total: number; subtotal: number }>("update-transaksi", {
+      ...p,
+    }),
 }
 
 export const apiPengeluaran = {

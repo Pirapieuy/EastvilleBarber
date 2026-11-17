@@ -3215,17 +3215,20 @@ textarea {
   display: flex;
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 9px;
+  min-height: 44px;
 }
 
 .stepper .button {
-  width: 30px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .stepper span {
-  min-width: 22px;
-  font-size: 13px;
+  min-width: 32px;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -5454,6 +5457,145 @@ textarea {
 .expense-head > :last-child {
   text-align: center;
 }
+
+/* Modal Edit Transaksi */
+.edit-trx-modal {
+  width: min(620px, calc(100% - 24px)) !important;
+  max-width: 620px !important;
+  max-height: calc(100svh - 32px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.edit-trx-modal > header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.edit-trx-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-trx-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-trx-item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(110px, 0.8fr) auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgb(20 17 15 / 2%);
+}
+
+.edit-trx-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.edit-trx-item-info strong {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-trx-item-info small {
+  color: var(--slate);
+  font-size: 11px;
+}
+
+.edit-trx-item-price {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.edit-trx-add-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(110px, 0.8fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 9px;
+  background: var(--bone);
+}
+
+.edit-trx-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  background: rgb(200 150 62 / 8%);
+  border: 1px solid rgb(200 150 62 / 20%);
+}
+
+.edit-trx-summary > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--slate);
+}
+
+.edit-trx-summary > div.total {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+}
+
+.edit-trx-modal > footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+
+@media (max-width: 600px) {
+  .edit-trx-item-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "info price"
+      "kapster kapster"
+      "stepper del";
+  }
+  .edit-trx-item-info { grid-area: info; }
+  .edit-trx-item-price { grid-area: price; text-align: right; }
+  .edit-trx-item-kapster { grid-area: kapster; }
+  .edit-trx-item-stepper { grid-area: stepper; }
+  .edit-trx-item-del { grid-area: del; justify-self: end; }
+
+  .edit-trx-add-box {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .expense-row {
   min-height: 59px;
@@ -12496,8 +12638,8 @@ summary,
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 8px;
-  min-height: 48px;
+  gap: 10px;
+  min-height: 52px;
 }
 
 .cart-lines article .cart-line-title {
@@ -12523,19 +12665,23 @@ summary,
 }
 
 .cart-lines article .stepper {
-  width: 90px;
-  height: 34px;
+  width: 124px;
+  height: 44px;
+  min-height: 44px;
   display: grid;
-  grid-template-columns: 28px 1fr 28px;
+  grid-template-columns: 44px 1fr 44px;
   align-items: stretch;
   overflow: hidden;
   border-radius: 9px;
+  border: 1px solid var(--line);
   background: var(--paper);
 }
 
 .cart-lines article .stepper .button {
-  width: 28px;
-  height: 100%;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -12548,7 +12694,8 @@ summary,
 
 .cart-lines article .stepper input {
   width: 100%;
-  min-width: 0;
+  min-width: 36px;
+  height: 100%;
   border: 0;
   border-inline: 1px solid var(--line);
   border-radius: 0;
