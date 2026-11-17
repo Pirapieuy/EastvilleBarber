@@ -228,7 +228,7 @@ export function AbsensiKapster({
     setPhotoError("")
     setStatus("Izin")
     setCatatan("")
-    setTanggalIzin(besokIso)
+    setTanggalIzin(todayIso)
     setView("leave")
   }
 
@@ -293,13 +293,19 @@ export function AbsensiKapster({
 
   async function handleCatat() {
     if (!selectedKapster) return
-    if (view === "leave" && !catatan.trim()) {
-      setPhotoError("Keterangan wajib diisi.")
-      return
-    }
-    if (view === "leave" && tanggalIzin <= todayIso) {
-      setPhotoError("Pengajuan izin paling cepat untuk besok.")
-      return
+    if (view === "leave") {
+      if (!catatan.trim()) {
+        setPhotoError("Keterangan wajib diisi.")
+        return
+      }
+      if (status === "Cuti" && tanggalIzin <= todayIso) {
+        setPhotoError("Pengajuan cuti paling cepat untuk besok.")
+        return
+      }
+      if (tanggalIzin < todayIso) {
+        setPhotoError("Pengajuan tidak bisa untuk tanggal lampau.")
+        return
+      }
     }
     setSubmitting(true)
     try {
@@ -748,9 +754,9 @@ export function AbsensiKapster({
                   <label className="pay-field">
                     <span>Tanggal pengajuan</span>
                     <CalendarPicker
-                      min={besokIso}
+                      min={status === "Cuti" ? besokIso : todayIso}
                       onChange={setTanggalIzin}
-                      showToday={false}
+                      showToday={status !== "Cuti"}
                       value={tanggalIzin}
                     />
                   </label>
@@ -767,7 +773,12 @@ export function AbsensiKapster({
                       <Button
                         className={status === value ? "active" : ""}
                         key={value}
-                        onClick={() => setStatus(value)}
+                        onClick={() => {
+                          setStatus(value)
+                          if (value === "Cuti" && tanggalIzin <= todayIso) {
+                            setTanggalIzin(besokIso)
+                          }
+                        }}
                         disabled={submitting}
                       >
                         <strong>{value}</strong>

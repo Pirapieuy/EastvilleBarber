@@ -13,7 +13,7 @@ export type AbsensiStatus = "Hadir" | "Izin" | "Sakit" | "Cuti" | "Tidak Hadir"
 
 export type Page = "dashboard" | "cashier" | "history" | "manual" | "expenses" | "payroll" | "my-salary" | "reports" | "product-reports" | "team" | "services" | "products" | "attendance" | "attendance-admin" | "attendance-tim" | "attendance-history" | "audit" | "backup" | "KasirPOS" | "RiwayatTransaksi" | "RekapManual" | "LaporanKeuangan" | "LaporanProduk" | "Pengeluaran" | "catalog" | "KatalogLayananProduk" | "LayananHarga" | "MasterProduk" | "GajiKasbon" | "AbsensiTim" | "BerandaOwner" | "TimEastville" | "AbsensiAdmin" | "JejakAudit" | "BackupData" | "BerandaKapster" | "GajiKomisiSaya" | "KomisiProdukSaya" | "AbsensiJadwalSaya" | "AbsensiKapster" | "KasbonKapster" | "kasbon-kapster" | "IzinKapster" | "izin-kapster" | "RiwayatAbsensi" | "JadwalAbsensi"
 
-export type IconName = "alert" | "arrow" | "back" | "calendar" | "camera" | "cash" | "cashier" | "chart" | "check" | "chevron" | "clock" | "close" | "expense" | "eye" | "file" | "history" | "home" | "lock" | "logout" | "mail" | "menu" | "minus" | "pencil" | "people" | "plus" | "print" | "product" | "qris" | "receipt" | "restore" | "search" | "settings" | "team" | "trash" | "user" | "wallet" | "whatsapp"
+export type IconName = "alert" | "arrow" | "back" | "calendar" | "camera" | "cash" | "cashier" | "chart" | "check" | "chevron" | "clock" | "close" | "download" | "expense" | "eye" | "file" | "history" | "home" | "lock" | "logout" | "mail" | "menu" | "minus" | "pencil" | "people" | "plus" | "print" | "product" | "qris" | "receipt" | "restore" | "search" | "settings" | "team" | "trash" | "user" | "wallet" | "whatsapp"
 
 export const DEMO_USERS: Record<Role, AppUser> = {
   Owner: {

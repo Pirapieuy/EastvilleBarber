@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
@@ -25,21 +25,23 @@ export type CartLine = CatalogItem & {
   barber: string
 }
 
-function assignCartToBarber(lines: CartLine[], barber: string): CartLine[] {
-  const byItem = new Map<string | number, CartLine>()
-  lines.forEach((line) => {
-    const existing = byItem.get(line.id)
-    if (existing) {
-      existing.qty += line.qty
-      return
+/** Kelompokkan baris keranjang berdasarkan kapster secara berurutan */
+export function groupCartByBarber(lines: CartLine[]): CartLine[] {
+  const order: string[] = []
+  const groups = new Map<string, CartLine[]>()
+  for (const line of lines) {
+    const b = line.barber || ""
+    if (!groups.has(b)) {
+      groups.set(b, [])
+      order.push(b)
     }
-    byItem.set(line.id, {
-      ...line,
-      lineId: `${line.id}-${barber}`,
-      barber,
-    })
-  })
-  return [...byItem.values()]
+    groups.get(b)!.push(line)
+  }
+  const result: CartLine[] = []
+  for (const b of order) {
+    result.push(...groups.get(b)!)
+  }
+  return result
 }
 
 export function ReceiptView({
@@ -190,7 +192,10 @@ export function ReceiptView({
           {cart.map((line) => (
             <div className="receipt-item" key={line.lineId}>
               <span>
-                <strong>{line.name}</strong>
+                <strong>
+                  {line.name}
+                  {line.barber ? ` (${line.barber})` : ""}
+                </strong>
                 <small>
                   {line.qty} ×{" "}
                   {new Intl.NumberFormat("id-ID").format(line.price)}
@@ -226,7 +231,7 @@ export function ReceiptView({
             </div>
             {method !== "QRIS" && (
               <div>
-                <dt>Tunai</dt>
+                <dt>{method === "Gabungan" ? "Tunai Diterima" : "Tunai"}</dt>
                 <dd>{new Intl.NumberFormat("id-ID").format(cash)}</dd>
               </div>
             )}
@@ -236,7 +241,7 @@ export function ReceiptView({
                 <dd>{new Intl.NumberFormat("id-ID").format(qris)}</dd>
               </div>
             )}
-            {method === "Tunai" && (
+            {change > 0 && (
               <div>
                 <dt>Kembalian</dt>
                 <dd>{new Intl.NumberFormat("id-ID").format(change)}</dd>
@@ -267,7 +272,9 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
   const [cash, setCash] = useState(0)
   const [qrisInput, setQrisInput] = useState(0)
-  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
+  const [splitTunaiInput, setSplitTunaiInput] = useState(0)
+  const [cashReceived, setCashReceived] = useState(0)
+  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("qris")
   const [discount, setDiscount] = useState(0)
   const [kodeDiskon, setKodeDiskon] = useState("")
   const [kodeError, setKodeError] = useState("")
@@ -533,7 +540,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         ? payableTotal
         : gabunganDari === "qris"
           ? Math.min(qrisInput, payableTotal)
-          : Math.max(0, payableTotal - Math.min(cash, payableTotal))
+          : Math.max(0, payableTotal - Math.min(splitTunaiInput, payableTotal))
   const tunaiTerpakai =
     method === "QRIS"
       ? 0
@@ -541,25 +548,51 @@ export function CashierPage({ currentUser, onNavigate }: {
         ? cash
         : gabunganDari === "qris"
           ? Math.max(0, payableTotal - qris)
-          : Math.min(cash, payableTotal)
+          : Math.min(splitTunaiInput, payableTotal)
   const paid = tunaiTerpakai + qris
-  const shortage = Math.max(0, payableTotal - paid)
-  const change = method === "Tunai" ? Math.max(0, cash - payableTotal) : 0
+  const shortage =
+    method === "Tunai"
+      ? Math.max(0, payableTotal - cash)
+      : method === "Gabungan"
+        ? tunaiTerpakai + qris < payableTotal
+          ? payableTotal - (tunaiTerpakai + qris)
+          : tunaiTerpakai > 0 && cashReceived > 0 && cashReceived < tunaiTerpakai
+            ? tunaiTerpakai - cashReceived
+            : 0
+        : 0
+  const change =
+    method === "Tunai"
+      ? Math.max(0, cash - payableTotal)
+      : method === "Gabungan"
+        ? tunaiTerpakai > 0 && cashReceived > tunaiTerpakai
+          ? cashReceived - tunaiTerpakai
+          : 0
+        : 0
 
   const payDisabledReason = ((): string | null => {
     if (!cart.length) return null
-    if (!selectedBarber) return "Pilih nama kapster terlebih dahulu."
+    if (cart.some((l) => !l.barber?.trim()) && !selectedBarber) {
+      return "Pilih nama kapster terlebih dahulu."
+    }
     if (gagalMuat) return "Data kasir belum selesai dimuat."
     if (paying) return "Sedang memproses pembayaran..."
     if (method === "Tunai" && cash <= 0) return "Masukkan jumlah tunai."
-    if (method === "Gabungan" && tunaiTerpakai + qris <= 0) {
-      return "Masukkan jumlah tunai atau QRIS."
+    if (method === "Gabungan") {
+      if (tunaiTerpakai + qris <= 0) {
+        return "Masukkan jumlah tunai atau QRIS."
+      }
+      if (tunaiTerpakai + qris < payableTotal) {
+        return `Porsi pembayaran masih kurang ${rupiah(payableTotal - (tunaiTerpakai + qris))}.`
+      }
+      if (tunaiTerpakai > 0 && cashReceived > 0 && cashReceived < tunaiTerpakai) {
+        return `Uang tunai masih kurang ${rupiah(tunaiTerpakai - cashReceived)}.`
+      }
     }
     if (shortage > 0) {
       return `Pembayaran masih kurang ${rupiah(shortage)}.`
     }
     if (payableTotal === 0 && !discountReason.trim()) {
-      return "Tagihan Rp 0. Masukkan keterangan diskon di menu Beri Diskon."
+      return "Tagihan Rp 0. Centang Gratis dan isi kolom alasan transaksi gratis."
     }
     return null
   })()
@@ -620,6 +653,17 @@ export function CashierPage({ currentUser, onNavigate }: {
     .sort((a, b) => a - b)
     .slice(0, 5)
 
+  const pecahanCepatGabungan = Array.from(
+    new Set(
+      [10000, 20000, 50000, 100000]
+        .map((k) => Math.ceil(tunaiTerpakai / k) * k)
+        .concat([50000, 100000, 150000, 200000]),
+    ),
+  )
+    .filter((n) => n > tunaiTerpakai)
+    .sort((a, b) => a - b)
+    .slice(0, 4)
+
   if (receipt) {
     return (
       <ReceiptView
@@ -628,7 +672,13 @@ export function CashierPage({ currentUser, onNavigate }: {
         discount={effectiveDiscount}
         total={payableTotal}
         method={method}
-        cash={method === "Tunai" ? cash : tunaiTerpakai}
+        cash={
+          method === "Tunai"
+            ? cash
+            : method === "Gabungan"
+              ? cashReceived || tunaiTerpakai
+              : 0
+        }
         qris={qris}
         change={change}
         cashier={currentUser?.name ?? "Siti Rahma"}
@@ -662,6 +712,9 @@ export function CashierPage({ currentUser, onNavigate }: {
     setCart([])
     setCash(0)
     setQrisInput(0)
+    setSplitTunaiInput(0)
+    setCashReceived(0)
+    setGabunganDari("qris")
     setKomisiLayanan("Normal")
     setDiscount(0)
     setAppliedDiscountPercent(null)
@@ -669,6 +722,36 @@ export function CashierPage({ currentUser, onNavigate }: {
     setKodeTerpakai("")
     setKodeDiskon("")
     setKodeError("")
+  }
+
+  /** Ganti kapster untuk baris item tertentu di keranjang */
+  function changeLineBarber(lineId: string, newBarber: string) {
+    setCart((current) => {
+      const target = current.find((x) => x.lineId === lineId)
+      if (!target || target.barber === newBarber) return current
+
+      const existing = current.find(
+        (x) => x.id === target.id && x.barber === newBarber && x.lineId !== lineId,
+      )
+
+      let updated: CartLine[]
+      if (existing) {
+        updated = current
+          .filter((x) => x.lineId !== lineId)
+          .map((x) =>
+            x.lineId === existing.lineId
+              ? { ...x, qty: x.qty + target.qty }
+              : x,
+          )
+      } else {
+        updated = current.map((x) =>
+          x.lineId === lineId
+            ? { ...x, barber: newBarber, lineId: `${x.id}-${newBarber}` }
+            : x,
+        )
+      }
+      return groupCartByBarber(updated)
+    })
   }
 
   /** Atur jumlah item langsung (ketik); produk dibatasi sisa stok. */
@@ -700,6 +783,10 @@ export function CashierPage({ currentUser, onNavigate }: {
   }
 
   const itemCount = cart.reduce((sum, line) => sum + line.qty, 0)
+  const uniqueBarbersInCart = Array.from(
+    new Set(cart.map((l) => l.barber).filter(Boolean)),
+  )
+  const hasMultipleBarbers = uniqueBarbersInCart.length > 1
 
   return (
     <div className="cashier-page">
@@ -739,8 +826,11 @@ export function CashierPage({ currentUser, onNavigate }: {
                       if (id) setAttendanceTarget(id)
                       return
                     }
+                    if (selectedBarber === barber) {
+                      setSelectedBarber("")
+                      return
+                    }
                     setSelectedBarber(barber)
-                    setCart((items) => assignCartToBarber(items, barber))
                   }}
                 >
                   <i>{barber.charAt(0)}</i>
@@ -767,7 +857,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                 )
                 if (kapster) {
                   setSelectedBarber(kapster.name)
-                  setCart((items) => assignCartToBarber(items, kapster.name))
                 }
               }
               setAttendanceTarget("")
@@ -806,7 +895,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <span className="catalog-locked-icon">
                   <Icon name="user" />
                 </span>
-                <strong>👉 Pilih Nama Anda Dulu</strong>
+                <strong>Pilih Nama Anda Dulu</strong>
               </div>
               <p>
                 Katalog layanan &amp; produk dikunci sementara. Ketuk tombol nama kapster Anda di atas untuk mulai mencatat transaksi.
@@ -841,7 +930,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 const found = c.find(
                   (x) => x.id === item.id && x.barber === selectedBarber,
                 )
-                return found
+                const updated = found
                   ? c.map((x) =>
                       x.lineId === found.lineId ? { ...x, qty: x.qty + 1 } : x,
                     )
@@ -854,6 +943,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                         barber: selectedBarber,
                       },
                     ]
+                return groupCartByBarber(updated)
               })
             return (
               <div
@@ -985,11 +1075,24 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <span>Ketuk item untuk memulai.</span>
               </div>
             ) : (
-              cart.map((line) => (
-                <article
-                  className="cart-line-swipe"
-                  key={line.lineId}
-                  title="Geser ke kiri untuk menghapus item"
+              cart.map((line, idx) => {
+                const isFirstOfBarber =
+                  idx === 0 || cart[idx - 1].barber !== line.barber
+
+                return (
+                  <Fragment key={line.lineId}>
+                    {hasMultipleBarbers && isFirstOfBarber && (
+                      <div className="cart-barber-group-header">
+                        <Icon name="user" />
+                        <span>
+                          Kapster: <strong>{line.barber}</strong>
+                        </span>
+                      </div>
+                    )}
+                    <article
+                      className="cart-line-swipe"
+                      key={line.lineId}
+                      title="Geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -1083,7 +1186,31 @@ export function CashierPage({ currentUser, onNavigate }: {
                   >
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
-                      <small>{rupiah(line.price)}</small>
+                      <div className="cart-line-meta">
+                        {line.barber && (
+                          <label
+                            className="cart-line-kapster"
+                            title="Kapster untuk layanan ini (ketuk untuk mengubah)"
+                          >
+                            <Icon name="user" />
+                            <select
+                              aria-label={`Kapster untuk ${line.name}`}
+                              onChange={(e) =>
+                                changeLineBarber(line.lineId, e.target.value)
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                              value={line.barber}
+                            >
+                              {barberList.map((b) => (
+                                <option key={b.name} value={b.name}>
+                                  {b.name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                        <small>{rupiah(line.price)}</small>
+                      </div>
                     </span>
                     <div className="stepper">
                       <Button
@@ -1135,8 +1262,10 @@ export function CashierPage({ currentUser, onNavigate }: {
                     </b>
                   </div>
                 </article>
-              ))
-            )}
+              </Fragment>
+            )
+          })
+        )}
           </div>
           {cart.length > 0 && (
           <div className="cart-total">
@@ -1242,7 +1371,9 @@ export function CashierPage({ currentUser, onNavigate }: {
                       setMethod(value)
                       setCash(0)
                       setQrisInput(0)
-                      setGabunganDari("tunai")
+                      setSplitTunaiInput(0)
+                      setCashReceived(0)
+                      setGabunganDari("qris")
                     }}
                   >
                     <Icon name={value === "QRIS" ? "qris" : "cash"} />
@@ -1335,30 +1466,11 @@ export function CashierPage({ currentUser, onNavigate }: {
               {method === "Gabungan" && (
                 <>
                   <p className="pay-hint">
-                    Isi salah satu saja, sisanya dihitung otomatis.
+                    Bagi pembayaran tagihan ke QRIS &amp; Tunai:
                   </p>
                   <div className="pay-split">
                     <label className="pay-field">
-                      <span>Jumlah tunai</span>
-                      <div className="input-shell">
-                        <b>Rp</b>
-                        <input
-                          inputMode="numeric"
-                          onChange={(e) => {
-                            setGabunganDari("tunai")
-                            setCash(Number(e.target.value.replace(/\D/g, "")))
-                          }}
-                          placeholder="0"
-                          value={
-                            gabunganDari === "tunai"
-                              ? cash || ""
-                              : tunaiTerpakai || ""
-                          }
-                        />
-                      </div>
-                    </label>
-                    <label className="pay-field">
-                      <span>Jumlah QRIS</span>
+                      <span>Porsi QRIS</span>
                       <div className="input-shell">
                         <b>Rp</b>
                         <input
@@ -1378,16 +1490,94 @@ export function CashierPage({ currentUser, onNavigate }: {
                         />
                       </div>
                     </label>
+                    <label className="pay-field">
+                      <span>Porsi Tunai</span>
+                      <div className="input-shell">
+                        <b>Rp</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => {
+                            setGabunganDari("tunai")
+                            setSplitTunaiInput(
+                              Number(e.target.value.replace(/\D/g, "")),
+                            )
+                          }}
+                          placeholder="0"
+                          value={
+                            gabunganDari === "tunai"
+                              ? splitTunaiInput || ""
+                              : tunaiTerpakai || ""
+                          }
+                        />
+                      </div>
+                    </label>
                   </div>
-                  {tunaiTerpakai + qris > 0 && (
+
+                  {tunaiTerpakai > 0 && (
+                    <div style={{ marginTop: 10 }}>
+                      <label className="pay-field">
+                        <span>Uang tunai diterima</span>
+                        <div className="input-shell">
+                          <b>Rp</b>
+                          <input
+                            inputMode="numeric"
+                            onChange={(e) =>
+                              setCashReceived(
+                                Number(e.target.value.replace(/\D/g, "")),
+                              )
+                            }
+                            placeholder={String(tunaiTerpakai)}
+                            value={cashReceived || ""}
+                          />
+                        </div>
+                      </label>
+                      <div className="quick-cash">
+                        <Button
+                          className={
+                            cashReceived === tunaiTerpakai ? "active" : ""
+                          }
+                          onClick={() => setCashReceived(tunaiTerpakai)}
+                        >
+                          Uang pas ({rupiah(tunaiTerpakai)})
+                        </Button>
+                        {pecahanCepatGabungan.map((n) => (
+                          <Button
+                            key={n}
+                            className={cashReceived === n ? "active" : ""}
+                            onClick={() => setCashReceived(n)}
+                          >
+                            {rupiah(n)}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {shortage > 0 && (
+                    <div className="payment-result danger">
+                      <span>Pembayaran kurang</span>
+                      <strong>Kurang {rupiah(shortage)}</strong>
+                    </div>
+                  )}
+
+                  {change > 0 && (
+                    <div className="payment-result success">
+                      <span>Kembalian tunai</span>
+                      <strong>{rupiah(change)}</strong>
+                    </div>
+                  )}
+
+                  {tunaiTerpakai + qris > 0 && shortage === 0 && change === 0 && (
                     <div className="payment-result success">
                       <span>Tunai {rupiah(tunaiTerpakai)}</span>
                       <strong>QRIS {rupiah(qris)}</strong>
                     </div>
                   )}
+
                   {qris > 0 && (
                     <div className="cart-qris-note">
-                      <Icon name="qris" /> Pastikan pembayaran QRIS sudah masuk.
+                      <Icon name="qris" /> Pastikan pembayaran QRIS sebesar{" "}
+                      <strong>{rupiah(qris)}</strong> sudah masuk.
                     </div>
                   )}
                 </>
@@ -1416,7 +1606,14 @@ export function CashierPage({ currentUser, onNavigate }: {
                 disabled={Boolean(payDisabledReason) || !cart.length}
                 onClick={pay}
               >
-                <span>Bayar {selectedBarber ? `(${selectedBarber})` : ""}</span>
+                <span>
+                  Bayar{" "}
+                  {cart.length > 0
+                    ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
+                    : selectedBarber
+                      ? `(${selectedBarber})`
+                      : ""}
+                </span>
                 <Icon name="cash" />
               </Button>
               {gagalMuat && (

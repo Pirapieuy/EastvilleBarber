@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, LoadingState, PageTitle } from "../../components/common/UI"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 import { AppUser, Role } from "../../types"
 import {
   apiTim,
@@ -9,7 +10,6 @@ import {
   UserRow,
   PengaturanKomisi,
 } from "../../api"
-import { ReasonDialog } from "./HistoryPage"
 
 export const demoTeamData: UserRow[] = [
   {
@@ -106,14 +106,16 @@ export function TeamPage({ currentUser, role, title }: {
   const [roleFilter, setRoleFilter] = useState("Semua")
 
   const [formOpen, setFormOpen] = useState(false)
-  const [deleting, setDeleting] = useState<UserRow | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingUser, setDeletingUser] = useState<UserRow | null>(null)
+  const [statusModalUser, setStatusModalUser] = useState<UserRow | null>(null)
   const [nama, setNama] = useState("")
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [pin, setPin] = useState("")
   const [selectedRole, setSelectedRole] = useState<Role>("Kapster")
   const [status, setStatus] = useState<"Aktif" | "Nonaktif">("Aktif")
+  const [formError, setFormError] = useState("")
 
   const [commission, setCommission] = useState(40)
   const [commissionReason, setCommissionReason] = useState("")
@@ -160,6 +162,7 @@ export function TeamPage({ currentUser, role, title }: {
     setStatus("Aktif")
     setCommission(40)
     setCommissionReason("")
+    setFormError("")
     setFormOpen(true)
   }
 
@@ -173,6 +176,7 @@ export function TeamPage({ currentUser, role, title }: {
     setStatus(u.status)
     setCommission(komisiMap[u.id] ?? 40)
     setCommissionReason("")
+    setFormError("")
     setFormOpen(true)
   }
 
@@ -200,10 +204,9 @@ export function TeamPage({ currentUser, role, title }: {
             commissionReason.trim(),
           )
         }
-        alert("Data anggota tim berhasil diperbarui.")
       } else {
         if (!pin.trim() || pin.trim().length !== 6) {
-          alert("PIN awal harus 6 digit angka.")
+          setFormError("PIN awal harus 6 digit angka.")
           return
         }
         const created = await apiTim.create({
@@ -224,26 +227,30 @@ export function TeamPage({ currentUser, role, title }: {
             commissionReason.trim(),
           )
         }
-        alert("Anggota tim berhasil ditambahkan.")
       }
       setFormOpen(false)
       loadData()
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Terjadi kesalahan.")
+      setFormError(err instanceof Error ? err.message : "Terjadi kesalahan.")
     }
   }
 
-  async function handleToggleStatus(u: UserRow) {
+  function handleToggleStatus(u: UserRow) {
     if (!isOwner) return
-    const nextStatus = u.status === "Aktif" ? "Nonaktif" : "Aktif"
-    if (confirm(`Ubah status ${u.nama} menjadi ${nextStatus}?`)) {
-      try {
-        await apiTim.toggleStatus(u.id, nextStatus)
-        loadData()
-      } catch (err) {
-        alert(err instanceof Error ? err.message : "Gagal mengubah status.")
-      }
-    }
+    setStatusModalUser(u)
+  }
+
+  async function handleConfirmToggleStatus() {
+    if (!statusModalUser) return
+    const nextStatus =
+      statusModalUser.status === "Aktif" ? "Nonaktif" : "Aktif"
+    await apiTim.toggleStatus(statusModalUser.id, nextStatus)
+    loadData()
+  }
+
+  async function handleConfirmDeleteUser(user: UserRow, alasan: string) {
+    await apiTim.hapus(user.id, alasan.trim())
+    loadData()
   }
 
   const filtered = users.filter((u) => {
@@ -373,7 +380,7 @@ export function TeamPage({ currentUser, role, title }: {
                 {x.role !== "Owner" && (
                   <Button
                     className="danger-button"
-                    onClick={() => setDeleting(x)}
+                    onClick={() => setDeletingUser(x)}
                   >
                     Hapus
                   </Button>
@@ -382,22 +389,6 @@ export function TeamPage({ currentUser, role, title }: {
           </article>
         ))}
       </div>
-
-      {deleting && (
-        <ReasonDialog
-          title={`Hapus anggota "${deleting.nama}"?`}
-          warning="Akun akan dinonaktifkan dan disembunyikan dari daftar tim. Riwayat transaksi dan data terkait tetap tersimpan."
-          onClose={() => setDeleting(null)}
-          onConfirm={async (alasan) => {
-            if (getToken()) {
-              await apiTim.hapus(deleting.id, alasan)
-              await loadData()
-            } else {
-              setUsers((list) => list.filter((user) => user.id !== deleting.id))
-            }
-          }}
-        />
-      )}
 
       {formOpen && (
         <div className="modal-overlay">
@@ -518,6 +509,25 @@ export function TeamPage({ currentUser, role, title }: {
                 </i>
               </div>
             </div>
+            {formError && (
+              <div
+                className="info-banner"
+                role="alert"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  background: "var(--oxblood-soft)",
+                  color: "var(--oxblood)",
+                  fontSize: 12,
+                }}
+              >
+                <Icon name="alert" />
+                <span>{formError}</span>
+              </div>
+            )}
             <footer>
               <Button
                 className="secondary-button"
@@ -532,6 +542,43 @@ export function TeamPage({ currentUser, role, title }: {
             </footer>
           </form>
         </div>
+      )}
+
+      {statusModalUser && (
+        <ConfirmModal
+          title={`Ubah Status ${statusModalUser.nama}?`}
+          eyebrow="Ubah Status Karyawan"
+          message={`Ubah status ${statusModalUser.nama} (@${statusModalUser.username}) menjadi ${
+            statusModalUser.status === "Aktif" ? "Nonaktif" : "Aktif"
+          }? ${
+            statusModalUser.status === "Aktif"
+              ? "Karyawan nonaktif tidak akan dapat masuk ke sistem."
+              : "Karyawan akan dapat mengakses sistem kembali."
+          }`}
+          confirmText={`Jadikan ${
+            statusModalUser.status === "Aktif" ? "Nonaktif" : "Aktif"
+          }`}
+          confirmTone={statusModalUser.status === "Aktif" ? "danger" : "primary"}
+          onClose={() => setStatusModalUser(null)}
+          onConfirm={handleConfirmToggleStatus}
+        />
+      )}
+
+      {deletingUser && (
+        <ConfirmModal
+          title={`Hapus Anggota Tim "${deletingUser.nama}"?`}
+          eyebrow="Hapus Karyawan"
+          warning="Tindakan ini akan menghapus akun karyawan dari sistem. Riwayat transaksi lama tetap tersimpan."
+          requireReason
+          reasonLabel="Alasan Penghapusan"
+          reasonPlaceholder="Contoh: Karyawan sudah resign / tidak lagi bekerja..."
+          confirmText="Hapus Karyawan"
+          confirmTone="danger"
+          onClose={() => setDeletingUser(null)}
+          onConfirm={(alasan) =>
+            handleConfirmDeleteUser(deletingUser, alasan)
+          }
+        />
       )}
     </div>
   )

@@ -33,6 +33,14 @@ function KalenderBesar({
   const [tahun, setTahun] = useState(() => Number(value.slice(0, 4)))
   const [bulan, setBulan] = useState(() => Number(value.slice(5, 7)) - 1)
   const hariIni = tanggalIsoLokal(new Date())
+
+  useEffect(() => {
+    if (value && value.length >= 7) {
+      setTahun(Number(value.slice(0, 4)))
+      setBulan(Number(value.slice(5, 7)) - 1)
+    }
+  }, [value])
+
   const offset = (new Date(tahun, bulan, 1).getDay() + 6) % 7
   const jumlahHari = new Date(tahun, bulan + 1, 0).getDate()
   const geser = (arah: number) => {
@@ -98,9 +106,10 @@ function KalenderBesar({
   )
 }
 
-// Kasir mencatat izin/sakit/cuti kapster. Berlaku untuk besok atau setelahnya (H-1),
-// dan tidak terkait absen foto, jadi bisa dicatat kapan saja.
+// Kasir mencatat izin/sakit/cuti kapster. Izin dan sakit bisa diajukan untuk hari ini (hari H) atau setelahnya,
+// sedangkan cuti berlaku untuk besok atau setelahnya (H-1).
 export function IzinKapster() {
+  const hariIniIso = useMemo(() => tanggalIsoLokal(new Date()), [])
   const besokIso = useMemo(() => {
     const d = new Date()
     d.setDate(d.getDate() + 1)
@@ -109,14 +118,16 @@ export function IzinKapster() {
   const [kapster, setKapster] = useState<{ id: string; nama: string }[]>([])
   const [daftar, setDaftar] = useState<AbsensiRow[]>([])
   const [kapsterId, setKapsterId] = useState("")
-  const [tanggal, setTanggal] = useState(besokIso)
   const [jenis, setJenis] = useState<Jenis>("Izin")
+  const [tanggal, setTanggal] = useState(hariIniIso)
   const [catatan, setCatatan] = useState("")
   const [loading, setLoading] = useState(() => Boolean(getToken()))
   const [loadError, setLoadError] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  const minTanggal = jenis === "Cuti" ? besokIso : hariIniIso
 
   const izinPerTanggal = useMemo(() => {
     const peta: Record<string, string[]> = {}
@@ -126,10 +137,14 @@ export function IzinKapster() {
     return peta
   }, [daftar])
 
-  const bisaKirim = Boolean(kapsterId) && catatan.trim() !== "" && !saving
+  const bisaKirim =
+    Boolean(kapsterId) &&
+    catatan.trim() !== "" &&
+    !saving &&
+    (jenis === "Cuti" ? tanggal >= besokIso : tanggal >= hariIniIso)
   const tgl = dariIso(tanggal)
   const selisih = Math.round(
-    (tgl.getTime() - dariIso(besokIso).getTime()) / 86400000,
+    (tgl.getTime() - dariIso(hariIniIso).getTime()) / 86400000,
   )
 
   async function muat() {
@@ -162,6 +177,14 @@ export function IzinKapster() {
     if (!bisaKirim) return
     const target = kapster.find((k) => k.id === kapsterId)
     if (!target) return
+    if (jenis === "Cuti" && tanggal < besokIso) {
+      setError("Cuti hanya bisa diajukan untuk besok atau setelahnya.")
+      return
+    }
+    if (tanggal < hariIniIso) {
+      setError("Izin atau sakit tidak bisa diajukan untuk tanggal lampau.")
+      return
+    }
     setError("")
     setSuccess("")
     setSaving(true)
@@ -203,7 +226,7 @@ export function IzinKapster() {
           <div className="izin-layout-cal">
             <KalenderBesar
               izin={izinPerTanggal}
-              min={besokIso}
+              min={minTanggal}
               onChange={setTanggal}
               value={tanggal}
             />
@@ -216,7 +239,15 @@ export function IzinKapster() {
                   {izinPerTanggal[tanggal]?.join(", ") ?? "Belum ada yang izin"}
                 </span>
               </div>
-              <small>{selisih === 0 ? "Besok" : `${selisih + 1} hari lagi`}</small>
+              <small>
+                {selisih === 0
+                  ? "Hari ini"
+                  : selisih === 1
+                    ? "Besok"
+                    : selisih > 1
+                      ? `${selisih} hari lagi`
+                      : `${Math.abs(selisih)} hari lalu`}
+              </small>
             </div>
         <div className="form-grid manual-info-grid kasbon-kapster-grid">
           <div className="form-grid-field">
@@ -243,7 +274,12 @@ export function IzinKapster() {
                 <Button
                   className={jenis === j ? "active" : ""}
                   key={j}
-                  onClick={() => setJenis(j)}
+                  onClick={() => {
+                    setJenis(j)
+                    if (j === "Cuti" && tanggal < besokIso) {
+                      setTanggal(besokIso)
+                    }
+                  }}
                 >
                   {j}
                 </Button>

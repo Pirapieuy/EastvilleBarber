@@ -50,6 +50,12 @@ const iconPaths: Record<IconName, ReactNode> = {
     </>
   ),
   close: <path d="m6 6 12 12M18 6 6 18" />,
+  download: (
+    <>
+      <path d="M12 4v11m0 0-4-4m4 4 4-4" />
+      <path d="M4 19h16" />
+    </>
+  ),
   expense: (
     <>
       <path d="M12 3v18M7.5 7.5H15a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h7.5" />

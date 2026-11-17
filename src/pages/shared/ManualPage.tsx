@@ -11,6 +11,7 @@ import {
   LoadingState,
   rupiah,
 } from "../../components/common/UI"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 interface ManualItem {
   tipe: "Layanan" | "Produk"
@@ -75,6 +76,7 @@ export function ManualPage() {
   // Gabungan: isi salah satu (tunai atau QRIS), sisanya dihitung otomatis, sama seperti di Kasir.
   const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
   const [saving, setSaving] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
@@ -239,7 +241,7 @@ export function ManualPage() {
     })
   }
 
-  async function handleSave(e: FormEvent) {
+  function handleSave(e: FormEvent) {
     e.preventDefault()
     setError("")
     setSuccess("")
@@ -247,12 +249,10 @@ export function ManualPage() {
       setSuccess("Mode demo: nota tidak disimpan ke server.")
       return
     }
-    if (
-      !window.confirm(
-        `Simpan nota ${cleanNote} senilai ${rupiah(total)}? Stok produk akan dipotong.`,
-      )
-    )
-      return
+    setConfirmOpen(true)
+  }
+
+  async function executeSave() {
     setSaving(true)
     try {
       const res = await apiTransaksi.manual({
@@ -280,16 +280,17 @@ export function ManualPage() {
       setQty({})
       setDiskon("")
       setDiskonJenis("nominal")
+      setKodeInput("")
       setPromo(null)
       setPin("")
+      setCash("")
+      setQris("")
       setNote(notaOtomatis(tanggal))
       setNotaDiubah(false)
       setKapsterId("")
-      setCash("")
-      setQris("")
       setGabunganDari("tunai")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menyimpan.")
+      setError(err instanceof Error ? err.message : "Gagal menyimpan nota.")
     } finally {
       setSaving(false)
     }
@@ -668,37 +669,15 @@ export function ManualPage() {
             <dt>Subtotal</dt>
             <dd>{rupiah(subtotal)}</dd>
           </div>
-          <div className="form-grid manual-info-grid">
-            {method !== "QRIS" && (
-              <label>
-                <span>
-                  {method === "Gabungan" ? "Dibayar tunai" : "Uang diterima"}
-                </span>
-                <div className="input-shell">
-                  <b>Rp</b>
-                  <input
-                    inputMode="numeric"
-                    onChange={(e) => setCash(e.target.value)}
-                    placeholder={method === "Gabungan" ? "0" : String(total)}
-                    value={cash}
-                  />
-                </div>
-              </label>
-            )}
-            {method === "Gabungan" && (
-              <label>
-                <span>Dibayar QRIS</span>
-                <div className="input-shell">
-                  <b>Rp</b>
-                  <input
-                    inputMode="numeric"
-                    onChange={(e) => setQris(e.target.value)}
-                    placeholder="0"
-                    value={qris}
-                  />
-                </div>
-              </label>
-            )}
+          {diskonNum > 0 && (
+            <div>
+              <dt>Diskon</dt>
+              <dd>-{rupiah(diskonNum)}</dd>
+            </div>
+          )}
+          <div className="nota-summary-total">
+            <dt>Total</dt>
+            <dd>{rupiah(total)}</dd>
           </div>
           {method === "Tunai" && cashNum > 0 && total > 0 && (
             <div>
@@ -730,6 +709,18 @@ export function ManualPage() {
           {saving ? "Menyimpan…" : "Simpan Nota"}
         </Button>
       </div>
+
+      {confirmOpen && (
+        <ConfirmModal
+          title={`Simpan Nota ${cleanNote}?`}
+          eyebrow="Konfirmasi Simpan Nota"
+          message={`Simpan nota ${cleanNote} senilai ${rupiah(total)}? Data transaksi akan dicatat ke sistem dan stok produk terkait akan otomatis terpotong.`}
+          confirmText="Simpan Nota"
+          confirmTone="primary"
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={executeSave}
+        />
+      )}
     </form>
   )
 }

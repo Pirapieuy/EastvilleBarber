@@ -2,11 +2,49 @@ import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
+  CalendarPicker,
   LoadingState,
   PageTitle,
   rupiah,
 } from "../../components/common/UI"
-import { apiGaji, getToken, HitungGajiResult } from "../../api"
+import {
+  AktivitasKapster,
+  apiGaji,
+  apiKapster,
+  getToken,
+  HitungGajiResult,
+} from "../../api"
+import { tanggalIsoLokal } from "../../utils/tanggal"
+
+const demoAktivitas: AktivitasKapster[] = [
+  {
+    item: "Haircut Classic",
+    qty: 1,
+    type: "Layanan",
+    time: "10.15",
+    fee: 50000,
+    comm: 20000,
+    trx: "TRX-001",
+  },
+  {
+    item: "Haircut + Wash + Tonic",
+    qty: 1,
+    type: "Layanan",
+    time: "11.30",
+    fee: 70000,
+    comm: 28000,
+    trx: "TRX-002",
+  },
+  {
+    item: "Free Style Dust",
+    qty: 1,
+    type: "Produk",
+    time: "14.05",
+    fee: 80000,
+    comm: 10000,
+    trx: "TRX-003",
+  },
+]
 
 export function MySalaryPage() {
   const [infoTerbuka, setInfoTerbuka] = useState(false)
@@ -14,6 +52,14 @@ export function MySalaryPage() {
   const [data, setData] = useState<HitungGajiResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  const [tanggalAktivitas, setTanggalAktivitas] = useState(() =>
+    tanggalIsoLokal(new Date()),
+  )
+  const [aktivitas, setAktivitas] = useState<AktivitasKapster[]>(
+    punyaToken ? [] : demoAktivitas,
+  )
+  const [loadingAktivitas, setLoadingAktivitas] = useState(false)
 
   function fetchData() {
     if (!getToken()) return
@@ -28,10 +74,29 @@ export function MySalaryPage() {
       .finally(() => setLoading(false))
   }
 
+  function fetchAktivitas(tgl: string) {
+    if (!getToken()) return
+    setLoadingAktivitas(true)
+    apiKapster
+      .aktivitas(tgl)
+      .then((rows) => setAktivitas(rows))
+      .catch((e) => console.error("Gagal memuat aktivitas kapster:", e))
+      .finally(() => setLoadingAktivitas(false))
+  }
+
   useEffect(() => {
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    fetchAktivitas(tanggalAktivitas)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tanggalAktivitas])
+
+  const totalKomisiHariIni = aktivitas.reduce((s, r) => s + (r.comm || 0), 0)
+  const totalLayananHariIni = aktivitas.filter((r) => r.type === "Layanan").length
+  const totalProdukHariIni = aktivitas.filter((r) => r.type === "Produk").length
 
   if (!punyaToken) {
     return (
@@ -70,8 +135,11 @@ export function MySalaryPage() {
         action={
           <Button
             className="secondary-button"
-            onClick={fetchData}
-            disabled={loading}
+            onClick={() => {
+              fetchData()
+              fetchAktivitas(tanggalAktivitas)
+            }}
+            disabled={loading || loadingAktivitas}
           >
             <Icon name="history" /> {loading ? "Memperbarui..." : "Refresh"}
           </Button>
@@ -156,6 +224,97 @@ export function MySalaryPage() {
         </section>
       )}
 
+      <section className="panel kapster-activity-panel" style={{ marginTop: 16, padding: 15 }}>
+        <PageTitle
+          eyebrow="Aktivitas pribadi"
+          title="Rincian Transaksi Layanan"
+          action={
+            <div style={{ maxWidth: 170 }}>
+              <CalendarPicker
+                value={tanggalAktivitas}
+                onChange={setTanggalAktivitas}
+                align="right"
+              />
+            </div>
+          }
+        />
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 8,
+            marginBottom: 12,
+            padding: "8px 12px",
+            background: "rgb(20 17 15 / 3%)",
+            borderRadius: 8,
+            fontSize: 12,
+          }}
+        >
+          <span style={{ color: "var(--slate)" }}>
+            {totalLayananHariIni} layanan · {totalProdukHariIni} produk
+          </span>
+          <strong style={{ color: "var(--sage)" }}>
+            Komisi: +{rupiah(totalKomisiHariIni)}
+          </strong>
+        </div>
+
+        {loadingAktivitas ? (
+          <LoadingState message="Memuat rincian aktivitas..." />
+        ) : aktivitas.length === 0 ? (
+          <p
+            style={{
+              padding: "24px 0",
+              textAlign: "center",
+              color: "var(--slate)",
+              fontSize: 13,
+            }}
+          >
+            Belum ada pengerjaan layanan/produk pada tanggal ini.
+          </p>
+        ) : (
+          <div className="recent-list" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {aktivitas.map((row, idx) => (
+              <div key={idx} className="recent-row">
+                <div className="recent-icon">
+                  <Icon name={row.type === "Produk" ? "product" : "cashier"} />
+                </div>
+                <div className="recent-info">
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <strong>
+                      {row.item}
+                      {row.qty > 1 ? ` (${row.qty}x)` : ""}
+                    </strong>
+                    {row.lembur && (
+                      <span
+                        className="chip"
+                        style={{
+                          fontSize: 9,
+                          padding: "1px 5px",
+                          background: "#fef3c7",
+                          color: "#92400e",
+                          border: "1px solid #fde68a",
+                        }}
+                      >
+                        Lembur
+                      </span>
+                    )}
+                  </div>
+                  <small>
+                    {row.time} WIB {row.trx ? `· Nota ${row.trx}` : ""} · Tarif {rupiah(row.fee)}
+                  </small>
+                </div>
+                <div className="recent-amount">
+                  <small className="comm-label">Komisi</small>
+                  <strong>+{rupiah(row.comm)}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   )
 }

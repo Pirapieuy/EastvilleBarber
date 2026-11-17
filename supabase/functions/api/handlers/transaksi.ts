@@ -177,7 +177,10 @@ function bentukTransaksi(t: B, items: B[]) {
   const w = new Date(t.waktu)
   return {
     id: t.id, date: fmtTglPanjang(w), time: fmtJamTitik(w),
-    items: items.map((i) => ({ name: i.nama, qty: i.qty, price: Number(i.harga), type: i.tipe })),
+    items: items.map((i) => ({
+      name: i.nama, qty: i.qty, price: Number(i.harga), type: i.tipe,
+      refId: i.ref_id, kapsterId: i.kapster_id, kapster: i.kapster,
+    })),
     barber: [...kapsters].join(", "), method: t.metode, commission: Number(t.komisi_total),
     commissionNote: catatan, overtime: t.lembur === "Ya",
     subtotal: Number(t.subtotal), discount: Number(t.diskon), total: Number(t.total),
@@ -267,6 +270,108 @@ export async function pulihkanTransaksi(body: B, user: Pengguna) {
   await db.from("transaksi").update({ status: "Lunas", void_alasan: "", void_oleh: "", void_waktu: null }).eq("id", t.id)
   await tulisAudit(user.id, user.nama, "PULIHKAN_TRANSAKSI", `${t.id} — ${alasan}`)
   return ok({ id: t.id, status: "Lunas" })
+}
+
+export async function updateTransaksi(body: B, user: Pengguna) {
+  const trxId = String(body.id ?? "").trim()
+  if (!trxId) return gagal("ID transaksi wajib diisi.")
+  const { data: t } = await db.from("transaksi").select("*").eq("id", trxId).maybeSingle()
+  if (!t) return gagal("Transaksi tidak ditemukan.")
+  if (t.status === "BATAL") return gagal("Transaksi yang sudah dibatalkan tidak dapat diedit.")
+  if (user.role === "Kasir" && t.dibuat_oleh_id !== user.id) return gagal("Kasir hanya boleh mengedit transaksi yang dibuat sendiri.")
+  if (user.role === "Kasir" && t.tanggal !== tanggalIso()) return gagal("Kasir hanya boleh mengedit transaksi pada hari yang sama sebelum shift tutup.")
+
+  const items: B[] = body.items || []
+  if (!items.length) return gagal("Item transaksi tidak boleh kosong.")
+
+  const alasanEdit = String(body.alasanEdit ?? "").trim() || "Perubahan item transaksi"
+
+  const [{ data: lay }, { data: prod }, peng, override, { data: kap }] = await Promise.all([
+    db.from("layanan").select("*"), db.from("produk").select("*"), getPengaturan(), komisiOverride(),
+    db.from("users").select("id,nama").eq("role", "Kapster"),
+  ])
+  const layananMap = new Map((lay ?? []).map((l: B) => [String(l.id), l]))
+  const produkMap = new Map((prod ?? []).map((p: B) => [String(p.kode), p]))
+  const kapsterMap = new Map((kap ?? []).map((u: B) => [u.id, u.nama]))
+
+  // 1. Rollback stok lama produk transaksi ini
+  const { data: oldItems } = await db.from("transaksi_item").select("*").eq("trx_id", t.id)
+  const oldProductItems = (oldItems ?? []).filter((i: B) => i.tipe === "Produk")
+  for (const old of oldProductItems) {
+    await mutasiStok(old.ref_id, Number(old.qty), "Revisi edit " + t.id, t.id, user)
+    const p = produkMap.get(old.ref_id)
+    if (p) p.stok = Number(p.stok) + Number(old.qty)
+  }
+
+  const lembur = t.lembur === "Ya"
+  let subtotal = 0, komisiTotal = 0
+  const lines: B[] = []
+  const stokBaru: Record<string, number> = {}
+
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i]
+    const qty = toInt(it.qty)
+    if (qty < 1) return gagal("Qty tidak valid.")
+    const namaKapster = kapsterMap.get(it.kapsterId) || it.kapster
+    if (!namaKapster) return gagal(`Kapster tidak ditemukan untuk item ke-${i + 1}.`)
+    const kapsterId = it.kapsterId || [...kapsterMap.entries()].find(([, v]) => v === namaKapster)?.[0] || ""
+
+    const tipe = it.tipe || it.type
+    if (tipe === "Layanan") {
+      const l = layananMap.get(String(it.refId)) || (lay ?? []).find((x: B) => x.nama === it.nama || x.nama === it.name)
+      if (!l || l.status !== "Aktif") return gagal(`Layanan ${it.nama || it.name || ""} tidak tersedia.`)
+      const hargaL = Number(l.harga) * qty
+      const persenL = lembur ? peng.komisi_lembur
+        : override[kapsterId] !== undefined ? override[kapsterId] : peng.komisi_default
+      const kom = Math.round((hargaL * persenL) / 100)
+      subtotal += hargaL; komisiTotal += kom
+      lines.push({ tipe: "Layanan", ref_id: String(l.id), nama: l.nama, qty, harga: Number(l.harga),
+        kapster_id: kapsterId, kapster: namaKapster, komisi: kom, komisi_persen: persenL })
+    } else if (tipe === "Produk") {
+      const p = produkMap.get(String(it.refId)) || (prod ?? []).find((x: B) => x.nama === it.nama || x.nama === it.name)
+      if (!p || p.status !== "Aktif") return gagal(`Produk ${it.nama || it.name || ""} tidak tersedia.`)
+      const currentStok = stokBaru[p.kode] !== undefined ? stokBaru[p.kode] : Number(p.stok)
+      const sisa = currentStok - qty
+      if (sisa < 0) return gagal(`Stok ${p.nama} tidak cukup (sisa: ${currentStok}).`)
+      stokBaru[p.kode] = sisa
+      const hargaP = Number(p.harga) * qty
+      const komP = komisiProduk(p, qty)
+      subtotal += hargaP; komisiTotal += komP
+      lines.push({ tipe: "Produk", ref_id: p.kode, nama: p.nama, qty, harga: Number(p.harga),
+        kapster_id: kapsterId, kapster: namaKapster, komisi: komP, komisi_persen: 0 })
+    } else return gagal("Tipe item tidak dikenal.")
+  }
+
+  // 2. Potong stok produk baru
+  for (const kode of Object.keys(stokBaru)) {
+    const p = produkMap.get(kode)!
+    await mutasiStok(kode, stokBaru[kode] - Number(p.stok), "Edit Penjualan " + t.id, t.id, user)
+  }
+
+  const diskon = Math.min(Number(t.diskon) || 0, subtotal)
+  const total = subtotal - diskon
+  const metode = body.metode || t.metode
+  let tunai = toInt(body.bayarTunai ?? t.bayar_tunai)
+  let qris = toInt(body.bayarQris ?? t.bayar_qris)
+  if (metode === "Tunai") { tunai = total; qris = 0 }
+  else if (metode === "QRIS") { tunai = 0; qris = total }
+  else if (metode === "Gabungan") {
+    if (qris > total) qris = total
+    tunai = total - qris
+  }
+
+  // 3. Simpan baris item baru
+  await db.from("transaksi_item").delete().eq("trx_id", t.id)
+  await db.from("transaksi_item").insert(lines.map((ln) => ({ ...ln, trx_id: t.id })))
+
+  // 4. Update transaksi
+  await db.from("transaksi").update({
+    subtotal, diskon, total, bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, metode,
+  }).eq("id", t.id)
+
+  await tulisAudit(user.id, user.nama, "EDIT_TRANSAKSI", `${t.id} — ${alasanEdit} (Total baru: ${total})`)
+
+  return ok({ id: t.id, total, subtotal, komisiTotal, items: lines })
 }
 
 // ---- Pengeluaran ----
