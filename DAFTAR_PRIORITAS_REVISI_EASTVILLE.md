@@ -12,7 +12,7 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 | Tingkat Prioritas | Definisi & Dampak | Jumlah Temuan | Status Pengerjaan |
 |---|---|:---:|---|
 | **P0 (Kritis / Blocker)** | Transaksi macet total, kasir lumpuh, atau nota salah tidak bisa dibatalkan dari sistem. | 2 | 1 Selesai (`P0.2` Void Transaksi), 1 Dilewati (`P0.1` Kamera) |
-| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 2 Selesai (`P1.1`, `P1.2`), 4 Menunggu |
+| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 3 Selesai (`P1.1`, `P1.2`, `P1.3`), 3 Menunggu |
 | **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | ⚠️ Menunggu Eksekusi |
 | **P3 (Rendah / Estetika)** | Popup browser kuno (`prompt`/`confirm`) dan badge dekoratif semu di HP kapster. | 2 | ⚠️ Menunggu Eksekusi |
 
@@ -65,19 +65,15 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
   - Struk thermal kasir mencantumkan nama kapster per layanan/produk, misal: `Haircut (Ferdi)` dan `Haircut Anak (Seva)`.
 
 ### 5. [P1.3] Kalkulasi Kembalian Uang Tunai Hilang pada Metode Pembayaran Gabungan (Split Bill)
-* **Status:** ⏳ **Siap Dikerjakan (Quick Win / 30 Menit)**
-* **Lokasi File:** `src/pages/shared/CashierPage.tsx` (baris 548)
-* **Akar Masalah:** Nilai `change` di-hardcode `0` jika `method !== "Tunai"`. Pada Split Bill (Tunai + QRIS), kelebihan uang tunai tidak dihitung sebagai kembalian.
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/CashierPage.tsx`
+* **Akar Masalah:** Nilai `change` di-hardcode `0` jika `method !== "Tunai"`, dan field tunai di Gabungan menduplikasi peran sebagai porsi tagihan sekaligus uang tunai diterima sehingga kelebihan uang tunai tidak dihitung sebagai kembalian.
 * **Dampak:** Misal tagihan Rp 60.000, bayar QRIS Rp 20.000 dan tunai lembaran Rp 50.000. Kembalian di layar tertulis Rp 0, kasir bingung dan harus hitung manual di kalkulator HP.
-* **Solusi Teknis:**
-  ```ts
-  // Ubah perhitungan kembalian menjadi:
-  const change = method === "Tunai" 
-    ? Math.max(0, cash - payableTotal) 
-    : method === "Gabungan"
-      ? Math.max(0, cash - tunaiTerpakai)
-      : 0
-  ```
+* **Solusi yang Diterapkan:**
+  - Memisahkan input porsi tagihan (`Porsi QRIS` & `Porsi Tunai`) dengan input `Uang tunai diterima`.
+  - Menambahkan tombol cepat pecahan uang tunai (`Uang pas`, `Rp 50.000`, `Rp 100.000`, dst) untuk porsi tunai pada pembayaran Gabungan.
+  - Menghitung kembalian tunai secara otomatis: `change = Math.max(0, cashReceived - tunaiTerpakai)`.
+  - Menampilkan banner hijau "Kembalian tunai: Rp ..." di kasir dan mencetak rincian (Tunai Diterima, QRIS, Kembalian) di struk thermal kasir.
 
 ### 6. [P1.4] Validasi Kaku: Tidak Bisa Catat Izin / Sakit di Hari Ini (Hari H)
 * **Status:** ⏳ **Siap Dikerjakan (1 Jam)**
