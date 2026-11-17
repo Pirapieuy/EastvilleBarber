@@ -16,6 +16,7 @@ import {
   HitungGajiResult,
 } from "../../api"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: boolean; onExternalAddDone?: () => void }) {
   const [add, setAdd] = useState(false)
@@ -54,9 +55,14 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
   const [jumlah, setJumlah] = useState("")
   const [catatan, setCatatan] = useState("")
   const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState("")
   const [filterKapster, setFilterKapster] = useState("")
   const [searchKasbon, setSearchKasbon] = useState("")
   const [filterStatus, setFilterStatus] = useState<"" | "Aktif" | "Lunas" | "Menunggu" | "Ditolak">("")
+  const [confirmAction, setConfirmAction] = useState<{
+    type: "lunasi" | "setujui" | "tolak"
+    item: KasbonRow
+  } | null>(null)
 
   useEffect(() => {
     if (externalAdd) {
@@ -91,6 +97,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
       kapsters.find((k) => k.id === selectedKapsterId) || kapsters[0]
     if (!target) return
     setSaving(true)
+    setFormError("")
     try {
       await apiKasbon.create({
         userId: target.id,
@@ -99,39 +106,28 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
         jumlah: Number(jumlah),
         catatan: catatan.trim(),
       })
-      alert("Kasbon berhasil dicatat.")
       setAdd(false)
       setCatatan("")
       setJumlah("")
       loadData()
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal mencatat kasbon.")
+      setFormError(err instanceof Error ? err.message : "Gagal mencatat kasbon.")
     } finally {
       setSaving(false)
     }
   }
 
-  async function handleLunasi(id: string) {
-    if (confirm("Tandai kasbon ini sudah lunas?")) {
-      try {
-        await apiKasbon.lunasi(id)
-        loadData()
-      } catch (err) {
-        alert(err instanceof Error ? err.message : "Gagal melunasi kasbon.")
-      }
+  async function handleConfirmKasbonAction() {
+    if (!confirmAction) return
+    const { type, item } = confirmAction
+    if (type === "lunasi") {
+      await apiKasbon.lunasi(item.id)
+    } else if (type === "setujui") {
+      await apiKasbon.setujui(item.id)
+    } else if (type === "tolak") {
+      await apiKasbon.tolak(item.id)
     }
-  }
-
-  async function handleKeputusan(id: string, setuju: boolean) {
-    if (!confirm(setuju ? "Setujui pengajuan kasbon ini?" : "Tolak pengajuan kasbon ini?"))
-      return
-    try {
-      if (setuju) await apiKasbon.setujui(id)
-      else await apiKasbon.tolak(id)
-      loadData()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal memproses pengajuan.")
-    }
+    loadData()
   }
 
   // Ringkasan per kapster
@@ -287,13 +283,17 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                         <>
                           <Button
                             className="secondary-button"
-                            onClick={() => handleKeputusan(k.id, true)}
+                            onClick={() =>
+                              setConfirmAction({ type: "setujui", item: k })
+                            }
                           >
                             Setujui
                           </Button>
                           <Button
                             className="secondary-button"
-                            onClick={() => handleKeputusan(k.id, false)}
+                            onClick={() =>
+                              setConfirmAction({ type: "tolak", item: k })
+                            }
                           >
                             Tolak
                           </Button>
@@ -301,7 +301,9 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                       ) : k.status === "Aktif" ? (
                         <Button
                           className="secondary-button"
-                          onClick={() => handleLunasi(k.id)}
+                          onClick={() =>
+                            setConfirmAction({ type: "lunasi", item: k })
+                          }
                         >
                           Tandai Lunas
                         </Button>
@@ -365,13 +367,17 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                         <footer className="kasbon-card-footer">
                           <Button
                             className="secondary-button"
-                            onClick={() => handleKeputusan(k.id, true)}
+                            onClick={() =>
+                              setConfirmAction({ type: "setujui", item: k })
+                            }
                           >
                             <Icon name="check" /> Setujui
                           </Button>
                           <Button
                             className="secondary-button"
-                            onClick={() => handleKeputusan(k.id, false)}
+                            onClick={() =>
+                              setConfirmAction({ type: "tolak", item: k })
+                            }
                           >
                             Tolak
                           </Button>
@@ -385,7 +391,9 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                         <footer className="kasbon-card-footer">
                           <Button
                             className="secondary-button"
-                            onClick={() => handleLunasi(k.id)}
+                            onClick={() =>
+                              setConfirmAction({ type: "lunasi", item: k })
+                            }
                           >
                             <Icon name="check" /> Tandai Lunas
                           </Button>
@@ -445,6 +453,25 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
                 required
               />
             </label>
+            {formError && (
+              <div
+                className="info-banner"
+                role="alert"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  background: "var(--oxblood-soft)",
+                  color: "var(--oxblood)",
+                  fontSize: 12,
+                }}
+              >
+                <Icon name="alert" />
+                <span>{formError}</span>
+              </div>
+            )}
             <footer>
               <Button
                 className="secondary-button"
@@ -463,6 +490,50 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
             </footer>
           </form>
         </div>
+      )}
+
+      {confirmAction && (
+        <ConfirmModal
+          title={
+            confirmAction.type === "lunasi"
+              ? `Tandai Lunas Kasbon ${confirmAction.item.nama}?`
+              : confirmAction.type === "setujui"
+                ? `Setujui Kasbon ${confirmAction.item.nama}?`
+                : `Tolak Kasbon ${confirmAction.item.nama}?`
+          }
+          eyebrow={
+            confirmAction.type === "lunasi"
+              ? "Pelunasan Kasbon"
+              : confirmAction.type === "setujui"
+                ? "Persetujuan Kasbon"
+                : "Penolakan Kasbon"
+          }
+          message={
+            confirmAction.type === "lunasi"
+              ? `Kasbon sebesar ${rupiah(confirmAction.item.jumlah)} untuk ${
+                  confirmAction.item.nama
+                } akan ditandai lunas dan tidak lagi memotong perhitungan gaji berikutnya.`
+              : confirmAction.type === "setujui"
+                ? `Pengajuan kasbon sebesar ${rupiah(
+                    confirmAction.item.jumlah,
+                  )} untuk ${
+                    confirmAction.item.nama
+                  } akan disetujui dan dicatat aktif memotong gaji.`
+                : `Pengajuan kasbon sebesar ${rupiah(
+                    confirmAction.item.jumlah,
+                  )} untuk ${confirmAction.item.nama} akan ditolak.`
+          }
+          confirmText={
+            confirmAction.type === "lunasi"
+              ? "Tandai Lunas"
+              : confirmAction.type === "setujui"
+                ? "Setujui Kasbon"
+                : "Tolak Kasbon"
+          }
+          confirmTone={confirmAction.type === "tolak" ? "danger" : "primary"}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={handleConfirmKasbonAction}
+        />
       )}
     </>
   )

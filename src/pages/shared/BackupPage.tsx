@@ -3,6 +3,7 @@ import { apiBackup, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { Button, LoadingState, PageTitle } from "../../components/common/UI"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 interface BackupRow {
   nama: string
@@ -33,6 +34,7 @@ export function BackupPage() {
   const [message, setMessage] = useState("")
   const [restore, setRestore] = useState<0 | 1 | 2>(0)
   const [target, setTarget] = useState("")
+  const [deletingBackup, setDeletingBackup] = useState<string | null>(null)
   const [restoring, setRestoring] = useState(false)
 
   async function doRestore() {
@@ -74,13 +76,7 @@ export function BackupPage() {
     })
   }, [reloadKey])
 
-  async function hapus(nama: string) {
-    if (
-      !window.confirm(
-        `Hapus ${nama}? Backup yang dihapus tidak bisa dikembalikan.`,
-      )
-    )
-      return
+  async function handleConfirmDeleteBackup(nama: string) {
     setMessage("")
     if (!live) {
       setBackups((curr) => curr.filter((b) => b.nama !== nama))
@@ -288,7 +284,7 @@ export function BackupPage() {
               <Button
                 className="backup-delete-btn"
                 disabled={busyNama === row.nama || restoring}
-                onClick={() => hapus(row.nama)}
+                onClick={() => setDeletingBackup(row.nama)}
                 title={`Hapus ${row.nama}`}
               >
                 <Icon name="trash" /> Hapus
@@ -351,6 +347,18 @@ export function BackupPage() {
             </div>
           </section>
         </div>
+      )}
+
+      {deletingBackup && (
+        <ConfirmModal
+          title={`Hapus Backup "${deletingBackup}"?`}
+          eyebrow="Hapus File Backup"
+          warning="File backup yang dihapus tidak dapat dipulihkan kembali."
+          confirmText="Hapus Backup"
+          confirmTone="danger"
+          onClose={() => setDeletingBackup(null)}
+          onConfirm={() => handleConfirmDeleteBackup(deletingBackup)}
+        />
       )}
     </div>
   )

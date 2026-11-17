@@ -9,6 +9,7 @@ import {
   rupiah,
 } from "../../components/common/UI"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 const STOK_MENIPIS = 1
 
@@ -70,6 +71,9 @@ export function ProductsPage({ embedded = false }: {
   const [editingCode, setEditingCode] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [stockOpen, setStockOpen] = useState(false)
+  const [deletingProduct, setDeletingProduct] = useState<
+    (typeof productsList)[number] | null
+  >(null)
   const [formData, setFormData] = useState({
     code: "",
     name: "",
@@ -189,15 +193,7 @@ export function ProductsPage({ embedded = false }: {
       return setFormError("Alasan perubahan wajib diisi saat mengubah produk.")
     }
     if (editingCode) {
-      const lama = productsList.find((p) => p.code === editingCode)
-      if (lama?.status === "Aktif" && formData.status === "Nonaktif") {
-        if (
-          !window.confirm(
-            `Nonaktifkan "${formData.name}"? Produk tidak akan muncul di Kasir.`,
-          )
-        )
-          return
-      }
+      // Data sedang diedit
     }
     if (live) {
       setSaving(true)
@@ -237,19 +233,17 @@ export function ProductsPage({ embedded = false }: {
     setFormOpen(false)
   }
 
-  async function handleDelete(product: typeof productsList[number]) {
-    const alasan = window.prompt(`Alasan menghapus produk "${product.name}"?`)
-    if (!alasan || alasan.trim().length < 3) return
-    if (!window.confirm(`Hapus produk "${product.name}" (${product.code})?`)) return
-    try {
-      if (live) {
-        await apiProduk.hapus(product.code, alasan.trim())
-        await loadLive()
-      } else {
-        setProductsList((list) => list.filter((item) => item.code !== product.code))
-      }
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Gagal menghapus produk.")
+  async function handleDeleteConfirm(
+    product: (typeof productsList)[number],
+    alasan: string,
+  ) {
+    if (live) {
+      await apiProduk.hapus(product.code, alasan.trim())
+      await loadLive()
+    } else {
+      setProductsList((list) =>
+        list.filter((item) => item.code !== product.code),
+      )
     }
   }
 
@@ -418,7 +412,7 @@ export function ProductsPage({ embedded = false }: {
                 </Button>
                 <Button
                   className="danger-button"
-                  onClick={() => handleDelete(product)}
+                  onClick={() => setDeletingProduct(product)}
                 >
                   <Icon name="trash" /> Hapus
                 </Button>
@@ -889,6 +883,22 @@ export function ProductsPage({ embedded = false }: {
             </footer>
           </form>
         </div>
+      )}
+      {deletingProduct && (
+        <ConfirmModal
+          title={`Hapus Produk "${deletingProduct.name}"?`}
+          eyebrow="Hapus Produk"
+          warning={`Produk (${deletingProduct.code}) tidak akan muncul lagi di Kasir. Riwayat penjualan lama tetap aman.`}
+          requireReason
+          reasonLabel="Alasan Penghapusan"
+          reasonPlaceholder="Contoh: Stok sudah diskontinu / tidak dijual lagi..."
+          confirmText="Hapus Produk"
+          confirmTone="danger"
+          onClose={() => setDeletingProduct(null)}
+          onConfirm={(alasan) =>
+            handleDeleteConfirm(deletingProduct, alasan)
+          }
+        />
       )}
     </div>
   )

@@ -190,9 +190,6 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
             action={
               <div className="shift-badges">
                 <span className="chip active">Shift 8 Jam</span>
-                <small className="pending-client">
-                  Pelanggan dalam antrean
-                </small>
               </div>
             }
           />

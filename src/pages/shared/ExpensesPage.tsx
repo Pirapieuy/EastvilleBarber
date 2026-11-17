@@ -13,6 +13,7 @@ import {
   rupiah,
 } from "../../components/common/UI"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 export interface ExpenseRecord {
   id: string
@@ -159,6 +160,7 @@ export function ExpensesPage() {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [batalId, setBatalId] = useState<string | null>(null)
+  const [pulihkanItem, setPulihkanItem] = useState<ExpenseRecord | null>(null)
 
   const [newCategory, setNewCategory] =
     useState<ExpenseRecord["category"]>("Listrik")
@@ -256,18 +258,7 @@ export function ExpensesPage() {
         setBatalId(id) // alasan diminta lewat dialog
         return
       }
-      if (
-        !window.confirm(
-          `Pulihkan pengeluaran "${item.description}" (${rupiah(item.amount)})?`,
-        )
-      )
-        return
-      try {
-        await apiPengeluaran.aktifkan(id)
-        await loadLive()
-      } catch (err) {
-        window.alert(err instanceof Error ? err.message : "Aksi gagal.")
-      }
+      setPulihkanItem(item)
       return
     }
     setRecords((prev) =>
@@ -284,6 +275,12 @@ export function ExpensesPage() {
         return item
       }),
     )
+  }
+
+  async function konfirmasiPulihkan() {
+    if (!pulihkanItem) return
+    await apiPengeluaran.aktifkan(pulihkanItem.id)
+    await loadLive()
   }
 
   async function konfirmasiBatal(alasan: string) {
@@ -548,6 +545,18 @@ export function ExpensesPage() {
             </footer>
           </form>
         </div>
+      )}
+
+      {pulihkanItem && (
+        <ConfirmModal
+          title={`Pulihkan Pengeluaran?`}
+          eyebrow="Pulihkan Pengeluaran"
+          message={`Pulihkan pengeluaran "${pulihkanItem.description}" senilai ${rupiah(pulihkanItem.amount)}? Status pengeluaran akan kembali Aktif dan dihitung dalam laporan keuangan.`}
+          confirmText="Pulihkan"
+          confirmTone="primary"
+          onClose={() => setPulihkanItem(null)}
+          onConfirm={konfirmasiPulihkan}
+        />
       )}
     </div>
   )

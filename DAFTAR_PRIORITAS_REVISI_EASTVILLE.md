@@ -173,18 +173,23 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 > *Penyempurnaan visual agar sistem bebas dari kesan amatir dan terlihat rapi.*
 
 ### 16. [P3.1] Penggunaan Dialog Bawaan Browser (`prompt`, `confirm`, `alert`)
-* **Status:** ⏳ **Siap Dikerjakan (2 Jam)**
-* **Lokasi File:** `ServicesPage.tsx`, `ProductsPage.tsx`, `PayrollPage.tsx`
-* **Akar Masalah:** Konfirmasi hapus dan input alasan masih menggunakan kotak dialog abu-abu bawaan browser (`window.confirm` / `window.prompt`).
-* **Dampak:** Tampilan tidak profesional, tidak konsisten dengan tema desain Eastville, dan rentan diblokir otomatis oleh browser mobile/tablet.
-* **Solusi Teknis:** Gantikan dialog native browser dengan modal konfirmasi dialog kustom tema Eastville.
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/components/common/ConfirmModal.tsx`, `ServicesPage.tsx`, `ProductsPage.tsx`, `PayrollPage.tsx`, `TeamPage.tsx`, `PromoDiscountsTab.tsx`, `BackupPage.tsx`, `ExpensesPage.tsx`, `ManualPage.tsx`
+* **Akar Masalah:** Konfirmasi hapus dan input alasan sebelumnya menggunakan kotak dialog abu-abu bawaan browser (`window.confirm` / `window.prompt` / `alert`).
+* **Dampak:** Tampilan tidak profesional, rawan terblokir otomatis oleh browser tablet/HP jika sering ditekan, dan tidak ergonomis untuk layar sentuh kasir.
+* **Solusi yang Diterapkan:**
+  - Membuat komponen reusable `ConfirmModal` (`src/components/common/ConfirmModal.tsx`) dengan desain pop-up dialog kustom tema Eastville yang berada tepat di tengah halaman (`modal-centered`).
+  - Mendukung input alasan wajib/opsional, warning banner bertema amber/merah, tombol Batal, dan tombol konfirmasi yang besar dan ergonomis untuk sentuhan tablet/HP.
+  - Menggantikan 100% dialog browser native pada 8 modul: Hapus Layanan (`ServicesPage`), Hapus Produk (`ProductsPage`), Ubah Status & Hapus Staf (`TeamPage`), Setujui/Tolak/Tandai Lunas Kasbon (`PayrollPage`), Hapus Kode Promo (`PromoDiscountsTab`), Hapus File Backup (`BackupPage`), Pulihkan Pengeluaran (`ExpensesPage`), dan Simpan Nota Manual (`ManualPage`).
 
 ### 17. [P3.2] Elemen UI Semu: Badge "Pelanggan dalam antrean"
-* **Status:** ⏳ **Siap Dikerjakan (15 Menit)**
-* **Lokasi File:** `src/pages/kapster/KapsterDashboard.tsx` (baris 194)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/KapsterDashboard.tsx` (baris 191-196)
 * **Akar Masalah:** Tampilan menunjukkan teks antrean tanpa angka urutan dan tidak memiliki daftar giliran kerja yang dapat diakses.
 * **Dampak:** Menimbulkan ekspektasi fitur antrean otomatis, padahal hanya teks pajangan statis.
-* **Solusi Teknis:** Hapus teks dekoratif tersebut atau ganti dengan informasi shift dan target harian yang nyata.
+* **Solusi yang Diterapkan:**
+  - Menghapus badge teks semu `"Pelanggan dalam antrean"` dari header panel Target & Proteksi Shift di `KapsterDashboard.tsx`.
+  - Merapikan tata letak chip informasi shift 8 jam agar bersih, fokus, dan tidak membingungkan kapster saat memantau progres shift hariannya.
 
 ---
 
@@ -199,16 +204,16 @@ TAHAP 1: QUICK WINS FINANSIAL & OWNER (SELESAI 100% ✅)
 ├── [P2.1] Bersihkan Duplikasi Input Form di ManualPage.tsx (SELESAI)
 └── [P2.2] Perbaiki Teks Error Hantu "Menu Beri Diskon" di CashierPage.tsx (SELESAI)
 
-TAHAP 2: FITUR UTAMA POS & KOMISI (1-2 Hari Kerja)
+TAHAP 2: FITUR UTAMA POS & KOMISI
 ├── [P1.2] Single-Cart Multi-Kapster (1 Struk Beda Kapster) di CashierPage.tsx (SELESAI)
 ├── [P1.6] Modal Tutup Shift Kasir & Rekonsiliasi Laci di CashierPage.tsx
 ├── [P2.3] Munculkan Menu Pengeluaran di Sidebar Owner (SELESAI)
 └── [P2.4] Tampilkan Rincian Pengerjaan Layanan di Gaji Kapster (SELESAI)
 
-TAHAP 3: POLISH & ERGONOMI (1-2 Hari Kerja)
+TAHAP 3: POLISH & ERGONOMI
 ├── [P2.5] Buka Akses Jadwal Mandiri di HP Kapster
 ├── [P2.6] Perbesar Tombol Stepper Kuantitas (+ dan -) Jadi 44px (SELESAI)
 ├── [P2.7] Fitur Edit Item Transaksi Pasca-Simpan di HistoryPage (SELESAI)
-├── [P3.1] Ganti Window Prompt/Confirm dengan Modal Kustom
-└── [P3.2] Hapus Badge Semu Antrean di Beranda Kapster
+├── [P3.1] Ganti Window Prompt/Confirm dengan Modal Kustom (SELESAI)
+└── [P3.2] Hapus Badge Semu Antrean di Beranda Kapster (SELESAI)
 ```

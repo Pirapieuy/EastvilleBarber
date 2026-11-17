@@ -5,6 +5,7 @@ import { apiKodeDiskon, KodeDiskonRow } from "../../api"
 import { LoadingState } from "../../components/common/UI"
 import { formatTanggal, tanggalIsoLokal, TANGGAL_MAKS } from "../../utils/tanggal"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 type PromoDiscount = {
   id: string
@@ -54,6 +55,7 @@ export function PromoDiscountsTab() {
   useEffect(muat, [])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingPromo, setDeletingPromo] = useState<PromoDiscount | null>(null)
 
   const [nama, setNama] = useState("")
   const [jenis, setJenis] = useState<"persen" | "nominal">("persen")
@@ -163,14 +165,9 @@ export function PromoDiscountsTab() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm("Hapus kode diskon ini?")) return
-    try {
-      await apiKodeDiskon.hapus(id)
-      muat()
-    } catch (err) {
-      setGagalMuat(err instanceof Error ? err.message : "Gagal menghapus kode.")
-    }
+  async function handleDeleteConfirm(promo: PromoDiscount) {
+    await apiKodeDiskon.hapus(promo.id)
+    muat()
   }
 
   const todayStr = TANGGAL_MAKS()
@@ -308,7 +305,7 @@ export function PromoDiscountsTab() {
                   </Button>
                   <Button
                     className="text-button"
-                    onClick={() => handleDelete(p.id)}
+                    onClick={() => setDeletingPromo(p)}
                     style={{
                       fontSize: 12,
                       padding: "4px 8px",
@@ -439,6 +436,18 @@ export function PromoDiscountsTab() {
             </footer>
           </form>
         </div>
+      )}
+
+      {deletingPromo && (
+        <ConfirmModal
+          title={`Hapus Kode Diskon "${deletingPromo.kode}"?`}
+          eyebrow="Hapus Diskon"
+          message={`Kode diskon "${deletingPromo.nama}" (${deletingPromo.kode}) akan dihapus dan tidak dapat digunakan lagi pada transaksi kasir.`}
+          confirmText="Hapus Diskon"
+          confirmTone="danger"
+          onClose={() => setDeletingPromo(null)}
+          onConfirm={() => handleDeleteConfirm(deletingPromo)}
+        />
       )}
     </div>
   )

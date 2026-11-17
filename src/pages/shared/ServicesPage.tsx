@@ -15,6 +15,7 @@ import {
   rupiah,
 } from "../../components/common/UI"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 export const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
 
@@ -79,6 +80,9 @@ export function ServicesPage({ embedded = false }: {
   const [kategoriFilter, setKategoriFilter] = useState("Semua")
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<LayananRow | null>(null)
+  const [deletingService, setDeletingService] = useState<LayananRow | null>(
+    null,
+  )
   const [nama, setNama] = useState("")
   const [harga, setHarga] = useState("")
   const [kategori, setKategori] = useState("Potong")
@@ -133,14 +137,6 @@ export function ServicesPage({ embedded = false }: {
         r.nama.trim().toLowerCase() === nama.trim().toLowerCase(),
     )
     if (kembar) return setFormError("Nama layanan sudah ada.")
-    if (editing?.status === "Aktif" && status === "Nonaktif") {
-      if (
-        !window.confirm(
-          `Nonaktifkan "${editing.nama}"? Layanan tidak akan muncul di Kasir.`,
-        )
-      )
-        return
-    }
     if (live) {
       setSaving(true)
       setFormError("")
@@ -182,19 +178,12 @@ export function ServicesPage({ embedded = false }: {
     setFormOpen(false)
   }
 
-  async function handleDelete(service: LayananRow) {
-    const alasan = window.prompt(`Alasan menghapus layanan "${service.nama}"?`)
-    if (!alasan || alasan.trim().length < 3) return
-    if (!window.confirm(`Hapus layanan "${service.nama}"?`)) return
-    try {
-      if (live) {
-        await apiLayanan.hapus(service.id, alasan.trim())
-        await loadLive()
-      } else {
-        setRows((prev) => prev.filter((row) => row.id !== service.id))
-      }
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Gagal menghapus layanan.")
+  async function handleDeleteConfirm(service: LayananRow, alasan: string) {
+    if (live) {
+      await apiLayanan.hapus(service.id, alasan.trim())
+      await loadLive()
+    } else {
+      setRows((prev) => prev.filter((row) => row.id !== service.id))
     }
   }
 
@@ -342,7 +331,7 @@ export function ServicesPage({ embedded = false }: {
               </Button>
               <Button
                 className="danger-button"
-                onClick={() => handleDelete(service)}
+                onClick={() => setDeletingService(service)}
               >
                 <Icon name="trash" /> Hapus
               </Button>
@@ -439,6 +428,20 @@ export function ServicesPage({ embedded = false }: {
             </footer>
           </form>
         </div>
+      )}
+      {deletingService && (
+        <ConfirmModal
+          title={`Hapus Layanan "${deletingService.nama}"?`}
+          eyebrow="Hapus Layanan"
+          warning="Layanan yang dihapus tidak akan muncul lagi di Kasir. Riwayat transaksi lama tetap aman."
+          requireReason
+          reasonLabel="Alasan Penghapusan"
+          reasonPlaceholder="Contoh: Menu layanan sudah tidak disediakan..."
+          confirmText="Hapus Layanan"
+          confirmTone="danger"
+          onClose={() => setDeletingService(null)}
+          onConfirm={(alasan) => handleDeleteConfirm(deletingService, alasan)}
+        />
       )}
     </div>
   )
