@@ -14472,3 +14472,55 @@ label .search-select-trigger {
     overscroll-behavior: contain;
   }
 }
+
+/* Kasir desktop: daftar item hanya ±2 baris (lalu scroll), bagian pembayaran memakai sisa tinggi agar muat 1 layar */
+@media (min-width: 1025px) {
+  .cashier-page .cart-tabs {
+    min-height: 42px;
+  }
+
+  .cashier-page .cart-lines {
+    flex: 0 1 auto;
+    min-height: 76px;
+    max-height: min(152px, 19svh);
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .cashier-page .cart-total {
+    flex: 1 1 0;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    padding: 10px 14px 12px;
+  }
+}
+
+@media (min-width: 1025px) and (max-height: 860px) {
+  .cashier-page .cart-total > div,
+  .cashier-page .cart-payment > * {
+    margin-top: 4px;
+  }
+
+  .cashier-page .cart-payment-heading {
+    display: none;
+  }
+
+  .cashier-page .cart-total > .cart-discount-panel {
+    padding: 8px 10px;
+  }
+
+  .cashier-page .cart-total {
+    gap: 0;
+    font-size: 13px;
+  }
+
+  .cashier-page .cart-total .grand strong {
+    font-size: 22px;
+  }
+
+  .cashier-page .cart-total .button,
+  .cashier-page .cart-total .primary-button {
+    min-height: 36px;
+  }
+}
