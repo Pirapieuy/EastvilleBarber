@@ -3123,6 +3123,37 @@ textarea {
   color: var(--brass-dark);
 }
 
+.cart-barber-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  margin: 12px 0 2px;
+  background: var(--bone, #f4efe6);
+  border: 1px solid var(--line, #e2d9cc);
+  border-left: 3px solid var(--brass, #c59b27);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink, #1f1b18);
+}
+
+.cart-barber-group-header:first-of-type {
+  margin-top: 4px;
+}
+
+.cart-barber-group-header .icon {
+  width: 12px;
+  height: 12px;
+  color: var(--brass-dark, #b45309);
+  flex-shrink: 0;
+}
+
+.cart-barber-group-header strong {
+  color: var(--brass-dark, #b45309);
+  font-weight: 700;
+}
+
 .cart-line-meta {
   display: flex;
   align-items: center;

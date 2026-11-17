@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
@@ -23,6 +23,25 @@ export type CartLine = CatalogItem & {
   lineId: string
   qty: number
   barber: string
+}
+
+/** Kelompokkan baris keranjang berdasarkan kapster secara berurutan */
+export function groupCartByBarber(lines: CartLine[]): CartLine[] {
+  const order: string[] = []
+  const groups = new Map<string, CartLine[]>()
+  for (const line of lines) {
+    const b = line.barber || ""
+    if (!groups.has(b)) {
+      groups.set(b, [])
+      order.push(b)
+    }
+    groups.get(b)!.push(line)
+  }
+  const result: CartLine[] = []
+  for (const b of order) {
+    result.push(...groups.get(b)!)
+  }
+  return result
 }
 
 export function ReceiptView({
@@ -669,21 +688,23 @@ export function CashierPage({ currentUser, onNavigate }: {
         (x) => x.id === target.id && x.barber === newBarber && x.lineId !== lineId,
       )
 
+      let updated: CartLine[]
       if (existing) {
-        return current
+        updated = current
           .filter((x) => x.lineId !== lineId)
           .map((x) =>
             x.lineId === existing.lineId
               ? { ...x, qty: x.qty + target.qty }
               : x,
           )
+      } else {
+        updated = current.map((x) =>
+          x.lineId === lineId
+            ? { ...x, barber: newBarber, lineId: `${x.id}-${newBarber}` }
+            : x,
+        )
       }
-
-      return current.map((x) =>
-        x.lineId === lineId
-          ? { ...x, barber: newBarber, lineId: `${x.id}-${newBarber}` }
-          : x,
-      )
+      return groupCartByBarber(updated)
     })
   }
 
@@ -716,6 +737,10 @@ export function CashierPage({ currentUser, onNavigate }: {
   }
 
   const itemCount = cart.reduce((sum, line) => sum + line.qty, 0)
+  const uniqueBarbersInCart = Array.from(
+    new Set(cart.map((l) => l.barber).filter(Boolean)),
+  )
+  const hasMultipleBarbers = uniqueBarbersInCart.length > 1
 
   return (
     <div className="cashier-page">
@@ -859,7 +884,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 const found = c.find(
                   (x) => x.id === item.id && x.barber === selectedBarber,
                 )
-                return found
+                const updated = found
                   ? c.map((x) =>
                       x.lineId === found.lineId ? { ...x, qty: x.qty + 1 } : x,
                     )
@@ -872,6 +897,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                         barber: selectedBarber,
                       },
                     ]
+                return groupCartByBarber(updated)
               })
             return (
               <div
@@ -1003,11 +1029,24 @@ export function CashierPage({ currentUser, onNavigate }: {
                 <span>Ketuk item untuk memulai.</span>
               </div>
             ) : (
-              cart.map((line) => (
-                <article
-                  className="cart-line-swipe"
-                  key={line.lineId}
-                  title="Geser ke kiri untuk menghapus item"
+              cart.map((line, idx) => {
+                const isFirstOfBarber =
+                  idx === 0 || cart[idx - 1].barber !== line.barber
+
+                return (
+                  <Fragment key={line.lineId}>
+                    {hasMultipleBarbers && isFirstOfBarber && (
+                      <div className="cart-barber-group-header">
+                        <Icon name="user" />
+                        <span>
+                          Kapster: <strong>{line.barber}</strong>
+                        </span>
+                      </div>
+                    )}
+                    <article
+                      className="cart-line-swipe"
+                      key={line.lineId}
+                      title="Geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -1177,8 +1216,10 @@ export function CashierPage({ currentUser, onNavigate }: {
                     </b>
                   </div>
                 </article>
-              ))
-            )}
+              </Fragment>
+            )
+          })
+        )}
           </div>
           {cart.length > 0 && (
           <div className="cart-total">
