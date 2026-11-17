@@ -5431,8 +5431,8 @@ textarea {
     minmax(120px, 1fr)
     minmax(180px, 2fr)
     minmax(110px, 1fr)
-    minmax(90px, 0.7fr)
-    minmax(72px, 0.6fr);
+    minmax(80px, 0.6fr)
+    minmax(96px, 0.7fr);
   align-items: center;
   gap: 8px;
 }
@@ -5484,10 +5484,11 @@ textarea {
   text-decoration: line-through;
 }
 
-.expense-row .secondary-button {
-  min-height: 32px;
-  padding-inline: 7px;
-  font-size: 11px;
+.expense-row .secondary-button,
+.expense-row .danger-button {
+  min-height: 34px;
+  padding-inline: 12px;
+  font-size: 12px;
 }
 
 .expense-table-compact > .expense-head,

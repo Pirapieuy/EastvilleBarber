@@ -405,7 +405,7 @@ export function ExpensesPage() {
           <span>Keterangan</span>
           <span>Jumlah</span>
           <span>Status</span>
-          <span />
+          <span>Aksi</span>
         </div>
 
         {filteredRecords.map((row) => (
@@ -441,10 +441,11 @@ export function ExpensesPage() {
               </Button>
             ) : (
               <Button
+                className="danger-button"
                 onClick={() => handleToggleStatus(row.id)}
                 title="Batalkan pengeluaran"
               >
-                <Icon name="arrow" />
+                Batalkan
               </Button>
             )}
           </div>
