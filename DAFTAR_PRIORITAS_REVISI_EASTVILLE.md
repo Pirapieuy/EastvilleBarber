@@ -12,7 +12,7 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 | Tingkat Prioritas | Definisi & Dampak | Jumlah Temuan | Status Pengerjaan |
 |---|---|:---:|---|
 | **P0 (Kritis / Blocker)** | Transaksi macet total, kasir lumpuh, atau nota salah tidak bisa dibatalkan dari sistem. | 2 | 1 Selesai (`P0.2` Void Transaksi), 1 Dilewati (`P0.1` Kamera) |
-| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 4 Selesai (`P1.1`, `P1.2`, `P1.3`, `P1.4`), 2 Menunggu |
+| **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 5 Selesai (`P1.1`, `P1.2`, `P1.3`, `P1.4`, `P1.5`), 1 Menunggu (`P1.6`) |
 | **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | ⚠️ Menunggu Eksekusi |
 | **P3 (Rendah / Estetika)** | Popup browser kuno (`prompt`/`confirm`) dan badge dekoratif semu di HP kapster. | 2 | ⚠️ Menunggu Eksekusi |
 
@@ -86,12 +86,15 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
   - Di `AbsensiKapster.tsx`: Menyelaraskan modal cuti/izin cepat pada halaman absensi kasir agar konsisten mengizinkan sakit dan izin pada hari H.
 
 ### 7. [P1.5] Tombol "Download / Unduh Backup" dan "Hapus" Hilang dari Tabel
-* **Status:** ⏳ **Siap Dikerjakan (Quick Win / 30 Menit)**
-* **Lokasi File:** `src/pages/shared/BackupPage.tsx` (baris 244–255)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/BackupPage.tsx` (baris 244–275), `src/components/common/Icon.tsx`, `src/types/index.ts`, & `src/index.css`
 * **Akar Masalah:** Fungsi `unduh(row.nama)` dan `hapus(row.nama)` sudah dibuat lengkap di TypeScript, namun tabel arsip backup hanya me-render tombol "Pulihkan".
 * **Dampak:** Owner tidak bisa mengunduh file cadangan fisik JSON ke laptop pribadi untuk arsip offline di luar Supabase.
-* **Solusi Teknis:**
-  - Tambahkan tombol aksi pemicu `unduh(row.nama)` dengan `<Icon name="download" /> Unduh` dan `hapus(row.nama)` dengan icon tempat sampah di kolom `.backup-action-cell`.
+* **Solusi yang Diterapkan:**
+  - Menambahkan icon `download` resmi ke dalam `src/types/index.ts` dan pustaka komponen `src/components/common/Icon.tsx`.
+  - Menambahkan tombol aksi `Unduh` (`<Icon name="download" /> Unduh`) dan `Hapus` (`<Icon name="trash" /> Hapus`) di kolom `.backup-action-cell` pada `src/pages/shared/BackupPage.tsx`.
+  - Memperbarui CSS grid layout `.backup-head` dan `.backup-row` di `src/index.css` (`grid-template-columns: minmax(180px, 1.4fr) 1fr 0.6fr 0.6fr auto`) agar ketiga tombol muat rapi dan tidak tumpang tindih.
+  - Menambahkan fallback mode demo yang aman untuk unduh & hapus saat berjalan secara lokal/offline.
 
 ### 8. [P1.6] Fitur Tutup Shift Kasir (Cash Drawer Reconciliation) Belum Tersedia di UI
 * **Status:** ⏳ **Siap Dikerjakan (1–2 Hari Kerja)**

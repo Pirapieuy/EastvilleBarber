@@ -82,6 +82,10 @@ export function BackupPage() {
     )
       return
     setMessage("")
+    if (!live) {
+      setBackups((curr) => curr.filter((b) => b.nama !== nama))
+      return setMessage(`Mode demo: ${nama} dihapus dari daftar lokal.`)
+    }
     setBusyNama(nama)
     try {
       await apiBackup.hapus(nama)
@@ -96,6 +100,25 @@ export function BackupPage() {
 
   async function unduh(nama: string) {
     setMessage("")
+    if (!live) {
+      const demoData = {
+        backup: nama,
+        timestamp: new Date().toISOString(),
+        keterangan: "File cadangan demo (offline)",
+      }
+      const blob = new Blob([JSON.stringify(demoData, null, 2)], {
+        type: "application/json",
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${nama}.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      return setMessage(`Mode demo: file cadangan ${nama}.json diunduh.`)
+    }
     setBusyNama(nama)
     try {
       const res = await apiBackup.unduh(nama)
@@ -243,13 +266,32 @@ export function BackupPage() {
             <i className="chip lunas desktop-col">Siap</i>
             <div className="backup-action-cell">
               <Button
+                className="secondary-button"
+                disabled={busyNama === row.nama || restoring}
+                onClick={() => unduh(row.nama)}
+                title={`Unduh file backup ${row.nama}.json`}
+              >
+                <Icon name="download" />
+                {busyNama === row.nama ? "..." : "Unduh"}
+              </Button>
+              <Button
                 className="restore-danger-button"
+                disabled={busyNama === row.nama || restoring}
                 onClick={() => {
                   setTarget(row.nama)
                   setRestore(1)
                 }}
+                title={`Pulihkan data dari ${row.nama}`}
               >
                 <Icon name="restore" /> Pulihkan
+              </Button>
+              <Button
+                className="backup-delete-btn"
+                disabled={busyNama === row.nama || restoring}
+                onClick={() => hapus(row.nama)}
+                title={`Hapus ${row.nama}`}
+              >
+                <Icon name="trash" /> Hapus
               </Button>
             </div>
           </article>
