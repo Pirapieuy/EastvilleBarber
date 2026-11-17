@@ -13,7 +13,7 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 |---|---|:---:|---|
 | **P0 (Kritis / Blocker)** | Transaksi macet total, kasir lumpuh, atau nota salah tidak bisa dibatalkan dari sistem. | 2 | 1 Selesai (`P0.2` Void Transaksi), 1 Dilewati (`P0.1` Kamera) |
 | **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 5 Selesai (`P1.1`, `P1.2`, `P1.3`, `P1.4`, `P1.5`), 1 Menunggu (`P1.6`) |
-| **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | 2 Selesai (`P2.1`, `P2.2`), 5 Menunggu |
+| **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | 4 Selesai (`P2.1`, `P2.2`, `P2.3`, `P2.4`), 3 Menunggu |
 | **P3 (Rendah / Estetika)** | Popup browser kuno (`prompt`/`confirm`) dan badge dekoratif semu di HP kapster. | 2 | ⚠️ Menunggu Eksekusi |
 
 ---
@@ -128,18 +128,23 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
   - Memperbarui pesan validasi kasir menjadi jelas dan sesuai UI: *"Tagihan Rp 0. Centang Gratis dan isi kolom alasan transaksi gratis."*
 
 ### 11. [P2.3] Menu "Pengeluaran" (Operasional) Hilang dari Navigasi Sidebar Owner
-* **Status:** ⏳ **Siap Dikerjakan (Quick Win / 20 Menit)**
+* **Status:** ✅ **SELESAI DIKERJAKAN**
 * **Lokasi File:** `src/layouts/sidebars/SidebarOwner.tsx`
 * **Akar Masalah:** Menu pencatatan pengeluaran operasional disatukan secara tersembunyi di dalam tab Laporan Keuangan.
 * **Dampak:** Navigasi membingungkan Owner saat ingin mencatat biaya operasional harian (seperti beli galon atau token listrik).
-* **Solusi Teknis:** Tambahkan item menu langsung `"Pengeluaran"` pada navigasi sidebar Owner.
+* **Solusi yang Diterapkan:**
+  - Menambahkan item menu langsung `"Pengeluaran"` (halaman `Pengeluaran`, alias `expenses`, icon `expense`) di dalam grup navigasi LAPORAN pada `SidebarOwner.tsx`.
+  - Membuka akses cepat bagi Owner untuk mencatat, melihat, dan menyaring pos pengeluaran operasional secara instan dari sidebar.
 
 ### 12. [P2.4] Komisi Kapster Gelondongan Tanpa Rincian Transaksi Layanan
-* **Status:** ⏳ **Siap Dikerjakan (2–3 Jam)**
-* **Lokasi File:** `src/pages/kapster/MySalaryPage.tsx` & Backend `aktivitas-kapster`
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/MySalaryPage.tsx`, `src/api.ts`, & `supabase/functions/api/handlers/laporan.ts`
 * **Akar Masalah:** Halaman "Gaji Saya" hanya menampilkan 1 kartu angka kumulatif total (misal: Rp 1.400.000) tanpa rincian potong rambut berapa kepala dan produk apa saja yang terjual.
 * **Dampak:** Kapster merasa tidak memiliki transparansi perhitungan komisi dan potongan kasbon.
-* **Solusi Teknis:** Tampilkan daftar riwayat pengerjaan layanan (No. nota, jam, nama layanan, dan komisi didapat) di menu gaji kapster.
+* **Solusi yang Diterapkan:**
+  - Memperbarui backend Supabase endpoint `aktivitas-kapster` (`laporan.ts`) agar mendukung filter tanggal dan rentang tanggal, mengembalikan field `tanggal`, dan diurutkan terbaru (*descending*).
+  - Memperluas tipe `AktivitasKapster` dan method `apiKapster.aktivitas` di `src/api.ts`.
+  - Mengimplementasikan section *"Rincian Transaksi Layanan"* di `MySalaryPage.tsx` lengkap dengan `CalendarPicker` pemilih tanggal, ringkasan jumlah layanan & produk serta komisi hari tersebut, dan kartu riwayat transaksi (nama layanan/produk, kuantitas, jam, no nota, tarif, komisi, dan label status lembur).
 
 ### 13. [P2.5] Hilangnya Halaman Mandiri "Absensi & Jadwal Saya" untuk Kapster
 * **Status:** ⏳ **Siap Dikerjakan (1–2 Jam)**
@@ -195,10 +200,10 @@ TAHAP 1: QUICK WINS FINANSIAL & OWNER (SELESAI 100% ✅)
 └── [P2.2] Perbaiki Teks Error Hantu "Menu Beri Diskon" di CashierPage.tsx (SELESAI)
 
 TAHAP 2: FITUR UTAMA POS & KOMISI (1-2 Hari Kerja)
-├── [P1.2] Single-Cart Multi-Kapster (1 Struk Beda Kapster) di CashierPage.tsx
+├── [P1.2] Single-Cart Multi-Kapster (1 Struk Beda Kapster) di CashierPage.tsx (SELESAI)
 ├── [P1.6] Modal Tutup Shift Kasir & Rekonsiliasi Laci di CashierPage.tsx
-├── [P2.3] Munculkan Menu Pengeluaran di Sidebar Owner
-└── [P2.4] Tampilkan Rincian Pengerjaan Layanan di Gaji Kapster
+├── [P2.3] Munculkan Menu Pengeluaran di Sidebar Owner (SELESAI)
+└── [P2.4] Tampilkan Rincian Pengerjaan Layanan di Gaji Kapster (SELESAI)
 
 TAHAP 3: POLISH & ERGONOMI (1-2 Hari Kerja)
 ├── [P2.5] Buka Akses Jadwal Mandiri di HP Kapster

@@ -30,6 +30,12 @@ const OWNER_GROUPS: SidebarNavGroup[] = [
         icon: "chart",
       },
       {
+        page: "Pengeluaran",
+        alias: "expenses",
+        label: "Pengeluaran",
+        icon: "expense",
+      },
+      {
         page: "LaporanProduk",
         alias: "product-report",
         label: "Laporan Produk",

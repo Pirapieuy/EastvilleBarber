@@ -59,18 +59,25 @@ export async function laporanKeuangan(body: B) {
 }
 
 export async function aktivitasKapster(body: B, user: Pengguna) {
-  const tgl = String(body.tanggal ?? "") || tanggalIso()
-  const { data: trx } = await db.from("transaksi").select("id,waktu,lembur").eq("status", "Lunas").eq("tanggal", tgl)
+  let qt = db.from("transaksi").select("id,waktu,lembur,tanggal").eq("status", "Lunas")
+  if (body.dari && body.sampai) {
+    qt = qt.gte("tanggal", body.dari).lte("tanggal", body.sampai)
+  } else if (body.tanggal) {
+    qt = qt.eq("tanggal", body.tanggal)
+  } else {
+    qt = qt.eq("tanggal", tanggalIso())
+  }
+  const { data: trx } = await qt.limit(20000)
   const peta = new Map((trx ?? []).map((t) => [t.id, t]))
   const rows = (await itemDari([...peta.keys()], (q) => q.eq("kapster_id", user.id))).map((i) => {
     const t = peta.get(i.trx_id)!
     return {
       item: i.nama, qty: Number(i.qty), type: i.tipe, time: fmtJamTitik(new Date(t.waktu)),
-      waktu: new Date(t.waktu).getTime(), fee: Number(i.harga) * Number(i.qty),
+      tanggal: t.tanggal, waktu: new Date(t.waktu).getTime(), fee: Number(i.harga) * Number(i.qty),
       comm: Number(i.komisi) || 0, trx: i.trx_id, lembur: t.lembur === "Ya",
     }
   })
-  rows.sort((a, b) => a.waktu - b.waktu)
+  rows.sort((a, b) => b.waktu - a.waktu)
   return ok(rows)
 }
 

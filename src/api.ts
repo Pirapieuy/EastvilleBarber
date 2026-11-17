@@ -323,6 +323,7 @@ export interface AktivitasKapster {
   type: "Layanan" | "Produk"
   /** HH.mm */
   time: string
+  tanggal?: string
   fee: number
   comm: number
   /** id invoice */
@@ -332,9 +333,13 @@ export interface AktivitasKapster {
 }
 
 export const apiKapster = {
-  /** Layanan & produk yang dikerjakan kapster yang login pada satu hari (default hari ini). */
-  aktivitas: (tanggal?: string) =>
-    api<AktivitasKapster[]>("aktivitas-kapster", { tanggal }),
+  /** Layanan & produk yang dikerjakan kapster yang login pada satu hari atau rentang tanggal. */
+  aktivitas: (
+    p?: string | { tanggal?: string; dari?: string; sampai?: string },
+  ) => {
+    const params = typeof p === "string" ? { tanggal: p } : (p ?? {})
+    return api<AktivitasKapster[]>("aktivitas-kapster", params)
+  },
 }
 
 export interface LaporanKeuangan {
