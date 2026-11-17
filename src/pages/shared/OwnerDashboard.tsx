@@ -113,7 +113,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   // Kehadiran dari absensi asli (Masuk/Pulang) per kapster; jumlah layanan dari laporan keuangan.
   const kapsterList = kapsterAll.map((k) => {
     const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
-    const masuk = rows.find((r) => r.tipe === "Masuk")
+    const masuk = rows.find((r) => r.status === "Hadir" || r.tipe === "Masuk")
     let statusText: "Tepat Waktu" | "Terlambat" | "Tidak Hadir" = "Tidak Hadir"
     if (masuk) {
       const isLate =
