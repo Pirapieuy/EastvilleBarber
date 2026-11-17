@@ -2,7 +2,7 @@
 // POST {action, token, ...} -> {success, data | error, code}.
 import { ApiError, gagal, penggunaDariToken, type Role } from "./util.ts"
 import { login, logout, verifySession } from "./handlers/auth.ts"
-import { createUser, forgotPin, listUsers, resetPin, toggleUserStatus, updateUser } from "./handlers/user.ts"
+import { createUser, deleteUser, forgotPin, listUsers, resetPin, toggleUserStatus, updateUser } from "./handlers/user.ts"
 import { createLayanan, toggleLayanan, updateLayanan } from "./handlers/layananLama.ts"
 import {
   getPengaturanAksi, hapusLayanan, listKapster, listLayanan, listProduk, setKomisiKapster, simpanLayanan, simpanPengaturan,
@@ -33,6 +33,7 @@ type HandlerUser = (body: any, user: any) => Promise<unknown>
 const rute: Record<string, Handler> = {
   login, logout, "verify-session": verifySession, "forgot-pin": forgotPin, "reset-pin": resetPin,
   "list-users": listUsers, "create-user": createUser, "update-user": updateUser, "toggle-user-status": toggleUserStatus,
+  "delete-user": deleteUser,
   "create-layanan": createLayanan, "update-layanan": updateLayanan, "toggle-layanan": toggleLayanan,
   "list-kasbon": listKasbon, "create-kasbon": createKasbon, "lunasi-kasbon": lunasiKasbon,
   "setujui-kasbon": (b) => keputusanKasbon(b, "Aktif"), "tolak-kasbon": (b) => keputusanKasbon(b, "Ditolak"),
