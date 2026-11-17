@@ -2128,7 +2128,7 @@ textarea {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 2;
+    z-index: 10;
     width: calc((100% - max(340px, 25%)) );
     padding: 16px 24px 0;
     pointer-events: none;
@@ -2139,7 +2139,11 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding-top: 56px;
+    padding-top: 0;
+  }
+
+  .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
+    padding-top: 58px;
   }
 }
 
@@ -2521,16 +2525,16 @@ textarea {
 .barber-picker.needs-selection {
   border-color: #d97706;
   background: #fffdfa;
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.16);
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.2);
   animation: pulse-barber-picker 2s infinite ease-in-out;
 }
 
 @keyframes pulse-barber-picker {
   0%, 100% {
-    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.18);
+    box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.18);
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(217, 119, 6, 0.32);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.28);
   }
 }
 
@@ -14536,5 +14540,17 @@ label .search-select-trigger {
 
   .cashier-page .cart-lines:has(> .empty) + .cart-total {
     flex: 0 0 auto;
+  }
+}
+
+/* Kasir di layar dengan navbar atas (≤1024px): beri ruang untuk navbar agar bagian kapster tidak tertutup */
+@media (max-width: 1024px) {
+  .cashier-page {
+    padding-top: 56px;
+  }
+
+  .cashier-page .catalog-sticky {
+    top: 56px;
+    padding-top: 12px;
   }
 }
