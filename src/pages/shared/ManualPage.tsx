@@ -668,37 +668,15 @@ export function ManualPage() {
             <dt>Subtotal</dt>
             <dd>{rupiah(subtotal)}</dd>
           </div>
-          <div className="form-grid manual-info-grid">
-            {method !== "QRIS" && (
-              <label>
-                <span>
-                  {method === "Gabungan" ? "Dibayar tunai" : "Uang diterima"}
-                </span>
-                <div className="input-shell">
-                  <b>Rp</b>
-                  <input
-                    inputMode="numeric"
-                    onChange={(e) => setCash(e.target.value)}
-                    placeholder={method === "Gabungan" ? "0" : String(total)}
-                    value={cash}
-                  />
-                </div>
-              </label>
-            )}
-            {method === "Gabungan" && (
-              <label>
-                <span>Dibayar QRIS</span>
-                <div className="input-shell">
-                  <b>Rp</b>
-                  <input
-                    inputMode="numeric"
-                    onChange={(e) => setQris(e.target.value)}
-                    placeholder="0"
-                    value={qris}
-                  />
-                </div>
-              </label>
-            )}
+          {diskonNum > 0 && (
+            <div>
+              <dt>Diskon</dt>
+              <dd>-{rupiah(diskonNum)}</dd>
+            </div>
+          )}
+          <div className="nota-summary-total">
+            <dt>Total</dt>
+            <dd>{rupiah(total)}</dd>
           </div>
           {method === "Tunai" && cashNum > 0 && total > 0 && (
             <div>

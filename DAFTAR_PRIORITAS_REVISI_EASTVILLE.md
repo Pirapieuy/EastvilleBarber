@@ -13,7 +13,7 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 |---|---|:---:|---|
 | **P0 (Kritis / Blocker)** | Transaksi macet total, kasir lumpuh, atau nota salah tidak bisa dibatalkan dari sistem. | 2 | 1 Selesai (`P0.2` Void Transaksi), 1 Dilewati (`P0.1` Kamera) |
 | **P1 (Tinggi / Finansial)** | Anomali data kehadiran Owner, komisi salah sasaran, kembalian salah, atau laci kasir rawan selisih. | 6 | 5 Selesai (`P1.1`, `P1.2`, `P1.3`, `P1.4`, `P1.5`), 1 Menunggu (`P1.6`) |
-| **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | ⚠️ Menunggu Eksekusi |
+| **P2 (Sedang / Ergonomi)** | Duplikasi input form, pesan error hantu, tombol kecil di layar HP, atau gaji tanpa rincian. | 7 | 2 Selesai (`P2.1`, `P2.2`), 5 Menunggu |
 | **P3 (Rendah / Estetika)** | Popup browser kuno (`prompt`/`confirm`) dan badge dekoratif semu di HP kapster. | 2 | ⚠️ Menunggu Eksekusi |
 
 ---
@@ -111,18 +111,21 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 > *Kategori ini menyebabkan kebingungan bagi kasir pemula, memperlambat pelayanan, atau membatasi transparansi kapster.*
 
 ### 9. [P2.1] Duplikasi Input Form Uang Diterima & QRIS pada Halaman Rekap Manual
-* **Status:** ⏳ **Siap Dikerjakan (Quick Win / 20 Menit)**
-* **Lokasi File:** `src/pages/shared/ManualPage.tsx` (baris 591–611 vs 671–702)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/ManualPage.tsx` (baris 668–685)
 * **Akar Masalah:** Terdapat dua pasang field input nominal pembayaran yang sama di form yang bertumpuk akibat elemen `<dl className="nota-summary">` yang menduplikasi input.
 * **Dampak:** Tampilan input berantakan; membingungkan kasir baru yang mengira harus mengisi nominal uang dua kali.
-* **Solusi Teknis:** Hapus blok input form bayar tunai/QRIS yang terduplikasi di dalam `<dl className="nota-summary">`.
+* **Solusi yang Diterapkan:**
+  - Menghapus blok input ganda di dalam `<dl className="nota-summary">`.
+  - Mengembalikan `<dl className="nota-summary">` ke fungsinya yang bersih dan semantik (Subtotal, Diskon, Total Tagihan dengan style `.nota-summary-total`, dan Kembalian).
 
 ### 10. [P2.2] Pesan Validasi Error Hantu ("Menu Beri Diskon")
-* **Status:** ⏳ **Siap Dikerjakan (Quick Win / 15 Menit)**
-* **Lokasi File:** `src/pages/shared/CashierPage.tsx` (baris 561–563)
+* **Status:** ✅ **SELESAI DIKERJAKAN**
+* **Lokasi File:** `src/pages/shared/CashierPage.tsx` (baris 595)
 * **Akar Masalah:** Sistem memunculkan teks error: *"Tagihan Rp 0. Masukkan keterangan diskon di menu Beri Diskon"*, padahal menu bernama "Beri Diskon" tersebut tidak ada di POS.
 * **Dampak:** Kasir terjebak (*deadlock*) mencari-cari tombol yang tidak pernah ada saat melayani transaksi gratis/traktiran.
-* **Solusi Teknis:** Perbaiki teks validasi menjadi: *"Tagihan Rp 0. Centang Gratis dan isi kolom alasan transaksi gratis."*
+* **Solusi yang Diterapkan:**
+  - Memperbarui pesan validasi kasir menjadi jelas dan sesuai UI: *"Tagihan Rp 0. Centang Gratis dan isi kolom alasan transaksi gratis."*
 
 ### 11. [P2.3] Menu "Pengeluaran" (Operasional) Hilang dari Navigasi Sidebar Owner
 * **Status:** ⏳ **Siap Dikerjakan (Quick Win / 20 Menit)**
@@ -183,13 +186,13 @@ Daftar prioritas ini disusun berdasarkan tingkat urgensi operasional di lapangan
 ## 🚀 ROADMAP EKSEKUSI TAHAP DEMI TAHAP
 
 ```
-TAHAP 1: QUICK WINS FINANSIAL & OWNER (Selesai dalam 1-2 Jam)
-├── [P1.1] Perbaiki Bug Anomali Kehadiran Owner (0 Hadir) di OwnerDashboard.tsx
-├── [P1.3] Perbaiki Kalkulasi Kembalian Uang Tunai Split Bill di CashierPage.tsx
-├── [P1.4] Buka Akses Izin Sakit Hari H di IzinKapster.tsx & backend sdm.ts
-├── [P1.5] Munculkan Tombol Unduh & Hapus Backup di BackupPage.tsx
-├── [P2.1] Bersihkan Duplikasi Input Form di ManualPage.tsx
-└── [P2.2] Perbaiki Teks Error Hantu "Menu Beri Diskon" di CashierPage.tsx
+TAHAP 1: QUICK WINS FINANSIAL & OWNER (SELESAI 100% ✅)
+├── [P1.1] Perbaiki Bug Anomali Kehadiran Owner (0 Hadir) di OwnerDashboard.tsx (SELESAI)
+├── [P1.3] Perbaiki Kalkulasi Kembalian Uang Tunai Split Bill di CashierPage.tsx (SELESAI)
+├── [P1.4] Buka Akses Izin Sakit Hari H di IzinKapster.tsx & backend sdm.ts (SELESAI)
+├── [P1.5] Munculkan Tombol Unduh & Hapus Backup di BackupPage.tsx (SELESAI)
+├── [P2.1] Bersihkan Duplikasi Input Form di ManualPage.tsx (SELESAI)
+└── [P2.2] Perbaiki Teks Error Hantu "Menu Beri Diskon" di CashierPage.tsx (SELESAI)
 
 TAHAP 2: FITUR UTAMA POS & KOMISI (1-2 Hari Kerja)
 ├── [P1.2] Single-Cart Multi-Kapster (1 Struk Beda Kapster) di CashierPage.tsx
