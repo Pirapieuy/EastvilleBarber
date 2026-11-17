@@ -146,7 +146,7 @@ export function ReasonDialog({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay modal-centered">
       <section className="reason-dialog">
         <header>
           <div>
@@ -661,21 +661,23 @@ function TransactionDetailBody({
         </div>
 
         <div className="detail-actions-group">
-          <Button className="secondary-button" onClick={onPrintReceipt}>
-            <Icon name="print" /> Cetak Struk
-          </Button>
-          {canEdit && onEdit && (
-            <Button className="secondary-button" onClick={onEdit}>
-              <Icon name="pencil" /> Edit Transaksi
+          <div className="detail-actions-row">
+            <Button className="secondary-button" onClick={onPrintReceipt}>
+              <Icon name="print" /> Cetak Struk
             </Button>
-          )}
+            {canEdit && onEdit && (
+              <Button className="secondary-button" onClick={onEdit}>
+                <Icon name="pencil" /> Edit Transaksi
+              </Button>
+            )}
+          </div>
           {!isVoided && canVoid && onVoid && (
-            <Button className="danger-button" onClick={onVoid}>
+            <Button className="danger-button action-btn-full" onClick={onVoid}>
               <Icon name="alert" /> Batalkan Transaksi
             </Button>
           )}
           {isVoided && canRestore && onRestore && (
-            <Button className="secondary-button restore-btn" onClick={onRestore}>
+            <Button className="secondary-button restore-btn action-btn-full" onClick={onRestore}>
               <Icon name="restore" /> Pulihkan Transaksi
             </Button>
           )}
