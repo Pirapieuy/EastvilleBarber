@@ -155,7 +155,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
         title="Kasbon kapster"
       />
 
-      <div className="advance-grid" style={{ gridTemplateColumns: `repeat(${Object.keys(ringkasanMap).length || 2}, 1fr)` }}>
+      <div className="advance-grid">
         {!loading &&
           Object.entries(ringkasanMap).map(([uid, x]) => (
           <article key={uid}>
@@ -169,7 +169,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
         ))}
       </div>
 
-      <section className="panel list-panel">
+      <section className="panel list-panel kasbon-history-panel">
         <header
           style={{
             padding: "14px 18px",
@@ -211,7 +211,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
             Belum Lunas
           </Button>
         </header>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, padding: "12px 18px", borderBottom: "1px solid var(--line)" }}>
+        <div className="kasbon-history-filters">
           <SearchSelect
             value={filterKapster}
             onChange={(e) => setFilterKapster(e.target.value)}
@@ -580,7 +580,7 @@ export function PayrollPage() {
   )
 
   return (
-    <div className="content">
+    <div className={`content payroll-page payroll-page-${tab.toLowerCase()}`}>
       <div className="payroll-topbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
         <div className="segmented payroll-segment">
           <Button

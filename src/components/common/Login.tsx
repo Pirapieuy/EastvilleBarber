@@ -251,10 +251,10 @@ export function Login({
         </div>
       </section>
       <section className="login-form-wrap">
+        <div className="login-mobile-header">
+          <BrandMark />
+        </div>
         <form className="login-card" onSubmit={submit}>
-          <div className="login-mobile-header">
-            <BrandMark />
-          </div>
           <h1 className="login-title">LOGIN</h1>
           <label>
             <span>Username</span>

@@ -3841,6 +3841,10 @@ textarea {
   padding-bottom: 0;
 }
 
+.simple-modal.expense-form {
+  overflow: visible;
+}
+
 .expense-form > label:last-of-type {
   margin-bottom: 22px;
 }
@@ -5541,6 +5545,36 @@ textarea {
   margin-top: 14px;
 }
 
+.kasbon-history-panel {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.kasbon-history-filters {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.85fr) minmax(160px, 1.15fr);
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.kasbon-history-filters .search-select,
+.kasbon-history-filters .search {
+  width: 100%;
+  min-width: 0;
+}
+
+.kasbon-history-filters .search-select.open {
+  z-index: 5;
+}
+
+.kasbon-history-filters .search-select-menu {
+  width: max(100%, 180px);
+  max-width: calc(100vw - 36px);
+}
+
 .advance-grid article {
   display: flex;
   gap: 8px;
@@ -5711,7 +5745,7 @@ textarea {
 .kasbon-card {
   display: flex;
   flex-direction: column;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
@@ -5765,15 +5799,15 @@ textarea {
 .kasbon-card-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  row-gap: 6px;
-  column-gap: 12px;
-  margin-top: 8px;
+  row-gap: 10px;
+  column-gap: 16px;
+  margin-top: 10px;
 }
 
 .kasbon-card-field {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
   min-width: 0;
 }
 
@@ -5832,8 +5866,14 @@ textarea {
   .kasbon-mobile-cards {
     display: flex !important;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px;
+    gap: 10px;
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 620px) {
+  .content.payroll-page-kasbon {
+    padding-inline: 10px;
   }
 }
 
@@ -8551,6 +8591,7 @@ textarea {
   }
 
   .login-form-wrap {
+    position: relative;
     width: 100%;
     min-height: 100svh;
     display: flex;
@@ -8571,14 +8612,17 @@ textarea {
 
   /* Header Mobile: Pindahkan Logo Barbershop ke posisi paling atas layar/card login mobile */
   .login-mobile-header {
+    position: absolute;
+    top: 24px;
+    left: 24px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    margin-bottom: 22px;
+    margin: 0;
   }
 
   .login-mobile-header .brand-mark {
-    justify-content: center;
+    justify-content: flex-start;
     text-align: left;
   }
 
@@ -8591,9 +8635,9 @@ textarea {
   }
 
   .login-mobile-header .monogram {
-    border-color: var(--brass-dark);
-    color: var(--brass-dark);
-    background: var(--brass-soft);
+    border-color: rgb(200 150 62 / 55%);
+    color: var(--brass);
+    background: var(--charcoal);
   }
 
   /* Tata Letak: Di bawah logo, tampilkan tulisan LOGIN diikuti oleh field input Username, PIN, dan tombol Masuk secara center-aligned (rata tengah) */
@@ -8603,20 +8647,20 @@ textarea {
   }
 
   .login-card label {
-    text-align: center;
+    text-align: left;
   }
 
   .login-card label > span {
-    text-align: center;
-    margin-inline: auto;
+    text-align: left;
+    margin-inline: 2px 0;
   }
 
   .login-card .input-shell {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .login-card .input-shell input {
-    text-align: center;
+    text-align: left;
   }
 
   .login-card .primary-button {
@@ -10704,9 +10748,13 @@ textarea {
     display: block;
   }
 
+  .workspace:has(> .flow-page) > .mobile-top-navbar {
+    display: none;
+  }
+
   .flow-toolbar {
     position: sticky;
-    top: 54px;
+    top: 0;
     z-index: 40;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -10751,7 +10799,7 @@ textarea {
     min-height: 60svh;
     max-height: calc(100svh - 150px);
     overflow: auto;
-    place-items: center;
+    place-items: start center;
     padding: 24px 22px;
   }
 
@@ -13793,6 +13841,21 @@ label .search-select-trigger {
   .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
   .mobile-content.attendance-history-page {
     padding: 26px 27px 26px;
+  }
+
+  .audit-page-content {
+    height: 100svh;
+    min-height: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .audit-page-content > .audit-list {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
   }
 }
 
