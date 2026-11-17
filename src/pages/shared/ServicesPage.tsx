@@ -15,6 +15,7 @@ import {
   rupiah,
 } from "../../components/common/UI"
 import { SearchSelect } from "../../components/common/SearchSelect"
+import { ReasonDialog } from "./HistoryPage"
 
 export const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
 
@@ -79,6 +80,7 @@ export function ServicesPage({ embedded = false }: {
   const [kategoriFilter, setKategoriFilter] = useState("Semua")
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<LayananRow | null>(null)
+  const [deleting, setDeleting] = useState<LayananRow | null>(null)
   const [nama, setNama] = useState("")
   const [harga, setHarga] = useState("")
   const [kategori, setKategori] = useState("Potong")
@@ -183,19 +185,7 @@ export function ServicesPage({ embedded = false }: {
   }
 
   async function handleDelete(service: LayananRow) {
-    const alasan = window.prompt(`Alasan menghapus layanan "${service.nama}"?`)
-    if (!alasan || alasan.trim().length < 3) return
-    if (!window.confirm(`Hapus layanan "${service.nama}"?`)) return
-    try {
-      if (live) {
-        await apiLayanan.hapus(service.id, alasan.trim())
-        await loadLive()
-      } else {
-        setRows((prev) => prev.filter((row) => row.id !== service.id))
-      }
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "Gagal menghapus layanan.")
-    }
+    setDeleting(service)
   }
 
   const aktifCount = rows.filter((r) => r.status === "Aktif").length
@@ -439,6 +429,21 @@ export function ServicesPage({ embedded = false }: {
             </footer>
           </form>
         </div>
+      )}
+      {deleting && (
+        <ReasonDialog
+          title={`Hapus layanan "${deleting.nama}"?`}
+          warning="Layanan akan dihapus dari katalog."
+          onClose={() => setDeleting(null)}
+          onConfirm={async (alasan) => {
+            if (live) {
+              await apiLayanan.hapus(deleting.id, alasan)
+              await loadLive()
+            } else {
+              setRows((prev) => prev.filter((row) => row.id !== deleting.id))
+            }
+          }}
+        />
       )}
     </div>
   )

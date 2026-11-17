@@ -2132,8 +2132,18 @@ textarea {
   display: none;
 }
 
+@media (min-width: 1025px) {
+  .workspace:has(> .mobile-content.attendance-history-page) > .desktop-page-head {
+    display: block;
+  }
+}
+
 @media (max-width: 1024px) {
   .desktop-page-head {
+    display: none;
+  }
+
+  .content > .backup-page-title {
     display: none;
   }
 }
@@ -2147,6 +2157,22 @@ textarea {
 
 .owner-dashboard-title {
   align-items: center;
+}
+
+@media (max-width: 1280px) {
+  .owner-dashboard-title {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .owner-dashboard-title > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .owner-dashboard-title h2 {
+    overflow-wrap: anywhere;
+  }
 }
 
 @media (max-width: 620px) {
@@ -2672,26 +2698,34 @@ textarea {
 
 @media (max-width: 768px) {
   .mobile-content.attendance-history-page .attendance-history-filters {
-    grid-template-columns: minmax(0, 1fr) !important;
-    justify-items: center !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    align-items: center !important;
   }
 
   .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-wrapper {
-    grid-column: 1 / -1 !important;
-    justify-self: center !important;
-    width: max-content !important;
-    max-width: 100% !important;
+    grid-column: 1 !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 
   .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-btn {
-    width: max-content !important;
+    width: 100% !important;
     max-width: 100% !important;
     justify-content: center !important;
   }
 
-  .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-text {
-    overflow: visible !important;
-    text-overflow: clip !important;
+  .mobile-content.attendance-history-page .attendance-history-filters > .search-select {
+    grid-column: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .search-select-trigger {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: space-between !important;
   }
 
   .mobile-content.attendance-history-page .attendance-history-filters .search {
@@ -9253,6 +9287,24 @@ textarea {
     display: none !important;
   }
 
+  .content > .owner-dashboard-title > div:first-child {
+    display: block !important;
+  }
+
+  .content > .owner-dashboard-title {
+    justify-content: flex-start !important;
+  }
+
+  .owner-dashboard-title > div:first-child,
+  .owner-dashboard-title h2 {
+    width: 100%;
+    text-align: left;
+  }
+
+  .owner-dashboard-title .page-actions {
+    justify-content: flex-start;
+  }
+
   .content > .page-title:not(:has(.page-actions)):not(:has(.button)),
   .mobile-content > .page-title:not(:has(.page-actions)):not(:has(.button)),
   .catalog-embedded-view > .page-title:not(:has(.page-actions)):not(:has(.button)) {
@@ -10200,6 +10252,11 @@ textarea {
     width: 100%;
     max-height: 95svh;
     border-radius: 17px 17px 0 0;
+  }
+
+  .expense-form .calendar-picker-popup {
+    top: auto;
+    bottom: calc(100% + 6px);
   }
 }
 

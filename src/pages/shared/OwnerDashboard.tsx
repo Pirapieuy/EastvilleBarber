@@ -161,7 +161,16 @@ export function OwnerDashboard({ onNavigate, navigate }: {
 
       <PageTitle
         className="owner-dashboard-title"
-        title="Ringkasan Operasional Hari Ini"
+        title={
+          <>
+            <span className="page-title-desktop">
+              Ringkasan Operasional Hari Ini
+            </span>
+            <span className="page-title-mobile">
+              Ringkasan Operasional Hari Ini
+            </span>
+          </>
+        }
         action={
           <div className="page-actions">
             <CalendarPicker

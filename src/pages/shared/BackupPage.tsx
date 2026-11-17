@@ -160,7 +160,11 @@ export function BackupPage() {
   return (
     <div className="content">
       <DemoNotice live={live} error={liveError} />
-      <PageTitle eyebrow="Keamanan data" title="Backup" />
+      <PageTitle
+        className="backup-page-title"
+        eyebrow="Keamanan data"
+        title="Backup"
+      />
       <section className="backup-status-grid">
         <article className="backup-hero">
           <span className="backup-icon">
