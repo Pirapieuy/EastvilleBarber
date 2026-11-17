@@ -284,7 +284,7 @@ export function AuditPage() {
   }, [realLogs, filterDate, filterAksi, filterUser])
 
   return (
-    <div className="content">
+    <div className="content audit-page-content">
       <PageTitle eyebrow="Khusus Owner" title="Jejak audit" />
       <section className="panel audit-list">
         <div className="filters">
