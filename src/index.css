@@ -15681,3 +15681,69 @@ label .search-select-trigger {
     grid-row: 3 / span 2;
   }
 }
+
+/* Loading / gagal memuat: sembunyikan judul bawaan layout, hanya spinner/pesan di tengah */
+.workspace:has(> .content > .loading-state:only-child) > .desktop-page-head,
+.workspace:has(> .mobile-content > .loading-state:only-child) > .desktop-page-head,
+.workspace:has(> .loading-state-screen) > .desktop-page-head,
+.workspace:has(> .content > .error-state:only-child) > .desktop-page-head,
+.workspace:has(> .mobile-content > .error-state:only-child) > .desktop-page-head,
+.workspace:has(> .content.catalog-page > .catalog-embedded-view > .loading-state:only-child) > .desktop-page-head,
+.workspace:has(> .content.catalog-page > .catalog-embedded-view > .error-state:only-child) > .desktop-page-head {
+  display: none;
+}
+
+.loading-state-screen {
+  min-height: 100svh;
+}
+
+/* Laptop: semua halaman Kapster, kartu pertama mulai di tinggi & jarak yang sama */
+@media (min-width: 1025px) {
+  .app-shell-kapster .kapster-dashboard > .page-title,
+  .app-shell-kapster .my-salary-page > .page-title,
+  .app-shell-kapster .kapster-product-commission > .page-title {
+    height: 48px;
+    margin: 0 0 14px !important;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .kpi-grid,
+  .app-shell-kapster .my-salary-page > *:not(.page-title),
+  .app-shell-kapster .kapster-product-commission > *:not(.page-title) {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .app-shell-kapster .my-salary-page,
+  .app-shell-kapster .kapster-product-commission {
+    row-gap: 14px;
+    column-gap: 14px;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .dashboard-grid {
+    margin-top: 14px !important;
+    gap: 14px;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .kpi-grid {
+    gap: 14px;
+  }
+
+  /* kartu hero (gelap) dan panel punya radius & padding yang sama */
+  .app-shell-kapster .my-salary-hero {
+    padding: 22px 24px;
+    border-radius: 14px;
+  }
+
+  .app-shell-kapster .kapster-dashboard .panel,
+  .app-shell-kapster .my-salary-page .panel,
+  .app-shell-kapster .kapster-product-commission .panel {
+    border-radius: 14px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .app-shell-kapster .my-salary-page > .page-title,
+  .app-shell-kapster .kapster-product-commission > .page-title {
+    margin-bottom: 0 !important;
+  }
+}
