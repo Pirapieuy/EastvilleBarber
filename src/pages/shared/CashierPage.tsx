@@ -1028,7 +1028,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       />
 
       <aside
-        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[88svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain md:static md:w-auto md:max-w-none md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-[var(--bone)] md:shadow-none md:translate-y-0 md:opacity-100 md:pointer-events-auto ${
+        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[92svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain md:static md:w-auto md:max-w-none md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-[var(--bone)] md:shadow-none md:translate-y-0 md:opacity-100 md:pointer-events-auto ${
           isCartOpen
             ? "translate-y-0 opacity-100 pointer-events-auto"
             : "translate-y-full opacity-0 pointer-events-none"
