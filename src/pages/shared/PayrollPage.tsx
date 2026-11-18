@@ -3,7 +3,7 @@ import { Icon } from "../../components/common/Icon"
 import {
   Button,
   LoadingState,
-
+  PageTitle,
   rupiah,
 } from "../../components/common/UI"
 import {
@@ -146,6 +146,11 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
 
   return (
     <>
+      <PageTitle
+        eyebrow="Saldo berjalan"
+        title="Kasbon kapster"
+      />
+
       <div className="advance-grid">
         {!loading &&
           Object.entries(ringkasanMap).map(([uid, x]) => (
@@ -646,18 +651,43 @@ export function PayrollPage() {
   )
 
   return (
-    <div className="content payroll-page fit-page">
-      <div className="payroll-split">
-        <div className="payroll-col payroll-col-gaji">
+    <div className={`content payroll-page payroll-page-${tab.toLowerCase()}`}>
+      <div className="payroll-topbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
+        <div className="segmented payroll-segment">
+          <Button
+            className={tab === "Gaji" ? "active" : ""}
+            onClick={() => setTab("Gaji")}
+          >
+            Gaji
+          </Button>
+          <Button
+            className={tab === "Kasbon" ? "active" : ""}
+            onClick={() => setTab("Kasbon")}
+          >
+            Kasbon
+          </Button>
+        </div>
+        {tab === "Kasbon" && (
+          <Button
+            className="primary-button"
+            onClick={() => setTriggerAdd(true)}
+          >
+            <Icon name="plus" /> Catat kasbon
+          </Button>
+        )}
+      </div>
+
+      {tab === "Gaji" ? (
+        <>
           <section className="salary-hero">
             <div>
-              
-              <h2>Gaji periode ini</h2>
+              <p className="eyebrow">Periode pembayaran</p>
+              <h2>Periode Berjalan (Live)</h2>
             </div>
             <div>
-              <small>Perkiraan gaji bersih</small>
+              <small>Total estimasi gaji bersih</small>
               <strong>{loading ? "-" : rupiah(totalAllBersih)}</strong>
-              <small>{kapsters.length} kapster</small>
+              <small>{kapsters.length} kapster terdaftar</small>
             </div>
           </section>
 
@@ -693,7 +723,7 @@ export function PayrollPage() {
                   </header>
                   <dl>
                     <div>
-                      <dt>Komisi periode ini</dt>
+                      <dt>Total komisi berjalan</dt>
                       <dd>{loading ? "-" : rupiah(calc.totalKomisi)}</dd>
                     </div>
                     <div className="deduct">
@@ -942,17 +972,10 @@ export function PayrollPage() {
               </>
             )}
           </section>
-        </div>
-        <div className="payroll-col payroll-col-kasbon">
-          <div className="payroll-col-head">
-            <strong>Kasbon kapster</strong>
-            <Button className="primary-button" onClick={() => setTriggerAdd(true)}>
-              <Icon name="plus" /> Catat kasbon
-            </Button>
-          </div>
-          <KasbonTab externalAdd={triggerAdd} onExternalAddDone={() => setTriggerAdd(false)} />
-        </div>
-      </div>
+        </>
+      ) : (
+        <KasbonTab externalAdd={triggerAdd} onExternalAddDone={() => setTriggerAdd(false)} />
+      )}
 
       {selectedPayTarget && (
         <div
