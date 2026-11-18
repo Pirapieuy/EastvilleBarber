@@ -115,14 +115,6 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   return (
     <div className="content kapster-dashboard">
       <DemoNotice live={live} error={liveError} />
-      <div className="kapster-dashboard-actions">
-        <Button
-          className="secondary-button"
-          onClick={() => nav("GajiKomisiSaya")}
-        >
-          <Icon name="wallet" /> Rincian Gaji & Kasbon
-        </Button>
-      </div>
       <div className="kpi-grid">
         <Kpi
           icon="people"
