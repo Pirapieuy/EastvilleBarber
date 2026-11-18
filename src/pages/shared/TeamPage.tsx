@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, PageTitle } from "../../components/common/UI"
+import { Button, LoadingState } from "../../components/common/UI"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
 import { AppUser, Role } from "../../types"
 import {
@@ -274,16 +274,12 @@ export function TeamPage({ currentUser, role, title }: {
   }
 
   return (
-    <div className="content">
-      <PageTitle
-        eyebrow="Akun dan hak akses"
-        title={pageTitle}
-        action={
-          <Button className="primary-button" onClick={openCreate}>
-            <Icon name="plus" /> Tambah anggota
-          </Button>
-        }
-      />
+    <div className="content fit-page">
+      <div className="fit-page-actions">
+        <Button className="primary-button" onClick={openCreate}>
+          <Icon name="plus" /> Tambah anggota
+        </Button>
+      </div>
       <div className="filters">
         <div className="search">
           <Icon name="search" />
@@ -327,7 +323,7 @@ export function TeamPage({ currentUser, role, title }: {
         </p>
       )}
 
-      <div className={`team-grid${isOwner ? " team-grid-owner" : ""}`}>
+      <div className={`team-grid fit-fill${isOwner ? " team-grid-owner" : ""}`}>
         {filtered.map((x) => (
           <article
             className={`team-card role-${x.role.toLowerCase()} ${x.status === "Nonaktif" ? "inactive" : ""}`}

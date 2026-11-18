@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import {
   CalendarPicker,
   LoadingState,
-  PageTitle,
 } from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
 import { formatTanggal, formatTanggalWaktu } from "../../utils/tanggal"
@@ -284,9 +283,8 @@ export function AuditPage() {
   }, [realLogs, filterDate, filterAksi, filterUser])
 
   return (
-    <div className="content audit-page-content">
-      <PageTitle eyebrow="Khusus Owner" title="Jejak audit" />
-      <section className="panel audit-list">
+    <div className="content audit-page-content fit-page">
+      <section className="panel audit-list fit-fill">
         <div className="filters">
           <CalendarPicker
             value={filterDate}
