@@ -290,6 +290,8 @@ export function CashierPage({ currentUser, onNavigate }: {
     offset: number
     removing?: boolean
   } | null>(null)
+  const [lastAdded, setLastAdded] = useState<{ id: string; timestamp: number } | null>(null)
+  const lastAddedTimer = useRef<number | null>(null)
 
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
   // halaman tetap memakai data demo.
@@ -891,7 +893,13 @@ export function CashierPage({ currentUser, onNavigate }: {
               : stokHabis(item.id, item.stock)
                 ? "Stok habis di keranjang"
                 : undefined
-            const tambah = () =>
+            const tambah = () => {
+              setLastAdded({ id: item.id, timestamp: Date.now() })
+              if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
+              lastAddedTimer.current = window.setTimeout(() => {
+                setLastAdded((cur) => (cur?.id === item.id ? null : cur))
+              }, 600)
+
               setCart((c) => {
                 const found = c.find(
                   (x) => x.id === item.id && x.barber === selectedBarber,
@@ -911,16 +919,34 @@ export function CashierPage({ currentUser, onNavigate }: {
                     ]
                 return groupCartByBarber(updated)
               })
+            }
+            const isJustAdded = lastAdded?.id === item.id
             return (
               <button
                 type="button"
-                className={`catalog-item ${tidakBisa ? "disabled" : ""}`}
+                className={`catalog-item ${tidakBisa ? "disabled" : ""} ${isJustAdded ? "just-added" : ""}`}
                 key={item.id}
                 title={alasan ?? `Tambah ${item.name} ke keranjang`}
                 disabled={tidakBisa}
                 onClick={tambah}
                 aria-label={`Tambah ${item.name} ke keranjang`}
               >
+                {isJustAdded && (
+                  <>
+                    <span
+                      key={`ripple-${lastAdded.timestamp}`}
+                      className="catalog-click-ripple"
+                      aria-hidden="true"
+                    />
+                    <span
+                      key={`badge-${lastAdded.timestamp}`}
+                      className="catalog-plus-badge"
+                      aria-hidden="true"
+                    >
+                      +1
+                    </span>
+                  </>
+                )}
                 <span className="item-icon">
                   <Icon name={item.type === "Produk" ? "product" : "cashier"} />
                 </span>
@@ -937,10 +963,11 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </small>
                 )}
                 <span
+                  key={isJustAdded ? `add-${lastAdded.timestamp}` : "add-idle"}
                   aria-hidden="true"
-                  className="catalog-add"
+                  className={`catalog-add ${isJustAdded ? "just-added" : ""}`}
                 >
-                  <Icon name="plus" />
+                  <Icon name={isJustAdded ? "check" : "plus"} />
                 </span>
               </button>
             )
