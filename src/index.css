@@ -15824,3 +15824,150 @@ label .search-select-trigger {
     top: 14px;
   }
 }
+
+/* HP/tablet: semua popup tampil di TENGAH layar (bukan menempel di bawah) */
+@media (max-width: 1024px) {
+  .modal-overlay,
+  .modal-overlay.mobile-only-modal {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+  }
+
+  .simple-modal,
+  .reason-dialog,
+  .staff-form,
+  .payment-modal,
+  .product-modal,
+  .mobile-only-modal .transaction-modal-box {
+    width: min(520px, 100%) !important;
+    max-width: 520px !important;
+    max-height: calc(100svh - 32px) !important;
+    margin: auto !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--line) !important;
+    box-shadow: 0 16px 48px rgb(20 17 15 / 24%) !important;
+    animation: modal-pop 160ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .mobile-only-modal .transaction-modal-body {
+    max-height: calc(100svh - 110px) !important;
+  }
+}
+
+@media (max-width: 820px) {
+  /* Keranjang Kasir (HP): kartu di tengah */
+  .cart.cart-sheet-center {
+    inset: 0 !important;
+    margin: auto !important;
+    width: min(520px, calc(100% - 32px)) !important;
+    height: fit-content !important;
+    max-height: calc(100svh - 32px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 16px 48px rgb(20 17 15 / 24%) !important;
+    transform: none;
+  }
+}
+
+@media (min-width: 821px) {
+  .cart.cart-sheet-center {
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+  }
+}
+
+/* ===== Halaman Kapster mengikuti pola Riwayat Transaksi (Raga) ===== */
+/* Judul dari kerangka halaman; isi setinggi layar, jarak 26px 27px, panel terakhir meregang */
+@media (min-width: 1025px) {
+  .workspace:has(> .kapster-dashboard) > .desktop-page-head,
+  .workspace:has(> .my-salary-page) > .desktop-page-head,
+  .workspace:has(> .kapster-product-commission) > .desktop-page-head {
+    display: block;
+    position: static;
+  }
+
+  .workspace:has(> .kapster-dashboard),
+  .workspace:has(> .my-salary-page),
+  .workspace:has(> .kapster-product-commission) {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-shell-kapster .kapster-dashboard,
+  .app-shell-kapster .my-salary-page,
+  .app-shell-kapster .kapster-product-commission {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: min(1280px, 100%);
+    margin: 0 auto;
+    padding: 16px 27px 26px !important;
+    overflow: hidden;
+  }
+
+  .app-shell-kapster .kapster-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .kapster-dashboard-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .kpi-grid {
+    margin-top: 0;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .dashboard-grid {
+    margin-top: 0 !important;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .app-shell-kapster .my-salary-page > .customer-list,
+  .app-shell-kapster .my-salary-page > .kapster-activity-panel .recent-list {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .kapster-dashboard-actions {
+    margin-bottom: 4px;
+  }
+
+  .kapster-dashboard-actions .button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Beranda: tombol Rincian sejajar di baris yang sama dengan judul (kanan atas) */
+  .workspace:has(> .kapster-dashboard) {
+    position: relative;
+  }
+
+  .app-shell-kapster .kapster-dashboard-actions {
+    position: absolute;
+    top: 14px;
+    right: 27px;
+    z-index: 5;
+  }
+
+  .app-shell-kapster .kapster-dashboard {
+    padding-top: 16px !important;
+  }
+
+  /* panel Progres meregang setinggi panel Detail Penjualan */
+  .kapster-dashboard > .dashboard-grid > .kapster-shift-panel {
+    align-self: stretch !important;
+  }
+}

@@ -128,23 +128,6 @@ export function MySalaryPage() {
 
   return (
     <div className="mobile-content my-salary-page">
-      <PageTitle
-        eyebrow="Pendapatan pribadi"
-        title="Gaji Saya"
-        action={
-          <Button
-            className="secondary-button"
-            onClick={() => {
-              fetchData()
-              fetchAktivitas(tanggalAktivitas)
-            }}
-            disabled={loading || loadingAktivitas}
-          >
-            <Icon name="history" /> {loading ? "Memperbarui..." : "Refresh"}
-          </Button>
-        }
-      />
-
       <article className="my-salary-hero">
         <span>Komisi</span>
         <strong>{rupiah(data.totalKomisi)}</strong>

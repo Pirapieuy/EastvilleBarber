@@ -1022,10 +1022,10 @@ export function CashierPage({ currentUser, onNavigate }: {
       />
 
       <aside
-        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[92svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
+        className={`cart cart-sheet-center fixed z-50 flex flex-col overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
           isCartOpen
-            ? "translate-y-0 opacity-100 pointer-events-auto"
-            : "translate-y-full opacity-0 pointer-events-none"
+            ? "scale-100 opacity-100 pointer-events-auto"
+            : "scale-95 opacity-0 pointer-events-none"
         }`}
         role="dialog"
         aria-modal="true"

@@ -10,7 +10,6 @@ import {
 } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { formatTanggal } from "../../utils/tanggal"
 import {
   Button,
   Kpi,
@@ -86,7 +85,6 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   const jam = now.getHours()
   const sapaan =
     jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
-  const hari = formatTanggal(now)
   const layananRows = (aktivitas ?? []).filter((r) => r.type === "Layanan")
   const produkRows = (aktivitas ?? []).filter((r) => r.type === "Produk")
   const jumlahPelanggan = live ? (komisi?.jumlahTransaksi ?? 0) : 5
@@ -117,27 +115,14 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   return (
     <div className="content kapster-dashboard">
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        eyebrow={live ? hari : "Rabu, 29 Oktober 2026"}
-        title={
-          <>
-            <span className="page-title-desktop">
-              Selamat {sapaan}, {firstName}.
-            </span>
-            <span className="page-title-mobile">Beranda</span>
-          </>
-        }
-        action={
-          <div className="page-actions">
-            <Button
-              className="secondary-button"
-              onClick={() => nav("GajiKomisiSaya")}
-            >
-              <Icon name="wallet" /> Rincian Gaji & Kasbon
-            </Button>
-          </div>
-        }
-      />
+      <div className="kapster-dashboard-actions">
+        <Button
+          className="secondary-button"
+          onClick={() => nav("GajiKomisiSaya")}
+        >
+          <Icon name="wallet" /> Rincian Gaji & Kasbon
+        </Button>
+      </div>
       <div className="kpi-grid">
         <Kpi
           icon="people"
