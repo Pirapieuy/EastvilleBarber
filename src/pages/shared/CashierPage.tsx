@@ -289,6 +289,8 @@ export function CashierPage({ currentUser, onNavigate }: {
     offset: number
     removing?: boolean
   } | null>(null)
+  const [lastAdded, setLastAdded] = useState<{ id: string; timestamp: number } | null>(null)
+  const lastAddedTimer = useRef<number | null>(null)
 
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
   // halaman tetap memakai data demo.
@@ -753,10 +755,6 @@ export function CashierPage({ currentUser, onNavigate }: {
   }
 
   const itemCount = cart.reduce((sum, line) => sum + line.qty, 0)
-  const uniqueBarbersInCart = Array.from(
-    new Set(cart.map((l) => l.barber).filter(Boolean)),
-  )
-  const hasMultipleBarbers = uniqueBarbersInCart.length > 1
 
   return (
     <div className="cashier-page">
@@ -895,7 +893,13 @@ export function CashierPage({ currentUser, onNavigate }: {
               : stokHabis(item.id, item.stock)
                 ? "Stok habis di keranjang"
                 : undefined
-            const tambah = () =>
+            const tambah = () => {
+              setLastAdded({ id: item.id, timestamp: Date.now() })
+              if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
+              lastAddedTimer.current = window.setTimeout(() => {
+                setLastAdded((cur) => (cur?.id === item.id ? null : cur))
+              }, 600)
+
               setCart((c) => {
                 const found = c.find(
                   (x) => x.id === item.id && x.barber === selectedBarber,
@@ -915,12 +919,34 @@ export function CashierPage({ currentUser, onNavigate }: {
                     ]
                 return groupCartByBarber(updated)
               })
+            }
+            const isJustAdded = lastAdded?.id === item.id
             return (
-              <div
-                className={`catalog-item ${tidakBisa ? "disabled" : ""}`}
+              <button
+                type="button"
+                className={`catalog-item ${tidakBisa ? "disabled" : ""} ${isJustAdded ? "just-added" : ""}`}
                 key={item.id}
-                title={alasan}
+                title={alasan ?? `Tambah ${item.name} ke keranjang`}
+                disabled={tidakBisa}
+                onClick={tambah}
+                aria-label={`Tambah ${item.name} ke keranjang`}
               >
+                {isJustAdded && (
+                  <>
+                    <span
+                      key={`ripple-${lastAdded.timestamp}`}
+                      className="catalog-click-ripple"
+                      aria-hidden="true"
+                    />
+                    <span
+                      key={`badge-${lastAdded.timestamp}`}
+                      className="catalog-plus-badge"
+                      aria-hidden="true"
+                    >
+                      +1
+                    </span>
+                  </>
+                )}
                 <span className="item-icon">
                   <Icon name={item.type === "Produk" ? "product" : "cashier"} />
                 </span>
@@ -936,22 +962,20 @@ export function CashierPage({ currentUser, onNavigate }: {
                     {item.consignment && <em>Titipan</em>}
                   </small>
                 )}
-                <Button
-                  aria-label={`Tambah ${item.name} ke keranjang`}
-                  className="catalog-add"
-                  disabled={tidakBisa}
-                  onClick={tambah}
-                  title={alasan ?? "Tambah ke keranjang"}
+                <span
+                  key={isJustAdded ? `add-${lastAdded.timestamp}` : "add-idle"}
+                  aria-hidden="true"
+                  className={`catalog-add ${isJustAdded ? "just-added" : ""}`}
                 >
-                  <Icon name="plus" />
-                </Button>
-              </div>
+                  <Icon name={isJustAdded ? "check" : "plus"} />
+                </span>
+              </button>
             )
           })}
         </div>
       </section>
       {cart.length > 0 && (
-        <div className="fixed bottom-0 inset-x-0 z-40 p-3 bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] md:hidden">
+        <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] min-[821px]:hidden">
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
@@ -988,7 +1012,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       )}
 
       <div
-        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 min-[821px]:hidden ${
           isCartOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -998,7 +1022,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       />
 
       <aside
-        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[92svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain md:static md:w-auto md:max-w-none md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-[var(--bone)] md:shadow-none md:translate-y-0 md:opacity-100 md:pointer-events-auto ${
+        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[92svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
           isCartOpen
             ? "translate-y-0 opacity-100 pointer-events-auto"
             : "translate-y-full opacity-0 pointer-events-none"
@@ -1008,7 +1032,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         aria-label="Pesanan saat ini"
       >
         <div className="cart-panel">
-          <div className="md:hidden mx-auto my-2.5 h-1.5 w-12 rounded-full bg-[var(--line)]" />
+          <div className="min-[821px]:hidden mx-auto my-2.5 h-1.5 w-12 rounded-full bg-[var(--line)]" />
           <div className="cart-tabs flex items-center justify-between">
             <span className="cart-tab-active">
               <Icon name="receipt" /> Pesanan saat ini
@@ -1017,7 +1041,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(false)}
-                className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--bone)] text-[var(--ink)] active:scale-95 transition cursor-pointer"
+                className="min-[821px]:hidden flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--bone)] text-[var(--ink)] active:scale-95 transition cursor-pointer"
                 aria-label="Tutup pesanan"
               >
                 <Icon name="chevron" />
@@ -1051,7 +1075,7 @@ export function CashierPage({ currentUser, onNavigate }: {
 
                 return (
                   <Fragment key={line.lineId}>
-                    {hasMultipleBarbers && isFirstOfBarber && (
+                    {isFirstOfBarber && line.barber && (
                       <div className="cart-barber-group-header">
                         <Icon name="user" />
                         <span>

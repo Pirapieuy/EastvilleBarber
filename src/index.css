@@ -14078,8 +14078,8 @@ summary,
   margin-bottom: 14px;
 }
 
-/* Desktop: header "Pesanan saat ini" dihapus (di mobile tetap ada untuk tombol tutup) */
-@media (min-width: 768px) {
+/* Desktop: header "Pesanan saat ini" dihapus (di mobile & tablet portrait tetap ada untuk tombol tutup) */
+@media (min-width: 821px) {
   .cashier-page .cart-tabs {
     display: none;
   }
@@ -14786,14 +14786,33 @@ label .search-select-trigger {
   margin-top: 14px;
 }
 
-/* Kasir POS: kartu katalog diam, hanya tombol + yang memasukkan ke keranjang */
+/* Kasir POS: seluruh kotak item dapat diklik untuk menambah ke keranjang */
 .catalog-item {
   position: relative;
-  cursor: default;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.catalog-item:hover:not(.disabled) {
-  transform: none;
+.catalog-item:hover:not(.disabled):not(:disabled) {
+  border-color: var(--brass);
+  box-shadow: 0 4px 14px rgba(200, 150, 62, 0.16);
+  transform: translateY(-2px);
+}
+
+.catalog-item:active:not(.disabled):not(:disabled) {
+  transform: scale(0.98);
+}
+
+.catalog-item:hover:not(.disabled):not(:disabled) > .catalog-add {
+  border-color: var(--brass-dark);
+  background: var(--brass-dark);
+  color: #fff;
+}
+
+.catalog-item:active:not(.disabled):not(:disabled) > .catalog-add {
+  transform: scale(0.92);
 }
 
 .catalog-item > .catalog-add {
@@ -14811,18 +14830,138 @@ label .search-select-trigger {
   border-radius: 8px;
   color: var(--ink);
   background: var(--brass);
+  pointer-events: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease, color 0.15s ease;
 }
 
-.catalog-item > .catalog-add:hover:not(:disabled) {
-  border-color: var(--brass-dark);
-  background: var(--brass-dark);
-}
-
-.catalog-item > .catalog-add:disabled {
+.catalog-item.disabled > .catalog-add,
+.catalog-item:disabled > .catalog-add {
   border-color: var(--line);
   color: var(--muted);
   background: transparent;
   cursor: not-allowed;
+}
+
+/* Animasi feedback saat item diklik / ditambahkan ke keranjang */
+.catalog-item.just-added {
+  animation: catalog-item-pop 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+  border-color: var(--brass) !important;
+}
+
+@keyframes catalog-item-pop {
+  0% {
+    transform: scale(0.95);
+  }
+  35% {
+    transform: scale(1.025);
+    box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.35), 0 6px 18px rgba(197, 155, 39, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: var(--shadow);
+  }
+}
+
+.catalog-item.just-added .item-icon {
+  animation: item-icon-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes item-icon-bounce {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+    background: var(--brass-soft);
+    color: var(--brass-dark);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.catalog-add.just-added {
+  background: var(--brass-dark) !important;
+  border-color: var(--brass-dark) !important;
+  color: #ffffff !important;
+  animation: catalog-add-check 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes catalog-add-check {
+  0% {
+    transform: scale(0.7);
+  }
+  45% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.catalog-plus-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 50px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #f7d070;
+  border: 1px solid var(--brass);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  animation: catalog-badge-float 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes catalog-badge-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.15);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-16px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.85);
+  }
+}
+
+.catalog-click-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 80% 80%, rgba(197, 155, 39, 0.32) 0%, rgba(197, 155, 39, 0) 70%);
+  pointer-events: none;
+  animation: catalog-ripple-fade 0.5s ease-out forwards;
+}
+
+@keyframes catalog-ripple-fade {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
 }
 
 .catalog-item > .catalog-add .icon {
