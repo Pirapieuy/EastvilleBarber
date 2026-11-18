@@ -912,10 +912,14 @@ export function CashierPage({ currentUser, onNavigate }: {
                 return groupCartByBarber(updated)
               })
             return (
-              <div
+              <button
+                type="button"
                 className={`catalog-item ${tidakBisa ? "disabled" : ""}`}
                 key={item.id}
-                title={alasan}
+                title={alasan ?? `Tambah ${item.name} ke keranjang`}
+                disabled={tidakBisa}
+                onClick={tambah}
+                aria-label={`Tambah ${item.name} ke keranjang`}
               >
                 <span className="item-icon">
                   <Icon name={item.type === "Produk" ? "product" : "cashier"} />
@@ -932,16 +936,13 @@ export function CashierPage({ currentUser, onNavigate }: {
                     {item.consignment && <em>Titipan</em>}
                   </small>
                 )}
-                <Button
-                  aria-label={`Tambah ${item.name} ke keranjang`}
+                <span
+                  aria-hidden="true"
                   className="catalog-add"
-                  disabled={tidakBisa}
-                  onClick={tambah}
-                  title={alasan ?? "Tambah ke keranjang"}
                 >
                   <Icon name="plus" />
-                </Button>
-              </div>
+                </span>
+              </button>
             )
           })}
         </div>

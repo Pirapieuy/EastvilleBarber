@@ -14576,14 +14576,33 @@ label .search-select-trigger {
   margin-top: 14px;
 }
 
-/* Kasir POS: kartu katalog diam, hanya tombol + yang memasukkan ke keranjang */
+/* Kasir POS: seluruh kotak item dapat diklik untuk menambah ke keranjang */
 .catalog-item {
   position: relative;
-  cursor: default;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.catalog-item:hover:not(.disabled) {
-  transform: none;
+.catalog-item:hover:not(.disabled):not(:disabled) {
+  border-color: var(--brass);
+  box-shadow: 0 4px 14px rgba(200, 150, 62, 0.16);
+  transform: translateY(-2px);
+}
+
+.catalog-item:active:not(.disabled):not(:disabled) {
+  transform: scale(0.98);
+}
+
+.catalog-item:hover:not(.disabled):not(:disabled) > .catalog-add {
+  border-color: var(--brass-dark);
+  background: var(--brass-dark);
+  color: #fff;
+}
+
+.catalog-item:active:not(.disabled):not(:disabled) > .catalog-add {
+  transform: scale(0.92);
 }
 
 .catalog-item > .catalog-add {
@@ -14601,14 +14620,12 @@ label .search-select-trigger {
   border-radius: 8px;
   color: var(--ink);
   background: var(--brass);
+  pointer-events: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease, color 0.15s ease;
 }
 
-.catalog-item > .catalog-add:hover:not(:disabled) {
-  border-color: var(--brass-dark);
-  background: var(--brass-dark);
-}
-
-.catalog-item > .catalog-add:disabled {
+.catalog-item.disabled > .catalog-add,
+.catalog-item:disabled > .catalog-add {
   border-color: var(--line);
   color: var(--muted);
   background: transparent;
