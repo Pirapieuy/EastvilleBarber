@@ -14927,3 +14927,113 @@ label .search-select-trigger {
     max-height: calc(100svh - 96px);
   }
 }
+
+/* Beranda Kapster: rincian penjualan sendiri + tata letak rapi */
+.kapster-sales-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.kapster-sales-summary > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bone);
+}
+
+.kapster-sales-summary small {
+  display: block;
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.kapster-sales-summary strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+  .kapster-sales-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Desktop: Beranda Kapster pas 1 layar, daftar penjualan scroll sendiri */
+@media (min-width: 1025px) {
+  .workspace:has(> .kapster-dashboard) {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .kapster-dashboard {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: min(1280px, 100%);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 27px 22px !important;
+  }
+
+  .kapster-dashboard > .kpi-grid {
+    flex: 0 0 auto;
+    margin-top: 14px;
+  }
+
+  .kapster-dashboard > .dashboard-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .kapster-dashboard .kapster-shift-panel,
+  .kapster-dashboard .kapster-activity-panel {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kapster-dashboard .kapster-activity-panel .recent-list {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 1025px) {
+  .kapster-dashboard > .dashboard-grid > .kapster-shift-panel {
+    align-self: start;
+  }
+
+  .kapster-dashboard > .page-title {
+    padding-top: 4px;
+    margin-bottom: 0;
+  }
+}
+
+/* Beranda Kapster di HP: kartu angka 2x2 supaya tidak memanjang */
+@media (max-width: 700px) {
+  .kapster-dashboard > .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kapster-dashboard .kpi {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 12px;
+  }
+
+  .kapster-dashboard .kpi > strong {
+    font-size: 17px;
+  }
+}

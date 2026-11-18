@@ -93,6 +93,8 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   const produkRows = (aktivitas ?? []).filter((r) => r.type === "Produk")
   const jumlahPelanggan = live ? (komisi?.jumlahTransaksi ?? 0) : 5
   const targetShift = 6
+  const totalLayanan = layananRows.reduce((n, r) => n + r.fee, 0)
+  const totalProduk = produkRows.reduce((n, r) => n + r.fee, 0)
   const persen = Math.min(
     100,
     Math.round((jumlahPelanggan / targetShift) * 100),
@@ -108,6 +110,9 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
         fee: r.fee,
         comm: r.comm,
         type: r.type,
+        qty: r.qty,
+        trx: r.trx,
+        lembur: r.lembur,
       }))
     : null
 
@@ -224,8 +229,24 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
         <section className="panel kapster-activity-panel">
           <PageTitle
             eyebrow="Pengerjaan Anda hari ini"
-            title="Aktivitas Layanan & Produk"
+            title="Detail Penjualan Saya"
           />
+          {live && (
+            <div className="kapster-sales-summary">
+              <div>
+                <small>Total penjualan</small>
+                <strong>{rupiah(totalLayanan + totalProduk)}</strong>
+              </div>
+              <div>
+                <small>Layanan</small>
+                <strong>{rupiah(totalLayanan)}</strong>
+              </div>
+              <div>
+                <small>Produk</small>
+                <strong>{rupiah(totalProduk)}</strong>
+              </div>
+            </div>
+          )}
           <div className="recent-list">
             {(
               rows ?? [
@@ -271,9 +292,15 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
                   <Icon name={row.type === "Produk" ? "product" : "cashier"} />
                 </div>
                 <div className="recent-info">
-                  <strong>{row.item}</strong>
+                  <strong>
+                    {row.item}
+                    {"qty" in row && row.qty > 1 ? ` ×${row.qty}` : ""}
+                  </strong>
                   <small>
-                    {row.time} WIB · Total {rupiah(row.fee)}
+                    {row.time} WIB
+                    {"trx" in row && row.trx ? ` · ${row.trx}` : ""}
+                    {"lembur" in row && row.lembur ? " · Lembur" : ""} · Total{" "}
+                    {rupiah(row.fee)}
                   </small>
                 </div>
                 <div className="recent-amount">
