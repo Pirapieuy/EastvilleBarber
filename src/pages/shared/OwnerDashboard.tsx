@@ -142,7 +142,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
 
   if (punyaToken && !liveData && liveError) {
     return (
-      <div className="content">
+      <div className="content owner-dashboard-page">
         <DemoNotice live={false} error={liveError} />
         <p>Beranda gagal dimuat: {liveError}</p>
         <Button
@@ -156,7 +156,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   }
 
   return (
-    <div className="content">
+    <div className="content owner-dashboard-page">
       <DemoNotice live={Boolean(liveData)} error={liveError} />
 
       <PageTitle
@@ -216,17 +216,10 @@ export function OwnerDashboard({ onNavigate, navigate }: {
         />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr)",
-          gap: 16,
-          marginTop: 16,
-        }}
-      >
+      <div className="owner-dashboard-lower-wrap">
         <div className="dashboard-lower-grid">
           {/* Status & Daftar Kapster */}
-          <section className="panel" style={{ padding: 18 }}>
+          <section className="panel owner-attendance-panel" style={{ padding: 18 }}>
             <div
               style={{
                 display: "flex",
@@ -247,7 +240,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
               </span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="owner-attendance-list" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {kapsterList.map((k) => {
                 const isLibur = k.jamMasuk === "-"
                 return (
