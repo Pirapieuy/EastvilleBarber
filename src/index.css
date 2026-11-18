@@ -14905,8 +14905,9 @@ label .search-select-trigger {
     padding-top: 56px;
   }
 
+  /* Blok kapster+tab+cari ikut menggulir (tidak menempel), supaya layar kecil tidak tertutup */
   .cashier-page .catalog-sticky {
-    top: 56px;
+    position: static;
     padding-top: 12px;
   }
 }

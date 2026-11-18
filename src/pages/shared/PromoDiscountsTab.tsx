@@ -329,7 +329,7 @@ export function PromoDiscountsTab() {
             style={{ maxWidth: 460 }}
           >
             <header>
-              <h2>{editingId ? "Edit Diskon Event" : "Tambah Diskon Event"}</h2>
+              <h2>{editingId ? "Ubah Diskon Event" : "Tambah Diskon Event"}</h2>
             </header>
 
             {error && (

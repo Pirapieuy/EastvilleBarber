@@ -100,7 +100,7 @@ export function ReceiptView({
       <div className="flow-toolbar">
         {onEdit ? (
           <Button className="secondary-button" onClick={onEdit}>
-            <Icon name="pencil" /> Edit
+            <Icon name="pencil" /> Ubah
           </Button>
         ) : (
           <Button className="primary-button" onClick={onClose}>

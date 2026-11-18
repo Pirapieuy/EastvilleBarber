@@ -341,7 +341,7 @@ export function EditTransactionModal({
         <header>
           <div>
             <p className="eyebrow">Koreksi Transaksi</p>
-            <h2>Edit Nota {transaction.id}</h2>
+            <h2>Ubah Nota {transaction.id}</h2>
           </div>
           <Button onClick={onClose} disabled={saving} aria-label="Tutup">
             <Icon name="close" />
@@ -671,7 +671,7 @@ function TransactionDetailBody({
             </Button>
             {canEdit && onEdit && (
               <Button className="secondary-button" onClick={onEdit}>
-                <Icon name="pencil" /> Edit Transaksi
+                <Icon name="pencil" /> Ubah Transaksi
               </Button>
             )}
           </div>

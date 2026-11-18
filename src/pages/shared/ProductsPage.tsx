@@ -429,7 +429,7 @@ export function ProductsPage({ embedded = false }: {
                 <p className="eyebrow">Pengaturan produk</p>
                 <h2>
                   {editingCode
-                    ? "Edit Data Produk & Komisi"
+                    ? "Ubah Data Produk & Komisi"
                     : "Tambah Produk Baru"}
                 </h2>
               </div>
