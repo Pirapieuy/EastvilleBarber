@@ -15248,3 +15248,45 @@ label .search-select-trigger {
     font-size: 17px;
   }
 }
+
+/* Halaman Kapster di laptop: pakai lebar layar, 2 kolom, tanpa kolom sempit di tengah */
+@media (min-width: 1025px) {
+  .app-shell-kapster .my-salary-page {
+    width: min(1280px, 100%);
+    padding: 24px 27px 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    column-gap: 14px;
+    row-gap: 12px;
+    align-items: start;
+  }
+
+  .app-shell-kapster .my-salary-page > .page-title {
+    grid-column: 1 / -1;
+  }
+
+  .app-shell-kapster .my-salary-page > .my-salary-hero,
+  .app-shell-kapster .my-salary-page > .salary-breakdown,
+  .app-shell-kapster .my-salary-page > .customer-list {
+    grid-column: 1;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-activity-panel {
+    grid-column: 2;
+    grid-row: 2 / span 4;
+    margin-top: 0 !important;
+  }
+
+  .app-shell-kapster .my-salary-page > .customer-list {
+    max-height: 240px;
+  }
+
+  .app-shell-kapster .kapster-product-commission {
+    width: min(1280px, 100%);
+    padding: 24px 27px 28px;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .page-title {
+    margin-bottom: 12px;
+  }
+}

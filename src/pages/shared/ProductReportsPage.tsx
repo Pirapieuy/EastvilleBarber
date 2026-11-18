@@ -470,6 +470,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
           </div>
         )}
         <DemoNotice live={live} error={liveError} />
+        <PageTitle eyebrow="Pendapatan pribadi" title="Komisi Produk Saya" />
         <div className="segmented full">
           {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
             <Button
