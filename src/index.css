@@ -15999,3 +15999,68 @@ label .search-select-trigger {
     animation: none;
   }
 }
+
+/* ===== Pola halaman setinggi layar (seperti Riwayat Transaksi) =====
+   Pakai: class "fit-page" di .content, tombol aksi di .fit-page-actions,
+   panel terakhir diberi "fit-fill" supaya meregang dan scroll sendiri. */
+.fit-page-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 1024px) {
+  .fit-page-actions .button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1025px) {
+  .workspace:has(> .fit-page) {
+    position: relative;
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .workspace:has(> .fit-page) > .desktop-page-head {
+    display: block;
+    position: static;
+    flex: 0 0 auto;
+  }
+
+  .workspace > .content.fit-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: min(1280px, 100%);
+    margin: 0 auto;
+    padding: 16px 27px 26px !important;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .fit-page > .kpi-grid {
+    margin-top: 0;
+  }
+
+  /* .content jadi acuan posisi; naik ke baris judul kerangka (±52px di atasnya) */
+  .fit-page-actions {
+    position: absolute;
+    top: -38px;
+    right: 27px;
+    z-index: 5;
+    margin: 0;
+  }
+
+  .fit-page > .fit-fill {
+    flex: 1 1 0;
+    min-height: 0;
+    margin-top: 0 !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
