@@ -724,36 +724,6 @@ export function CashierPage({ currentUser, onNavigate }: {
     setKodeError("")
   }
 
-  /** Ganti kapster untuk baris item tertentu di keranjang */
-  function changeLineBarber(lineId: string, newBarber: string) {
-    setCart((current) => {
-      const target = current.find((x) => x.lineId === lineId)
-      if (!target || target.barber === newBarber) return current
-
-      const existing = current.find(
-        (x) => x.id === target.id && x.barber === newBarber && x.lineId !== lineId,
-      )
-
-      let updated: CartLine[]
-      if (existing) {
-        updated = current
-          .filter((x) => x.lineId !== lineId)
-          .map((x) =>
-            x.lineId === existing.lineId
-              ? { ...x, qty: x.qty + target.qty }
-              : x,
-          )
-      } else {
-        updated = current.map((x) =>
-          x.lineId === lineId
-            ? { ...x, barber: newBarber, lineId: `${x.id}-${newBarber}` }
-            : x,
-        )
-      }
-      return groupCartByBarber(updated)
-    })
-  }
-
   /** Atur jumlah item langsung (ketik); produk dibatasi sisa stok. */
   function setLineQty(line: CartLine, raw: string) {
     const digits = raw.replace(/\D/g, "")
@@ -1028,7 +998,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       />
 
       <aside
-        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[88svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain md:static md:w-auto md:max-w-none md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-[var(--bone)] md:shadow-none md:translate-y-0 md:opacity-100 md:pointer-events-auto ${
+        className={`cart fixed inset-x-0 bottom-0 z-50 flex w-full max-w-full max-h-[92svh] flex-col overflow-y-auto rounded-t-2xl border-t border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain md:static md:w-auto md:max-w-none md:inset-auto md:z-auto md:max-h-none md:overflow-visible md:rounded-none md:border-0 md:bg-[var(--bone)] md:shadow-none md:translate-y-0 md:opacity-100 md:pointer-events-auto ${
           isCartOpen
             ? "translate-y-0 opacity-100 pointer-events-auto"
             : "translate-y-full opacity-0 pointer-events-none"
@@ -1186,31 +1156,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                   >
                     <span className="cart-line-title">
                       <strong>{line.name}</strong>
-                      <div className="cart-line-meta">
-                        {line.barber && (
-                          <label
-                            className="cart-line-kapster"
-                            title="Kapster untuk layanan ini (ketuk untuk mengubah)"
-                          >
-                            <Icon name="user" />
-                            <select
-                              aria-label={`Kapster untuk ${line.name}`}
-                              onChange={(e) =>
-                                changeLineBarber(line.lineId, e.target.value)
-                              }
-                              onClick={(e) => e.stopPropagation()}
-                              value={line.barber}
-                            >
-                              {barberList.map((b) => (
-                                <option key={b.name} value={b.name}>
-                                  {b.name}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        )}
-                        <small>{rupiah(line.price)}</small>
-                      </div>
+                      <small>{rupiah(line.price)}</small>
                     </span>
                     <div className="stepper">
                       <Button
