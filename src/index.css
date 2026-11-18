@@ -16309,3 +16309,24 @@ label .search-select-trigger {
     display: block !important;
   }
 }
+
+/* Riwayat (laptop): tanggal & kapster lebar tetap di kiri, pilihan cara bayar di kanan sejajar panel detail */
+@media (min-width: 1025px) {
+  .history-page-content .filters {
+    flex-wrap: nowrap;
+  }
+
+  .history-page-content .filters .calendar-picker-wrapper {
+    flex: 0 0 auto;
+    min-width: 200px;
+  }
+
+  .history-page-content .filters .search-select.history-kapster-select {
+    flex: 0 1 260px;
+    min-width: 200px;
+  }
+
+  .history-page-content .filters .history-method-filter {
+    margin-left: auto;
+  }
+}
