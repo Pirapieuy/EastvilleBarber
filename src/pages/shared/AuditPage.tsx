@@ -60,6 +60,7 @@ const AKSI_MAP: Record<string, string> = {
   TRANSAKSI: "Transaksi",
   REKAP_MANUAL: "Rekap Manual",
   VOID_TRANSAKSI: "Batal Transaksi",
+  EDIT_TRANSAKSI: "Ubah Transaksi",
   PULIHKAN_TRANSAKSI: "Pulihkan Transaksi",
   PENGELUARAN: "Pengeluaran",
   BATAL_PENGELUARAN: "Batal Pengeluaran",
