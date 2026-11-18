@@ -13960,8 +13960,8 @@ summary,
   margin-bottom: 14px;
 }
 
-/* Desktop: header "Pesanan saat ini" dihapus (di mobile tetap ada untuk tombol tutup) */
-@media (min-width: 768px) {
+/* Desktop: header "Pesanan saat ini" dihapus (di mobile & tablet portrait tetap ada untuk tombol tutup) */
+@media (min-width: 821px) {
   .cashier-page .cart-tabs {
     display: none;
   }
