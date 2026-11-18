@@ -894,10 +894,10 @@ export function CashierPage({ currentUser, onNavigate }: {
                 ? "Stok habis di keranjang"
                 : undefined
             const tambah = () => {
-              setLastAdded({ id: item.id, timestamp: Date.now() })
+              setLastAdded({ id: String(item.id), timestamp: Date.now() })
               if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
               lastAddedTimer.current = window.setTimeout(() => {
-                setLastAdded((cur) => (cur?.id === item.id ? null : cur))
+                setLastAdded((cur) => (cur?.id === String(item.id) ? null : cur))
               }, 600)
 
               setCart((c) => {
