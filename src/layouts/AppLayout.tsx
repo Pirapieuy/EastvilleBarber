@@ -41,7 +41,7 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   MasterProduk: "Layanan & Produk",
   products: "Layanan & Produk",
   TimEastville: "Tim Eastville",
-  team: "Tim",
+  team: "Tim Eastville",
   GajiKasbon: "Gaji & Kasbon",
   payroll: "Gaji & Kasbon",
   GajiKomisiSaya: "Gaji & Komisi Saya",
@@ -72,12 +72,6 @@ const PAGE_TITLE_MAP: Record<string, string> = {
 function getSapaan() {
   const jam = new Date().getHours()
   return jam < 11 ? "pagi" : jam < 15 ? "siang" : jam < 18 ? "sore" : "malam"
-}
-
-// Judul laptop yang tetap memakai nama lama halamannya (menu & navbar HP tidak berubah)
-const DESKTOP_TITLE_OVERRIDE: Record<string, string> = {
-  GajiKomisiSaya: "Gaji Saya",
-  "my-salary": "Gaji Saya",
 }
 
 export function AppLayout({
@@ -180,7 +174,7 @@ export function AppLayout({
           <div className="mobile-navbar-spacer" />
         </header>
         <div className="desktop-page-head">
-          <h1>{DESKTOP_TITLE_OVERRIDE[activePage] ?? pageTitle}</h1>
+          <h1 key={activePage}>{pageTitle}</h1>
         </div>
         {children}
       </main>

@@ -46,3 +46,18 @@ Backend aktif ada di `supabase/`, BUKAN di `backend/` (Google Apps Script lama, 
 - Mengubah frontend saja (halaman, CSS) tidak perlu menyentuh `supabase/`.
 - Mengubah backend: edit file di `supabase/functions/api/` (dan `schema.sql` bila tabel berubah), commit, lalu minta Rania men-deploy. Jangan menjalankan perubahan database ke project produksi tanpa izin.
 - Tabel dikunci RLS; browser tidak boleh membaca tabel langsung. Jangan menaruh `service_role` key di kode, `.env`, atau git.
+
+## Skill & aturan tampilan
+
+**Skill** ada di `.claude/skills/<nama>/SKILL.md` (Claude Code membacanya otomatis). Agent lain (Codex, Cursor, Copilot, Gemini): buka file `SKILL.md` yang sesuai sebelum mengerjakan, jangan baca semuanya sekaligus.
+- UI/tampilan: `frontend-design`, `ui-ux-pro-max`
+- Bug: `systematic-debugging`, `diagnosing-bugs`
+- Sebelum bilang selesai: `verification-before-completion` (jalankan `npx tsc --noEmit -p .` dan `npx vite build`, lihat hasilnya di browser)
+- Uji browser: `webapp-testing`; tinjau kode: `code-review`; cari skill baru: `find-skills`
+
+**Aturan tampilan (laptop ≥1025px)**
+- Judul halaman = nama menu di sidebar (diatur di `PAGE_TITLE_MAP`, `src/layouts/AppLayout.tsx`). Halaman tidak membuat judul sendiri.
+- Contoh pola yang benar: Riwayat Transaksi. Halaman setinggi layar, hanya daftar/panel yang scroll sendiri, panel terakhir meregang ke bawah, jarak 26px 27px.
+- Saat memuat atau gagal memuat: hanya spinner/pesan di tengah (`LoadingState`, `ErrorState`), tanpa judul/tab.
+- Popup di HP/tablet: kartu di tengah, bukan menempel di bawah.
+- Tombol minimal 44px dan teks minimal 14px di laptop; HP tidak diubah.
