@@ -239,7 +239,7 @@ export function ServicesPage({ embedded = false }: {
         </Button>
       </div>
 
-      <section className="panel service-list">
+      <section className="panel service-list fit-fill">
         <div className="filters">
           <div className="search">
             <Icon name="search" />
