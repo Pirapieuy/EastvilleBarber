@@ -176,13 +176,8 @@ export function BackupPage() {
   const terakhir = backups[0]
 
   return (
-    <div className="content">
+    <div className="content fit-page">
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        className="backup-page-title"
-        eyebrow="Keamanan data"
-        title="Backup"
-      />
       <section className="backup-status-grid">
         <article className="backup-hero">
           <span className="backup-icon">
@@ -240,7 +235,7 @@ export function BackupPage() {
           {backingUp ? "Membuat backup..." : "Backup sekarang"}
         </Button>
       </section>
-      <section className="panel backup-list">
+      <section className="panel backup-list fit-fill">
         <PageTitle eyebrow="Arsip tersimpan" title="Daftar backup" />
         <div className="backup-head">
           <span>Nama backup</span>

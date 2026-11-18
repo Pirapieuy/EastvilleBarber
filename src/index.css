@@ -16031,7 +16031,8 @@ label .search-select-trigger {
     flex: 0 0 auto;
   }
 
-  .workspace > .content.fit-page {
+  .workspace > .content.fit-page,
+  .workspace > .mobile-content.fit-page {
     flex: 1 1 auto;
     min-height: 0;
     width: min(1280px, 100%);
