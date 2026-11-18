@@ -3,8 +3,7 @@ import { Icon } from "../../components/common/Icon"
 import {
   Button,
   LoadingState,
-  rupiah,
-} from "../../components/common/UI"
+  rupiah, ErrorState } from "../../components/common/UI"
 import { AppUser } from "../../types"
 import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
@@ -634,10 +633,11 @@ export function CashierPage({ currentUser, onNavigate }: {
     }
     return (
       <div className="content">
-        <div className="payment-result danger" role="alert">
-          <span>Data kasir gagal dimuat: {liveError}</span>
-          <Button onClick={() => setReloadKey((k) => k + 1)}>Coba lagi</Button>
-        </div>
+        <ErrorState
+          title="Data kasir gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }

@@ -9,8 +9,7 @@ import {
   Button,
   CalendarPicker,
   LoadingState,
-  rupiah,
-} from "../../components/common/UI"
+  rupiah, ErrorState } from "../../components/common/UI"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 interface ManualItem {
@@ -366,10 +365,11 @@ export function ManualPage() {
   if (Boolean(getToken()) && !live && liveError) {
     return (
       <div className="content narrow manual-page">
-        <div className="payment-result danger" role="alert">
-          <span>Data Input Manual gagal dimuat: {liveError}</span>
-          <Button onClick={() => window.location.reload()}>Coba lagi</Button>
-        </div>
+        <ErrorState
+          title="Data Input Manual gagal dimuat"
+          message={liveError}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     )
   }

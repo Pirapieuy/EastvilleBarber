@@ -11,6 +11,7 @@ import {
   MonthPicker,
   PageTitle,
   rupiah,
+  ErrorState,
 } from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
 import {
@@ -434,14 +435,11 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   if (getToken() && !live && liveError) {
     return (
       <div className="content">
-        <DemoNotice live={live} error={liveError} />
-        <p>Laporan produk gagal dimuat: {liveError}</p>
-        <Button
-          className="primary-button"
-          onClick={() => setReloadKey((k) => k + 1)}
-        >
-          Coba lagi
-        </Button>
+        <ErrorState
+          title="Laporan produk gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }

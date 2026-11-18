@@ -20,6 +20,7 @@ import {
   MonthPicker,
   PageTitle,
   rupiah,
+  ErrorState,
 } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
 import {
@@ -325,14 +326,11 @@ export function ReportsPage({ currentUser, role }: {
   if (gagalMuat) {
     return (
       <div className="content">
-        <DemoNotice live={live} error={liveError} />
-        <p>Laporan gagal dimuat: {liveError}</p>
-        <Button
-          className="primary-button"
-          onClick={() => setReloadKey((k) => k + 1)}
-        >
-          Coba lagi
-        </Button>
+        <ErrorState
+          title="Laporan gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }

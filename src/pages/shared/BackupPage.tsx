@@ -2,7 +2,9 @@ import { useEffect, useState } from "react"
 import { apiBackup, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, PageTitle } from "../../components/common/UI"
+import { Button, LoadingState, PageTitle,
+  ErrorState,
+} from "../../components/common/UI"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 interface BackupRow {
@@ -162,14 +164,11 @@ export function BackupPage() {
   if (Boolean(getToken()) && !live && liveError) {
     return (
       <div className="content">
-        <DemoNotice live={false} error={liveError} />
-        <p>Daftar backup gagal dimuat: {liveError}</p>
-        <Button
-          className="primary-button"
-          onClick={() => setReloadKey((k) => k + 1)}
-        >
-          Coba lagi
-        </Button>
+        <ErrorState
+          title="Daftar backup gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }

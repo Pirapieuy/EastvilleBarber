@@ -114,6 +114,33 @@ export function LoadingState({
   )
 }
 
+export function ErrorState({
+  title,
+  message,
+  onRetry,
+}: {
+  title: string
+  message?: string
+  onRetry?: () => void
+}) {
+  const ramah =
+    message && /failed to fetch|networkerror|gagal terhubung/i.test(message)
+      ? "Tidak bisa terhubung ke server. Periksa koneksi internet lalu coba lagi."
+      : message
+  return (
+    <div className="error-state" role="alert">
+      <span className="error-state-icon" aria-hidden="true">!</span>
+      <strong>{title}</strong>
+      {ramah && <p>{ramah}</p>}
+      {onRetry && (
+        <Button className="primary-button" onClick={onRetry}>
+          Coba lagi
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function Kpi({
   icon,
   label,

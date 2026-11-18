@@ -7,6 +7,7 @@ import {
   LoadingState,
   PageTitle,
   rupiah,
+  ErrorState,
 } from "../../components/common/UI"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
@@ -259,15 +260,12 @@ export function ProductsPage({ embedded = false }: {
 
   if (getToken() && !live && liveError) {
     return (
-      <div className="content">
-        <DemoNotice live={live} error={liveError} />
-        <p>Data produk gagal dimuat: {liveError}</p>
-        <Button
-          className="primary-button"
-          onClick={() => setReloadKey((k) => k + 1)}
-        >
-          Coba lagi
-        </Button>
+      <div className={embedded ? "catalog-embedded-view" : "content"}>
+        <ErrorState
+          title="Data produk gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }

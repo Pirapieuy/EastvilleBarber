@@ -15290,3 +15290,199 @@ label .search-select-trigger {
     margin-bottom: 12px;
   }
 }
+
+/* Loading: hanya spinner + teks, di tengah area kerja */
+.content:has(> .loading-state:only-child),
+.mobile-content:has(> .loading-state:only-child) {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.content > .loading-state:only-child,
+.mobile-content > .loading-state:only-child {
+  min-height: 0;
+}
+
+/* Gagal memuat: kartu di tengah dengan tombol normal */
+.content:has(> .error-state:only-child),
+.mobile-content:has(> .error-state:only-child) {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.error-state {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 24px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.error-state-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #8f2d25;
+  background: #f8e3e0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.error-state strong {
+  font-size: 17px;
+}
+
+.error-state p {
+  color: var(--slate);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.error-state .button {
+  margin-top: 8px;
+  min-height: 44px;
+  padding: 0 22px;
+  font-size: 14px;
+}
+
+/* Laptop: header semua halaman Kapster seragam (tinggi, posisi, ukuran judul) */
+@media (min-width: 1025px) {
+  .app-shell-kapster .kapster-dashboard,
+  .app-shell-kapster .my-salary-page,
+  .app-shell-kapster .kapster-product-commission {
+    width: min(1280px, 100%);
+    padding: 24px 27px 28px !important;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .page-title,
+  .app-shell-kapster .my-salary-page > .page-title,
+  .app-shell-kapster .kapster-product-commission > .page-title {
+    min-height: 48px;
+    align-items: center;
+    margin: 0 0 14px;
+    padding: 0;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .page-title h2,
+  .app-shell-kapster .my-salary-page > .page-title h2,
+  .app-shell-kapster .kapster-product-commission > .page-title h2 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .app-shell-kapster .kapster-dashboard > .kpi-grid {
+    margin-top: 0;
+  }
+
+  /* Kalender di Rincian Transaksi tidak boleh terpotong panel */
+  .app-shell-kapster .my-salary-page > .kapster-activity-panel {
+    overflow: visible;
+  }
+
+  /* Komisi Produk Saya: Harian/Mingguan/Bulanan + tanggal dalam 1 baris */
+  .app-shell-kapster .kapster-product-commission {
+    display: grid;
+    grid-template-columns: 420px 300px minmax(0, 1fr);
+    justify-content: start;
+    column-gap: 12px;
+    row-gap: 12px;
+    align-content: start;
+  }
+
+  .app-shell-kapster .kapster-product-commission > * {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .segmented {
+    grid-column: 1;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .commission-month-shell {
+    grid-column: 2;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .commission-month-shell .calendar-picker-wrapper,
+  .app-shell-kapster .kapster-product-commission > .commission-month-shell .calendar-picker-btn {
+    width: 100%;
+    height: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+}
+
+/* Laptop: ukuran minimal tombol dan teks (HP tidak diubah) */
+@media (min-width: 1025px) {
+  .primary-button,
+  .secondary-button,
+  .danger-button,
+  .whatsapp-button,
+  .calendar-picker-btn {
+    min-height: 44px;
+    padding-inline: 18px;
+    font-size: 14px;
+  }
+
+  .text-button,
+  .danger-link {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .segmented button,
+  .segmented .button {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .chip {
+    font-size: 12px;
+  }
+
+  .eyebrow,
+  .kpi small,
+  .comm-label {
+    font-size: 12px;
+  }
+}
+
+/* Katalog (Layanan/Produk): saat memuat atau gagal, tampilkan hanya spinner/pesan di tengah */
+.catalog-page:has(.catalog-embedded-view > .loading-state:only-child),
+.catalog-page:has(.catalog-embedded-view > .error-state:only-child) {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.catalog-page:has(.catalog-embedded-view > .loading-state:only-child) > .catalog-tab-header,
+.catalog-page:has(.catalog-embedded-view > .error-state:only-child) > .catalog-tab-header {
+  display: none;
+}
+
+.catalog-embedded-view > .loading-state:only-child {
+  min-height: 0;
+}
+
+.catalog-page > .catalog-embedded-view:has(> .loading-state:only-child),
+.catalog-page > .catalog-embedded-view:has(> .error-state:only-child) {
+  width: 100%;
+  display: grid;
+  place-items: center;
+}

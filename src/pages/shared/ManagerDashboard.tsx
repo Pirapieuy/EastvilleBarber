@@ -15,6 +15,7 @@ import {
   Kpi,
   PageTitle,
   rupiah,
+  ErrorState,
 } from "../../components/common/UI"
 import { TANGGAL_MULAI } from "../../utils/tanggal"
 
@@ -144,14 +145,11 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
   if (punyaToken && !liveData && liveError) {
     return (
       <div className="content">
-        <DemoNotice live={false} error={liveError} />
-        <p>Beranda gagal dimuat: {liveError}</p>
-        <Button
-          className="primary-button"
-          onClick={() => setReloadKey((k) => k + 1)}
-        >
-          Coba lagi
-        </Button>
+        <ErrorState
+          title="Beranda gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }

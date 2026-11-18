@@ -5,8 +5,7 @@ import {
   CalendarPicker,
   LoadingState,
   PageTitle,
-  rupiah,
-} from "../../components/common/UI"
+  rupiah, ErrorState } from "../../components/common/UI"
 import {
   AktivitasKapster,
   apiGaji,
@@ -118,11 +117,11 @@ export function MySalaryPage() {
   if (!data) {
     return (
       <div className="mobile-content my-salary-page">
-        <PageTitle eyebrow="Pendapatan pribadi" title="Gaji Saya" />
-        <p>Data gaji gagal dimuat: {error}</p>
-        <Button className="primary-button" onClick={fetchData}>
-          Coba lagi
-        </Button>
+        <ErrorState
+          title="Data gaji gagal dimuat"
+          message={error}
+          onRetry={fetchData}
+        />
       </div>
     )
   }

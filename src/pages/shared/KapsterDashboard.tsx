@@ -17,6 +17,7 @@ import {
   LoadingState,
   PageTitle,
   rupiah,
+  ErrorState,
 } from "../../components/common/UI"
 import { AppUser } from "../../types"
 
@@ -65,14 +66,11 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
   if (Boolean(getToken()) && !live && liveError) {
     return (
       <div className="content">
-        <DemoNotice live={false} error={liveError} />
-        <p>Beranda gagal dimuat: {liveError}</p>
-        <Button
-          className="primary-button"
-          onClick={() => setReloadKey((k) => k + 1)}
-        >
-          Coba lagi
-        </Button>
+        <ErrorState
+          title="Beranda gagal dimuat"
+          message={liveError}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       </div>
     )
   }
