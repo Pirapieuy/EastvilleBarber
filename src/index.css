@@ -15747,3 +15747,80 @@ label .search-select-trigger {
     margin-bottom: 0 !important;
   }
 }
+
+/* Laptop: Gaji Saya & Komisi Produk Saya memakai struktur sama dengan halaman lain
+   (judul h1 dari kerangka halaman + isi di bawahnya), bukan judul sendiri */
+@media (min-width: 1025px) {
+  .workspace:has(> .mobile-content.my-salary-page) > .desktop-page-head,
+  .workspace:has(> .mobile-content.kapster-product-commission) > .desktop-page-head {
+    display: block;
+  }
+
+  .workspace:has(> .mobile-content.my-salary-page),
+  .workspace:has(> .mobile-content.kapster-product-commission) {
+    position: relative;
+  }
+
+  .app-shell-kapster .my-salary-page,
+  .app-shell-kapster .kapster-product-commission {
+    padding: 16px 27px 28px !important;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .page-title {
+    display: none;
+  }
+
+  /* judul di sisi kiri sudah dari kerangka; tombol Refresh tetap di kanan atas */
+  .app-shell-kapster .my-salary-page > .page-title {
+    position: absolute;
+    top: 20px;
+    right: 27px;
+    height: auto;
+    min-height: 0;
+    margin: 0 !important;
+    z-index: 5;
+  }
+
+  .app-shell-kapster .my-salary-page > .page-title > div:first-child {
+    display: none;
+  }
+
+  .app-shell-kapster .my-salary-page {
+    row-gap: 14px;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-activity-panel {
+    grid-row: 1 / span 4;
+  }
+
+  .app-shell-kapster .my-salary-page > .my-salary-hero,
+  .app-shell-kapster .my-salary-page > .salary-breakdown,
+  .app-shell-kapster .my-salary-page > .customer-list {
+    grid-column: 1;
+  }
+}
+
+@media (min-width: 1025px) {
+  .app-shell-kapster .kapster-product-commission {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .app-shell-kapster .my-salary-page {
+    grid-template-rows: auto auto 1fr;
+    align-content: stretch;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-activity-panel {
+    grid-row: 1 / span 3;
+  }
+
+  .app-shell-kapster .my-salary-page:not(:has(> .customer-list)) > .salary-breakdown {
+    grid-row: 2 / span 2;
+  }
+}
+
+@media (min-width: 1025px) {
+  .app-shell-kapster .my-salary-page > .page-title {
+    top: 14px;
+  }
+}
