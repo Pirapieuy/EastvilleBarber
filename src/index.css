@@ -3651,7 +3651,7 @@ textarea {
   max-height: 520px;
   overflow-y: auto;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
   scrollbar-gutter: stable;
 }
 
@@ -4641,7 +4641,7 @@ textarea {
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
 }
 
 .modal-close-icon-btn {
@@ -5550,7 +5550,7 @@ textarea {
   margin-inline: 0;
   max-height: 420px;
   overflow: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
@@ -7683,7 +7683,7 @@ textarea {
   margin-top: 11px;
   max-height: 520px;
   overflow-y: auto;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
   position: relative;
 }
 
@@ -9861,7 +9861,7 @@ textarea {
   .product-tx-table-wrap {
     max-height: 56svh !important;
     overflow-y: auto !important;
-    overscroll-behavior-y: contain !important;
+    overscroll-behavior-y: none !important;
   }
 
   .service-list,
@@ -9930,7 +9930,7 @@ textarea {
     max-height: min(360px, 52svh);
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
     box-sizing: border-box;
   }
 
@@ -10174,7 +10174,7 @@ textarea {
     max-height: calc(100svh - 315px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -10971,7 +10971,7 @@ textarea {
   .app-shell-kapster .my-salary-page > .customer-list {
     max-height: max(180px, calc(100svh - 560px));
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -12276,7 +12276,7 @@ summary,
   gap: 6px;
   max-height: 216px;
   overflow-y: auto;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -13411,7 +13411,7 @@ summary,
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   scrollbar-width: thin;
 }
 
@@ -13580,7 +13580,7 @@ summary,
 /* Riwayat: daftar dan detail mengikuti tinggi layar, daftar item hanya ±2,5 baris lalu digulir */
 .detail-items-list {
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   scrollbar-width: none;
 }
 
@@ -14492,7 +14492,7 @@ label .search-select-trigger {
   .history-page-content .transaction-list {
     min-height: 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 
   .history-page-content .desktop-only-detail {
@@ -14523,7 +14523,7 @@ label .search-select-trigger {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-y: auto !important;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 }
 
@@ -15183,7 +15183,7 @@ label .search-select-trigger {
     min-height: 0;
     overflow-y: auto;
     padding-right: 4px;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 }
 
@@ -15200,7 +15200,7 @@ label .search-select-trigger {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 
   .cashier-page .cart-lines {
@@ -15354,7 +15354,7 @@ label .search-select-trigger {
     flex: 1 1 0;
     min-height: 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 }
 
@@ -16062,7 +16062,7 @@ label .search-select-trigger {
     min-height: 0;
     margin-top: 0 !important;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 }
 
@@ -16080,7 +16080,7 @@ label .search-select-trigger {
     flex: 1 1 0;
     min-height: 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
   }
 }
 
@@ -16158,84 +16158,7 @@ label .search-select-trigger {
     flex: 0 1 auto;
     max-height: 70%;
     overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
-
-/* Gaji & Kasbon: satu halaman dua kolom, tiap kolom scroll sendiri (laptop) */
-.payroll-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-
-.payroll-col {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.payroll-col-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.payroll-col-head strong {
-  font: 600 18px/1.2 var(--heading);
-}
-
-@media (min-width: 1025px) {
-  .payroll-split {
-    flex: 1 1 0;
-    min-height: 0;
-    align-items: stretch;
-  }
-
-  .payroll-col {
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 2px;
-  }
-
-  .payroll-col-gaji .salary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .payroll-col-kasbon .kasbon-history-panel {
-    margin-top: 0 !important;
-  }
-}
-
-@media (max-width: 1024px) {
-  .payroll-split {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Kolom kasbon sempit: pakai tampilan kartu, bukan tabel 6 kolom */
-@media (min-width: 1025px) {
-  .payroll-split {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .payroll-col-kasbon .kasbon-desktop-table {
-    display: none;
-  }
-
-  .payroll-col-kasbon .kasbon-mobile-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .payroll-col-kasbon .advance-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overscroll-behavior: none;
   }
 }
 
@@ -16303,5 +16226,107 @@ label .search-select-trigger {
 
   .panel {
     border-radius: 14px;
+  }
+}
+
+/* fit-page-actions mengacu ke .workspace; pastikan semua halaman fit-page punya acuan posisi */
+@media (min-width: 1025px) {
+  .workspace > .fit-page {
+    position: relative;
+  }
+}
+
+@media (min-width: 1025px) {
+  .workspace:has(> .content.owner-dashboard-page) > .owner-dashboard-page {
+    overflow: visible;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* tabel di dalam panel fit-fill yang scroll sendiri; header panel tetap */
+  .fit-fill > .product-tx-table-wrap,
+  .fit-fill > .product-tx-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1025px) {
+  .fit-page > .kpi-grid {
+    margin-bottom: 0 !important;
+  }
+}
+
+.fit-page > .report-subnav-row:empty {
+  display: none;
+}
+
+/* ===== Kontrol filter seragam (laptop): tinggi 44px, huruf 14px, sudut 9px ===== */
+@media (min-width: 1025px) {
+  .search-select-trigger,
+  .calendar-picker-btn,
+  .filters select,
+  .filters .search,
+  .report-toolbar select {
+    min-height: 44px;
+    height: 44px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .search input,
+  .search-select-trigger span {
+    font-size: 14px;
+  }
+
+  /* pilihan segmented (Harian/Mingguan, Semua/Tunai/QRIS, Rp/%) */
+  .segmented {
+    padding: 3px;
+    border-radius: 9px;
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: stretch;
+  }
+
+  .segmented .button {
+    min-height: 38px;
+    border-radius: 7px;
+    font-size: 14px;
+  }
+}
+
+/* Judul dari kerangka harus tampil di laptop untuk halaman-halaman ini. Memakai !important karena
+   saat build, aturan "sembunyikan judul ganda" di atas digabung jadi :is(...) dan spesifisitasnya naik,
+   sehingga menimpa aturan display:block biasa (judul hilang di versi produksi, tampil di server dev). */
+@media (min-width: 1025px) {
+  .workspace:has(> .kapster-dashboard) > .desktop-page-head,
+  .workspace:has(> .my-salary-page) > .desktop-page-head,
+  .workspace:has(> .kapster-product-commission) > .desktop-page-head,
+  .workspace:has(> .mobile-content.attendance-history-page) > .desktop-page-head,
+  .workspace:has(> .fit-page) > .desktop-page-head {
+    display: block !important;
+  }
+}
+
+/* Riwayat (laptop): tanggal & kapster lebar tetap di kiri, pilihan cara bayar di kanan sejajar panel detail */
+@media (min-width: 1025px) {
+  .history-page-content .filters {
+    flex-wrap: nowrap;
+  }
+
+  .history-page-content .filters .calendar-picker-wrapper {
+    flex: 0 0 auto;
+    min-width: 200px;
+  }
+
+  .history-page-content .filters .search-select.history-kapster-select {
+    flex: 0 1 260px;
+    min-width: 200px;
+  }
+
+  .history-page-content .filters .history-method-filter {
+    margin-left: auto;
   }
 }

@@ -593,7 +593,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   // data server otomatis menggantikan saat selesai dimuat.
 
   return (
-    <div className="content">
+    <div className="content fit-page">
       <DemoNotice live={live} error={liveError} />
       <div className="report-toolbar">
         <div className="report-filter-row">
@@ -759,7 +759,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
       <div className="report-subnav-row" style={{ overflowX: "auto" }}></div>
 
       {activeTab === "transaksi" && (
-        <section className="panel product-tx-panel">
+        <section className="panel product-tx-panel fit-fill">
           <div className="product-tx-toolbar">
             <PageTitle
               eyebrow="Rincian Transaksi"
