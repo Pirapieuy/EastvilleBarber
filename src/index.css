@@ -16318,3 +16318,24 @@ label .search-select-trigger {
     overflow: visible;
   }
 }
+
+@media (min-width: 1025px) {
+  /* tabel di dalam panel fit-fill yang scroll sendiri; header panel tetap */
+  .fit-fill > .product-tx-table-wrap,
+  .fit-fill > .product-tx-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none !important;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1025px) {
+  .fit-page > .kpi-grid {
+    margin-bottom: 0 !important;
+  }
+}
+
+.fit-page > .report-subnav-row:empty {
+  display: none;
+}
