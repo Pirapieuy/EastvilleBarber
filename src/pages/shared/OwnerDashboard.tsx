@@ -16,7 +16,6 @@ import {
   Button,
   CalendarPicker,
   Kpi,
-  PageTitle,
   rupiah,
   ErrorState,
 } from "../../components/common/UI"
@@ -154,34 +153,19 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   }
 
   return (
-    <div className="content owner-dashboard-page">
+    <div className="content owner-dashboard-page fit-page">
       <DemoNotice live={Boolean(liveData)} error={liveError} />
 
-      <PageTitle
-        className="owner-dashboard-title"
-        title={
-          <>
-            <span className="page-title-desktop">
-              Ringkasan Operasional Hari Ini
-            </span>
-            <span className="page-title-mobile">
-              Ringkasan Operasional Hari Ini
-            </span>
-          </>
-        }
-        action={
-          <div className="page-actions">
-            <CalendarPicker
-              value={selectedDate}
-              onChange={setSelectedDate}
-              max={todayIso}
-              min={TANGGAL_MULAI}
-              align="right"
-              showToday={false}
-            />
-          </div>
-        }
-      />
+      <div className="fit-page-actions">
+        <CalendarPicker
+          value={selectedDate}
+          onChange={setSelectedDate}
+          max={todayIso}
+          min={TANGGAL_MULAI}
+          align="right"
+          showToday={false}
+        />
+      </div>
 
       <div className="kpi-grid" style={loading ? { opacity: 0.6 } : undefined}>
         <Kpi

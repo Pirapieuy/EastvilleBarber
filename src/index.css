@@ -16305,3 +16305,16 @@ label .search-select-trigger {
     border-radius: 14px;
   }
 }
+
+/* fit-page-actions mengacu ke .workspace; pastikan semua halaman fit-page punya acuan posisi */
+@media (min-width: 1025px) {
+  .workspace > .fit-page {
+    position: relative;
+  }
+}
+
+@media (min-width: 1025px) {
+  .workspace:has(> .content.owner-dashboard-page) > .owner-dashboard-page {
+    overflow: visible;
+  }
+}
