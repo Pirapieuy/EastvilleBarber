@@ -13419,6 +13419,13 @@ summary,
   flex: 0 0 auto;
 }
 
+.owner-dashboard-page .owner-recent-empty {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
 @media (max-width: 1024px) {
   .owner-dashboard-page {
     padding: 66px 14px 14px !important;
