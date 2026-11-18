@@ -1095,7 +1095,6 @@ export function HistoryPage({ currentUser, role }: {
             role="dialog"
             aria-modal="true"
           >
-            <div className="md:hidden mx-auto my-2 h-1.5 w-12 rounded-full bg-[var(--line)]" />
             <div className="transaction-modal-header">
               <div>
                 <p className="eyebrow">Detail Transaksi</p>
