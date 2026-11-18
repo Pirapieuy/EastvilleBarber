@@ -16339,3 +16339,37 @@ label .search-select-trigger {
 .fit-page > .report-subnav-row:empty {
   display: none;
 }
+
+/* ===== Kontrol filter seragam (laptop): tinggi 44px, huruf 14px, sudut 9px ===== */
+@media (min-width: 1025px) {
+  .search-select-trigger,
+  .calendar-picker-btn,
+  .filters select,
+  .filters .search,
+  .report-toolbar select {
+    min-height: 44px;
+    height: 44px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .search input,
+  .search-select-trigger span {
+    font-size: 14px;
+  }
+
+  /* pilihan segmented (Harian/Mingguan, Semua/Tunai/QRIS, Rp/%) */
+  .segmented {
+    padding: 3px;
+    border-radius: 9px;
+    min-height: 44px;
+    box-sizing: border-box;
+    align-items: stretch;
+  }
+
+  .segmented .button {
+    min-height: 38px;
+    border-radius: 7px;
+    font-size: 14px;
+  }
+}
