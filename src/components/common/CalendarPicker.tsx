@@ -179,6 +179,7 @@ export function CalendarPicker({
                   type="button"
                   className="secondary-button"
                   style={{ padding: "4px 8px" }}
+                  data-dir="prev"
                   onClick={handlePrevMonth}
                 >
                   <Icon name="chevron" />
@@ -186,7 +187,8 @@ export function CalendarPicker({
                 <button
                   type="button"
                   className="secondary-button"
-                  style={{ padding: "4px 8px", transform: "rotate(180deg)" }}
+                  style={{ padding: "4px 8px" }}
+                  data-dir="next"
                   onClick={handleNextMonth}
                 >
                   <Icon name="chevron" />
@@ -391,7 +393,8 @@ export function MonthPicker({
                 <button
                   type="button"
                   className="secondary-button"
-                  style={{ padding: "4px 8px", transform: "rotate(180deg)" }}
+                  style={{ padding: "4px 8px" }}
+                  data-dir="next"
                   onClick={(e) => {
                     e.stopPropagation()
                     setYear((y) => y + 1)

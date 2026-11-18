@@ -15625,3 +15625,59 @@ label .search-select-trigger {
   display: grid;
   place-items: center;
 }
+
+/* Panah kalender: kiri = bulan sebelumnya, kanan = bulan berikutnya */
+[data-dir="prev"] .icon {
+  transform: rotate(90deg);
+}
+
+[data-dir="next"] .icon {
+  transform: rotate(-90deg);
+}
+
+/* Laptop: halaman Kapster memenuhi layar, panel terakhir meregang (tanpa area kosong) */
+@media (min-width: 1025px) {
+  .workspace:has(> .kapster-product-commission),
+  .workspace:has(> .my-salary-page) {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-shell-kapster .kapster-product-commission {
+    flex: 1 1 auto;
+    width: min(1280px, 100%);
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    justify-content: stretch;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .segmented,
+  .app-shell-kapster .kapster-product-commission > .commission-month-shell {
+    align-self: stretch;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .panel {
+    align-self: stretch;
+  }
+
+  .app-shell-kapster .my-salary-page {
+    flex: 1 1 auto;
+    grid-template-rows: auto auto auto 1fr;
+    align-items: stretch;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-activity-panel {
+    grid-row: 2 / span 3;
+    align-self: stretch;
+  }
+
+  .app-shell-kapster .my-salary-page > .customer-list {
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .app-shell-kapster .my-salary-page:not(:has(> .customer-list)) > .salary-breakdown {
+    grid-row: 3 / span 2;
+  }
+}

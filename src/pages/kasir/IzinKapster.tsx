@@ -59,6 +59,7 @@ function KalenderBesar({
         <div className="izin-cal-nav">
           <button
             aria-label="Bulan sebelumnya"
+            data-dir="prev"
             disabled={!bisaMundur}
             onClick={() => geser(-1)}
             type="button"
@@ -68,7 +69,7 @@ function KalenderBesar({
           <button
             aria-label="Bulan berikutnya"
             onClick={() => geser(1)}
-            style={{ transform: "rotate(180deg)" }}
+            data-dir="next"
             type="button"
           >
             <Icon name="chevron" />
