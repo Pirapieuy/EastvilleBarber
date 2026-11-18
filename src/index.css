@@ -16238,3 +16238,70 @@ label .search-select-trigger {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ===== HP/tablet: rapikan margin & padding yang menempel/terpotong ===== */
+@media (max-width: 1024px) {
+  /* Jejak Audit: kartu tidak melebihi panel, jarak kiri-kanan sama */
+  .audit-list {
+    overflow-x: hidden;
+  }
+
+  .audit-row {
+    box-sizing: border-box !important;
+    width: auto !important;
+    max-width: calc(100% - 24px) !important;
+    margin: 10px 12px !important;
+  }
+
+  /* Backup: nama file boleh turun baris, tombol aksi di baris sendiri di bawahnya */
+  .backup-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .backup-action-cell {
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .backup-file-name strong {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ===== HP/tablet: satu ritme jarak untuk semua halaman =====
+   samping 14px, atas 14px di bawah navbar (54px), antar blok 12px, bawah 20px */
+@media (max-width: 1024px) {
+  .workspace > .content,
+  .workspace > .mobile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 68px 14px 20px !important;
+    margin: 0 auto;
+  }
+
+  .workspace > .content > *,
+  .workspace > .mobile-content > * {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .workspace > .content > .kpi-grid,
+  .workspace > .mobile-content > .kpi-grid {
+    gap: 12px;
+  }
+
+  /* kartu KPI: isi tidak menempel ke tepi kartu */
+  .kpi {
+    padding: 14px 16px;
+  }
+
+  .panel {
+    border-radius: 14px;
+  }
+}
