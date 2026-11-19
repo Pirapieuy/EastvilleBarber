@@ -189,12 +189,14 @@ export function KasbonKapster() {
                       {k.catatan ? ` · ${k.catatan}` : ""}
                     </small>
                   </div>
-                  <strong className="kasbon-kapster-amount">
-                    {rupiah(k.jumlah)}
-                  </strong>
-                  <i className={`chip ${STATUS_CHIP[k.status] ?? ""}`}>
-                    {STATUS_LABEL[k.status] ?? k.status}
-                  </i>
+                  <div className="kasbon-kapster-meta">
+                    <i className={`chip ${STATUS_CHIP[k.status] ?? ""}`}>
+                      {STATUS_LABEL[k.status] ?? k.status}
+                    </i>
+                    <strong className="kasbon-kapster-amount">
+                      {rupiah(k.jumlah)}
+                    </strong>
+                  </div>
                 </article>
               ))}
             </div>

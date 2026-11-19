@@ -403,8 +403,10 @@ textarea {
 }
 
 .monogram {
+  flex: 0 0 42px;
   width: 42px;
   height: 42px;
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
   border: 1px solid rgb(200 150 62 / 55%);
@@ -2218,6 +2220,20 @@ textarea {
 .workspace:has(> .flow-page) > .desktop-page-head,
 .workspace:has(> .content > .page-title-mobile:first-child) > .desktop-page-head {
   display: none;
+}
+
+@media (min-width: 1025px) {
+  .app-shell:has(.workspace > .flow-page) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell:has(.workspace > .flow-page) .sidebar-wrap {
+    display: none;
+  }
+
+  .app-shell:has(.workspace > .flow-page) .workspace {
+    grid-column: 1;
+  }
 }
 
 @media (min-width: 1025px) {
@@ -5754,12 +5770,12 @@ textarea {
   border-top: 1px dashed var(--line);
 }
 
-.edit-trx-modal > footer {
+.edit-trx-modal form > footer {
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 14px 20px;
+  padding: 14px 20px calc(18px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   background: var(--paper);
 }
@@ -5783,6 +5799,15 @@ textarea {
   .edit-trx-add-box {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  .edit-trx-modal form > footer {
+    gap: 8px;
+    padding: 12px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .edit-trx-modal form > footer .button {
+    min-height: 44px;
   }
 }
 
@@ -14737,7 +14762,7 @@ label .search-select-trigger {
 
 .kasbon-kapster-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
   padding: 12px 14px;
@@ -14765,6 +14790,13 @@ label .search-select-trigger {
   white-space: nowrap;
 }
 
+.kasbon-kapster-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
 @media (max-width: 620px) {
   .kasbon-kapster-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -14772,10 +14804,11 @@ label .search-select-trigger {
 
   .kasbon-kapster-row {
     grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
   }
 
-  .kasbon-kapster-row .chip {
-    grid-column: 1 / -1;
+  .kasbon-kapster-meta {
+    min-width: 0;
   }
 
   .kasbon-kapster-actions .button {
@@ -16023,6 +16056,21 @@ label .search-select-trigger {
     border-radius: 16px !important;
     box-shadow: 0 16px 48px rgb(20 17 15 / 24%) !important;
     transform: none;
+  }
+
+  .cart.cart-sheet-center:has(.cart-lines > .empty) {
+    height: min(360px, calc(100svh - 32px)) !important;
+  }
+
+  .cart.cart-sheet-center .cart-lines:has(> .empty) {
+    display: grid;
+    place-items: center;
+  }
+
+  .cart.cart-sheet-center .cart-lines > .empty {
+    width: 100%;
+    height: auto;
+    min-height: 220px;
   }
 }
 

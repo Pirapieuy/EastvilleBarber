@@ -24,6 +24,35 @@ export type CartLine = CatalogItem & {
   barber: string
 }
 
+type CashierDraft = {
+  selectedBarber: string
+  cart: CartLine[]
+  method: "Tunai" | "QRIS" | "Gabungan"
+  komisiLayanan: "Normal" | "OT"
+  cash: number
+  qrisInput: number
+  splitTunaiInput: number
+  cashReceived: number
+  gabunganDari: "tunai" | "qris"
+  discount: number
+  kodeDiskon: string
+  kodeTerpakai: string
+  discountReason: string
+  appliedDiscountPercent: number | null
+  receipt: boolean
+  invoice?: string
+  isTransactionSaved: boolean
+}
+
+function readCashierDraft(key: string): CashierDraft | null {
+  try {
+    const value = localStorage.getItem(key)
+    return value ? (JSON.parse(value) as CashierDraft) : null
+  } catch {
+    return null
+  }
+}
+
 /** Kelompokkan baris keranjang berdasarkan kapster secara berurutan */
 export function groupCartByBarber(lines: CartLine[]): CartLine[] {
   const order: string[] = []
@@ -52,7 +81,6 @@ export function ReceiptView({
   cash,
   qris,
   change,
-  cashier,
   barber,
   invoice = "INV-291026-0084",
   tanggal,
@@ -94,6 +122,8 @@ export function ReceiptView({
     barber ||
     Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
     "-"
+  const multipleBarbers =
+    new Set(cart.map((line) => line.barber).filter(Boolean)).size > 1
   return (
     <div className="flow-page">
       <div className="flow-toolbar">
@@ -179,10 +209,6 @@ export function ReceiptView({
               <dd>{invoice ?? "Dibuat saat disimpan"}</dd>
             </div>
             <div>
-              <dt>Kasir</dt>
-              <dd>{cashier}</dd>
-            </div>
-            <div>
               <dt>Kapster</dt>
               <dd>{barberName}</dd>
             </div>
@@ -193,7 +219,7 @@ export function ReceiptView({
               <span>
                 <strong>
                   {line.name}
-                  {line.barber ? ` (${line.barber})` : ""}
+                  {multipleBarbers && line.barber ? ` (${line.barber})` : ""}
                 </strong>
                 <small>
                   {line.qty} ×{" "}
@@ -263,26 +289,28 @@ export function CashierPage({ currentUser, onNavigate }: {
   currentUser?: AppUser
   onNavigate?: (page: string) => void
 } = {}) {
+  const draftKey = `eastville_cashier_draft:${currentUser?.id ?? "guest"}`
+  const [draft] = useState(() => readCashierDraft(draftKey))
   const [tab, setTab] = useState<"Layanan" | "Produk">("Layanan")
   const [cari, setCari] = useState("")
-  const [selectedBarber, setSelectedBarber] = useState("")
-  const [cart, setCart] = useState<CartLine[]>([])
-  const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
-  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
-  const [cash, setCash] = useState(0)
-  const [qrisInput, setQrisInput] = useState(0)
-  const [splitTunaiInput, setSplitTunaiInput] = useState(0)
-  const [cashReceived, setCashReceived] = useState(0)
-  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("qris")
-  const [discount, setDiscount] = useState(0)
-  const [kodeDiskon, setKodeDiskon] = useState("")
+  const [selectedBarber, setSelectedBarber] = useState(draft?.selectedBarber ?? "")
+  const [cart, setCart] = useState<CartLine[]>(draft?.cart ?? [])
+  const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">(draft?.method ?? "Tunai")
+  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">(draft?.komisiLayanan ?? "Normal")
+  const [cash, setCash] = useState(draft?.cash ?? 0)
+  const [qrisInput, setQrisInput] = useState(draft?.qrisInput ?? 0)
+  const [splitTunaiInput, setSplitTunaiInput] = useState(draft?.splitTunaiInput ?? 0)
+  const [cashReceived, setCashReceived] = useState(draft?.cashReceived ?? 0)
+  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">(draft?.gabunganDari ?? "qris")
+  const [discount, setDiscount] = useState(draft?.discount ?? 0)
+  const [kodeDiskon, setKodeDiskon] = useState(draft?.kodeDiskon ?? "")
   const [kodeError, setKodeError] = useState("")
   const [kodeChecking, setKodeChecking] = useState(false)
-  const [kodeTerpakai, setKodeTerpakai] = useState("")
-  const [discountReason, setDiscountReason] = useState("")
+  const [kodeTerpakai, setKodeTerpakai] = useState(draft?.kodeTerpakai ?? "")
+  const [discountReason, setDiscountReason] = useState(draft?.discountReason ?? "")
   const [appliedDiscountPercent, setAppliedDiscountPercent] =
-    useState<number | null>(null)
-  const [receipt, setReceipt] = useState(false)
+    useState<number | null>(draft?.appliedDiscountPercent ?? null)
+  const [receipt, setReceipt] = useState(draft?.receipt ?? false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartSwipe, setCartSwipe] = useState<{
     lineId: string
@@ -305,10 +333,10 @@ export function CashierPage({ currentUser, onNavigate }: {
   )
   const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(new Set())
   const [attendanceTarget, setAttendanceTarget] = useState("")
-  const [invoice, setInvoice] = useState<string | undefined>()
+  const [invoice, setInvoice] = useState<string | undefined>(draft?.invoice)
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState("")
-  const [isTransactionSaved, setIsTransactionSaved] = useState(false)
+  const [isTransactionSaved, setIsTransactionSaved] = useState(draft?.isTransactionSaved ?? false)
   const [savingReceipt, setSavingReceipt] = useState(false)
   const [saveReceiptError, setSaveReceiptError] = useState("")
   const [liveError, setLiveError] = useState("")
@@ -333,6 +361,52 @@ export function CashierPage({ currentUser, onNavigate }: {
       if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
     }
   }, [])
+
+  useEffect(() => {
+    if (cart.length === 0 && !receipt && !isTransactionSaved) {
+      localStorage.removeItem(draftKey)
+      return
+    }
+    const value: CashierDraft = {
+      selectedBarber,
+      cart,
+      method,
+      komisiLayanan,
+      cash,
+      qrisInput,
+      splitTunaiInput,
+      cashReceived,
+      gabunganDari,
+      discount,
+      kodeDiskon,
+      kodeTerpakai,
+      discountReason,
+      appliedDiscountPercent,
+      receipt,
+      invoice,
+      isTransactionSaved,
+    }
+    localStorage.setItem(draftKey, JSON.stringify(value))
+  }, [
+    draftKey,
+    selectedBarber,
+    cart,
+    method,
+    komisiLayanan,
+    cash,
+    qrisInput,
+    splitTunaiInput,
+    cashReceived,
+    gabunganDari,
+    discount,
+    kodeDiskon,
+    kodeTerpakai,
+    discountReason,
+    appliedDiscountPercent,
+    receipt,
+    invoice,
+    isTransactionSaved,
+  ])
 
   // Bila seluruh item di keranjang dihapus sampai habis, reset kapster yang dipilih
   // agar kasir harus memilih kapster lagi dan tidak salah kapster pada transaksi berikutnya.
@@ -405,9 +479,6 @@ export function CashierPage({ currentUser, onNavigate }: {
         )
         setAttendedBarbers(present)
         setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
-        setSelectedBarber("")
-        setCart([])
-        setCash(0)
         setLive(true)
       })
       .catch((e) => {
@@ -751,6 +822,9 @@ export function CashierPage({ currentUser, onNavigate }: {
   function clearCart() {
     setSelectedBarber("")
     setCart([])
+    setReceipt(false)
+    setInvoice(undefined)
+    setIsTransactionSaved(false)
     setCash(0)
     setQrisInput(0)
     setSplitTunaiInput(0)
@@ -813,10 +887,8 @@ export function CashierPage({ currentUser, onNavigate }: {
               <Icon name="user" />
             </span>
             <small>Kapster</small>
-            {!selectedBarber ? (
+            {!selectedBarber && (
               <span className="barber-status-badge warn">Wajib Pilih</span>
-            ) : (
-              <span className="barber-status-badge active">{selectedBarber}</span>
             )}
           </div>
           <div className="barber-options">
@@ -1557,12 +1629,12 @@ export function CashierPage({ currentUser, onNavigate }: {
                       </label>
                       <div className="quick-cash">
                         <Button
-                          className={
+                          className={`quick-cash-exact ${
                             cashReceived === tunaiTerpakai ? "active" : ""
-                          }
+                          }`}
                           onClick={() => setCashReceived(tunaiTerpakai)}
                         >
-                          Uang pas ({rupiah(tunaiTerpakai)})
+                          Uang pas
                         </Button>
                         {pecahanCepatGabungan.map((n) => (
                           <Button

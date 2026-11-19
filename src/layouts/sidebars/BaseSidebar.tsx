@@ -68,7 +68,6 @@ export function BaseSidebar({
     <>
       <aside className={`sidebar ${expanded ? "expanded" : "collapsed"}`}>
         <BrandMark
-          isCollapsed={!expanded}
           onClick={onToggleExpanded}
           title={
             expanded

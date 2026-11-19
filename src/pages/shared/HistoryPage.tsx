@@ -343,9 +343,6 @@ export function EditTransactionModal({
             <p className="eyebrow">Koreksi Transaksi</p>
             <h2>Ubah Nota {transaction.id}</h2>
           </div>
-          <Button onClick={onClose} disabled={saving} aria-label="Tutup">
-            <Icon name="close" />
-          </Button>
         </header>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>

@@ -41,11 +41,9 @@ export function Button({
 
 export function BrandMark({
   onClick,
-  isCollapsed = false,
   title,
 }: {
   onClick?: () => void
-  isCollapsed?: boolean
   title?: string
 }) {
   return (
@@ -61,14 +59,6 @@ export function BrandMark({
         <div className="brand-name">BarberBoss</div>
         <div className="brand-caption">Eastville Barbershop</div>
       </div>
-      {onClick && !isCollapsed && (
-        <div
-          className="sidebar-toggle-indicator"
-          title="Klik logo untuk ringkas"
-        >
-          <Icon name="chevron" />
-        </div>
-      )}
     </div>
   )
 }
