@@ -42,10 +42,6 @@
     scrollbar-width: none;
   }
 
-  body::-webkit-scrollbar {
-    display: none;
-  }
-
   button,
   input,
   select,
@@ -57,6 +53,62 @@
   select {
     cursor: pointer;
   }
+}
+
+/* Hilangkan tombol stepper (▲ / ▼) pada seluruh scrollbar */
+*::-webkit-scrollbar-button,
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Scrollbar default yang bersih dan ramping untuk browser WebKit (Chrome, Safari, Edge) */
+*::-webkit-scrollbar,
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+  background: rgba(160, 140, 120, 0.4);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 120, 100, 0.65);
+}
+
+*::-webkit-scrollbar-corner,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Untuk Firefox yang tidak memakai engine webkit */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(160, 140, 120, 0.45) transparent;
+  }
+}
+
+body,
+.catalog {
+  scrollbar-width: none !important;
+}
+
+body::-webkit-scrollbar,
+.catalog::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .icon {
@@ -1126,6 +1178,11 @@ textarea {
   overflow-y: auto;
   margin-top: 24px;
   padding-right: 2px;
+  scrollbar-width: none;
+}
+
+.sidebar nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-nav-scroll {
@@ -2129,8 +2186,8 @@ textarea {
     top: 0;
     left: 0;
     z-index: 10;
-    width: calc((100% - max(340px, 25%)) );
-    padding: 16px 24px 0;
+    width: calc((100% - max(340px, 25%)));
+    padding: 26px 27px 0;
     pointer-events: none;
   }
 
@@ -2139,11 +2196,11 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding-top: 0;
+    padding: 0 0 16px 27px;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
-    padding-top: 58px;
+    padding-top: 68px;
   }
 }
 
@@ -3104,7 +3161,7 @@ textarea {
   flex: 1;
   padding: 10px 12px 12px;
   background: var(--paper);
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
 }
 
 .cart-lines article {
@@ -13412,7 +13469,6 @@ summary,
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
 }
 
 .owner-dashboard-page .owner-recent-head,
@@ -13793,7 +13849,8 @@ summary,
 }
 
 .history-page-content .desktop-only-detail {
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .transaction-modal-body {
@@ -14496,7 +14553,8 @@ label .search-select-trigger {
   }
 
   .history-page-content .desktop-only-detail {
-    overflow: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .history-page-content .desktop-only-detail .detail-pinned {
@@ -15205,7 +15263,7 @@ label .search-select-trigger {
 
   .cashier-page .cart-lines {
     flex: 1 1 auto;
-    min-height: 340px;
+    min-height: 120px;
     max-height: none;
     padding: 10px 14px 12px;
   }
@@ -15221,7 +15279,7 @@ label .search-select-trigger {
 
 @media (min-width: 1025px) and (max-height: 860px) {
   .cashier-page .cart-lines {
-    min-height: 280px;
+    min-height: 90px;
   }
 
   .cashier-page .cart-total > div,
@@ -15876,6 +15934,50 @@ label .search-select-trigger {
     width: auto;
     height: auto;
     border-radius: 0;
+  }
+
+  /* Desktop/tablet landscape: keranjang kasir berbentuk kontainer rounded rapi */
+  .cashier-page .catalog {
+    border-right: 0;
+  }
+
+  .cashier-page .cart {
+    height: 100%;
+    min-height: 0;
+    padding: 16px 20px 16px 14px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background: var(--bone);
+  }
+
+  .cashier-page .cart-panel {
+    height: 100%;
+    min-height: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    background: var(--paper);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .cashier-page .cart-panel::-webkit-scrollbar,
+  .cashier-page .cart-lines::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cashier-page .cart-lines {
+    scrollbar-width: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Margin desktop mengikuti acuan Riwayat Transaksi: 27px kanan, 16px bawah, 14px celah kolom, sejajar header */
+  .cashier-page .cart {
+    padding: 68px 27px 16px 14px;
+    transform: none !important;
   }
 }
 

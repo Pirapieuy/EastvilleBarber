@@ -289,7 +289,11 @@ export function CashierPage({ currentUser, onNavigate }: {
     offset: number
     removing?: boolean
   } | null>(null)
-  const [lastAdded, setLastAdded] = useState<{ id: string; timestamp: number } | null>(null)
+  const [lastAdded, setLastAdded] = useState<{
+    id: string
+    type: "Layanan" | "Produk"
+    timestamp: number
+  } | null>(null)
   const lastAddedTimer = useRef<number | null>(null)
 
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
@@ -323,6 +327,34 @@ export function CashierPage({ currentUser, onNavigate }: {
   )
   const punyaToken = !!getToken()
   const gagalMuat = !live
+
+  useEffect(() => {
+    return () => {
+      if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
+    }
+  }, [])
+
+  // Bila seluruh item di keranjang dihapus sampai habis, reset kapster yang dipilih
+  // agar kasir harus memilih kapster lagi dan tidak salah kapster pada transaksi berikutnya.
+  const prevCartLength = useRef(cart.length)
+  useEffect(() => {
+    if (prevCartLength.current > 0 && cart.length === 0) {
+      setSelectedBarber("")
+      setCash(0)
+      setQrisInput(0)
+      setSplitTunaiInput(0)
+      setCashReceived(0)
+      setGabunganDari("qris")
+      setKomisiLayanan("Normal")
+      setDiscount(0)
+      setAppliedDiscountPercent(null)
+      setDiscountReason("")
+      setKodeTerpakai("")
+      setKodeDiskon("")
+      setKodeError("")
+    }
+    prevCartLength.current = cart.length
+  }, [cart.length])
 
   useEffect(() => {
     if (!getToken()) {
@@ -514,11 +546,18 @@ export function CashierPage({ currentUser, onNavigate }: {
     }
   }
 
-  const items = catalogData.filter(
-    (x) =>
-      x.type === tab &&
-      x.name.toLowerCase().includes(cari.trim().toLowerCase()),
-  )
+  const items = catalogData
+    .filter(
+      (x) =>
+        x.type === tab &&
+        x.name.toLowerCase().includes(cari.trim().toLowerCase()),
+    )
+    .sort((a, b) => {
+      if (tab !== "Produk") return 0
+      const aHabis = (a.stock ?? 0) <= 0 ? 1 : 0
+      const bHabis = (b.stock ?? 0) <= 0 ? 1 : 0
+      return aHabis - bHabis
+    })
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0)
   // Jumlah produk di keranjang (semua kapster) dibatasi stok yang tersisa.
   const qtyDiKeranjang = (id: number | string) =>
@@ -749,7 +788,13 @@ export function CashierPage({ currentUser, onNavigate }: {
   function removeCartLineWithAnimation(lineId: string) {
     setCartSwipe({ lineId, offset: -120, removing: true })
     window.setTimeout(() => {
-      setCart((items) => items.filter((item) => item.lineId !== lineId))
+      setCart((items) => {
+        const remaining = items.filter((item) => item.lineId !== lineId)
+        if (remaining.length === 0) {
+          setSelectedBarber("")
+        }
+        return remaining
+      })
       setCartSwipe((current) => (current?.lineId === lineId ? null : current))
     }, 180)
   }
@@ -894,10 +939,16 @@ export function CashierPage({ currentUser, onNavigate }: {
                 ? "Stok habis di keranjang"
                 : undefined
             const tambah = () => {
-              setLastAdded({ id: String(item.id), timestamp: Date.now() })
+              setLastAdded({
+                id: String(item.id),
+                type: item.type,
+                timestamp: Date.now(),
+              })
               if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
               lastAddedTimer.current = window.setTimeout(() => {
-                setLastAdded((cur) => (cur?.id === String(item.id) ? null : cur))
+                setLastAdded((cur) =>
+                  cur?.id === String(item.id) && cur?.type === item.type ? null : cur,
+                )
               }, 600)
 
               setCart((c) => {
@@ -920,18 +971,21 @@ export function CashierPage({ currentUser, onNavigate }: {
                 return groupCartByBarber(updated)
               })
             }
-            const isJustAdded = lastAdded?.id === item.id
+            const isJustAdded =
+              lastAdded !== null &&
+              lastAdded.id === String(item.id) &&
+              lastAdded.type === item.type
             return (
               <button
                 type="button"
                 className={`catalog-item ${tidakBisa ? "disabled" : ""} ${isJustAdded ? "just-added" : ""}`}
-                key={item.id}
+                key={`${item.type}-${item.id}`}
                 title={alasan ?? `Tambah ${item.name} ke keranjang`}
                 disabled={tidakBisa}
                 onClick={tambah}
                 aria-label={`Tambah ${item.name} ke keranjang`}
               >
-                {isJustAdded && (
+                {isJustAdded && lastAdded && (
                   <>
                     <span
                       key={`ripple-${lastAdded.timestamp}`}
@@ -963,7 +1017,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </small>
                 )}
                 <span
-                  key={isJustAdded ? `add-${lastAdded.timestamp}` : "add-idle"}
+                  key={isJustAdded && lastAdded ? `add-${lastAdded.timestamp}` : "add-idle"}
                   aria-hidden="true"
                   className={`catalog-add ${isJustAdded ? "just-added" : ""}`}
                 >
@@ -1022,7 +1076,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       />
 
       <aside
-        className={`cart cart-sheet-center fixed z-50 flex flex-col overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
+        className={`cart cart-sheet-center fixed z-50 flex flex-col overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:scale-100 min-[821px]:transform-none min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
           isCartOpen
             ? "scale-100 opacity-100 pointer-events-auto"
             : "scale-95 opacity-0 pointer-events-none"
