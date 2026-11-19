@@ -15245,6 +15245,105 @@ label .search-select-trigger {
   }
 }
 
+/* Kasir: riwayat kasbon/izin tetap bisa discroll tanpa menampilkan scrollbar. */
+.workspace:has(> .kasbon-kapster-page) .kasbon-kapster-page,
+.workspace:has(> .izin-kapster-page) .izin-kapster-page,
+.kasbon-kapster-history .kasbon-kapster-list {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.workspace:has(> .kasbon-kapster-page) .kasbon-kapster-page::-webkit-scrollbar,
+.workspace:has(> .izin-kapster-page) .izin-kapster-page::-webkit-scrollbar,
+.kasbon-kapster-history .kasbon-kapster-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Kasbon Kapster di ponsel: form tetap, daftar memanjang di dalam kartunya. */
+@media (max-width: 820px) {
+  .workspace:has(> .kasbon-kapster-page) {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace:has(> .kasbon-kapster-page) > .mobile-top-navbar {
+    flex: 0 0 54px;
+  }
+
+  .workspace > .content.kasbon-kapster-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    padding: 68px 14px 14px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page > .panel {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .kasbon-kapster-page > .kasbon-kapster-history {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page .kasbon-kapster-history .section-title {
+    flex: 0 0 auto;
+  }
+
+  .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .workspace > .content.izin-kapster-page {
+    width: 100%;
+    margin: 0;
+    padding: 68px 14px 30px !important;
+    overflow: visible;
+  }
+
+  .izin-kapster-page > .panel:first-of-type {
+    overflow: visible;
+  }
+
+  .izin-kapster-page > .kasbon-kapster-history {
+    flex: none;
+    height: 400px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .izin-kapster-page .kasbon-kapster-history .section-title {
+    flex: 0 0 auto;
+  }
+
+  .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Kasir desktop: daftar item leluasa memanjang ke bawah, seluruh keranjang teratur rapi */
 @media (min-width: 1025px) {
   .cashier-page .cart-tabs {
