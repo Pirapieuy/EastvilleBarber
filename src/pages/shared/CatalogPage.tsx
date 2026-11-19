@@ -13,7 +13,7 @@ export function CatalogPage({ initialTab = "layanan" }: {
   )
 
   return (
-    <div className="content catalog-page">
+    <div className="content catalog-page fit-page">
       <div className="catalog-tab-header">
         <div className="segmented catalog-segmented">
           <Button

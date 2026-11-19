@@ -315,7 +315,7 @@ export function ProductsPage({ embedded = false }: {
           </Button>
         </div>
       </div>
-      <section className="panel product-admin-list">
+      <section className="panel product-admin-list fit-fill">
           <div className="filters">
             <div className="search">
               <Icon name="search" />

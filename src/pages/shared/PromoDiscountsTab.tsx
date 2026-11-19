@@ -301,7 +301,7 @@ export function PromoDiscountsTab() {
                     onClick={() => openEdit(p)}
                     style={{ fontSize: 12, padding: "4px 10px" }}
                   >
-                    Edit
+                    Ubah
                   </Button>
                   <Button
                     className="text-button"

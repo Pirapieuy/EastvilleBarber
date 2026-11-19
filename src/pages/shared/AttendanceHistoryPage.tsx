@@ -389,8 +389,8 @@ export function AttendanceHistoryPage() {
   ]
 
   return (
-    <div className="mobile-content attendance-history-page">
-      <section className="panel" style={{ padding: 18 }}>
+    <div className="mobile-content attendance-history-page fit-page">
+      <section className="panel fit-fill" style={{ padding: 18 }}>
         {/* Statistik Harian */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
           {statItems.map((item) => (

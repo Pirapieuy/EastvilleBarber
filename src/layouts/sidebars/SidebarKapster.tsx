@@ -20,7 +20,7 @@ const KAPSTER_GROUPS: SidebarNavGroup[] = [
       {
         page: "GajiKomisiSaya",
         alias: "my-salary",
-        label: "Gaji & Komisi Saya",
+        label: "Pendapatan Saya",
         icon: "wallet",
       },
       {

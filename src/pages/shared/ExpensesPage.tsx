@@ -300,17 +300,13 @@ export function ExpensesPage() {
   }
 
   return (
-    <div className="content">
+    <div className="content fit-page">
       <DemoNotice live={live} error={liveError} />
-      <PageTitle
-        eyebrow="Operasional"
-        title="Pengeluaran"
-        action={
-          <Button className="primary-button" onClick={() => setForm(true)}>
-            <Icon name="plus" /> Catat pengeluaran
-          </Button>
-        }
-      />
+      <div className="fit-page-actions">
+        <Button className="primary-button" onClick={() => setForm(true)}>
+          <Icon name="plus" /> Catat pengeluaran
+        </Button>
+      </div>
 
       <div className="kpi-grid">
         <Kpi
@@ -373,7 +369,7 @@ export function ExpensesPage() {
         />
       </div>
 
-      <section className="panel list-panel">
+      <section className="panel list-panel fit-fill">
         <div className="filters">
           <div className="search">
             <Icon name="search" />

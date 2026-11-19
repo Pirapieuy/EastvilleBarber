@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import {
   CalendarPicker,
   LoadingState,
-  PageTitle,
 } from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
 import { formatTanggal, formatTanggalWaktu } from "../../utils/tanggal"
@@ -61,6 +60,7 @@ const AKSI_MAP: Record<string, string> = {
   TRANSAKSI: "Transaksi",
   REKAP_MANUAL: "Rekap Manual",
   VOID_TRANSAKSI: "Batal Transaksi",
+  EDIT_TRANSAKSI: "Ubah Transaksi",
   PULIHKAN_TRANSAKSI: "Pulihkan Transaksi",
   PENGELUARAN: "Pengeluaran",
   BATAL_PENGELUARAN: "Batal Pengeluaran",
@@ -284,9 +284,8 @@ export function AuditPage() {
   }, [realLogs, filterDate, filterAksi, filterUser])
 
   return (
-    <div className="content audit-page-content">
-      <PageTitle eyebrow="Khusus Owner" title="Jejak audit" />
-      <section className="panel audit-list">
+    <div className="content audit-page-content fit-page">
+      <section className="panel audit-list fit-fill">
         <div className="filters">
           <CalendarPicker
             value={filterDate}
