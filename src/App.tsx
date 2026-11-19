@@ -1,0 +1,254 @@
+import { useEffect, useState } from "react"
+import { AppLayout } from "./layouts/AppLayout"
+import { Login } from "./components/common/Login"
+import { AppUser, DEMO_USERS, Role, toRoleKey } from "./types"
+import { clearToken, getToken, restoreSession } from "./api"
+import { LoadingState } from "./components/common/UI"
+
+// Kasir Pages
+import { KasirPOS } from "./pages/kasir/KasirPOS"
+import { RiwayatTransaksi as RiwayatTransaksiKasir } from "./pages/kasir/RiwayatTransaksi"
+import { RekapManual as RekapManualKasir } from "./pages/kasir/RekapManual"
+import { AbsensiKapster } from "./pages/kasir/AbsensiKapster"
+import { KasbonKapster } from "./pages/kasir/KasbonKapster"
+import { IzinKapster } from "./pages/kasir/IzinKapster"
+
+import { CatalogPage } from "./pages/shared/CatalogPage"
+
+// Owner Pages
+import { BerandaOwner } from "./pages/owner/BerandaOwner"
+import { RiwayatTransaksi as RiwayatTransaksiOwner } from "./pages/owner/RiwayatTransaksi"
+import { LaporanKeuangan as LaporanKeuanganOwner } from "./pages/owner/LaporanKeuangan"
+import { LaporanProduk as LaporanProdukOwner } from "./pages/owner/LaporanProduk"
+import { Pengeluaran as PengeluaranOwner } from "./pages/owner/Pengeluaran"
+import { RekapManual as RekapManualOwner } from "./pages/owner/RekapManual"
+import { LayananHarga as LayananHargaOwner } from "./pages/owner/LayananHarga"
+import { MasterProduk as MasterProdukOwner } from "./pages/owner/MasterProduk"
+import { TimEastville } from "./pages/owner/TimEastville"
+import { GajiKasbon as GajiKasbonOwner } from "./pages/owner/GajiKasbon"
+import { AttendanceHistoryPage } from "./pages/shared/AttendanceHistoryPage"
+import { JejakAudit as JejakAuditOwner } from "./pages/owner/JejakAudit"
+import { BackupData as BackupDataOwner } from "./pages/owner/BackupData"
+
+// Kapster Pages
+import { BerandaKapster } from "./pages/kapster/BerandaKapster"
+import { GajiKomisiSaya } from "./pages/kapster/GajiKomisiSaya"
+import { KomisiProdukSaya } from "./pages/kapster/KomisiProdukSaya"
+
+const ROLE_DEFAULT_PAGES: Record<Role, string> = {
+  Owner: "BerandaOwner",
+  Kasir: "KasirPOS",
+  Kapster: "BerandaKapster",
+}
+
+export function App() {
+  // Mulai dari belum login. Kalau ada token tersimpan, sesi dicek ke server dulu supaya
+  // refresh tidak mengeluarkan user yang sah (dan tidak masuk sebagai Owner demo).
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(() =>
+    Boolean(getToken()),
+  )
+  const [currentRole, setCurrentRole] = useState<Role>("Owner")
+  const [activePage, setActivePageRaw] = useState<string>(() => {
+    return sessionStorage.getItem("activePage") || "BerandaOwner"
+  })
+
+  function setActivePage(page: string) {
+    sessionStorage.setItem("activePage", page)
+    setActivePageRaw(page)
+  }
+
+  // User asli dari backend (hasil login). Kalau role diganti lewat pengalih peran demo,
+  // kembali ke data demo untuk peran itu.
+  const [sessionUser, setSessionUser] = useState<AppUser | null>(null)
+  const currentUser =
+    sessionUser && sessionUser.role === currentRole
+      ? sessionUser
+      : DEMO_USERS[currentRole]
+  const roleKey = toRoleKey(currentRole)
+
+  function handleRoleChange(newRole: Role) {
+    setCurrentRole(newRole)
+    setActivePage(ROLE_DEFAULT_PAGES[newRole])
+  }
+
+  useEffect(() => {
+    if (!checkingSession) return
+    restoreSession().then((user) => {
+      if (user) {
+        setSessionUser({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          role: user.role,
+        })
+        setCurrentRole(user.role)
+        setActivePage(sessionStorage.getItem("activePage") || ROLE_DEFAULT_PAGES[user.role])
+        setLoggedIn(true)
+      }
+      setCheckingSession(false)
+    })
+  }, [])
+
+  if (checkingSession) {
+    return (
+      <div className="loading-state-screen">
+        <LoadingState message="Memuat sesi..." />
+      </div>
+    )
+  }
+
+  if (!loggedIn) {
+    return (
+      <Login
+        onLogin={(user, targetPage) => {
+          setSessionUser(user)
+          setCurrentRole(user.role)
+          setLoggedIn(true)
+          if (targetPage) {
+            setActivePage(targetPage)
+          } else {
+            setActivePage(ROLE_DEFAULT_PAGES[user.role])
+          }
+        }}
+      />
+    )
+  }
+
+  function renderPageContent() {
+    if (roleKey === "kasir") {
+      if (activePage === "KasirPOS" || activePage === "cashier") {
+        return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
+      }
+      if (activePage === "RiwayatTransaksi" || activePage === "history") {
+        return <RiwayatTransaksiKasir currentUser={currentUser} />
+      }
+      if (activePage === "RekapManual" || activePage === "manual") {
+        return <RekapManualKasir />
+      }
+      if (activePage === "AbsensiKapster" || activePage === "absensi-kapster") {
+        return <AbsensiKapster onNavigate={setActivePage} />
+      }
+      if (activePage === "KasbonKapster" || activePage === "kasbon-kapster") {
+        return <KasbonKapster />
+      }
+      if (activePage === "IzinKapster" || activePage === "izin-kapster") {
+        return <IzinKapster />
+      }
+      return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
+    }
+
+    if (roleKey === "kapster") {
+      if (activePage === "BerandaKapster" || activePage === "dashboard") {
+        return (
+          <BerandaKapster
+            user={currentUser}
+            onNavigate={setActivePage}
+            navigate={setActivePage}
+          />
+        )
+      }
+      if (activePage === "GajiKomisiSaya" || activePage === "my-salary") {
+        return <GajiKomisiSaya />
+      }
+      if (
+        activePage === "KomisiProdukSaya" ||
+        activePage === "product-reports" ||
+        activePage === "komisi-produk"
+      ) {
+        return <KomisiProdukSaya currentUser={currentUser} />
+      }
+      return (
+        <BerandaKapster
+          user={currentUser}
+          onNavigate={setActivePage}
+          navigate={setActivePage}
+        />
+      )
+    }
+
+    // Role Owner
+    if (activePage === "BerandaOwner" || activePage === "dashboard") {
+      return (
+        <BerandaOwner onNavigate={setActivePage} navigate={setActivePage} />
+      )
+    }
+    if (activePage === "RiwayatTransaksi" || activePage === "history") {
+      return <RiwayatTransaksiOwner currentUser={currentUser} />
+    }
+    if (activePage === "LaporanKeuangan" || activePage === "reports") {
+      return <LaporanKeuanganOwner currentUser={currentUser} />
+    }
+    if (
+      activePage === "LaporanProduk" ||
+      activePage === "product-reports" ||
+      activePage === "laporan-produk"
+    ) {
+      return <LaporanProdukOwner currentUser={currentUser} />
+    }
+    if (activePage === "Pengeluaran" || activePage === "expenses") {
+      return <PengeluaranOwner />
+    }
+    if (activePage === "RekapManual" || activePage === "manual") {
+      return <RekapManualOwner />
+    }
+    if (
+      activePage === "KatalogLayananProduk" ||
+      activePage === "catalog" ||
+      activePage === "LayananHarga" ||
+      activePage === "services" ||
+      activePage === "MasterProduk" ||
+      activePage === "products"
+    ) {
+      const initialTab =
+        activePage === "MasterProduk" || activePage === "products"
+          ? "produk"
+          : "layanan"
+      return <CatalogPage initialTab={initialTab} />
+    }
+    if (activePage === "TimEastville" || activePage === "team") {
+      return <TimEastville currentUser={currentUser} />
+    }
+    if (activePage === "GajiKasbon" || activePage === "payroll") {
+      return <GajiKasbonOwner />
+    }
+    if (
+      activePage === "RiwayatAbsensi" ||
+      activePage === "attendance-history" ||
+      activePage === "AbsensiAdmin" ||
+      activePage === "attendance-admin" ||
+      activePage === "JadwalAbsensi" ||
+      activePage === "jadwal-absensi"
+    ) {
+      return <AttendanceHistoryPage />
+    }
+    if (activePage === "JejakAudit" || activePage === "audit") {
+      return <JejakAuditOwner />
+    }
+    if (activePage === "BackupData" || activePage === "backup") {
+      return <BackupDataOwner />
+    }
+    return <BerandaOwner onNavigate={setActivePage} navigate={setActivePage} />
+  }
+
+  return (
+    <AppLayout
+      activePage={activePage}
+      currentRole={currentRole}
+      userName={currentUser.name}
+      onLogout={() => {
+        clearToken()
+        setSessionUser(null)
+        setLoggedIn(false)
+      }}
+      onNavigate={setActivePage}
+      // Pengalih peran demo disembunyikan saat login lewat backend: role ditentukan akun,
+      // dan server menolak aksi di luar role token.
+      onRoleChange={sessionUser ? undefined : handleRoleChange}
+    >
+      {renderPageContent()}
+    </AppLayout>
+  )
+}
+
+export default App

@@ -1,0 +1,454 @@
+import { FormEvent, useEffect, useState } from "react"
+import { Icon } from "../../components/common/Icon"
+import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
+import { apiKodeDiskon, KodeDiskonRow } from "../../api"
+import { LoadingState } from "../../components/common/UI"
+import { formatTanggal, tanggalIsoLokal, TANGGAL_MAKS } from "../../utils/tanggal"
+import { SearchSelect } from "../../components/common/SearchSelect"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
+
+type PromoDiscount = {
+  id: string
+  kode: string
+  nama: string
+  persen: number
+  jenis: "persen" | "nominal"
+  nilai: number
+  berlakuSampai: string
+  status: "Aktif" | "Nonaktif"
+  dipakai: number
+}
+
+const dariServer = (r: KodeDiskonRow): PromoDiscount => ({
+  id: r.id,
+  kode: r.kode,
+  nama: r.nama,
+  persen: Number(r.persen),
+  jenis: r.jenis === "nominal" ? "nominal" : "persen",
+  nilai: Number(r.nilai) || Number(r.persen),
+  berlakuSampai: r.berlaku_sampai,
+  status: r.status,
+  dipakai: Number(r.dipakai) || 0,
+})
+
+export function PromoDiscountsTab() {
+  const [showHelp, setShowHelp] = useState(false)
+  const [promos, setPromos] = useState<PromoDiscount[]>([])
+  const [memuat, setMemuat] = useState(true)
+  const [gagalMuat, setGagalMuat] = useState("")
+  const [menyimpan, setMenyimpan] = useState(false)
+  const [kode, setKode] = useState("")
+
+  function muat() {
+    setMemuat(true)
+    setGagalMuat("")
+    apiKodeDiskon
+      .list()
+      .then((rows) => setPromos(rows.map(dariServer)))
+      .catch((e) =>
+        setGagalMuat(
+          e instanceof Error ? e.message : "Gagal memuat kode diskon.",
+        ),
+      )
+      .finally(() => setMemuat(false))
+  }
+  useEffect(muat, [])
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingPromo, setDeletingPromo] = useState<PromoDiscount | null>(null)
+
+  const [nama, setNama] = useState("")
+  const [jenis, setJenis] = useState<"persen" | "nominal">("persen")
+  const [nilai, setNilai] = useState<number>(10)
+  const [berlakuSampai, setBerlakuSampai] = useState(() => {
+    const d = new Date()
+    d.setMonth(d.getMonth() + 1)
+    return tanggalIsoLokal(d)
+  })
+  const [status, setStatus] = useState<"Aktif" | "Nonaktif">("Aktif")
+  const [error, setError] = useState("")
+
+  function openCreate() {
+    setEditingId(null)
+    setKode("")
+    setNama("")
+    setJenis("persen")
+    setNilai(10)
+    const d = new Date()
+    d.setMonth(d.getMonth() + 1)
+    setBerlakuSampai(tanggalIsoLokal(d))
+    setStatus("Aktif")
+    setError("")
+    setModalOpen(true)
+  }
+
+  function openEdit(p: PromoDiscount) {
+    setEditingId(p.id)
+    setKode(p.kode)
+    setNama(p.nama)
+    setJenis(p.jenis)
+    setNilai(p.nilai)
+    setBerlakuSampai(p.berlakuSampai)
+    setStatus(p.status)
+    setError("")
+    setModalOpen(true)
+  }
+
+  async function simpanKe(p: Omit<PromoDiscount, "dipakai">) {
+    await apiKodeDiskon.simpan({
+      id: p.id || undefined,
+      kode: p.kode,
+      nama: p.nama,
+      persen: p.persen,
+      jenis: p.jenis,
+      nilai: p.nilai,
+      berlakuSampai: p.berlakuSampai,
+      status: p.status,
+    })
+    muat()
+  }
+
+  async function handleSave(e: FormEvent) {
+    e.preventDefault()
+    const kodeBersih = kode
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+    if (kodeBersih.length < 4 || kodeBersih.length > 20) {
+      setError("Kode harus 4-20 huruf atau angka, tanpa spasi.")
+      return
+    }
+    if (!nama.trim()) {
+      setError("Masukkan keterangan atau nama promo diskon.")
+      return
+    }
+    if (nilai <= 0 || (jenis === "persen" && nilai > 100)) {
+      setError(jenis === "persen" ? "Persentase diskon harus di antara 1% dan 100%." : "Nominal diskon minimal Rp1.")
+      return
+    }
+    if (!berlakuSampai) {
+      setError("Pilih tanggal batas masa berlaku diskon.")
+      return
+    }
+    setMenyimpan(true)
+    try {
+      await simpanKe({
+        id: editingId ?? "",
+        kode: kodeBersih,
+        nama: nama.trim(),
+        persen: jenis === "persen" ? nilai : 0,
+        jenis,
+        nilai,
+        berlakuSampai,
+        status,
+      })
+      setModalOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menyimpan kode.")
+    } finally {
+      setMenyimpan(false)
+    }
+  }
+
+  async function toggleStatus(id: string) {
+    const p = promos.find((x) => x.id === id)
+    if (!p) return
+    try {
+      await simpanKe({
+        ...p,
+        status: p.status === "Aktif" ? "Nonaktif" : "Aktif",
+      })
+    } catch (err) {
+      setGagalMuat(
+        err instanceof Error ? err.message : "Gagal mengubah status.",
+      )
+    }
+  }
+
+  async function handleDeleteConfirm(promo: PromoDiscount) {
+    await apiKodeDiskon.hapus(promo.id)
+    muat()
+  }
+
+  const todayStr = TANGGAL_MAKS()
+
+  return (
+    <div className="promo-discounts-tab" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="promo-discount-actions">
+        <div className="promo-discount-help-wrap">
+          <button
+            className="promo-discount-help"
+            type="button"
+            aria-label="Informasi diskon event"
+            aria-expanded={showHelp}
+            onClick={() => setShowHelp((shown) => !shown)}
+          >
+            <Icon name="alert" />
+          </button>
+          {showHelp && (
+            <div className="promo-discount-tooltip" role="tooltip">
+              Belum ada diskon. Klik Tambah Diskon Event untuk membuat kode.
+            </div>
+          )}
+        </div>
+        <Button className="primary-button" onClick={openCreate}>
+          <Icon name="plus" /> Tambah Diskon Event
+        </Button>
+      </div>
+
+      {memuat && <LoadingState message="Memuat kode diskon…" />}
+      {gagalMuat && (
+        <div className="payment-result danger" role="alert">
+          <span>{gagalMuat}</span>
+          <Button onClick={muat}>Coba lagi</Button>
+        </div>
+      )}
+      {!memuat && !gagalMuat && promos.length === 0 && (
+        <div className="promo-discount-empty">Belum ada diskon</div>
+      )}
+      <div className="promo-discount-list">
+        {promos.map((p) => {
+          const isExpired = p.berlakuSampai < todayStr
+          return (
+            <article
+              key={p.id}
+              style={{
+                borderRadius: 10,
+                border: "1px solid var(--line)",
+                background: "var(--paper)",
+                padding: "16px 18px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                gap: 12,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    marginBottom: 8,
+                  }}
+                >
+                  <strong style={{ fontSize: 16, color: "var(--ink)" }}>
+                    {p.nama}
+                  </strong>
+                  <span
+                    className={`chip ${
+                      isExpired
+                        ? "batal"
+                        : p.status === "Aktif"
+                          ? "lunas"
+                          : "manual"
+                    }`}
+                  >
+                    {isExpired ? "Kadaluarsa" : p.status}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 700,
+                    color: "var(--brass-dark, #b45309)",
+                    margin: "4px 0",
+                  }}
+                >
+                  {p.jenis === "nominal" ? `Rp ${p.nilai.toLocaleString("id-ID")} OFF` : `${p.nilai}% OFF`}
+                </div>
+                <small
+                  style={{
+                    color: "var(--slate)",
+                    display: "block",
+                    marginBottom: 4,
+                  }}
+                >
+                  Kode:{" "}
+                  <strong style={{ letterSpacing: "0.04em" }}>{p.kode}</strong>{" "}
+                  · dipakai {p.dipakai}x
+                </small>
+                <small style={{ color: "var(--muted)", display: "block" }}>
+                  Masa berlaku:{" "}
+                  <strong>
+                    {formatTanggal(p.berlakuSampai)}
+                  </strong>
+                </small>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingTop: 10,
+                  borderTop: "1px solid var(--line)",
+                  gap: 8,
+                }}
+              >
+                <Button
+                  className="text-button"
+                  onClick={() => toggleStatus(p.id)}
+                  style={{ fontSize: 12, padding: "4px 8px" }}
+                >
+                  {p.status === "Aktif" ? "Nonaktifkan" : "Aktifkan"}
+                </Button>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <Button
+                    className="secondary-button"
+                    onClick={() => openEdit(p)}
+                    style={{ fontSize: 12, padding: "4px 10px" }}
+                  >
+                    Ubah
+                  </Button>
+                  <Button
+                    className="text-button"
+                    onClick={() => setDeletingPromo(p)}
+                    style={{
+                      fontSize: 12,
+                      padding: "4px 8px",
+                      color: "#dc2626",
+                    }}
+                  >
+                    <Icon name="trash" />
+                  </Button>
+                </div>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+
+      {modalOpen && (
+        <div className="modal-overlay">
+          <form
+            className="simple-modal promo-discount-modal"
+            onSubmit={handleSave}
+            style={{ maxWidth: 460 }}
+          >
+            <header>
+              <h2>{editingId ? "Ubah Diskon Event" : "Tambah Diskon Event"}</h2>
+            </header>
+
+            {error && (
+              <div
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 6,
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  color: "#991b1b",
+                  fontSize: 12,
+                  marginBottom: 10,
+                }}
+              >
+                <Icon name="alert" /> {error}
+              </div>
+            )}
+
+            <label>
+              <span>Kode unik</span>
+              <input
+                autoCapitalize="characters"
+                autoComplete="off"
+                maxLength={20}
+                onChange={(e) => setKode(e.target.value.toUpperCase())}
+                placeholder="Contoh: JUMAT15"
+                value={kode}
+              />
+              <small style={{ color: "var(--muted)" }}>
+                Kasir mengetik kode ini untuk mendapat diskon.
+              </small>
+            </label>
+
+            <label>
+              <span>Nama promo</span>
+              <input
+                onChange={(e) => setNama(e.target.value)}
+                placeholder="Contoh: Promo Jumat Berkah"
+                value={nama}
+              />
+            </label>
+
+            <label>
+              <span>Jenis Diskon</span>
+              <SearchSelect
+                value={jenis}
+                onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
+              >
+                <option value="persen">Persentase (%)</option>
+                <option value="nominal">Nominal (Rp)</option>
+              </SearchSelect>
+            </label>
+
+            <label>
+              <span>Jumlah Diskon ({jenis === "persen" ? "%" : "Rp"})</span>
+              <div className="input-shell">
+                <b>{jenis === "persen" ? "%" : "Rp"}</b>
+                <input
+                  max={jenis === "persen" ? 100 : undefined}
+                  min={1}
+                  required
+                  type="number"
+                  value={nilai}
+                  onChange={(e) => setNilai(Number(e.target.value))}
+                />
+              </div>
+            </label>
+
+            <label>
+              <span>Masa Berlaku Sampai</span>
+              <CalendarPicker
+                value={berlakuSampai}
+                onChange={(d) => d && setBerlakuSampai(d)}
+              />
+            </label>
+
+            <div
+              className="toggle-row"
+              style={{ cursor: "pointer" }}
+              onClick={() => setStatus((s) => s === "Aktif" ? "Nonaktif" : "Aktif")}
+            >
+              <span>
+                <strong>Status diskon: {status}</strong>
+                <small>Diskon aktif dapat digunakan saat transaksi.</small>
+              </span>
+              <i className={`toggle ${status === "Aktif" ? "on" : ""}`}><b /></i>
+            </div>
+
+            <footer>
+              <Button
+                className="secondary-button"
+                type="button"
+                onClick={() => setModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                className="primary-button"
+                disabled={menyimpan}
+                type="submit"
+              >
+                {menyimpan ? "Menyimpan…" : "Simpan Diskon"}
+              </Button>
+            </footer>
+          </form>
+        </div>
+      )}
+
+      {deletingPromo && (
+        <ConfirmModal
+          title={`Hapus Kode Diskon "${deletingPromo.kode}"?`}
+          eyebrow="Hapus Diskon"
+          message={`Kode diskon "${deletingPromo.nama}" (${deletingPromo.kode}) akan dihapus dan tidak dapat digunakan lagi pada transaksi kasir.`}
+          confirmText="Hapus Diskon"
+          confirmTone="danger"
+          onClose={() => setDeletingPromo(null)}
+          onConfirm={() => handleDeleteConfirm(deletingPromo)}
+        />
+      )}
+    </div>
+  )
+}

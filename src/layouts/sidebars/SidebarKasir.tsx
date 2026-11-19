@@ -1,0 +1,68 @@
+import { BaseSidebar, SidebarNavGroup, SidebarProps } from "./BaseSidebar"
+
+const KASIR_GROUPS: SidebarNavGroup[] = [
+  {
+    id: "utama",
+    title: "UTAMA",
+    items: [
+      {
+        page: "KasirPOS",
+        alias: "cashier",
+        label: "Kasir POS",
+        icon: "cashier",
+      },
+    ],
+  },
+  {
+    id: "transaksi",
+    title: "TRANSAKSI",
+    items: [
+      {
+        page: "RiwayatTransaksi",
+        alias: "history",
+        label: "Riwayat Transaksi",
+        icon: "history",
+      },
+      {
+        page: "RekapManual",
+        alias: "manual",
+        label: "Input Manual",
+        icon: "pencil",
+      },
+    ],
+  },
+  {
+    id: "tim",
+    title: "TIM",
+    items: [
+      {
+        page: "KasbonKapster",
+        alias: "kasbon-kapster",
+        label: "Kasbon Kapster",
+        icon: "wallet",
+      },
+      {
+        page: "IzinKapster",
+        alias: "izin-kapster",
+        label: "Izin Kapster",
+        icon: "calendar",
+      },
+    ],
+  },
+]
+
+export function SidebarKasir(props: SidebarProps) {
+  return (
+    <BaseSidebar
+      {...props}
+      groups={KASIR_GROUPS}
+      user={{
+        name: "Kasir",
+        role: "Kasir",
+        roleBadge: "",
+      }}
+    />
+  )
+}
+
+export default SidebarKasir
