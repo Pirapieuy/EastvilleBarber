@@ -17,6 +17,7 @@ interface ManualItem {
   id: string
   name: string
   price: number
+  stok?: number
 }
 const demoItems: ManualItem[] = [
   { tipe: "Layanan", id: "1", name: "Haircut", price: 40000 },
@@ -123,6 +124,7 @@ export function ManualPage() {
                 id: p.kode,
                 name: p.nama,
                 price: p.harga,
+                stok: p.stok,
               }),
             ),
         ])
@@ -235,7 +237,9 @@ export function ManualPage() {
 
   function ubahQty(item: ManualItem, delta: number) {
     setQty((prev) => {
-      const next = Math.max(0, (prev[keyOf(item)] ?? 0) + delta)
+      const cur = prev[keyOf(item)] ?? 0
+      let next = Math.max(0, cur + delta)
+      if (delta > 0 && item.stok != null) next = Math.min(next, item.stok)
       return { ...prev, [keyOf(item)]: next }
     })
   }
@@ -304,17 +308,21 @@ export function ManualPage() {
         <div className="nota-items">
           {rows.map((it) => {
             const n = qty[keyOf(it)] ?? 0
+            const maxed = it.stok != null && n >= it.stok
             return (
               <div
-                className={`nota-item ${n > 0 ? "active" : ""}`}
+                className={`nota-item ${n > 0 ? "active" : ""} ${maxed ? "maxed" : ""}`}
                 key={keyOf(it)}
-                onClick={n === 0 ? () => ubahQty(it, 1) : undefined}
-                role={n === 0 ? "button" : undefined}
-                style={n === 0 ? { cursor: "pointer" } : undefined}
+                onClick={maxed ? undefined : () => ubahQty(it, 1)}
+                role="button"
+                style={{ cursor: maxed ? "default" : "pointer" }}
               >
                 <div className="nota-item-info">
                   <strong>{it.name}</strong>
-                  <span>{rupiah(it.price)}</span>
+                  <span>
+                    {rupiah(it.price)}
+                    {it.stok != null && <i className="nota-stock"> · stok {it.stok}</i>}
+                  </span>
                 </div>
                 {n === 0 ? (
                   <Button
@@ -331,7 +339,7 @@ export function ManualPage() {
                   <div className="nota-stepper">
                     <button
                       aria-label={`Kurangi ${it.name}`}
-                      onClick={() => ubahQty(it, -1)}
+                      onClick={(e) => { e.stopPropagation(); ubahQty(it, -1) }}
                       type="button"
                     >
                       −
@@ -339,7 +347,8 @@ export function ManualPage() {
                     <output aria-live="polite">{n}</output>
                     <button
                       aria-label={`Tambah ${it.name}`}
-                      onClick={() => ubahQty(it, 1)}
+                      disabled={maxed}
+                      onClick={(e) => { e.stopPropagation(); ubahQty(it, 1) }}
                       type="button"
                     >
                       +

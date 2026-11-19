@@ -12890,6 +12890,15 @@ summary,
   background: var(--brass-soft);
 }
 
+.nota-item.maxed {
+  opacity: 0.6;
+}
+
+.nota-stock {
+  font-style: normal;
+  color: var(--muted);
+}
+
 .nota-item-info {
   min-width: 0;
 }
