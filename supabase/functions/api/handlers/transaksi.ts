@@ -353,9 +353,13 @@ export async function updateTransaksi(body: B, user: Pengguna) {
   const metode = body.metode || t.metode
   let tunai = toInt(body.bayarTunai ?? t.bayar_tunai)
   let qris = toInt(body.bayarQris ?? t.bayar_qris)
-  if (metode === "Tunai") { tunai = total; qris = 0 }
-  else if (metode === "QRIS") { tunai = 0; qris = total }
-  else if (metode === "Gabungan") {
+  if (metode === "Tunai") {
+    tunai = Math.max(total, toInt(body.bayarTunai ?? total))
+    qris = 0
+  } else if (metode === "QRIS") {
+    tunai = 0
+    qris = total
+  } else if (metode === "Gabungan") {
     if (qris > total) qris = total
     tunai = total - qris
   }

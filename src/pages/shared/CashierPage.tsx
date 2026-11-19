@@ -1101,7 +1101,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         </div>
       </section>
       {cart.length > 0 && (
-        <div className="fixed bottom-0 inset-x-0 z-40 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] min-[821px]:hidden">
+        <div className="mobile-cart-bar fixed bottom-0 inset-x-0 z-40 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-[var(--paper)]/95 backdrop-blur border-t border-[var(--line)] shadow-[0_-4px_20px_rgba(20,17,15,0.08)] min-[821px]:hidden">
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}

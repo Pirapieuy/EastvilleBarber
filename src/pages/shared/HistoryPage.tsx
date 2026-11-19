@@ -220,6 +220,8 @@ export function EditTransactionModal({
   onSave: (payload: {
     items: HistoryItemDetail[]
     method: "Tunai" | "QRIS" | "Gabungan"
+    bayarTunai: number
+    bayarQris: number
     reason: string
   }) => Promise<void>
   catalog: { id: string; name: string; price: number; type: "Layanan" | "Produk" }[]
@@ -248,9 +250,15 @@ export function EditTransactionModal({
     transaction.method,
   )
   const [reason, setReason] = useState("Koreksi varian/item transaksi")
-  const [newItemId, setNewItemId] = useState("")
   const [newItemBarber, setNewItemBarber] = useState(
-    () => barberList[0]?.name || "",
+    () => transaction.barber.split(", ")[0] || barberList[0]?.name || "",
+  )
+  const [catalogSearch, setCatalogSearch] = useState("")
+  const [paymentCash, setPaymentCash] = useState(
+    transaction.bayarTunai ?? (transaction.method === "Tunai" ? transaction.total : 0),
+  )
+  const [paymentQris, setPaymentQris] = useState(
+    transaction.bayarQris ?? (transaction.method === "QRIS" ? transaction.total : 0),
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -258,26 +266,15 @@ export function EditTransactionModal({
   const subtotal = items.reduce((s, it) => s + it.price * it.qty, 0)
   const diskon = Math.min(transaction.discount ?? 0, subtotal)
   const total = Math.max(0, subtotal - diskon)
+  const splitQris = Math.min(Math.max(0, paymentQris), total)
+  const splitCash = Math.max(0, total - splitQris)
+  const tunaiShortage = Math.max(0, total - paymentCash)
+  const tunaiChange = Math.max(0, paymentCash - total)
 
   function updateItemQty(idx: number, delta: number) {
     setItems((cur) =>
       cur.map((it, i) =>
         i === idx ? { ...it, qty: Math.max(1, it.qty + delta) } : it,
-      ),
-    )
-  }
-
-  function updateItemBarber(idx: number, barberName: string) {
-    const bObj = barberList.find((b) => b.name === barberName)
-    setItems((cur) =>
-      cur.map((it, i) =>
-        i === idx
-          ? {
-              ...it,
-              kapster: barberName,
-              kapsterId: bObj?.id || it.kapsterId,
-            }
-          : it,
       ),
     )
   }
@@ -291,27 +288,42 @@ export function EditTransactionModal({
     setItems((cur) => cur.filter((_, i) => i !== idx))
   }
 
-  function handleAddItem() {
-    if (!newItemId) return
-    const catItem = catalog.find((c) => c.id === newItemId)
-    if (!catItem) return
+  function handleAddItem(catItem: (typeof catalog)[number]) {
     const bName = newItemBarber || barberList[0]?.name || "Kapster"
     const bId = barberList.find((b) => b.name === bName)?.id || ""
 
-    setItems((cur) => [
-      ...cur,
-      {
-        name: catItem.name,
-        price: catItem.price,
-        qty: 1,
-        type: catItem.type,
-        refId: catItem.id,
-        kapster: bName,
-        kapsterId: bId,
-      },
-    ])
-    setNewItemId("")
+    setItems((cur) => {
+      const existing = cur.findIndex(
+        (item) => item.refId === catItem.id && item.kapsterId === bId,
+      )
+      if (existing >= 0) {
+        return cur.map((item, idx) =>
+          idx === existing ? { ...item, qty: item.qty + 1 } : item,
+        )
+      }
+      return [
+        ...cur,
+        {
+          name: catItem.name,
+          price: catItem.price,
+          qty: 1,
+          type: catItem.type,
+          refId: catItem.id,
+          kapster: bName,
+          kapsterId: bId,
+        },
+      ]
+    })
     setError("")
+  }
+
+  function chooseMethod(next: "Tunai" | "QRIS" | "Gabungan") {
+    setMethod(next)
+    if (next === "Tunai") setPaymentCash(total)
+    if (next === "QRIS") setPaymentQris(total)
+    if (next === "Gabungan") {
+      setPaymentQris(Math.min(transaction.bayarQris ?? 0, total))
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -324,10 +336,30 @@ export function EditTransactionModal({
       setError("Alasan perubahan wajib diisi untuk log audit.")
       return
     }
+    if (method === "Tunai" && paymentCash < total) {
+      setError("Jumlah tunai belum mencukupi total tagihan.")
+      return
+    }
     setSaving(true)
     setError("")
     try {
-      await onSave({ items, method, reason: reason.trim() })
+      await onSave({
+        items,
+        method,
+        bayarTunai:
+          method === "Tunai"
+            ? paymentCash
+            : method === "Gabungan"
+              ? splitCash
+              : 0,
+        bayarQris:
+          method === "QRIS"
+            ? total
+            : method === "Gabungan"
+              ? splitQris
+              : 0,
+        reason: reason.trim(),
+      })
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal menyimpan perubahan.")
@@ -348,51 +380,46 @@ export function EditTransactionModal({
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <div className="edit-trx-body">
             {error && (
-              <div className="info-banner" role="alert">
+              <div className="info-banner edit-trx-error" role="alert">
                 <Icon name="alert" />
                 {error}
               </div>
             )}
 
-            <div>
-              <label style={{ margin: "0 0 8px 0", fontWeight: 700, fontSize: 13 }}>
-                Item Transaksi ({items.length})
-              </label>
+            <div className="edit-trx-left-column">
+            <div className="edit-trx-items-section">
+              <div className="edit-trx-section-heading">
+                <div>
+                  <span className="edit-trx-step-label">01</span>
+                  <label>Item transaksi</label>
+                </div>
+                <span className="edit-trx-count">{items.length} item</span>
+              </div>
               <div className="edit-trx-items-list">
                 {items.map((it, idx) => (
                   <div key={idx} className="edit-trx-item-row">
                     <div className="edit-trx-item-info">
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div className="edit-trx-item-title">
                         <strong>{it.name}</strong>
-                        <span className={`chip ${it.type.toLowerCase()}`} style={{ fontSize: 10, padding: "1px 6px" }}>
+                        <span className={`chip ${it.type.toLowerCase()}`}>
                           {it.type}
                         </span>
                       </div>
-                      <small>@ {rupiah(it.price)}</small>
+                      <small>{rupiah(it.price)}</small>
                     </div>
 
-                    <div className="edit-trx-item-kapster">
-                      <select
-                        aria-label={`Kapster untuk ${it.name}`}
-                        value={it.kapster || barberList[0]?.name}
-                        onChange={(e) => updateItemBarber(idx, e.target.value)}
-                        style={{ height: 36, fontSize: 12, padding: "0 8px", width: "100%", borderRadius: 7 }}
-                      >
-                        {barberList.map((b) => (
-                          <option key={b.name} value={b.name}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="edit-trx-item-kapster" title={`Kapster ${it.kapster || "-"}`}>
+                      <Icon name="user" />
+                      <span>{it.kapster || "Kapster belum dipilih"}</span>
                     </div>
 
                     <div className="edit-trx-item-stepper">
-                      <div className="stepper" style={{ minHeight: 36, height: 36 }}>
+                      <div className="stepper edit-trx-stepper" style={{ minHeight: 40, height: 40 }}>
                         <Button
                           aria-label="Kurangi kuantitas"
                           disabled={it.qty <= 1}
                           onClick={() => updateItemQty(idx, -1)}
-                          style={{ width: 34, height: 34, minWidth: 34, minHeight: 34 }}
+                          style={{ width: 38, height: 38, minWidth: 38, minHeight: 38 }}
                         >
                           <Icon name="minus" />
                         </Button>
@@ -400,7 +427,7 @@ export function EditTransactionModal({
                         <Button
                           aria-label="Tambah kuantitas"
                           onClick={() => updateItemQty(idx, 1)}
-                          style={{ width: 34, height: 34, minWidth: 34, minHeight: 34 }}
+                          style={{ width: 38, height: 38, minWidth: 38, minHeight: 38 }}
                         >
                           <Icon name="plus" />
                         </Button>
@@ -417,7 +444,7 @@ export function EditTransactionModal({
                         onClick={() => removeItem(idx)}
                         disabled={items.length <= 1}
                         title="Hapus item"
-                        style={{ width: 34, height: 34 }}
+                        style={{ width: 38, height: 38 }}
                       >
                         <Icon name="trash" />
                       </Button>
@@ -427,101 +454,186 @@ export function EditTransactionModal({
               </div>
             </div>
 
-            <div>
-              <label style={{ margin: "0 0 6px 0", fontWeight: 700, fontSize: 12, color: "var(--slate)" }}>
-                + Tambah Item Pengganti / Tambahan
-              </label>
-              <div className="edit-trx-add-box">
-                <select
-                  value={newItemId}
-                  onChange={(e) => setNewItemId(e.target.value)}
-                  style={{ height: 38, fontSize: 13, borderRadius: 8 }}
-                >
-                  <option value="">-- Pilih Layanan / Produk --</option>
-                  <optgroup label="Layanan">
-                    {catalog
-                      .filter((c) => c.type === "Layanan")
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name} ({rupiah(c.price)})
-                        </option>
-                      ))}
-                  </optgroup>
-                  <optgroup label="Produk">
-                    {catalog
-                      .filter((c) => c.type === "Produk")
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name} ({rupiah(c.price)})
-                        </option>
-                      ))}
-                  </optgroup>
-                </select>
-
-                <select
-                  value={newItemBarber}
-                  onChange={(e) => setNewItemBarber(e.target.value)}
-                  style={{ height: 38, fontSize: 13, borderRadius: 8 }}
-                >
-                  {barberList.map((b) => (
-                    <option key={b.name} value={b.name}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-
-                <Button
-                  className="secondary-button"
-                  onClick={handleAddItem}
-                  disabled={!newItemId}
-                  style={{ height: 38, minHeight: 38, paddingInline: 14 }}
-                >
-                  <Icon name="plus" /> Tambah
-                </Button>
+            <div className="edit-trx-add-section">
+              <div className="edit-trx-section-heading">
+                <div>
+                  <label>Tambah layanan &amp; produk</label>
+                </div>
+              </div>
+              <div className="search edit-trx-catalog-search">
+                <Icon name="search" />
+                <input
+                  aria-label="Cari layanan atau produk untuk ditambahkan"
+                  onChange={(e) => setCatalogSearch(e.target.value)}
+                  placeholder="Cari layanan atau produk…"
+                  value={catalogSearch}
+                />
+              </div>
+              <div className="edit-trx-catalog-columns">
+                {(["Layanan", "Produk"] as const).map((type) => {
+                  const visibleItems = catalog.filter(
+                    (item) =>
+                      item.type === type &&
+                      item.name.toLowerCase().includes(catalogSearch.trim().toLowerCase()),
+                  )
+                  return (
+                    <section className="edit-trx-catalog-group" key={type}>
+                      <h3>{type}</h3>
+                      <div className="edit-trx-catalog-list">
+                        {visibleItems.length === 0 ? (
+                          <p className="edit-trx-catalog-empty">
+                            {catalogSearch ? "Tidak ada yang cocok." : `Belum ada ${type.toLowerCase()}.`}
+                          </p>
+                        ) : (
+                          visibleItems.map((item) => (
+                            <div className="edit-trx-catalog-item" key={item.id}>
+                              <div>
+                                <strong>{item.name}</strong>
+                              </div>
+                              <Button
+                                aria-label={`Tambah ${item.name}`}
+                                className="secondary-button edit-trx-catalog-add"
+                                onClick={() => handleAddItem(item)}
+                              >
+                                <Icon name="plus" />
+                              </Button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </section>
+                  )
+                })}
               </div>
             </div>
+            </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <label style={{ margin: 0 }}>
-                <span style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>Metode Pembayaran</span>
-                <select
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value as "Tunai" | "QRIS" | "Gabungan")}
-                  style={{ height: 40, borderRadius: 8 }}
+            <div className="edit-trx-details">
+              <div className="edit-trx-section-heading">
+                <div>
+                  <span className="edit-trx-step-label">02</span>
+                  <label>Kapster &amp; pembayaran</label>
+                </div>
+              </div>
+              <label className="edit-trx-detail-label">
+                <span>Kapster untuk item baru</span>
+                <SearchSelect
+                  className="edit-trx-select"
+                  aria-label="Kapster untuk item baru"
+                  value={newItemBarber}
+                  onChange={(e) => setNewItemBarber(e.target.value)}
                 >
-                  <option value="Tunai">Tunai</option>
-                  <option value="QRIS">QRIS</option>
-                  <option value="Gabungan">Gabungan</option>
-                </select>
+                  {barberList.map((barber) => (
+                    <option key={barber.id} value={barber.name}>
+                      {barber.name}
+                    </option>
+                  ))}
+                </SearchSelect>
               </label>
 
-              <label style={{ margin: 0 }}>
-                <span style={{ fontWeight: 700, fontSize: 12, marginBottom: 4 }}>Alasan Perubahan *</span>
+              <section className="edit-trx-payment">
+                <span className="edit-trx-detail-title">Metode pembayaran</span>
+                <div className="method-grid edit-trx-method-grid" role="group" aria-label="Pilih metode pembayaran">
+                  {(["Tunai", "QRIS", "Gabungan"] as const).map((value) => (
+                    <Button
+                      className={method === value ? "active" : ""}
+                      key={value}
+                      onClick={() => chooseMethod(value)}
+                    >
+                      <Icon name={value === "QRIS" ? "qris" : "cash"} />
+                      <strong>{value}</strong>
+                    </Button>
+                  ))}
+                </div>
+
+                {method === "Tunai" && (
+                  <div className="edit-trx-payment-fields">
+                    <label className="edit-trx-detail-label">
+                      <span>Jumlah tunai diterima</span>
+                      <div className="input-shell">
+                        <b>Rp</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => setPaymentCash(Number(e.target.value.replace(/\D/g, "")))}
+                          placeholder="0"
+                          value={paymentCash || ""}
+                        />
+                      </div>
+                    </label>
+                    {paymentCash > 0 && (
+                      <div className={`payment-result ${tunaiShortage ? "danger" : "success"}`}>
+                        <span>{tunaiShortage ? "Pembayaran kurang" : "Kembalian"}</span>
+                        <strong>{rupiah(tunaiShortage || tunaiChange)}</strong>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {method === "QRIS" && (
+                  <p className="edit-trx-payment-note">
+                    <Icon name="qris" /> Nilai QRIS mengikuti total tagihan, {rupiah(total)}.
+                  </p>
+                )}
+
+                {method === "Gabungan" && (
+                  <div className="edit-trx-payment-fields edit-trx-split-fields">
+                    <label className="edit-trx-detail-label">
+                      <span>Porsi tunai</span>
+                      <div className="input-shell">
+                        <b>Rp</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => {
+                            const cash = Number(e.target.value.replace(/\D/g, ""))
+                            setPaymentQris(Math.max(0, total - Math.min(cash, total)))
+                          }}
+                          placeholder="0"
+                          value={splitCash || ""}
+                        />
+                      </div>
+                    </label>
+                    <label className="edit-trx-detail-label">
+                      <span>Porsi QRIS</span>
+                      <div className="input-shell">
+                        <b>Rp</b>
+                        <input
+                          inputMode="numeric"
+                          onChange={(e) => setPaymentQris(Math.min(total, Number(e.target.value.replace(/\D/g, ""))))}
+                          placeholder="0"
+                          value={splitQris || ""}
+                        />
+                      </div>
+                    </label>
+                  </div>
+                )}
+              </section>
+
+              <label className="edit-trx-detail-label">
+                <span>Alasan perubahan *</span>
                 <input
                   type="text"
                   required
                   placeholder="Misal: Salah varian pomade"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  style={{ height: 40, borderRadius: 8 }}
                 />
               </label>
-            </div>
-
-            <div className="edit-trx-summary">
-              <div>
-                <span>Subtotal Item Baru</span>
-                <b>{rupiah(subtotal)}</b>
-              </div>
-              {diskon > 0 && (
-                <div style={{ color: "var(--oxblood)" }}>
-                  <span>Diskon Nota</span>
-                  <b>− {rupiah(diskon)}</b>
+              <div className="edit-trx-summary">
+                <span className="edit-trx-summary-caption">Ringkasan pembayaran</span>
+                <div>
+                  <span>Subtotal Item Baru</span>
+                  <b>{rupiah(subtotal)}</b>
                 </div>
-              )}
-              <div className="total">
-                <span>Total Akhir Tagihan</span>
-                <strong>{rupiah(total)}</strong>
+                {diskon > 0 && (
+                  <div style={{ color: "var(--oxblood)" }}>
+                    <span>Diskon Nota</span>
+                    <b>− {rupiah(diskon)}</b>
+                  </div>
+                )}
+                <div className="total">
+                  <span>Total Akhir Tagihan</span>
+                  <strong>{rupiah(total)}</strong>
+                </div>
               </div>
             </div>
           </div>
@@ -808,6 +920,8 @@ export function HistoryPage({ currentUser, role }: {
   async function handleSaveEdit(payload: {
     items: HistoryItemDetail[]
     method: "Tunai" | "QRIS" | "Gabungan"
+    bayarTunai: number
+    bayarQris: number
     reason: string
   }) {
     if (!editingTx) return
@@ -827,6 +941,8 @@ export function HistoryPage({ currentUser, role }: {
           kapster: it.kapster,
         })),
         metode: payload.method,
+        bayarTunai: payload.bayarTunai,
+        bayarQris: payload.bayarQris,
         alasanEdit: payload.reason,
       })
       await loadLive()
@@ -847,6 +963,8 @@ export function HistoryPage({ currentUser, role }: {
               ...t,
               items: payload.items,
               method: payload.method,
+              bayarTunai: payload.bayarTunai,
+              bayarQris: payload.bayarQris,
               subtotal,
               discount: diskon,
               total,
