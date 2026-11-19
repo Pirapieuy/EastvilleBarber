@@ -12911,6 +12911,7 @@ summary,
 
 .nota-add {
   width: 32px;
+  height: 32px;
   min-width: 32px;
   min-height: 32px;
   padding: 0;
@@ -14805,6 +14806,14 @@ summary,
 .manual-page .manual-quick-cash button.active {
   border-color: var(--brass);
   background: var(--brass-soft);
+}
+
+/* Input Manual: tanggal & jam selalu sebaris */
+.manual-date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  grid-column: 1 / -1;
 }
 
 /* Input Manual: jarak antarkolom sama di semua kartu, uang cepat melebar penuh */

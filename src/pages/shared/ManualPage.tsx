@@ -308,6 +308,9 @@ export function ManualPage() {
               <div
                 className={`nota-item ${n > 0 ? "active" : ""}`}
                 key={keyOf(it)}
+                onClick={n === 0 ? () => ubahQty(it, 1) : undefined}
+                role={n === 0 ? "button" : undefined}
+                style={n === 0 ? { cursor: "pointer" } : undefined}
               >
                 <div className="nota-item-info">
                   <strong>{it.name}</strong>
@@ -321,7 +324,6 @@ export function ManualPage() {
                         : "nota-add-service"
                     }`}
                     aria-label={`Tambah ${it.name}`}
-                    onClick={() => ubahQty(it, 1)}
                   >
                     <Icon name="plus" />
                   </Button>
@@ -413,6 +415,7 @@ export function ManualPage() {
               ))}
             </SearchSelect>
           </div>
+          <div className="manual-date-row">
           <div className="form-grid-field manual-date-field">
             <span>Tanggal</span>
             <CalendarPicker
@@ -429,6 +432,7 @@ export function ManualPage() {
           <div className="form-grid-field manual-date-field">
             <span>Jam</span>
             <TimePicker align="right" onChange={setJam} value={jam} />
+          </div>
           </div>
           <small className="manual-jam-note">Di luar jam kerja dihitung lembur.</small>
         </div>
