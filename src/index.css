@@ -17423,3 +17423,50 @@ label .search-select-trigger {
     min-height: 42px;
   }
 }
+
+/* Riwayat: filter tanggal, kapster, dan metode bayar sama tinggi (40px) dan sama lebar */
+.history-page-content .filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.history-page-content .filters .calendar-picker-wrapper,
+.history-page-content .filters .search-select.history-kapster-select,
+.history-page-content .filters .history-method-filter {
+  width: 100%;
+  min-width: 0;
+  flex: none;
+  margin: 0;
+}
+
+.history-page-content .filters .history-method-filter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  height: 40px;
+  padding: 2px;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.history-page-content .filters .history-method-filter .button {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+@media (max-width: 820px) {
+  .history-page-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .history-page-content .filters .history-method-filter {
+    grid-column: 1 / -1;
+  }
+}
