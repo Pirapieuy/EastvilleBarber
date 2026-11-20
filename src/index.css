@@ -14248,49 +14248,76 @@ summary,
   }
 }
 
-/* Riwayat di tablet dan HP: tiap nota jadi kartu dua baris (nota + kapster, lalu item) */
+/* Riwayat di tablet dan HP: format tabel sama dengan desktop (NOTA | KAPSTER | ITEM), klik untuk buka modal */
 @media (max-width: 1024px) {
   .history-page-content .table-head {
-    display: none !important;
+    display: grid !important;
   }
 
   .history-page-content .transaction-list {
-    padding: 4px 0;
+    padding: 0;
     overflow-y: auto;
   }
 
   .history-page-content .transaction-row {
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    grid-template-areas:
-      "nota kapster"
-      "item item" !important;
-    gap: 6px 12px !important;
-    padding: 12px 14px !important;
-    min-height: 0 !important;
+    grid-template-columns: 1.3fr 1fr 1.4fr !important;
+    grid-template-areas: none !important;
+    gap: 12px !important;
+    padding: 10px 16px !important;
+    min-height: 56px !important;
   }
 
   .history-page-content .transaction-row .tx-cell-col-nota {
-    grid-area: nota;
+    grid-area: auto;
   }
 
   .history-page-content .transaction-row .tx-cell-kapster {
-    grid-area: kapster;
-    max-width: 140px;
-    overflow: hidden;
+    grid-area: auto;
+    max-width: none;
     color: var(--ink);
-    font-size: 13px;
-    font-weight: 600;
-    text-align: right;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .history-page-content .transaction-row .tx-cell-items {
-    grid-area: item;
-    padding-top: 6px;
-    border-top: 1px dashed var(--line);
+    grid-area: auto;
+    padding-top: 0;
+    border-top: none;
+    color: var(--slate);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 620px) {
+  .history-page-content .table-head,
+  .history-page-content .transaction-row {
+    grid-template-columns: minmax(95px, 1.35fr) minmax(65px, 0.9fr) minmax(80px, 1.15fr) !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
   }
 
+  .history-page-content .transaction-row .tx-cell-nota strong {
+    font-size: 11px;
+  }
+
+  .history-page-content .transaction-row .tx-cell-nota small {
+    font-size: 10px;
+  }
+
+  .history-page-content .transaction-row .tx-cell-kapster,
+  .history-page-content .transaction-row .tx-cell-items {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 1024px) {
   /* Detail di modal: metode dan kapster berdampingan, komisi selebar penuh */
   .transaction-modal-body .detail-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
