@@ -763,14 +763,14 @@ function TransactionDetailBody({
               <Icon name="wallet" />
               <small>Rincian Komisi</small>
               <strong>{rupiah(selected.commission)}</strong>
-              <span className="commission-hint">
-                {(selected.commissionNote || "")
-                  .replace("(lembur)", "")
-                  .replace("50%", "")
-                  .trim()}
-              </span>
             </div>
           </div>
+          <span className="commission-hint">
+            {(selected.commissionNote || "")
+              .replace("(lembur)", "")
+              .replace("50%", "")
+              .trim()}
+          </span>
         </div>
 
         <div className="detail-actions-group">
@@ -1096,7 +1096,7 @@ export function HistoryPage({ currentUser, role }: {
           <Icon name="search" />
           <input
             aria-label="Cari transaksi"
-            placeholder="Cari nota, kapster, item, atau total..."
+            placeholder="Cari nota, kapster, item..."
             value={cari}
             onChange={(e) => setCari(e.target.value)}
           />

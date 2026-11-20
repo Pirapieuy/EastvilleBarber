@@ -5207,10 +5207,14 @@ textarea {
 
 .commission-hint {
   display: block;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--slate);
   line-height: 1.3;
-  margin-top: 3px;
+  margin-top: 8px;
+}
+
+.commission-hint:empty {
+  display: none;
 }
 
 .audit-timeline {
@@ -14464,10 +14468,6 @@ summary,
     font-size: 12px;
   }
 
-  .transaction-modal-body .commission-hint {
-    display: none;
-  }
-
   /* Jarak kartu daftar ke tepi bawah sama dengan jarak samping */
   .content.history-page-content {
     padding-bottom: 27px !important;
@@ -14608,12 +14608,17 @@ summary,
 .history-page-content .filters .search {
   flex: 1 1 200px;
   grid-column: 1 / -1;
+  width: 100%;
   min-width: 0;
   height: 40px;
 }
 
 .history-page-content .filters .search input {
   font-size: 13px;
+}
+
+.history-page-content .filters .calendar-picker-btn {
+  justify-content: flex-start;
 }
 
 .history-method-filter .button.active {
@@ -14688,6 +14693,7 @@ summary,
     flex: 1 1 auto !important;
     min-height: 0;
     max-height: none !important;
+    margin-top: 0 !important;
     margin-bottom: 0 !important;
     overflow-y: auto !important;
   }
@@ -17146,24 +17152,24 @@ label .search-select-trigger {
 /* Riwayat (laptop): tanggal & kapster menyesuaikan lebar penuh seperti tab, pilihan cara bayar di kanan */
 @media (min-width: 1025px) {
   .history-page-content .filters {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 12px;
   }
 
   .history-page-content .filters .calendar-picker-wrapper {
-    flex: 0 0 auto;
-    min-width: 200px;
+    flex: 1 1 150px;
+    min-width: 0;
   }
 
   .history-page-content .filters .search-select.history-kapster-select {
-    flex: 1 1 0;
-    min-width: 180px;
+    flex: 1 1 150px;
+    min-width: 0;
   }
 
   .history-page-content .filters .search {
     grid-column: auto;
-    flex: 1.4 1 0;
-    min-width: 200px;
+    flex: 1.4 1 260px;
+    min-width: 0;
   }
 
   .history-page-content .filters .history-method-filter {
@@ -17173,6 +17179,13 @@ label .search-select-trigger {
 
   .history-page-content .master-detail {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* Laptop sempit: kolom cari satu baris sendiri agar tanggal, kapster, dan metode tidak terpotong */
+@media (min-width: 1025px) and (max-width: 1279px) {
+  .history-page-content .filters .search {
+    flex-basis: 100%;
   }
 }
 
