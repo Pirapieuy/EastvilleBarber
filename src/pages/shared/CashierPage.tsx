@@ -488,6 +488,15 @@ export function CashierPage({ currentUser, onNavigate }: {
   }, [reloadKey])
 
   useEffect(() => {
+    const mql = window.matchMedia("(min-width: 821px)")
+    const handleBp = (e: MediaQueryListEvent) => {
+      if (e.matches) setIsCartOpen(false)
+    }
+    mql.addEventListener("change", handleBp)
+    return () => mql.removeEventListener("change", handleBp)
+  }, [])
+
+  useEffect(() => {
     if (!isCartOpen) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsCartOpen(false)
@@ -1148,10 +1157,10 @@ export function CashierPage({ currentUser, onNavigate }: {
       />
 
       <aside
-        className={`cart cart-sheet-center fixed z-50 flex flex-col overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-all duration-300 ease-out overscroll-contain min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:scale-100 min-[821px]:transform-none min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
+        className={`cart cart-sheet-center fixed z-50 flex flex-col overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-2xl transition-[opacity,transform] duration-200 ease-out overscroll-contain min-[821px]:transition-none min-[821px]:static min-[821px]:w-auto min-[821px]:max-w-none min-[821px]:inset-auto min-[821px]:z-auto min-[821px]:max-h-none min-[821px]:overflow-visible min-[821px]:rounded-none min-[821px]:border-0 min-[821px]:bg-[var(--bone)] min-[821px]:shadow-none min-[821px]:translate-y-0 min-[821px]:scale-100 min-[821px]:transform-none min-[821px]:opacity-100 min-[821px]:pointer-events-auto ${
           isCartOpen
             ? "scale-100 opacity-100 pointer-events-auto"
-            : "scale-95 opacity-0 pointer-events-none"
+            : "max-[820px]:hidden scale-95 opacity-0 pointer-events-none"
         }`}
         role="dialog"
         aria-modal="true"

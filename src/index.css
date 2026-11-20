@@ -17233,15 +17233,16 @@ label .search-select-trigger {
 /* Tablet landscape Kasir: daftar katalog dan pembayaran menggulir di panelnya sendiri. */
 @media (min-width: 821px) and (max-width: 1024px) {
   .workspace:has(> .cashier-page) {
-    height: 100svh;
+    height: 100dvh;
     overflow: hidden;
   }
 
   .cashier-page {
-    height: calc(100svh - 56px);
+    height: 100dvh;
     min-height: 0;
     grid-template-columns: minmax(0, 1fr) minmax(320px, 0.62fr);
     overflow: hidden;
+    box-sizing: border-box;
   }
 
   .cashier-page .catalog {
