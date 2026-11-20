@@ -505,7 +505,7 @@ export function AbsensiKapster({
         </button>
       </div>
 
-      <div style={{ padding: "0 16px 20px" }}>
+      <div className="absensi-body">
         {activeTab === "absensi" ? (
           <>
             <div
