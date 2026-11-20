@@ -5210,7 +5210,7 @@ textarea {
   font-size: 11px;
   color: var(--slate);
   line-height: 1.3;
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .commission-hint:empty {
@@ -14419,7 +14419,7 @@ summary,
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 
 .detail-pinned .detail-actions-group {
@@ -14448,7 +14448,7 @@ summary,
   /* Info operasional tetap tiga kartu sejajar di HP dan tablet */
   .transaction-modal-body .detail-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 8px;
   }
 
   .transaction-modal-body .detail-cards > div:nth-child(3) {
@@ -14576,12 +14576,12 @@ summary,
   flex: none;
 }
 
-/* Riwayat: bar filter metode di samping kapster */
+/* Riwayat: bar filter metode di samping kapster. Jarak antar kontrol = ke kartu = antar kartu (14px) */
 .history-page-content .filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 14px !important;
 }
 
 .history-page-content .filters .search-select.history-kapster-select {
@@ -14593,6 +14593,7 @@ summary,
   flex: none;
   font-size: 13px;
   height: 40px;
+  gap: 3px;
   padding: 3px;
   border-radius: 9px;
   box-sizing: border-box;
@@ -14604,6 +14605,7 @@ summary,
   padding: 0 14px;
   border-radius: 7px;
   font-size: inherit;
+  font-weight: 500;
 }
 
 .history-page-content .filters .search {
@@ -14651,10 +14653,6 @@ summary,
   /* Panel detail: padding & jarak antar bagian sama dengan popup HP/tablet (14px samping, 12px antar bagian) */
   .history-page-content .desktop-only-detail {
     padding: 14px 16px 16px;
-    gap: 12px;
-  }
-
-  .history-page-content .desktop-only-detail .detail-pinned {
     gap: 12px;
   }
 
@@ -17183,7 +17181,6 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .history-page-content .filters {
     flex-wrap: wrap;
-    gap: 8px;
   }
 
   .history-page-content .filters .search,
