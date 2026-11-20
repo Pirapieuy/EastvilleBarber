@@ -14591,11 +14591,29 @@ summary,
 
 .history-method-filter {
   flex: none;
+  height: 40px;
+  padding: 2px;
+  border-radius: 9px;
+  box-sizing: border-box;
 }
 
 .history-method-filter .button {
-  min-height: 36px;
+  min-height: 0;
+  height: 100%;
   padding: 0 14px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.history-page-content .filters .search {
+  flex: 1 1 200px;
+  grid-column: 1 / -1;
+  min-width: 0;
+  height: 40px;
+}
+
+.history-page-content .filters .search input {
+  font-size: 13px;
 }
 
 .history-method-filter .button.active {
@@ -14648,10 +14666,11 @@ summary,
 
 /* Riwayat di mobile/tablet: halaman setinggi layar, kartu nota terkurung dan digulir di dalamnya (seperti desktop) */
 @media (max-width: 1024px) {
-  .content.history-page-content {
+  .workspace > .content.history-page-content {
     height: 100svh;
     display: flex;
     flex-direction: column;
+    gap: 14px;
     padding-bottom: 14px !important;
     overflow: hidden;
   }
@@ -17139,6 +17158,12 @@ label .search-select-trigger {
   .history-page-content .filters .search-select.history-kapster-select {
     flex: 1 1 0;
     min-width: 180px;
+  }
+
+  .history-page-content .filters .search {
+    grid-column: auto;
+    flex: 1.4 1 0;
+    min-width: 200px;
   }
 
   .history-page-content .filters .history-method-filter {
