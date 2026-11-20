@@ -20,7 +20,6 @@ import { BerandaOwner } from "./pages/owner/BerandaOwner"
 import { RiwayatTransaksi as RiwayatTransaksiOwner } from "./pages/owner/RiwayatTransaksi"
 import { LaporanKeuangan as LaporanKeuanganOwner } from "./pages/owner/LaporanKeuangan"
 import { LaporanProduk as LaporanProdukOwner } from "./pages/owner/LaporanProduk"
-import { Pengeluaran as PengeluaranOwner } from "./pages/owner/Pengeluaran"
 import { RekapManual as RekapManualOwner } from "./pages/owner/RekapManual"
 import { LayananHarga as LayananHargaOwner } from "./pages/owner/LayananHarga"
 import { MasterProduk as MasterProdukOwner } from "./pages/owner/MasterProduk"
@@ -185,9 +184,6 @@ export function App() {
       activePage === "laporan-produk"
     ) {
       return <LaporanProdukOwner currentUser={currentUser} />
-    }
-    if (activePage === "Pengeluaran" || activePage === "expenses") {
-      return <PengeluaranOwner />
     }
     if (activePage === "RekapManual" || activePage === "manual") {
       return <RekapManualOwner />
