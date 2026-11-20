@@ -17210,6 +17210,14 @@ label .search-select-trigger {
   .history-page-content .filters .history-method-filter {
     flex: 0 0 auto;
     margin-left: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .history-page-content .filters .history-method-filter .button {
+    min-height: 0;
+    height: 100%;
   }
 
   .history-page-content .master-detail {
