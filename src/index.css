@@ -6309,6 +6309,7 @@ textarea {
   }
 }
 
+
 .expense-row {
   min-height: 59px;
   padding: 9px 14px;
@@ -9898,9 +9899,45 @@ textarea {
     box-sizing: border-box !important;
   }
 
+  .master-detail {
+    display: block !important;
+  }
+
   .master-detail aside.detail,
   .desktop-only-detail {
     display: none !important;
+  }
+
+  .history-page-content {
+    min-height: calc(100svh - 60px) !important;
+    padding-bottom: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-inline: -14px !important;
+    margin-bottom: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
   }
 
   .salary-grid,
@@ -12026,6 +12063,11 @@ textarea {
     display: none !important;
   }
 
+  .master-detail {
+    display: block !important;
+    min-height: auto !important;
+  }
+
   .transaction-list {
     width: 100% !important;
     min-width: 0 !important;
@@ -12336,6 +12378,10 @@ textarea {
   .mobile-content {
     width: 100%;
     padding: 66px 14px 28px;
+  }
+
+  .content.history-page-content {
+    padding-bottom: 0 !important;
   }
 
   .form-panel {
@@ -14124,6 +14170,12 @@ summary,
   }
 }
 
+/* Riwayat dan Input Manual: judul sudah dihapus, elemen pertama tidak perlu jarak atas tambahan */
+.history-page-content > .filters:first-child,
+.history-page-content > .demo-notice + .filters {
+  margin-top: 0;
+}
+
 .content.narrow > .panel.form-panel:first-of-type {
   margin-top: 0;
 }
@@ -14140,6 +14192,28 @@ summary,
 }
 
 @media (min-width: 1025px) {
+  /* Halaman setinggi layar: daftar dan detail mengisi sisa tinggi sampai bawah,
+     jarak bawah sama dengan jarak atas (26px) */
+  .content.history-page-content {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 26px;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .history-page-content .transaction-list {
+    height: 100%;
+    max-height: none;
+    margin-top: 0;
+  }
 
   .history-page-content .desktop-only-detail {
     height: 100%;
@@ -14153,10 +14227,36 @@ summary,
   }
 }
 
+/* Tablet dan HP: daftar nota berupa kartu yang sama */
+@media (max-width: 1024px) {
+  .history-page-content .master-detail {
+    margin-inline: 0 !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 0 1 auto !important;
+    max-height: calc(100svh - 190px) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow) !important;
+    margin-bottom: 14px !important;
+  }
+
+  .content.history-page-content {
+    padding-bottom: 28px !important;
+  }
+}
+
 /* Riwayat di tablet dan HP: format tabel sama dengan desktop (NOTA | KAPSTER | ITEM), klik untuk buka modal */
 @media (max-width: 1024px) {
   .history-page-content .table-head {
     display: grid !important;
+  }
+
+  .history-page-content .transaction-list {
+    padding: 0;
+    overflow-y: auto;
   }
 
   .history-page-content .transaction-row {
@@ -14367,6 +14467,30 @@ summary,
   .transaction-modal-body .commission-hint {
     display: none;
   }
+
+  /* Jarak kartu daftar ke tepi bawah sama dengan jarak samping */
+  .content.history-page-content {
+    padding-bottom: 27px !important;
+  }
+
+  .history-page-content .master-detail {
+    margin-inline: 0 !important;
+    margin-top: 12px !important;
+    flex: 1 1 auto !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .content.history-page-content {
+    padding-bottom: 14px !important;
+  }
 }
 
 /* Detail transaksi: daftar item minimal 2 kartu; kalau layar lebih pendek, seluruh panel bisa digulir */
@@ -14452,6 +14576,33 @@ summary,
   flex: none;
 }
 
+/* Riwayat: bar filter metode di samping kapster */
+.history-page-content .filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.history-page-content .filters .search-select.history-kapster-select {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.history-method-filter {
+  flex: none;
+}
+
+.history-method-filter .button {
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.history-method-filter .button.active {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
 /* Desktop: daftar item memakai sisa tinggi panel (tidak berhenti di 260px), tetap menggulir bila penuh */
 @media (min-width: 1025px) {
   .history-page-content .desktop-only-detail .detail-items-section {
@@ -14470,11 +14621,57 @@ summary,
   }
 }
 
+/* Filter metode di mobile: satu baris penuh, tiga tombol melebar sama rata */
+@media (max-width: 820px) {
+  .history-page-content .filters .history-method-filter {
+    grid-column: 1 / -1;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+  }
+
+  .history-page-content .filters .history-method-filter .button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 6px;
+    justify-content: center;
+  }
+}
+
 /* Riwayat & Input Manual: isi melebar penuh, hanya menyisakan margin tipis kiri-kanan */
 .content.history-page-content,
 .content.narrow.manual-page {
   width: 100%;
   max-width: none;
+}
+
+/* Riwayat di mobile/tablet: halaman setinggi layar, kartu nota terkurung dan digulir di dalamnya (seperti desktop) */
+@media (max-width: 1024px) {
+  .content.history-page-content {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 14px !important;
+    overflow: hidden;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto !important;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px !important;
+  }
+
+  .history-page-content .transaction-list.panel,
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    min-height: 0;
+    max-height: none !important;
+    margin-bottom: 0 !important;
+    overflow-y: auto !important;
+  }
 }
 
 /* Pesanan saat ini: hanya satu "tab", penanda garis emas dihapus agar tidak tampak melayang */
@@ -14918,6 +15115,25 @@ label .search-select-trigger {
     flex: 0 0 auto;
   }
 
+  .workspace:has(> .history-page-content) > .history-page-content {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    padding-bottom: 26px;
+    overflow: hidden;
+  }
+
+  .history-page-content .master-detail {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .history-page-content .transaction-list {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: none;
+  }
+
   .history-page-content .desktop-only-detail {
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -14925,6 +15141,29 @@ label .search-select-trigger {
 
   .history-page-content .desktop-only-detail .detail-pinned {
     margin-top: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .workspace:has(> .history-page-content) > .history-page-content {
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .history-page-content .master-detail {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+
+  .history-page-content .transaction-list {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: none;
   }
 }
 
@@ -16885,6 +17124,33 @@ label .search-select-trigger {
   }
 }
 
+/* Riwayat (laptop): tanggal & kapster menyesuaikan lebar penuh seperti tab, pilihan cara bayar di kanan */
+@media (min-width: 1025px) {
+  .history-page-content .filters {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+
+  .history-page-content .filters .calendar-picker-wrapper {
+    flex: 0 0 auto;
+    min-width: 200px;
+  }
+
+  .history-page-content .filters .search-select.history-kapster-select {
+    flex: 1 1 0;
+    min-width: 180px;
+  }
+
+  .history-page-content .filters .history-method-filter {
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+
+  .history-page-content .master-detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 1200px) {
   .cashier-page .barber-btn > i {
     display: none;
@@ -17155,5 +17421,76 @@ label .search-select-trigger {
   .cashier-page .primary-button.cart-submit {
     margin-top: 8px;
     min-height: 42px;
+  }
+}
+
+/* Riwayat: bar filter. HP/tablet: cari penuh, tanggal + kapster berdampingan, metode penuh.
+   Laptop: satu baris (cari lebih lebar, lainnya sama lebar), semua setinggi 40px. */
+.history-page-content .filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+
+.history-page-content .filters .search {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 40px;
+}
+
+.history-page-content .filters .search input {
+  font-size: 13px;
+}
+
+.history-page-content .filters .calendar-picker-wrapper,
+.history-page-content .filters .search-select.history-kapster-select,
+.history-page-content .filters .history-method-filter {
+  width: 100%;
+  min-width: 0;
+  flex: none;
+  margin: 0;
+}
+
+.history-page-content .filters .history-method-filter {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  height: 40px;
+  padding: 2px;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.history-page-content .filters .history-method-filter .button {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+@media (min-width: 1025px) {
+  .history-page-content .filters {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .history-page-content .filters .search,
+  .history-page-content .filters .history-method-filter {
+    grid-column: auto;
+  }
+}
+
+/* Tablet & HP: jarak filter-daftar, samping, dan bawah sama (14px) */
+@media (max-width: 1024px) {
+  .content.history-page-content {
+    padding-bottom: 14px !important;
+  }
+
+  .content.history-page-content .master-detail {
+    margin-top: 2px !important;
   }
 }
