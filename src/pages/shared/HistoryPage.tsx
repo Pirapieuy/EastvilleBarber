@@ -836,7 +836,6 @@ export function HistoryPage({ currentUser, role }: {
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   const [dateFilter, setDateFilter] = useState("")
-  const [cari, setCari] = useState("")
   const [barberFilter, setBarberFilter] = useState("Semua kapster")
   const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
     "Semua",
@@ -849,23 +848,8 @@ export function HistoryPage({ currentUser, role }: {
   const activeBarber = barberOptions.includes(barberFilter)
     ? barberFilter
     : "Semua kapster"
-  const kataCari = cari.trim().toLowerCase()
   const visibleTx = txList.filter(
     (tx) =>
-      (!kataCari ||
-        [
-          tx.id,
-          tx.date,
-          tx.time,
-          tx.barber,
-          tx.method,
-          tx.status,
-          String(tx.total),
-          ...tx.items.map((it) => it.name),
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(kataCari)) &&
       (activeBarber === "Semua kapster" ||
         tx.barber.split(", ").includes(activeBarber)) &&
       (methodFilter === "Semua" ||
@@ -1092,15 +1076,6 @@ export function HistoryPage({ currentUser, role }: {
     <div className="content history-page-content history-no-scrollbar">
       <DemoNotice live={live} error={liveError} />
       <div className="filters">
-        <div className="search">
-          <Icon name="search" />
-          <input
-            aria-label="Cari transaksi"
-            placeholder="Cari nota, kapster, item, atau total..."
-            value={cari}
-            onChange={(e) => setCari(e.target.value)}
-          />
-        </div>
         <CalendarPicker
           value={dateFilter}
           onChange={setDateFilter}
@@ -1144,7 +1119,7 @@ export function HistoryPage({ currentUser, role }: {
           </div>
           {visibleTx.length === 0 && (
             <p className="history-empty">
-              {cari ? "Tidak ada nota yang cocok dengan pencarian" : "Belum ada transaksi"}
+              Belum ada transaksi
               {dateFilter ? " pada tanggal ini" : ""}
               {activeBarber !== "Semua kapster" ? ` untuk ${activeBarber}` : ""}
               .
