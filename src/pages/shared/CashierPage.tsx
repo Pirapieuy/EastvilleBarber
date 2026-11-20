@@ -927,7 +927,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                     setSelectedBarber(barber)
                   }}
                 >
-                  <i>{barber.charAt(0)}</i>
                   <span>{barber}</span>
                 </Button>
               )

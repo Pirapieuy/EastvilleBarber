@@ -675,6 +675,8 @@ function TransactionDetailBody({
   const canVoid = userRole === "Owner" || userRole === "Kasir" || userRole === "Manajer"
   const canRestore = userRole === "Owner"
   const canEdit = !isVoided && (userRole === "Owner" || userRole === "Kasir" || userRole === "Manajer")
+  // Persen komisi diambil dari catatan (mis. "40% total layanan ..."); kosong bila transaksi campur produk.
+  const persenKomisi = /(\d+(?:[.,]\d+)?)\s*%/.exec(selected.commissionNote || "")?.[1] ?? ""
 
   return (
     <>
@@ -761,16 +763,10 @@ function TransactionDetailBody({
             </div>
             <div>
               <Icon name="wallet" />
-              <small>Rincian Komisi</small>
+              <small>Komisi{persenKomisi ? ` ${persenKomisi}%` : ""}</small>
               <strong>{rupiah(selected.commission)}</strong>
             </div>
           </div>
-          <span className="commission-hint">
-            {(selected.commissionNote || "")
-              .replace("(lembur)", "")
-              .replace("50%", "")
-              .trim()}
-          </span>
         </div>
 
         <div className="detail-actions-group">
