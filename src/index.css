@@ -15092,7 +15092,7 @@ label .search-select-trigger {
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
-    padding-bottom: 16px;
+    padding-bottom: 26px;
     overflow: hidden;
   }
 
@@ -17097,10 +17097,11 @@ label .search-select-trigger {
   }
 }
 
-/* Riwayat (laptop): tanggal & kapster lebar tetap di kiri, pilihan cara bayar di kanan sejajar panel detail */
+/* Riwayat (laptop): tanggal & kapster menyesuaikan lebar penuh seperti tab, pilihan cara bayar di kanan */
 @media (min-width: 1025px) {
   .history-page-content .filters {
     flex-wrap: nowrap;
+    gap: 12px;
   }
 
   .history-page-content .filters .calendar-picker-wrapper {
@@ -17109,12 +17110,17 @@ label .search-select-trigger {
   }
 
   .history-page-content .filters .search-select.history-kapster-select {
-    flex: 0 1 260px;
-    min-width: 200px;
+    flex: 1 1 0;
+    min-width: 180px;
   }
 
   .history-page-content .filters .history-method-filter {
-    margin-left: auto;
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+
+  .history-page-content .master-detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
