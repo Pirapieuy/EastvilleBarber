@@ -14591,8 +14591,9 @@ summary,
 
 .history-method-filter {
   flex: none;
+  font-size: 13px;
   height: 40px;
-  padding: 2px;
+  padding: 3px;
   border-radius: 9px;
   box-sizing: border-box;
 }
@@ -14602,7 +14603,7 @@ summary,
   height: 100%;
   padding: 0 14px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: inherit;
 }
 
 .history-page-content .filters .search {
@@ -14613,8 +14614,27 @@ summary,
   height: 40px;
 }
 
-.history-page-content .filters .search input {
+/* Cari, tanggal, kapster: padding, jarak ikon-teks, huruf, dan ikon sama persis */
+.history-page-content .filters .search,
+.history-page-content .filters .calendar-picker-btn,
+.history-page-content .filters .search-select-trigger {
+  padding: 0 12px;
+  gap: 8px;
+  border-radius: 9px;
   font-size: 13px;
+  font-weight: 500;
+}
+
+.history-page-content .filters .search input {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.history-page-content .filters .search .icon,
+.history-page-content .filters .calendar-picker-btn .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
 }
 
 .history-page-content .filters .calendar-picker-btn {
@@ -14628,6 +14648,16 @@ summary,
 
 /* Desktop: daftar item memakai sisa tinggi panel (tidak berhenti di 260px), tetap menggulir bila penuh */
 @media (min-width: 1025px) {
+  /* Panel detail: padding & jarak antar bagian sama dengan popup HP/tablet (14px samping, 12px antar bagian) */
+  .history-page-content .desktop-only-detail {
+    padding: 14px 16px 16px;
+    gap: 12px;
+  }
+
+  .history-page-content .desktop-only-detail .detail-pinned {
+    gap: 12px;
+  }
+
   .history-page-content .desktop-only-detail .detail-items-section {
     flex: 1 1 auto;
     flex-shrink: 1;
@@ -17153,7 +17183,15 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .history-page-content .filters {
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
+  }
+
+  .history-page-content .filters .search,
+  .history-page-content .filters .calendar-picker-btn,
+  .history-page-content .filters .search-select-trigger,
+  .history-page-content .filters .history-method-filter {
+    height: 44px;
+    font-size: 14px;
   }
 
   .history-page-content .filters .calendar-picker-wrapper {
