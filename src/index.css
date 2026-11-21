@@ -17938,3 +17938,224 @@ label .search-select-trigger {
 .manual-page .manual-discount-manual .segmented button {
   height: 100%;
 }
+
+/* Input Manual: uang cepat dibagi rata dalam kolom, teks tidak meluber */
+.manual-page .manual-quick-cash {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+.manual-page .manual-quick-cash button {
+  width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Input Manual: pilihan komisi layanan, sama dengan Kasir */
+.manual-page .manual-komisi {
+  margin-top: 12px;
+}
+
+.manual-page .manual-komisi > span {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--slate);
+}
+
+.manual-page .manual-komisi-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.manual-page .manual-komisi-grid .button {
+  height: 44px;
+  min-height: 44px;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+/* Input Manual: footer total bisa diketuk membuka rincian nota */
+.manual-page .manual-total-button {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--slate);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.manual-page .manual-total-button:disabled {
+  cursor: default;
+}
+
+.manual-page .manual-total-button .icon {
+  flex: none;
+  color: var(--brass-dark);
+}
+
+.manual-page .manual-total-button small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.manual-page .sticky-submit {
+  align-items: center;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.manual-page .sticky-submit .primary-button {
+  flex: none;
+  min-height: 44px;
+}
+
+/* Rincian nota: kartu di tengah seperti panel "Pesanan saat ini" di Kasir, di dalam layar */
+.manual-ringkas {
+  width: min(460px, calc(100% - 32px));
+  max-height: calc(100svh - 32px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+
+.manual-ringkas-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.manual-ringkas-head > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.manual-ringkas-head .icon {
+  color: var(--brass-dark);
+}
+
+.manual-ringkas-head button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bone);
+  color: var(--ink);
+}
+
+.manual-ringkas-lines {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 16px;
+  scrollbar-width: none;
+}
+
+.manual-ringkas-lines::-webkit-scrollbar {
+  display: none;
+}
+
+.manual-ringkas-lines .cart-clear-row {
+  position: static;
+  min-height: 40px;
+  padding: 0;
+}
+
+.manual-ringkas-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.manual-ringkas-line strong {
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink);
+}
+
+.manual-ringkas-line small {
+  font-size: 12px;
+  color: var(--slate);
+}
+
+.manual-ringkas-line b {
+  min-width: 82px;
+  text-align: right;
+  font-size: 14px;
+}
+
+.manual-ringkas .nota-stepper {
+  height: 40px;
+}
+
+.manual-ringkas .nota-stepper button {
+  width: 36px;
+  height: 38px;
+}
+
+.manual-ringkas .nota-summary {
+  margin: 0 16px;
+  padding-top: 12px;
+}
+
+.manual-ringkas > .primary-button {
+  margin: 0 16px;
+  min-height: 44px;
+}
+
+.manual-ringkas-lines .cart-clear-row {
+  margin: 0;
+  padding: 0;
+  justify-content: space-between;
+}
+
+.manual-ringkas-lines .cart-clear-button {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.manual-page .manual-quick-cash {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.manual-page .manual-quick-cash button {
+  flex: 1 1 118px;
+}

@@ -74,9 +74,11 @@ export function ManualPage() {
   const [cash, setCash] = useState("")
   const [qris, setQris] = useState("")
   // Gabungan: isi salah satu (tunai atau QRIS), sisanya dihitung otomatis, sama seperti di Kasir.
+  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
   const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
   const [saving, setSaving] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [ringkasOpen, setRingkasOpen] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
@@ -267,6 +269,7 @@ export function ManualPage() {
         bayarTunai: tunaiPakai,
         bayarQris: qrisPakai,
         kodeDiskon: promo ? promo.kode : undefined,
+        komisiLayanan: selected.some((i) => i.tipe === "Layanan") ? komisiLayanan : undefined,
         pinOtorisasi: !promo && diskonNum > 0 && pin ? pin : undefined,
         items: selected.map((i) => ({
           tipe: i.tipe,
@@ -443,7 +446,6 @@ export function ManualPage() {
             <TimePicker align="right" onChange={setJam} value={jam} />
           </div>
           </div>
-          <small className="manual-jam-note">Di luar jam kerja dihitung lembur.</small>
         </div>
       </section>
 
@@ -602,6 +604,23 @@ export function ManualPage() {
             </Button>
           ))}
         </div>
+        {selected.some((i) => i.tipe === "Layanan") && (
+          <div className="commission-choice manual-komisi">
+            <span>Komisi layanan</span>
+            <div className="method-grid manual-komisi-grid" role="group" aria-label="Pilih komisi layanan">
+              {(["Normal", "OT"] as const).map((value) => (
+                <Button
+                  className={komisiLayanan === value ? "active" : ""}
+                  key={value}
+                  onClick={() => setKomisiLayanan(value)}
+                >
+                  <strong>{value}</strong>
+                  <small>{value === "Normal" ? "40%" : "50%"}</small>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="form-grid manual-info-grid">
           {method !== "QRIS" && (
             <label>
@@ -704,24 +723,86 @@ export function ManualPage() {
       )}
 
       <div className="sticky-submit">
-        <span>
+        <button
+          className="manual-total-button"
+          disabled={!adaItem}
+          onClick={() => setRingkasOpen(true)}
+          type="button"
+        >
+          <Icon name="receipt" />
           {adaItem && notaOk ? (
-            <>
+            <span>
               Total <b className="submit-total">{rupiah(total)}</b>
-            </>
+              <small>{selected.length} item · lihat nota</small>
+            </span>
           ) : (
-            !success &&
-            (notaOk
-              ? "Pilih minimal satu layanan atau produk."
-              : "Pilih kapster dulu untuk melanjutkan.")
+            <span>
+              {!success &&
+                (notaOk
+                  ? "Pilih minimal satu layanan atau produk."
+                  : "Pilih kapster dulu untuk melanjutkan.")}
+              {error && <small className="error-text"> {error}</small>}
+              {success && <small> {success}</small>}
+            </span>
           )}
-          {error && <small className="error-text"> {error}</small>}
-          {success && <small> {success}</small>}
-        </span>
+        </button>
         <Button className="primary-button" disabled={!canSave} type="submit">
           {saving ? "Menyimpan…" : "Simpan Nota"}
         </Button>
       </div>
+      {(error || success) && adaItem && notaOk && (
+        <p className={error ? "manual-payment-warning" : "manual-qris-notice"} role={error ? "alert" : "status"}>
+          {error || success}
+        </p>
+      )}
+
+      {ringkasOpen && (
+        <div className="modal-overlay modal-centered" onClick={() => setRingkasOpen(false)} role="dialog" aria-modal="true" aria-label="Ringkasan nota">
+          <section className="manual-ringkas" onClick={(e) => e.stopPropagation()}>
+            <header className="manual-ringkas-head">
+              <span><Icon name="receipt" /> Total nota</span>
+              <button type="button" aria-label="Tutup ringkasan" onClick={() => setRingkasOpen(false)}>
+                <Icon name="chevron" />
+              </button>
+            </header>
+            <div className="manual-ringkas-lines">
+              <div className="cart-clear-row">
+                <span className="cart-list-label">{selected.length} item</span>
+                <Button
+                  className="cart-clear-button"
+                  onClick={() => {
+                    setQty({})
+                    setRingkasOpen(false)
+                  }}
+                  aria-label="Hapus semua layanan dan produk"
+                >
+                  <Icon name="trash" /> Hapus Semua
+                </Button>
+              </div>
+              {selected.map((i) => (
+                <div className="manual-ringkas-line" key={keyOf(i)}>
+                  <div>
+                    <strong>{i.name}</strong>
+                    <small>{rupiah(i.price)}</small>
+                  </div>
+                  <div className="nota-stepper">
+                    <button type="button" aria-label={`Kurangi ${i.name}`} onClick={() => ubahQty(i, -1)}>−</button>
+                    <output>{qty[keyOf(i)]}</output>
+                    <button type="button" aria-label={`Tambah ${i.name}`} onClick={() => ubahQty(i, 1)}>+</button>
+                  </div>
+                  <b>{rupiah(i.price * qty[keyOf(i)])}</b>
+                </div>
+              ))}
+            </div>
+            <dl className="nota-summary">
+              <div><dt>Subtotal</dt><dd>{rupiah(subtotal)}</dd></div>
+              {diskonNum > 0 && <div><dt>Diskon</dt><dd>-{rupiah(diskonNum)}</dd></div>}
+              <div className="nota-summary-total"><dt>Total</dt><dd>{rupiah(total)}</dd></div>
+            </dl>
+            <Button className="primary-button" onClick={() => setRingkasOpen(false)}>Tutup</Button>
+          </section>
+        </div>
+      )}
 
       {confirmOpen && (
         <ConfirmModal
