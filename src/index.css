@@ -17225,10 +17225,10 @@ label .search-select-trigger {
   }
 }
 
-/* Laptop sempit: kolom cari satu baris sendiri agar tanggal, kapster, dan metode tidak terpotong */
+/* Laptop sempit: cari, tanggal, kapster satu baris; Semua/Tunai/QRIS turun ke baris bawah selebar penuh */
 @media (min-width: 1025px) and (max-width: 1279px) {
-  .history-page-content .filters .search {
-    flex-basis: 100%;
+  .history-page-content .filters .history-method-filter {
+    flex: 1 1 100%;
   }
 }
 
