@@ -4757,7 +4757,7 @@ textarea {
   .mobile-only-modal .transaction-modal-box {
     width: min(560px, calc(100% - 32px)) !important;
     max-width: 560px !important;
-    height: auto !important;
+    height: min(640px, calc(100svh - 32px)) !important;
     max-height: 86svh !important;
     border-radius: 16px !important;
     border: 1px solid var(--line) !important;
@@ -4769,7 +4769,7 @@ textarea {
   .mobile-only-modal .transaction-modal-body {
     max-height: calc(86svh - 75px) !important;
     overflow-y: auto !important;
-    padding: 16px 20px 20px !important;
+    padding: 14px 16px 16px !important;
   }
 }
 
@@ -4783,7 +4783,7 @@ textarea {
   .mobile-only-modal .transaction-modal-box {
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
+    height: min(640px, calc(100svh - 32px)) !important;
     max-height: 88svh !important;
     border-radius: 18px 18px 0 0 !important;
     border-bottom: 0 !important;
@@ -14512,7 +14512,10 @@ summary,
 }
 
 .transaction-modal-body .detail-items-section {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .transaction-modal-body .detail-items-list {
@@ -14535,8 +14538,10 @@ summary,
   max-height: max(132px, calc(100svh - 560px));
 }
 
-.transaction-modal-body .detail-items-list {
-  max-height: 34svh;
+.transaction-modal-body .detail-items-section .detail-items-list {
+  flex: 1 1 0;
+  min-height: 88px;
+  max-height: none;
 }
 
 @media (min-width: 1025px) {
@@ -14548,8 +14553,7 @@ summary,
 /* Detail transaksi: tanpa tinggi paksaan. Daftar item mengikuti isi, digulir bila lebih dari ±3 item;
    bila layar sangat pendek, seluruh panel yang digulir. */
 .history-page-content .desktop-only-detail .detail-items-section .detail-items-list,
-.detail-items-section .detail-items-list,
-.transaction-modal-body .detail-items-list {
+.detail-items-section .detail-items-list {
   min-height: 0;
   flex: none;
   max-height: 260px;
@@ -15247,7 +15251,7 @@ label .search-select-trigger {
   .mobile-only-modal .transaction-modal-box {
     width: min(480px, 100%) !important;
     max-width: 480px !important;
-    height: auto !important;
+    height: min(640px, calc(100svh - 32px)) !important;
     max-height: calc(100svh - 32px) !important;
     border: 1px solid var(--line) !important;
     border-radius: 16px !important;
@@ -16670,8 +16674,16 @@ label .search-select-trigger {
     animation: modal-pop 160ms cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
+  .mobile-only-modal .transaction-modal-box {
+    height: min(640px, calc(100svh - 32px)) !important;
+  }
+
   .mobile-only-modal .transaction-modal-body {
-    max-height: calc(100svh - 110px) !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    padding: 14px 16px 16px !important;
+    gap: 12px;
   }
 }
 
