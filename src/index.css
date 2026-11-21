@@ -14278,6 +14278,7 @@ summary,
 
   .history-page-content .table-head {
     padding-block: 0 !important;
+    min-height: 40px !important;
   }
 
 
