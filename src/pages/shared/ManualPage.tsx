@@ -729,11 +729,13 @@ export function ManualPage() {
           onClick={() => setRingkasOpen(true)}
           type="button"
         >
-          <Icon name="receipt" />
+          <span className="manual-total-icon">
+            <Icon name="receipt" />
+          </span>
           {adaItem && notaOk ? (
-            <span>
+            <span className="manual-total-text">
+              <span className="manual-total-count">{selected.length}</span>
               Total <b className="submit-total">{rupiah(total)}</b>
-              <small>{selected.length} item · lihat nota</small>
             </span>
           ) : (
             <span>
