@@ -14595,6 +14595,8 @@ summary,
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 14px;
+  /* latar melebar ke samping agar bayangan kartu yang menggulir tidak tembus di sisi kapster */
+  box-shadow: -27px 0 0 var(--bone), 10px 0 0 var(--bone);
 }
 
 /* Desktop: header "Pesanan saat ini" dihapus (di mobile & tablet portrait tetap ada untuk tombol tutup) */
@@ -17334,5 +17336,80 @@ label .search-select-trigger {
   .cashier-page .primary-button.cart-submit {
     margin-top: 8px;
     min-height: 42px;
+  }
+}
+
+/* Kasir POS: tipografi dan jarak seragam di semua ukuran layar (Inter 14px untuk kontrol, jarak 14px) */
+.cashier-page .barber-btn,
+.cashier-page .segmented button,
+.cashier-page .catalog-tools input {
+  font-size: 14px;
+}
+
+.cashier-page .barber-picker-label small {
+  font-size: 12px;
+}
+
+.cashier-page .catalog-item strong {
+  font: 600 14px/1.25 var(--body, Inter, sans-serif);
+}
+
+.cashier-page .catalog-item b {
+  font-size: 13px;
+}
+
+.cashier-page .catalog-sticky {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+}
+
+.cashier-page .catalog-sticky > .barber-picker,
+.cashier-page .catalog-sticky > .catalog-tools {
+  margin-top: 0;
+}
+
+.cashier-page .catalog-tools {
+  display: flex;
+  gap: 12px;
+}
+
+.cashier-page .catalog-tools .search {
+  width: auto;
+  margin-top: 0;
+  flex: 1;
+}
+
+.cashier-page .catalog-grid {
+  margin-top: 0;
+  gap: 10px;
+}
+
+.cashier-page .catalog-locked-card {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.cashier-page .catalog-tools .search {
+  min-height: 46px;
+}
+
+@media (max-width: 820px) {
+  .cashier-page .barber-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .cashier-page .barber-btn {
+    min-width: 0;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1024px) {
+  .cashier-page .catalog {
+    padding-top: 0 !important;
   }
 }
