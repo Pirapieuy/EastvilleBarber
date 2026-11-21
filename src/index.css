@@ -18653,3 +18653,142 @@ label .search-select-trigger {
 .receipt-popup.sudah-simpan .flow-toolbar > div:last-child .button:nth-of-type(2) {
   grid-column: 2;
 }
+
+/* Popup nota Kasir: nota di kiri, panel tombol di kanan (layar lebar); di HP nota di atas dan tombol di bawah selalu terlihat */
+.receipt-popup {
+  width: min(720px, calc(100% - 16px));
+}
+
+.receipt-popup .receipt-layout {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  overflow: hidden;
+}
+
+.receipt-popup .receipt-layout .receipt-stage {
+  order: 0;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+}
+
+.receipt-popup .receipt-aksi {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: var(--paper);
+}
+
+.receipt-popup .receipt-aksi::-webkit-scrollbar {
+  display: none;
+}
+
+.receipt-popup .receipt-aksi .receipt-status {
+  border-bottom: 1px solid var(--line);
+  align-items: flex-start;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar {
+  order: 0;
+  flex: 1 1 auto;
+  display: flex !important;
+  flex-direction: column;
+  align-content: stretch;
+  gap: 8px;
+  padding: 16px;
+  border-top: 0;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+  order: 0;
+  flex: none;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child {
+  display: contents !important;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child,
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  width: 100%;
+  min-height: 44px;
+  flex: none;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child > span {
+  order: 9;
+  grid-column: auto;
+}
+
+/* urutan: ukuran kertas, Cetak, Selesai, Kembali */
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented { order: 0; }
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 1; }
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 2; }
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 3; }
+
+@media (max-width: 640px) {
+  .receipt-popup {
+    width: min(460px, calc(100% - 16px));
+  }
+
+  .receipt-popup .receipt-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .receipt-popup .receipt-layout .receipt-stage {
+    border-right: 0;
+  }
+
+  .receipt-popup .receipt-aksi {
+    overflow: visible;
+    border-top: 1px solid var(--line);
+  }
+
+  .receipt-popup .receipt-aksi .receipt-status {
+    order: 0;
+    min-height: 0;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 12px 16px 16px;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+    grid-column: 1 / -1;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 0; grid-column: 1 !important; grid-row: 2 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 0; grid-column: 2 !important; grid-row: 2 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 0; grid-column: 3 !important; grid-row: 2 !important; }
+}
+
+.receipt-popup.sudah-simpan .receipt-aksi .flow-toolbar {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (min-width: 641px) {
+  .receipt-popup .receipt-aksi .flow-toolbar {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child {
+    margin-top: auto;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+    margin-bottom: 8px;
+  }
+}
