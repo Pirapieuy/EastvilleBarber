@@ -19379,3 +19379,66 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
 .kasbon-kapster-page .kasbon-kapster-actions .button {
   width: 100%;
 }
+
+/* Input Manual: jarak 16px di semua tempat; Terapkan dan Rp/% simetris (lebar, tinggi, jarak sama) */
+.manual-page .manual-info-grid,
+.manual-page .manual-discount-panel > .manual-info-grid {
+  gap: 16px;
+}
+
+.manual-page .manual-checkout-grid {
+  gap: 16px;
+}
+
+/* jarak antar kartu hanya dari gap halaman */
+.workspace > .content.manual-page {
+  gap: 16px;
+}
+
+.manual-page > section:last-of-type,
+.manual-page > .manual-checkout-grid {
+  margin-bottom: 0;
+}
+
+.manual-page .form-panel > h3,
+.manual-page .section-title {
+  margin-bottom: 16px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel {
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 16px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel > .primary-button {
+  width: 104px;
+}
+
+.manual-page .manual-discount-manual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 16px;
+}
+
+.manual-page .manual-discount-manual .segmented.manual-discount-type {
+  width: 104px;
+}
+
+.manual-page .manual-discount-manual .segmented button {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+/* Input Manual: jarak antar bagian panel Pembayaran 16px */
+.manual-page .manual-payment-panel .commission-choice,
+.manual-page .manual-payment-panel > .form-grid,
+.manual-page .manual-payment-panel > .nota-summary,
+.manual-page .manual-qris-notice,
+.manual-page .manual-payment-warning {
+  margin-top: 16px;
+}
+
+.manual-page .manual-payment-panel .manual-info-grid .manual-quick-cash {
+  margin-top: 0;
+}
