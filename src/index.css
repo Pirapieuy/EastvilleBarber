@@ -18962,3 +18962,105 @@ label .search-select-trigger {
     padding-top: 6px;
   }
 }
+
+/* ===== Kasbon Kapster (hanya halaman ini) ===== */
+/* Kapster dan jumlah kasbon selalu sebaris; keperluan di bawahnya; jarak isian seragam 14px */
+.kasbon-kapster-page .kasbon-kapster-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+  padding-right: 0;
+}
+
+/* Tablet (821-1024px): halaman setinggi layar, hanya daftar pengajuan yang digulir */
+@media (min-width: 821px) and (max-width: 1024px) {
+  .workspace:has(> .kasbon-kapster-page) {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.kasbon-kapster-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    padding: 68px 14px 14px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page > .panel {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .kasbon-kapster-page > .kasbon-kapster-history {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Laptop: halaman tidak menggulir, bawah sama dengan atas (16px) */
+@media (min-width: 1025px) {
+  .kasbon-kapster-page {
+    overflow: hidden;
+    padding-bottom: 16px !important;
+  }
+}
+
+/* Layar lebar tapi pendek: dibagi 2 kolom, form di kiri dan pengajuan tim di kanan */
+@media (min-width: 821px) and (max-height: 760px) {
+  .workspace > .content.kasbon-kapster-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 16px;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page > .panel,
+  .kasbon-kapster-page > .panel + .panel {
+    margin-top: 0;
+    min-height: 0;
+  }
+
+  .kasbon-kapster-page > .form-panel:first-of-type {
+    align-self: start;
+  }
+
+  .kasbon-kapster-page > .kasbon-kapster-history {
+    height: 100%;
+    max-height: 100%;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+.kasbon-kapster-page .kasbon-kapster-grid .input-shell {
+  height: 42px !important;
+  min-height: 42px !important;
+}
