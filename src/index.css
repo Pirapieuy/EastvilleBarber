@@ -19161,13 +19161,13 @@ label .search-select-trigger {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 600px) {
   .izin-kapster-page .izin-layout {
     grid-template-columns: 1fr;
   }
 }
 
-@media (min-width: 701px) {
+@media (min-width: 601px) {
   .izin-kapster-page .izin-layout-cal {
     display: flex;
   }
@@ -19179,9 +19179,9 @@ label .search-select-trigger {
 }
 
 /* Izin Kapster: kapster dan jenis sebaris, kalender lebih ringkas */
-@media (min-width: 701px) {
+@media (min-width: 601px) {
   .izin-kapster-page .izin-layout {
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: clamp(240px, 38vw, 300px) minmax(0, 1fr);
   }
 }
 
@@ -19248,4 +19248,18 @@ label .search-select-trigger {
 
 .izin-kapster-page .izin-cal-grid button.ada-izin::after {
   bottom: 3px;
+}
+
+/* Izin Kapster: halaman menggulir tanpa menampilkan batang scroll */
+html:has(.izin-kapster-page),
+.workspace:has(> .izin-kapster-page) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html:has(.izin-kapster-page)::-webkit-scrollbar,
+.workspace:has(> .izin-kapster-page)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
