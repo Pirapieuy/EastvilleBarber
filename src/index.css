@@ -19177,3 +19177,66 @@ label .search-select-trigger {
     width: 100%;
   }
 }
+
+/* Izin Kapster: kapster dan jenis sebaris, kalender lebih ringkas */
+@media (min-width: 821px) {
+  .izin-kapster-page .izin-layout {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}
+
+.izin-kapster-page .izin-layout-form .kasbon-kapster-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+
+.izin-kapster-page .izin-layout-form .kasbon-kapster-note {
+  grid-column: 1 / -1;
+}
+
+.izin-kapster-page .izin-cal {
+  padding: 14px;
+}
+
+.izin-kapster-page .izin-cal-head {
+  margin-bottom: 8px;
+}
+
+.izin-kapster-page .izin-cal-nav button {
+  width: 32px;
+  height: 32px;
+}
+
+.izin-kapster-page .izin-cal-week {
+  margin-bottom: 4px;
+}
+
+.izin-kapster-page .izin-cal-grid {
+  grid-auto-rows: minmax(30px, 1fr);
+  gap: 2px;
+}
+
+.izin-kapster-page .izin-cal-grid button {
+  font-size: 13px;
+}
+
+.izin-kapster-page .izin-layout-form .segmented {
+  height: 42px;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.izin-kapster-page .izin-layout-form .segmented > * {
+  min-height: 0;
+  height: 100%;
+}
+
+.izin-kapster-page .izin-layout-form .segmented {
+  padding: 3px;
+  gap: 2px;
+}
+
+.izin-kapster-page .izin-layout-form .segmented > * {
+  padding: 0 4px;
+  min-width: 0;
+}
