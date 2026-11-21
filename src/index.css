@@ -2167,7 +2167,7 @@ textarea {
 .desktop-page-head {
   width: 100%;
   margin: 0;
-  padding: 21px 14px 5px;
+  padding: 14px 14px 0;
 }
 
 .desktop-page-head h1 {
@@ -2189,7 +2189,7 @@ textarea {
     left: 0;
     z-index: 10;
     width: calc((100% - max(340px, 25%)));
-    padding: 21px 14px 5px;
+    padding: 14px 14px 0;
     pointer-events: none;
   }
 
@@ -2202,14 +2202,14 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
-    padding-top: 68px;
+    padding-top: 54px;
   }
 }
 
 @media (min-width: 1025px) {
   .desktop-page-head + .content,
   .desktop-page-head + .mobile-content {
-    padding-top: 16px !important;
+    padding-top: 14px !important;
   }
 }
 
@@ -16404,7 +16404,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    padding: 16px 14px 28px !important;
+    padding: 14px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16586,7 +16586,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   /* Margin desktop mengikuti acuan Riwayat Transaksi: 27px kanan, 16px bawah, 14px celah kolom, sejajar header */
   .cashier-page .cart {
-    padding: 68px 14px 16px 10px;
+    padding: 54px 14px 16px 10px;
     transform: none !important;
   }
 }
@@ -16618,7 +16618,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 16px 14px 26px !important;
+    padding: 14px 14px 26px !important;
     overflow: hidden;
   }
 
@@ -16749,7 +16749,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 16px 14px 26px !important;
+    padding: 14px 14px 26px !important;
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -16763,7 +16763,7 @@ label .search-select-trigger {
   /* .content jadi acuan posisi; naik ke baris judul kerangka (±52px di atasnya) */
   .fit-page-actions {
     position: absolute;
-    top: -38px;
+    top: -35px;
     right: 14px;
     z-index: 5;
     margin: 0;
