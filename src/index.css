@@ -18889,3 +18889,23 @@ label .search-select-trigger {
   .receipt-popup { height: min(720px, calc(100svh - 32px)); max-height: none; }
   .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { margin-top: 0; }
 }
+
+/* Popup nota: area struk meregang setinggi kartu (tanpa ruang kosong di bawah), label ukuran kertas di atas pilihan mm */
+.receipt-popup .receipt-layout .receipt-stage {
+  align-self: stretch;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: 100%;
+}
+
+@media (min-width: 641px) {
+  .receipt-popup .receipt-aksi .flow-toolbar::before {
+    content: "Ukuran kertas";
+    align-self: flex-start;
+    text-align: left;
+    margin-bottom: -4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
