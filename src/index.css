@@ -1947,7 +1947,7 @@ textarea {
 .app-header-inner {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 12px 27px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2100,7 +2100,7 @@ textarea {
 .content {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 26px 27px 42px;
+  padding: 26px 14px 42px;
 }
 
 .content.narrow {
@@ -2167,7 +2167,7 @@ textarea {
 .desktop-page-head {
   width: 100%;
   margin: 0;
-  padding: 26px 27px 0;
+  padding: 26px 14px 0;
 }
 
 .desktop-page-head h1 {
@@ -2189,7 +2189,7 @@ textarea {
     left: 0;
     z-index: 10;
     width: calc((100% - max(340px, 25%)));
-    padding: 26px 27px 0;
+    padding: 26px 14px 0;
     pointer-events: none;
   }
 
@@ -2198,7 +2198,7 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding: 0 10px 16px 27px;
+    padding: 0 10px 16px 14px;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
@@ -14596,7 +14596,7 @@ summary,
   border-bottom: 1px solid var(--line);
   margin-bottom: 14px;
   /* latar melebar ke samping agar bayangan kartu yang menggulir tidak tembus di sisi kapster */
-  box-shadow: -27px 0 0 var(--bone), 10px 0 0 var(--bone);
+  box-shadow: -14px 0 0 var(--bone), 10px 0 0 var(--bone);
 }
 
 /* Desktop: header "Pesanan saat ini" dihapus (di mobile & tablet portrait tetap ada untuk tombol tutup) */
@@ -15108,7 +15108,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
   .mobile-content.attendance-history-page {
-    padding: 26px 27px 26px;
+    padding: 26px 14px 26px;
   }
 
   .audit-page-content {
@@ -15970,7 +15970,7 @@ label .search-select-trigger {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    padding: 24px 27px 22px !important;
+    padding: 24px 14px 22px !important;
   }
 
   .kapster-dashboard > .kpi-grid {
@@ -16033,7 +16033,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .app-shell-kapster .my-salary-page {
     width: min(1280px, 100%);
-    padding: 24px 27px 28px;
+    padding: 24px 14px 28px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
     column-gap: 14px;
@@ -16063,7 +16063,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .kapster-product-commission {
     width: min(1280px, 100%);
-    padding: 24px 27px 28px;
+    padding: 24px 14px 28px;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16146,7 +16146,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
     width: min(1280px, 100%);
-    padding: 24px 27px 28px !important;
+    padding: 24px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-dashboard > .page-title,
@@ -16404,7 +16404,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    padding: 16px 27px 28px !important;
+    padding: 16px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16415,7 +16415,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page > .page-title {
     position: absolute;
     top: 20px;
-    right: 27px;
+    right: 14px;
     height: auto;
     min-height: 0;
     margin: 0 !important;
@@ -16586,7 +16586,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   /* Margin desktop mengikuti acuan Riwayat Transaksi: 27px kanan, 16px bawah, 14px celah kolom, sejajar header */
   .cashier-page .cart {
-    padding: 68px 27px 16px 10px;
+    padding: 68px 14px 16px 10px;
     transform: none !important;
   }
 }
@@ -16618,7 +16618,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 16px 27px 26px !important;
+    padding: 16px 14px 26px !important;
     overflow: hidden;
   }
 
@@ -16670,7 +16670,7 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-dashboard-actions {
     position: absolute;
     top: 14px;
-    right: 27px;
+    right: 14px;
     z-index: 5;
   }
 
@@ -16749,7 +16749,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 16px 27px 26px !important;
+    padding: 16px 14px 26px !important;
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -16764,7 +16764,7 @@ label .search-select-trigger {
   .fit-page-actions {
     position: absolute;
     top: -38px;
-    right: 27px;
+    right: 14px;
     z-index: 5;
     margin: 0;
   }
@@ -18163,8 +18163,8 @@ label .search-select-trigger {
 /* Input Manual: bar total menempel penuh di dasar seperti bar keranjang Kasir (latar solid, tidak tembus) */
 .manual-page .sticky-submit {
   bottom: 0;
-  margin: 14px -27px 0;
-  padding: 12px 27px calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 14px -14px 0;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
@@ -18277,8 +18277,8 @@ label .search-select-trigger {
 /* Input Manual: bar bawah berbentuk pil gelap seperti bar "Pesanan saat ini" di Kasir */
 .manual-page .sticky-submit {
   display: block;
-  margin: 14px -27px 0;
-  padding: 12px 27px calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 14px -14px 0;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
