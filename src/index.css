@@ -18625,11 +18625,6 @@ label .search-select-trigger {
   box-shadow: none;
 }
 
-@media screen and (min-width: 480px) {
-  .receipt-popup .thermal-receipt {
-    zoom: 1.2;
-  }
-}
 
 @media print {
   .receipt-popup .thermal-receipt {
@@ -18791,4 +18786,83 @@ label .search-select-trigger {
   .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
     margin-bottom: 8px;
   }
+}
+
+/* Popup nota: struk diperkecil mengikuti tinggi layar agar tampil penuh tanpa digulir; jarak panel tombol seragam 12px */
+@media screen and (min-width: 641px) {
+  .receipt-popup .thermal-receipt { zoom: 1; }
+}
+@media screen and (min-width: 641px) and (max-height: 819px) {
+  .receipt-popup .thermal-receipt { zoom: 0.92; }
+}
+@media screen and (min-width: 641px) and (max-height: 739px) {
+  .receipt-popup .thermal-receipt { zoom: 0.84; }
+}
+@media screen and (min-width: 641px) and (max-height: 679px) {
+  .receipt-popup .thermal-receipt { zoom: 0.76; }
+}
+@media screen and (min-width: 641px) and (max-height: 619px) {
+  .receipt-popup .thermal-receipt { zoom: 0.68; }
+}
+@media screen and (min-width: 641px) and (max-height: 559px) {
+  .receipt-popup .thermal-receipt { zoom: 0.6; }
+}
+@media screen and (min-width: 641px) and (max-height: 499px) {
+  .receipt-popup .thermal-receipt { zoom: 0.52; }
+}
+@media screen and (max-width: 640px) {
+  .receipt-popup .thermal-receipt { zoom: 0.8; }
+}
+@media screen and (max-width: 640px) and (max-height: 740px) {
+  .receipt-popup .thermal-receipt { zoom: 0.68; }
+}
+@media screen and (max-width: 640px) and (max-height: 620px) {
+  .receipt-popup .thermal-receipt { zoom: 0.56; }
+}
+
+.receipt-popup .receipt-layout .receipt-stage {
+  padding: 16px;
+  place-items: start center;
+}
+
+.receipt-popup .receipt-aksi .receipt-status {
+  padding: 12px 16px;
+  min-height: 0;
+  gap: 10px;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar {
+  gap: 12px;
+  padding: 16px;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+  margin-bottom: 0;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child {
+  margin-top: auto;
+}
+
+@media (max-width: 640px) {
+  .receipt-popup .receipt-aksi .flow-toolbar {
+    gap: 8px;
+    padding: 12px 16px 16px;
+  }
+}
+
+@media screen and (min-width: 641px) and (max-height: 579px) {
+  .receipt-popup .thermal-receipt { zoom: 0.56; }
+}
+@media screen and (min-width: 641px) and (max-height: 529px) {
+  .receipt-popup .thermal-receipt { zoom: 0.5; }
+}
+@media screen and (min-width: 641px) and (max-height: 479px) {
+  .receipt-popup .thermal-receipt { zoom: 0.44; }
+}
+@media screen and (max-width: 640px) and (max-height: 640px) {
+  .receipt-popup .thermal-receipt { zoom: 0.5; }
+}
+@media screen and (max-width: 640px) and (max-height: 560px) {
+  .receipt-popup .thermal-receipt { zoom: 0.44; }
 }
