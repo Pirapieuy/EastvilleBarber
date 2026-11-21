@@ -19107,7 +19107,7 @@ label .search-select-trigger {
 }
 
 /* Laptop & tablet lebar: halaman tidak menggulir, hanya daftar riwayat */
-@media (min-width: 821px) and (max-width: 1024px) {
+@media (min-width: 601px) and (max-width: 1024px) {
   .workspace:has(> .izin-kapster-page) {
     display: flex;
     flex-direction: column;
@@ -19278,4 +19278,35 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
 
 .izin-kapster-page .izin-layout-form .segmented > * {
   font-size: 14px !important;
+}
+
+/* Izin Kapster: padding kartu dan jarak antar kartu sama di semua lebar */
+.izin-kapster-page > .panel {
+  padding: 18px;
+}
+
+.izin-kapster-page > .panel + .panel {
+  margin-top: 16px;
+}
+
+/* Bertumpuk (<=600px): halaman menggulir, riwayat tampil 3 baris lalu digulir */
+@media (max-width: 600px) {
+  .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    max-height: 226px;
+  }
+}
+
+.workspace > .content.izin-kapster-page {
+  gap: 0 !important;
+  row-gap: 0 !important;
+}
+
+.izin-kapster-page > .kasbon-kapster-history {
+  margin-top: 16px !important;
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.izin-kapster-page {
+    padding-bottom: 16px !important;
+  }
 }
