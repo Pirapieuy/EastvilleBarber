@@ -19486,3 +19486,28 @@ html:has(.manual-page .modal-overlay) {
 .manual-page .manual-payment-panel .manual-komisi-grid {
   gap: 16px;
 }
+
+/* Input Manual popup: Hapus Semua tidak menempel di tepi, peringatan segaris dengan isi popup, jarak antar bagian 16px */
+.manual-ringkas .manual-ringkas-lines .cart-clear-button {
+  margin-right: -8px;
+  padding: 0 8px;
+}
+
+.manual-ringkas .manual-ringkas-note {
+  margin: 0 16px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.manual-ringkas {
+  gap: 16px;
+}
+
+/* Input Manual: tinggi baris label = ukuran font supaya jarak terlihat ke tulisan sama dengan jarak samping (16px) */
+.manual-page .form-grid-field > span,
+.manual-page label > span,
+.manual-page .manual-discount-panel label > span,
+.manual-page .commission-choice > span {
+  line-height: 12px;
+}
