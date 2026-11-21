@@ -19263,3 +19263,19 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
   width: 0;
   height: 0;
 }
+
+/* Izin Kapster: tombol Simpan sama di semua lebar layar */
+.izin-kapster-page .kasbon-kapster-actions .button {
+  width: auto;
+}
+
+.izin-kapster-page .kasbon-kapster-actions .button {
+  min-height: 42px !important;
+  height: 42px;
+  padding: 0 22px !important;
+  font-size: 14px !important;
+}
+
+.izin-kapster-page .izin-layout-form .segmented > * {
+  font-size: 14px !important;
+}
