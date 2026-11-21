@@ -93,6 +93,7 @@ export function ReceiptView({
   saving,
   saveError,
   popup = false,
+  tersimpan = false,
   /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   /** Struk dari data demo (tidak tersimpan di server) */
 }: {
@@ -118,6 +119,8 @@ export function ReceiptView({
   saveError?: string
   /** Tampil sebagai popup di atas halaman (Kasir); default: satu halaman penuh (Riwayat) */
   popup?: boolean
+  /** Hanya untuk popup: nota sudah tercatat di server */
+  tersimpan?: boolean
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
@@ -129,12 +132,25 @@ export function ReceiptView({
     new Set(cart.map((line) => line.barber).filter(Boolean)).size > 1
   const bagian = (
     <>
+      {popup && (
+        <div
+          className={`receipt-status ${tersimpan ? "ok" : "warn"}`}
+          role="status"
+        >
+          <Icon name={tersimpan ? "check" : "receipt"} />
+          <span>
+            {tersimpan
+              ? `Nota ${invoice} sudah tersimpan`
+              : "Belum tersimpan. Tekan Cetak atau Selesai untuk menyimpan."}
+          </span>
+        </div>
+      )}
       <div className="flow-toolbar">
         {onEdit ? (
           <Button className="secondary-button" onClick={onEdit}>
-            <Icon name="pencil" /> Ubah
+            <Icon name={popup ? "arrow" : "pencil"} /> {popup ? "Kembali" : "Ubah"}
           </Button>
-        ) : (
+        ) : popup ? null : (
           <Button className="primary-button" onClick={onClose}>
             <Icon name="check" /> {backLabel}
           </Button>
@@ -297,7 +313,10 @@ export function ReceiptView({
       }}
       role="dialog"
     >
-      <section className="receipt-popup" onClick={(e) => e.stopPropagation()}>
+      <section
+        className={`receipt-popup${onEdit ? "" : " sudah-simpan"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         {bagian}
       </section>
     </div>
@@ -1736,14 +1755,19 @@ export function CashierPage({ currentUser, onNavigate }: {
               ", ",
             ) || selectedBarber
           }
-          invoice={invoice}
+          invoice={invoice ?? "Dibuat saat disimpan"}
           popup
+          tersimpan={isTransactionSaved}
           saving={savingReceipt}
           saveError={saveReceiptError}
-          onEdit={() => {
-            setReceipt(false)
-            setSaveReceiptError("")
-          }}
+          onEdit={
+            isTransactionSaved
+              ? undefined
+              : () => {
+                  setReceipt(false)
+                  setSaveReceiptError("")
+                }
+          }
           onPrint={handlePrintReceipt}
           onComplete={handleCompleteReceipt}
           onClose={() => {
