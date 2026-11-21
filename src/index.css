@@ -17619,3 +17619,26 @@ label .search-select-trigger {
   flex: 1 1 calc((100% - 16px) / 3);
   min-width: 0;
 }
+
+/* Kasir POS: daftar item selalu terlihat (minimal 2 baris), pembayaran di bawahnya yang menggulir */
+.cashier-page .cart-panel .cart-lines {
+  flex: 1 1 auto;
+  min-height: 160px;
+}
+
+.cashier-page .cart-panel .cart-total {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: calc(100% - 160px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.cashier-page .cart-panel .cart-total::-webkit-scrollbar {
+  display: none;
+}
+
+/* Kasir POS: bayangan keranjang tipis seperti kartu menu, supaya celah 14px tampak rata */
+.cashier-page .cart-panel {
+  box-shadow: 0 1px 3px rgb(52 40 25 / 6%);
+}
