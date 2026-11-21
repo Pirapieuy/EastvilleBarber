@@ -17548,3 +17548,74 @@ label .search-select-trigger {
     margin-top: 0;
   }
 }
+
+/* Kasir POS: kolom isian, label, dan blok pembayaran memakai ukuran dan jarak yang sama di semua mode */
+.cashier-page .cart-payment .input-shell {
+  min-height: 40px;
+  height: 40px;
+}
+
+.cashier-page .cart-payment .pay-field,
+.cashier-page .cart-payment .pay-split,
+.cashier-page .cart-payment > div:not([class]) {
+  margin-top: 0;
+}
+
+.cashier-page .cart-payment .pay-split,
+.cashier-page .cart-payment > div:not([class]) {
+  display: grid;
+  gap: 8px;
+}
+
+.cashier-page .cart-payment .pay-split {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cashier-page .cart-payment .pay-field > span,
+.cashier-page .commission-choice > span {
+  margin: 0 0 6px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cashier-page .cart-payment .pay-hint {
+  margin: 0;
+  font-size: 12px;
+}
+
+.cashier-page .cart-payment .method-grid .button strong,
+.cashier-page .cart-payment .method-grid .button small {
+  font-size: 13px;
+}
+
+/* Celah menu kiri dan keranjang kanan = 14px, sama dengan jarak antar blok */
+@media (min-width: 821px) {
+  .cashier-page .cart {
+    padding-left: 4px !important;
+  }
+}
+
+.cashier-page .cart-payment > div:not([class]),
+.cashier-page .cart-payment .quick-cash,
+.cashier-page .cart-payment .pay-field + .quick-cash {
+  margin-top: 0 !important;
+}
+
+.cashier-page .cart-payment .cart-payment-heading {
+  margin: 0;
+}
+
+.cashier-page .cart-payment .quick-cash {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cashier-page .cart-payment .quick-cash button {
+  flex: 1 1 calc((100% - 16px) / 3);
+  min-width: 0;
+}
