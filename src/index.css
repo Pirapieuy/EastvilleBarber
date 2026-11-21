@@ -19548,3 +19548,73 @@ html:has(.manual-page .modal-overlay) {
 .manual-ringkas .manual-ringkas-line:last-child {
   padding-bottom: 0;
 }
+
+/* Ubah Transaksi (popup Riwayat): semua jarak 16px, tombol + bulat-kotak 40px seperti Input Manual, footer dua tombol sebaris penuh */
+.edit-trx-body,
+.edit-trx-left-column,
+.edit-trx-details,
+.edit-trx-payment,
+.edit-trx-payment-fields,
+.edit-trx-method-grid {
+  gap: 16px !important;
+}
+
+.edit-trx-items-list {
+  gap: 16px;
+}
+
+.edit-trx-item-row {
+  padding: 16px;
+  gap: 4px 16px;
+}
+
+.edit-trx-body .section-title {
+  margin-bottom: 16px;
+}
+
+.edit-trx-modal .nota-search {
+  margin-bottom: 16px;
+}
+
+.edit-trx-modal .nota-catalog-columns {
+  gap: 16px;
+}
+
+.edit-trx-modal .nota-group {
+  padding: 16px;
+}
+
+.edit-trx-modal .nota-group h4 {
+  margin-bottom: 16px;
+}
+
+.edit-trx-modal .nota-items {
+  gap: 16px;
+}
+
+.edit-trx-modal .nota-item {
+  min-height: 56px;
+  padding: 8px 10px;
+  gap: 16px;
+}
+
+.edit-trx-modal .nota-add {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  flex: none;
+  border-radius: 10px;
+}
+
+.edit-trx-modal form > footer {
+  gap: 16px;
+  padding: 16px;
+}
+
+.edit-trx-modal form > footer .button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 10px;
+}
