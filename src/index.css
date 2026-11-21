@@ -14299,19 +14299,21 @@ summary,
   }
 }
 
+/* HP kecil: huruf dan padding menyempit bertahap supaya nomor nota & tanggal muat satu baris.
+   Proporsi kolom sama dengan tablet (1.3fr 1fr 1.4fr), jadi tidak ada loncatan di batas lebar. */
 @media (max-width: 620px) {
   .history-page-content .table-head,
   .history-page-content .transaction-row {
-    grid-template-columns: minmax(95px, 1.35fr) minmax(65px, 0.9fr) minmax(80px, 1.15fr) !important;
+    grid-template-columns: 1.3fr 1fr 1.4fr !important;
     gap: 8px !important;
     padding: 8px 10px !important;
   }
 
-  .history-page-content .transaction-row .tx-cell-nota strong {
+  .history-page-content .transaction-row .tx-cell-nota {
     font-size: 11px;
   }
 
-  .history-page-content .transaction-row .tx-cell-nota small {
+  .history-page-content .transaction-row .tx-cell-time {
     font-size: 10px;
   }
 
@@ -14671,11 +14673,11 @@ summary,
   }
 }
 
-/* Tablet & HP: empat bar 2x2 sama lebar (cari | tanggal / kapster | metode), tiga tombol metode sama lebar */
+/* Tablet & HP: empat bar sama lebar. Satu baris sampai ±660px, di bawahnya 2x2 (cari | tanggal / kapster | metode) */
 @media (max-width: 1024px) {
   .history-page-content .filters {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .history-page-content .filters .search {
@@ -14694,6 +14696,16 @@ summary,
     min-width: 0;
     padding: 0 4px;
     justify-content: center;
+  }
+}
+
+.history-page-content .filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 659px) {
+  .history-page-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
