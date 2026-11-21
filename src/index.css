@@ -820,7 +820,7 @@ textarea {
   grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr);
   align-items: center;
   gap: 16px;
-  min-height: 58px;
+  min-height: 59px;
   padding: 10px 16px;
   border-top: 1px solid var(--line);
   font-size: 12px;
@@ -4538,7 +4538,7 @@ textarea {
 .transaction-row {
   position: relative;
   width: 100%;
-  min-height: 58px;
+  min-height: 59px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--line);
   color: var(--slate);
@@ -4606,7 +4606,7 @@ textarea {
 }
 
 .transaction-row.voided {
-  min-height: 58px;
+  min-height: 59px;
   background: #faf7f2;
 }
 
@@ -8167,7 +8167,7 @@ textarea {
 }
 
 .service-row {
-  min-height: 58px;
+  min-height: 59px;
   padding: 9px 14px;
   border-top: 1px solid var(--line);
   color: var(--slate);
@@ -19308,5 +19308,15 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
 @media (max-width: 1024px) {
   .workspace > .content.izin-kapster-page {
     padding-bottom: 16px !important;
+  }
+}
+
+/* Kasir desktop: baris "ITEM / Hapus Semua" setinggi dan sejajar dengan kartu Kapster di sebelahnya */
+@media (min-width: 1025px) {
+  .cashier-page .cart-clear-row {
+    box-sizing: border-box;
+    min-height: 59px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
