@@ -5692,7 +5692,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 26px;
+  padding: 16px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
@@ -5708,15 +5708,15 @@ textarea {
 
 .edit-trx-modal > header h2 {
   margin: 0;
-  font: 700 22px/1.2 var(--heading);
+  font: 700 20px/1.2 var(--heading);
   letter-spacing: -0.025em;
 }
 
 .edit-trx-body {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-  padding: 22px 26px;
+  overflow-y: auto;
+  padding: 16px;
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(270px, 0.85fr);
   grid-template-areas:
@@ -5724,18 +5724,12 @@ textarea {
     "left details";
   align-content: start;
   align-items: start;
-  gap: 18px 22px;
-  scrollbar-width: thin;
-  scrollbar-color: rgb(160 140 120 / 35%) transparent;
+  gap: 14px;
+  scrollbar-width: none;
 }
 
 .edit-trx-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.edit-trx-body::-webkit-scrollbar-thumb {
-  border-radius: 99px;
-  background: rgb(160 140 120 / 35%);
+  display: none;
 }
 
 .edit-trx-error {
@@ -5746,7 +5740,7 @@ textarea {
   grid-area: left;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -5762,7 +5756,7 @@ textarea {
   grid-area: details;
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -5771,7 +5765,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .edit-trx-section-heading > div {
@@ -5795,7 +5789,7 @@ textarea {
   border-radius: 8px;
   color: var(--brass-dark);
   background: var(--brass-soft);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -5805,16 +5799,16 @@ textarea {
   border-radius: 999px;
   color: var(--slate);
   background: var(--bone);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .edit-trx-items-list {
   display: flex;
   flex-direction: column;
-  max-height: 220px;
+  max-height: 232px;
   overflow-y: auto;
-  gap: 9px;
+  gap: 8px;
   overscroll-behavior: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -5827,13 +5821,13 @@ textarea {
 
 .edit-trx-item-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 38px;
+  grid-template-columns: minmax(0, 1fr) auto 88px 44px;
   grid-template-areas:
-    "info price del"
-    "kapster stepper del";
+    "info stepper price del"
+    "kapster stepper price del";
   align-items: center;
-  gap: 6px 10px;
-  padding: 10px;
+  gap: 4px 12px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 13px;
   background: var(--paper);
@@ -5864,7 +5858,7 @@ textarea {
 .edit-trx-item-info strong {
   min-width: 0;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
   white-space: normal;
   overflow: hidden;
@@ -5873,15 +5867,16 @@ textarea {
 
 .edit-trx-item-title .chip {
   flex: 0 0 auto;
-  padding: 2px 7px;
+  min-height: 20px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .edit-trx-item-info small {
   color: var(--slate);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .edit-trx-item-kapster {
@@ -5891,13 +5886,13 @@ textarea {
   gap: 5px;
   min-width: 0;
   color: var(--slate);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.25;
 }
 
 .edit-trx-item-kapster .icon {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   flex: none;
   color: var(--brass-dark);
 }
@@ -5914,6 +5909,8 @@ textarea {
 }
 
 .edit-trx-stepper {
+  height: 44px;
+  min-height: 44px;
   padding: 2px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -5921,12 +5918,23 @@ textarea {
 }
 
 .edit-trx-stepper .button {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
   border-radius: 7px;
+}
+
+.edit-trx-stepper span {
+  min-width: 28px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .edit-trx-item-price {
   grid-area: price;
-  font-size: 13px;
+  justify-self: end;
+  font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -5938,18 +5946,44 @@ textarea {
 }
 
 .edit-trx-item-del .button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
   border-radius: 9px;
+  color: var(--oxblood);
+  background: var(--paper);
+}
+
+.edit-trx-item-del .button:hover:not(:disabled) {
+  border-color: var(--oxblood);
+  background: var(--oxblood-soft);
+}
+
+.edit-trx-item-del .button:disabled {
+  color: var(--slate);
+  opacity: 0.45;
+}
+
+.edit-trx-stepper .icon,
+.edit-trx-item-del .icon {
+  width: 16px;
+  height: 16px;
 }
 
 .edit-trx-catalog-search {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   background: var(--paper);
 }
 
 .edit-trx-catalog-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .edit-trx-catalog-group {
@@ -5963,7 +5997,7 @@ textarea {
 .edit-trx-catalog-group h3 {
   margin: 0 0 8px;
   color: var(--slate);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -5984,8 +6018,8 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 48px;
-  padding: 5px 6px 5px 9px;
+  min-height: 52px;
+  padding: 4px 4px 4px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
@@ -6004,15 +6038,15 @@ textarea {
 
 .edit-trx-catalog-item strong {
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.35;
 }
 
 .edit-trx-catalog-add {
-  width: 34px;
-  min-width: 34px;
-  min-height: 34px;
-  height: 34px;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
   padding: 0;
   flex: none;
 }
@@ -6021,7 +6055,7 @@ textarea {
   margin: 0;
   padding: 10px 4px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -6036,7 +6070,7 @@ textarea {
 .edit-trx-detail-label > span,
 .edit-trx-detail-title {
   color: var(--slate);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -6056,24 +6090,26 @@ textarea {
 .edit-trx-method-grid {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 6px !important;
+  gap: 8px !important;
 }
 
 .edit-trx-method-grid .button {
-  min-height: 44px;
+  min-height: 60px;
+  flex-direction: column;
   justify-content: center;
-  gap: 5px;
-  padding: 5px 6px;
-  font-size: 11px;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  text-align: center;
 }
 
 .edit-trx-method-grid .button .icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
 }
 
 .edit-trx-method-grid .button strong {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .edit-trx-payment-fields {
@@ -6103,7 +6139,7 @@ textarea {
   border-radius: 9px;
   color: var(--slate);
   background: var(--bone);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -6140,8 +6176,8 @@ textarea {
 .edit-trx-summary {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 16px;
+  gap: 8px;
+  padding: 14px 16px;
   border-radius: 13px;
   background: linear-gradient(145deg, #fffaf0, #f8f0e2);
   border: 1px solid rgb(200 150 62 / 26%);
@@ -6149,7 +6185,7 @@ textarea {
 
 .edit-trx-summary-caption {
   color: var(--brass-dark);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6179,10 +6215,14 @@ textarea {
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 14px 26px calc(18px + env(safe-area-inset-bottom, 0px));
+  gap: 8px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   background: var(--paper);
+}
+
+.edit-trx-modal form > footer .button {
+  min-height: 44px;
 }
 
 @media (max-width: 720px) {
@@ -6199,37 +6239,12 @@ textarea {
     border-radius: 16px !important;
   }
 
-  .edit-trx-modal > header {
-    padding: 16px 18px;
-  }
-
-  .edit-trx-modal > header h2 {
-    font-size: 19px;
-  }
-
   .edit-trx-body {
-    overflow-y: auto;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "error"
       "left"
       "details";
-    gap: 18px;
-    padding: 18px;
-  }
-
-  .edit-trx-items-list {
-    max-height: 280px;
-  }
-
-  .edit-trx-modal form > footer {
-    padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
-@media (min-width: 721px) and (max-height: 760px) {
-  .edit-trx-body {
-    overflow-y: auto;
   }
 }
 
@@ -6247,41 +6262,22 @@ textarea {
     border-radius: 14px !important;
   }
 
-  .edit-trx-modal > header {
-    padding: 14px 15px;
-  }
-
   .edit-trx-modal > header h2 {
-    font-size: 17px;
     overflow-wrap: anywhere;
   }
 
-  .edit-trx-body {
-    gap: 15px;
-    padding: 15px;
-  }
-
-  .edit-trx-items-list {
-    max-height: 280px;
-  }
-
   .edit-trx-item-row {
-    grid-template-columns: minmax(0, 1fr) 38px;
+    grid-template-columns: auto minmax(0, 1fr) 44px;
     grid-template-areas:
-      "info del"
-      "price del"
-      "kapster kapster"
-      "stepper stepper";
-    gap: 8px 10px;
-    padding: 12px;
-  }
-
-  .edit-trx-item-price {
-    font-size: 12px;
+      "info info del"
+      "kapster kapster del"
+      "stepper price price";
+    gap: 4px 12px;
   }
 
   .edit-trx-item-stepper {
     justify-self: start;
+    margin-top: 4px;
   }
 
   .edit-trx-catalog-columns {
@@ -6300,16 +6296,9 @@ textarea {
     font-size: 18px;
   }
 
-  .edit-trx-modal form > footer {
-    gap: 8px;
-    padding: 11px 14px calc(12px + env(safe-area-inset-bottom, 0px));
-  }
-
   .edit-trx-modal form > footer .button {
-    min-height: 44px;
     flex: 1 1 0;
     padding-inline: 10px;
-    font-size: 13px;
   }
 }
 

@@ -414,20 +414,18 @@ export function EditTransactionModal({
                     </div>
 
                     <div className="edit-trx-item-stepper">
-                      <div className="stepper edit-trx-stepper" style={{ minHeight: 40, height: 40 }}>
+                      <div className="stepper edit-trx-stepper">
                         <Button
                           aria-label="Kurangi kuantitas"
                           disabled={it.qty <= 1}
                           onClick={() => updateItemQty(idx, -1)}
-                          style={{ width: 38, height: 38, minWidth: 38, minHeight: 38 }}
                         >
                           <Icon name="minus" />
                         </Button>
-                        <span style={{ minWidth: 28, fontSize: 13, fontWeight: 700 }}>{it.qty}</span>
+                        <span>{it.qty}</span>
                         <Button
                           aria-label="Tambah kuantitas"
                           onClick={() => updateItemQty(idx, 1)}
-                          style={{ width: 38, height: 38, minWidth: 38, minHeight: 38 }}
                         >
                           <Icon name="plus" />
                         </Button>
@@ -444,7 +442,6 @@ export function EditTransactionModal({
                         onClick={() => removeItem(idx)}
                         disabled={items.length <= 1}
                         title="Hapus item"
-                        style={{ width: 38, height: 38 }}
                       >
                         <Icon name="trash" />
                       </Button>
@@ -540,7 +537,7 @@ export function EditTransactionModal({
                       key={value}
                       onClick={() => chooseMethod(value)}
                     >
-                      <Icon name={value === "QRIS" ? "qris" : "cash"} />
+                      <Icon name={value === "QRIS" ? "qris" : value === "Gabungan" ? "wallet" : "cash"} />
                       <strong>{value}</strong>
                     </Button>
                   ))}
