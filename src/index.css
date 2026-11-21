@@ -19511,3 +19511,21 @@ html:has(.manual-page .modal-overlay) {
 .manual-page .commission-choice > span {
   line-height: 12px;
 }
+
+/* Input Manual popup: padding vertikal 16px di semua bagian; Hapus Semua tanpa kotak latar supaya tidak keluar dari garis */
+.manual-ringkas .manual-ringkas-lines .cart-clear-row {
+  min-height: 44px;
+}
+
+.manual-ringkas .manual-ringkas-line {
+  padding: 16px 0;
+}
+
+.manual-ringkas .nota-summary {
+  padding-top: 16px;
+}
+
+.manual-ringkas .manual-ringkas-lines .cart-clear-button,
+.manual-ringkas .manual-ringkas-lines .cart-clear-button:hover {
+  background: transparent;
+}
