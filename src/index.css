@@ -19365,3 +19365,17 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
 .izin-kapster-page .kasbon-kapster-actions .button {
   width: 100%;
 }
+
+/* Kasbon Kapster: semua jarak di dalam form 16px; tombol Ajukan selebar form */
+.kasbon-kapster-page .kasbon-kapster-grid {
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions {
+  margin-top: 16px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions .button {
+  width: 100%;
+}
