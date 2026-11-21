@@ -17180,7 +17180,7 @@ label .search-select-trigger {
 /* Riwayat (laptop): tanggal & kapster menyesuaikan lebar penuh seperti tab, pilihan cara bayar di kanan */
 @media (min-width: 1025px) {
   .history-page-content .filters {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .history-page-content .filters .search,
@@ -17192,18 +17192,18 @@ label .search-select-trigger {
   }
 
   .history-page-content .filters .calendar-picker-wrapper {
-    flex: 1 1 150px;
-    min-width: 0;
+    flex: 1 1 0;
+    min-width: 156px;
   }
 
   .history-page-content .filters .search-select.history-kapster-select {
-    flex: 1 1 150px;
-    min-width: 0;
+    flex: 1 1 0;
+    min-width: 156px;
   }
 
   .history-page-content .filters .search {
     grid-column: auto;
-    flex: 1.4 1 260px;
+    flex: 1 1 0;
     min-width: 0;
   }
 
@@ -17218,6 +17218,7 @@ label .search-select-trigger {
   .history-page-content .filters .history-method-filter .button {
     min-height: 0;
     height: 100%;
+    padding: 0 10px;
   }
 
   .history-page-content .master-detail {
@@ -17225,12 +17226,6 @@ label .search-select-trigger {
   }
 }
 
-/* Laptop sempit: cari, tanggal, kapster satu baris; Semua/Tunai/QRIS turun ke baris bawah selebar penuh */
-@media (min-width: 1025px) and (max-width: 1279px) {
-  .history-page-content .filters .history-method-filter {
-    flex: 1 1 100%;
-  }
-}
 
 @media (max-width: 1200px) {
   .cashier-page .barber-btn > i {
