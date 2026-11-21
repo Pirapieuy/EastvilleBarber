@@ -14263,12 +14263,35 @@ summary,
     overflow-y: auto;
   }
 
+  .history-page-content {
+    --tx-pad: clamp(10px, calc(10px + (100vw - 360px) * 0.03), 16px);
+    --tx-gap: clamp(8px, calc(8px + (100vw - 360px) * 0.016), 12px);
+    --tx-font: clamp(11px, calc(11px + (100vw - 360px) / 260), 12px);
+  }
+
+  .history-page-content .table-head,
   .history-page-content .transaction-row {
     grid-template-columns: 1.3fr 1fr 1.4fr !important;
+    gap: var(--tx-gap) !important;
+    padding-inline: var(--tx-pad) !important;
+  }
+
+  .history-page-content .transaction-row {
     grid-template-areas: none !important;
-    gap: 12px !important;
-    padding: 10px 16px !important;
+    padding-block: 10px !important;
     min-height: 56px !important;
+  }
+
+  .history-page-content .table-head {
+    padding-block: 0 !important;
+  }
+
+  .history-page-content .transaction-row .tx-cell-nota {
+    font-size: var(--tx-font);
+  }
+
+  .history-page-content .transaction-row .tx-cell-time {
+    font-size: calc(var(--tx-font) - 1px);
   }
 
   .history-page-content .transaction-row .tx-cell-col-nota {
@@ -14279,7 +14302,7 @@ summary,
     grid-area: auto;
     max-width: none;
     color: var(--ink);
-    font-size: 12px;
+    font-size: var(--tx-font);
     font-weight: 500;
     text-align: left;
     overflow: hidden;
@@ -14292,34 +14315,10 @@ summary,
     padding-top: 0;
     border-top: none;
     color: var(--slate);
-    font-size: 12px;
+    font-size: var(--tx-font);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-}
-
-/* HP kecil: huruf dan padding menyempit bertahap supaya nomor nota & tanggal muat satu baris.
-   Proporsi kolom sama dengan tablet (1.3fr 1fr 1.4fr), jadi tidak ada loncatan di batas lebar. */
-@media (max-width: 620px) {
-  .history-page-content .table-head,
-  .history-page-content .transaction-row {
-    grid-template-columns: 1.3fr 1fr 1.4fr !important;
-    gap: 8px !important;
-    padding: 8px 10px !important;
-  }
-
-  .history-page-content .transaction-row .tx-cell-nota {
-    font-size: 11px;
-  }
-
-  .history-page-content .transaction-row .tx-cell-time {
-    font-size: 10px;
-  }
-
-  .history-page-content .transaction-row .tx-cell-kapster,
-  .history-page-content .transaction-row .tx-cell-items {
-    font-size: 11px;
   }
 }
 
