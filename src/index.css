@@ -19024,42 +19024,6 @@ label .search-select-trigger {
   }
 }
 
-/* Layar lebar tapi pendek: dibagi 2 kolom, form di kiri dan pengajuan tim di kanan */
-@media (min-width: 821px) and (max-height: 760px) {
-  .workspace > .content.kasbon-kapster-page {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-    gap: 16px;
-    overflow: hidden;
-  }
-
-  .kasbon-kapster-page > .panel,
-  .kasbon-kapster-page > .panel + .panel {
-    margin-top: 0;
-    min-height: 0;
-  }
-
-  .kasbon-kapster-page > .form-panel:first-of-type {
-    align-self: start;
-  }
-
-  .kasbon-kapster-page > .kasbon-kapster-history {
-    height: 100%;
-    max-height: 100%;
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-  }
-}
-
 .kasbon-kapster-page .kasbon-kapster-grid .input-shell {
   height: 42px !important;
   min-height: 42px !important;
