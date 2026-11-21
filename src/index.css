@@ -19481,3 +19481,8 @@ html:has(.manual-page .modal-overlay) {
 .manual-page .nota-items {
   max-height: 140px;
 }
+
+/* Input Manual: jarak tombol Normal/OT sama dengan metode bayar (16px) */
+.manual-page .manual-payment-panel .manual-komisi-grid {
+  gap: 16px;
+}
