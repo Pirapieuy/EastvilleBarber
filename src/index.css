@@ -18882,3 +18882,10 @@ label .search-select-trigger {
     justify-content: center;
   }
 }
+
+/* Popup nota: struk ukuran penuh (digulir di kiri), tombol berurutan rapat dari atas */
+.receipt-popup .thermal-receipt { zoom: 1 !important; }
+@media (min-width: 641px) {
+  .receipt-popup { height: min(720px, calc(100svh - 32px)); max-height: none; }
+  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { margin-top: 0; }
+}

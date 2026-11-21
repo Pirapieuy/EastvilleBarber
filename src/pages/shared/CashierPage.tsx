@@ -256,7 +256,7 @@ export function ReceiptView({
           <div className="flow-toolbar">
             {onEdit ? (
               <Button className="secondary-button" onClick={onEdit}>
-                <Icon name={popup ? "arrow" : "pencil"} /> {popup ? "Kembali" : "Ubah"}
+                <Icon name="pencil" /> Ubah
               </Button>
             ) : popup ? null : (
               <Button className="primary-button" onClick={onClose}>
@@ -318,7 +318,7 @@ export function ReceiptView({
         <div className="flow-toolbar">
           {onEdit ? (
             <Button className="secondary-button" onClick={onEdit}>
-              <Icon name={popup ? "arrow" : "pencil"} /> {popup ? "Kembali" : "Ubah"}
+              <Icon name="pencil" /> Ubah
             </Button>
           ) : popup ? null : (
             <Button className="primary-button" onClick={onClose}>
