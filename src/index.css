@@ -17413,3 +17413,138 @@ label .search-select-trigger {
     padding-top: 0 !important;
   }
 }
+
+/* Kasir POS: kapster 1 baris, lalu 3 per baris, lalu 2 per baris (sisa baris melebar, tidak ada yang sendiri) */
+.cashier-page .barber-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.cashier-page .barber-btn {
+  min-width: 0;
+  min-height: 40px;
+  flex: 1 1 0;
+}
+
+@media (max-width: 640px) {
+  .cashier-page .barber-btn {
+    flex: 1 1 calc((100% - 16px) / 3);
+  }
+}
+
+@media (max-width: 480px) {
+  .cashier-page .barber-btn {
+    flex: 1 1 calc((100% - 8px) / 2);
+  }
+}
+
+/* Kasir POS: blok kapster tidak menempel ke navbar atas */
+@media (max-width: 1024px) {
+  .cashier-page .catalog-sticky {
+    padding-top: 14px;
+  }
+
+  .cashier-page .cart {
+    padding-top: 14px;
+  }
+}
+
+/* Kasir POS: isi keranjang memakai satu jarak 12px dan satu skala huruf */
+.cashier-page .cart-total {
+  display: grid;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  font-size: 13px;
+}
+
+.cashier-page .cart-total > *,
+.cashier-page .cart-payment > *,
+.cashier-page .cart-total .grand,
+.cashier-page .cart-total > .cart-discount-panel,
+.cashier-page .cart-total > .primary-button {
+  margin-top: 0;
+}
+
+.cashier-page .cart-payment {
+  display: grid;
+  gap: 8px;
+}
+
+.cashier-page .cart-total > div {
+  font-size: 13px;
+}
+
+.cashier-page .cart-total .grand {
+  padding-top: 0;
+}
+
+.cashier-page .cart-total .grand strong {
+  font: 700 20px/1 var(--heading);
+}
+
+.cashier-page .commission-choice {
+  margin-top: 0;
+}
+
+.cashier-page .commission-choice > span,
+.cashier-page .pay-field > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.cashier-page .method-grid {
+  gap: 8px;
+}
+
+.cashier-page .method-grid .button,
+.cashier-page .cart-payment .method-grid .button,
+.cashier-page .cart-payment .commission-choice .method-grid .button {
+  min-height: 40px;
+  font-size: 13px;
+}
+
+.cashier-page .quick-cash {
+  gap: 8px;
+}
+
+.cashier-page .quick-cash button {
+  min-height: 40px;
+  padding: 0 6px;
+  font-size: 13px;
+}
+
+.cashier-page .cart-total .button,
+.cashier-page .cart-total .primary-button {
+  min-height: 40px;
+}
+
+.cashier-page .cart-payment .payment-result,
+.cashier-page .cart-payment .cart-submit,
+.cashier-page .cart-payment .cart-error,
+.cashier-page .commission-choice .method-grid,
+.cashier-page .cart-total .cart-qris-note,
+.cashier-page .cart-total .pay-hint {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.cashier-page .cart-payment .payment-result {
+  min-height: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.cashier-page .cart-payment-heading {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1025px) {
+  .cashier-page .cart-total > div,
+  .cashier-page .cart-payment > * {
+    margin-top: 0;
+  }
+}
