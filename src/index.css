@@ -18909,3 +18909,33 @@ label .search-select-trigger {
     color: var(--ink);
   }
 }
+
+/* Kasir keranjang: daftar item selalu setinggi 2 card (sisanya digulir) di semua ukuran layar; teks tidak melewati tepi */
+.cashier-page .cart-lines {
+  flex: 0 0 auto !important;
+  height: 264px !important;
+  min-height: 264px !important;
+  max-height: 264px !important;
+}
+
+.cashier-page .cart-payment .quick-cash {
+  gap: 8px;
+}
+
+.cashier-page .cart-payment .quick-cash button {
+  padding: 0 2px;
+  font-size: 12px;
+}
+
+.cashier-page .cart-payment .payment-result {
+  gap: 12px;
+}
+
+.cashier-page .cart-payment .payment-result span {
+  min-width: 0;
+}
+
+.cashier-page .cart-payment .payment-result strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}

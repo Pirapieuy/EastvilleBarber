@@ -1751,7 +1751,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                       </span>
                       <strong>
                         {shortage
-                          ? `Kurang ${rupiah(shortage)}`
+                          ? rupiah(shortage)
                           : rupiah(change)}
                       </strong>
                     </div>
