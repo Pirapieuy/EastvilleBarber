@@ -2167,7 +2167,7 @@ textarea {
 .desktop-page-head {
   width: 100%;
   margin: 0;
-  padding: 26px 14px 0;
+  padding: 21px 14px 5px;
 }
 
 .desktop-page-head h1 {
@@ -2189,7 +2189,7 @@ textarea {
     left: 0;
     z-index: 10;
     width: calc((100% - max(340px, 25%)));
-    padding: 26px 14px 0;
+    padding: 21px 14px 5px;
     pointer-events: none;
   }
 
@@ -19318,5 +19318,12 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
     min-height: 59px;
     padding-top: 0;
     padding-bottom: 0;
+  }
+}
+
+/* Kasir desktop: popup absensi ada di dalam bagian menempel (z-index 5), angkat di atas judul halaman saat terbuka */
+@media (min-width: 1025px) {
+  .cashier-page .catalog-sticky:has(.modal-overlay) {
+    z-index: 110;
   }
 }
