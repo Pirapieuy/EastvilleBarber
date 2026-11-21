@@ -18939,3 +18939,26 @@ label .search-select-trigger {
   flex: 0 0 auto;
   white-space: nowrap;
 }
+
+/* Kasir keranjang: satu barang -> daftar mengikuti tinggi barang (tidak kosong) */
+.cashier-page .cart-lines:has(article:first-of-type:last-of-type) {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 264px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Popup keranjang HP/tablet: tanpa garis warna di atas kartu dan tanpa garis kecil penggeser */
+@media (max-width: 820px) {
+  .cart.cart-sheet-center {
+    padding-top: 0 !important;
+  }
+
+  .cart.cart-sheet-center .cart-panel > .mx-auto {
+    display: none !important;
+  }
+
+  .cart.cart-sheet-center .cart-tabs {
+    padding-top: 6px;
+  }
+}
