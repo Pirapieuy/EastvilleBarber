@@ -92,6 +92,7 @@ export function ReceiptView({
   onComplete,
   saving,
   saveError,
+  popup = false,
   /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   /** Struk dari data demo (tidak tersimpan di server) */
 }: {
@@ -115,6 +116,8 @@ export function ReceiptView({
   onComplete?: () => void | Promise<void>
   saving?: boolean
   saveError?: string
+  /** Tampil sebagai popup di atas halaman (Kasir); default: satu halaman penuh (Riwayat) */
+  popup?: boolean
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
@@ -124,8 +127,8 @@ export function ReceiptView({
     "-"
   const multipleBarbers =
     new Set(cart.map((line) => line.barber).filter(Boolean)).size > 1
-  return (
-    <div className="flow-page">
+  const bagian = (
+    <>
       <div className="flow-toolbar">
         {onEdit ? (
           <Button className="secondary-button" onClick={onEdit}>
@@ -281,6 +284,22 @@ export function ReceiptView({
           </footer>
         </article>
       </div>
+    </>
+  )
+  if (!popup) return <div className="flow-page">{bagian}</div>
+  return (
+    <div
+      aria-label="Nota"
+      aria-modal="true"
+      className="modal-overlay modal-centered"
+      onClick={() => {
+        if (!saving) (onEdit ?? onClose)?.()
+      }}
+      role="dialog"
+    >
+      <section className="receipt-popup" onClick={(e) => e.stopPropagation()}>
+        {bagian}
+      </section>
     </div>
   )
 }
@@ -785,48 +804,6 @@ export function CashierPage({ currentUser, onNavigate }: {
     .sort((a, b) => a - b)
     .slice(0, 4)
 
-  if (receipt) {
-    return (
-      <ReceiptView
-        cart={cart}
-        subtotal={total}
-        discount={effectiveDiscount}
-        total={payableTotal}
-        method={method}
-        cash={
-          method === "Tunai"
-            ? cash
-            : method === "Gabungan"
-              ? cashReceived || tunaiTerpakai
-              : 0
-        }
-        qris={qris}
-        change={change}
-        cashier={currentUser?.name ?? "Siti Rahma"}
-        barber={
-          Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(
-            ", ",
-          ) || selectedBarber
-        }
-        invoice={invoice}
-        saving={savingReceipt}
-        saveError={saveReceiptError}
-        onEdit={() => {
-          setReceipt(false)
-          setSaveReceiptError("")
-        }}
-        onPrint={handlePrintReceipt}
-        onComplete={handleCompleteReceipt}
-        onClose={() => {
-          setReceipt(false)
-          if (isTransactionSaved) {
-            clearCart()
-            setIsTransactionSaved(false)
-          }
-        }}
-      />
-    )
-  }
 
   function clearCart() {
     setSelectedBarber("")
@@ -1737,6 +1714,47 @@ export function CashierPage({ currentUser, onNavigate }: {
           )}
         </div>
       </aside>
+      {receipt && (
+        <ReceiptView
+          cart={cart}
+          subtotal={total}
+          discount={effectiveDiscount}
+          total={payableTotal}
+          method={method}
+          cash={
+            method === "Tunai"
+              ? cash
+              : method === "Gabungan"
+                ? cashReceived || tunaiTerpakai
+                : 0
+          }
+          qris={qris}
+          change={change}
+          cashier={currentUser?.name ?? "Siti Rahma"}
+          barber={
+            Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(
+              ", ",
+            ) || selectedBarber
+          }
+          invoice={invoice}
+          popup
+          saving={savingReceipt}
+          saveError={saveReceiptError}
+          onEdit={() => {
+            setReceipt(false)
+            setSaveReceiptError("")
+          }}
+          onPrint={handlePrintReceipt}
+          onComplete={handleCompleteReceipt}
+          onClose={() => {
+            setReceipt(false)
+            if (isTransactionSaved) {
+              clearCart()
+              setIsTransactionSaved(false)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

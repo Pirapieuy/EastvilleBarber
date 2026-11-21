@@ -1,7 +1,6 @@
 import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
 import { apiKasir, apiKodeDiskon, apiTransaksi, getToken } from "../../api"
-import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { TimePicker } from "../../components/common/TimePicker"
@@ -18,15 +17,6 @@ interface ManualItem {
   price: number
   stok?: number
 }
-const demoItems: ManualItem[] = [
-  { tipe: "Layanan", id: "1", name: "Haircut", price: 40000 },
-  { tipe: "Layanan", id: "3", name: "Shaving", price: 25000 },
-  { tipe: "Layanan", id: "5", name: "Treatment", price: 60000 },
-]
-const demoKapster = [
-  { id: "u-kapster", nama: "Ferdi" },
-  { id: "u-kapster2", nama: "Seva" },
-]
 
 function today() {
   const d = new Date()
@@ -42,8 +32,8 @@ function notaOtomatis(tanggal: string) {
 }
 
 export function ManualPage() {
-  const [items, setItems] = useState<ManualItem[]>(demoItems)
-  const [kapster, setKapster] = useState(demoKapster)
+  const [items, setItems] = useState<ManualItem[]>([])
+  const [kapster, setKapster] = useState<{ id: string; nama: string }[]>([])
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
 
@@ -137,8 +127,6 @@ export function ManualPage() {
       })
   }, [])
 
-  // Tidak blocking — form langsung tampil dengan data sementara (demo/cache),
-  // data server akan otomatis menggantikan saat selesai dimuat.
 
   const keyOf = (i: ManualItem) => `${i.tipe}:${i.id}`
   const selected = items.filter((i) => (qty[keyOf(i)] ?? 0) > 0)
@@ -190,7 +178,7 @@ export function ManualPage() {
     .filter((n) => n > total)
     .sort((a, b) => a - b)
     .slice(0, 5)
-  const gagalMuat = Boolean(getToken()) && !live
+  const gagalMuat = !live
   const gabunganKosong = method === "Gabungan" && cashNum <= 0 && qrisNum <= 0
   const kembalian = method === "Tunai" ? Math.max(0, cashNum - total) : 0
   const canSave =
@@ -359,7 +347,7 @@ export function ManualPage() {
   }
 
   // Sudah login tapi data belum datang: tutup seluruh halaman dengan tulisan memuat.
-  if (Boolean(getToken()) && !live && !liveError) {
+  if (!live && !liveError) {
     return (
       <div className="content narrow manual-page">
         <LoadingState message="Memuat data Input Manual…" />
@@ -368,7 +356,7 @@ export function ManualPage() {
   }
 
   // Gagal memuat: bedakan jelas dari "sedang memuat" dan beri jalan keluar.
-  if (Boolean(getToken()) && !live && liveError) {
+  if (!live && liveError) {
     return (
       <div className="content narrow manual-page">
         <ErrorState
@@ -382,8 +370,6 @@ export function ManualPage() {
 
   return (
     <form className="content narrow manual-page" onSubmit={handleSave}>
-      <DemoNotice live={live} error={liveError} />
-
       <section className="panel form-panel">
         <h3>Data nota</h3>
         <div className="form-grid manual-info-grid">
@@ -809,9 +795,7 @@ export function ManualPage() {
                 ""
               const info =
                 !peringatan &&
-                (live
-                  ? "Data transaksi akan dicatat ke sistem dan stok produk terkait otomatis terpotong."
-                  : "Mode demo: nota tidak disimpan ke server.")
+                "Data transaksi akan dicatat ke sistem dan stok produk terkait otomatis terpotong."
               return peringatan ? (
                 <p className="manual-payment-warning manual-ringkas-note" role="alert">{peringatan}</p>
               ) : (
@@ -823,11 +807,6 @@ export function ManualPage() {
               disabled={!canSave}
               onClick={async () => {
                 setError("")
-                if (!live) {
-                  setSuccess("Mode demo: nota tidak disimpan ke server.")
-                  setRingkasOpen(false)
-                  return
-                }
                 await executeSave()
                 setRingkasOpen(false)
               }}

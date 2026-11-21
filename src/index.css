@@ -18458,3 +18458,128 @@ label .search-select-trigger {
   font-size: 13px;
   line-height: 1.4;
 }
+
+/* Nota Kasir sebagai popup: kartu di tengah, struk digulir di dalam kartu (Riwayat tetap halaman penuh) */
+.receipt-popup {
+  width: min(460px, calc(100% - 16px));
+  max-height: calc(100svh - 32px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--shadow-modal);
+  animation: modal-pop 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.receipt-popup .flow-toolbar {
+  order: 2;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 0;
+}
+
+.receipt-popup .flow-toolbar > .segmented {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+}
+
+.receipt-popup .flow-toolbar > .segmented button {
+  flex: 1;
+  min-height: 36px;
+  font-size: 14px;
+}
+
+.receipt-popup .flow-toolbar > div:last-child {
+  display: contents !important;
+}
+
+.receipt-popup .flow-toolbar > .button:first-child,
+.receipt-popup .flow-toolbar > div:last-child .button {
+  grid-row: 2 !important;
+  width: 100%;
+  min-height: 44px;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+.receipt-popup .flow-toolbar > .button:first-child {
+  grid-column: 1 !important;
+  justify-self: stretch !important;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.receipt-popup .flow-toolbar > div:last-child .button:nth-of-type(1) {
+  grid-column: 2;
+}
+
+.receipt-popup .flow-toolbar > div:last-child .button:nth-of-type(2) {
+  grid-column: 3;
+}
+
+.receipt-popup .flow-toolbar > div:last-child > span {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  color: var(--oxblood, #9b2c2c) !important;
+  font-size: 13px !important;
+  font-weight: 600;
+}
+
+.receipt-popup .receipt-stage {
+  order: 1;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.receipt-popup .receipt-stage::-webkit-scrollbar {
+  display: none;
+}
+
+.receipt-popup .thermal-receipt {
+  max-width: 100%;
+}
+
+@media print {
+  .modal-overlay:has(.receipt-popup) {
+    position: static;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+  }
+
+  .receipt-popup {
+    max-height: none;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .receipt-popup .flow-toolbar {
+    display: none;
+  }
+
+  .receipt-popup .receipt-stage {
+    overflow: visible;
+    padding: 0;
+    background: none;
+  }
+}
+
+.receipt-popup .flow-toolbar > .segmented {
+  width: 100%;
+  max-width: none;
+  display: flex;
+}
