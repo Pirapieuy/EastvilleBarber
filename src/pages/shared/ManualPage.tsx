@@ -10,7 +10,6 @@ import {
   CalendarPicker,
   LoadingState,
   rupiah, ErrorState } from "../../components/common/UI"
-import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 interface ManualItem {
   tipe: "Layanan" | "Produk"
@@ -77,7 +76,6 @@ export function ManualPage() {
   const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
   const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
   const [saving, setSaving] = useState(false)
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const [ringkasOpen, setRingkasOpen] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -248,13 +246,7 @@ export function ManualPage() {
 
   function handleSave(e: FormEvent) {
     e.preventDefault()
-    setError("")
-    setSuccess("")
-    if (!live) {
-      setSuccess("Mode demo: nota tidak disimpan ke server.")
-      return
-    }
-    setConfirmOpen(true)
+    if (notaOk) setRingkasOpen(true)
   }
 
   async function executeSave() {
@@ -725,10 +717,14 @@ export function ManualPage() {
       <div className="sticky-submit">
         <div className="manual-bar">
           <button
-            aria-label="Buka total nota"
+            aria-label="Buka rincian nota dan simpan"
             className="manual-total-button"
-            disabled={!adaItem}
-            onClick={() => setRingkasOpen(true)}
+            disabled={!notaOk}
+            onClick={() => {
+              setError("")
+              setSuccess("")
+              setRingkasOpen(true)
+            }}
             type="button"
           >
             <span className="manual-total-icon">
@@ -736,7 +732,7 @@ export function ManualPage() {
             </span>
             {adaItem && notaOk ? (
               <>
-                <span className="manual-total-label">Total nota</span>
+                <span className="manual-total-label">Simpan Nota</span>
                 <span className="manual-total-count">{selected.length} item</span>
                 <b className="submit-total">{rupiah(total)}</b>
                 <span className="manual-total-chevron" aria-hidden="true">
@@ -745,32 +741,26 @@ export function ManualPage() {
               </>
             ) : (
               <span className="manual-total-label">
-                {!success &&
-                  (notaOk
-                    ? "Pilih minimal satu layanan atau produk."
-                    : "Pilih kapster dulu untuk melanjutkan.")}
-                {error && <small className="error-text"> {error}</small>}
-                {success && <small> {success}</small>}
+                {notaOk
+                  ? "Pilih minimal satu layanan atau produk."
+                  : "Pilih kapster dulu untuk melanjutkan."}
               </span>
             )}
           </button>
-          <Button className="primary-button" disabled={!canSave} type="submit">
-            {saving ? "Menyimpan…" : "Simpan Nota"}
-          </Button>
         </div>
       </div>
-      {(error || success) && adaItem && notaOk && (
-        <p className={error ? "manual-payment-warning" : "manual-qris-notice"} role={error ? "alert" : "status"}>
-          {error || success}
+      {success && (
+        <p className="manual-qris-notice manual-success-note" role="status">
+          {success}
         </p>
       )}
 
       {ringkasOpen && (
-        <div className="modal-overlay modal-centered" onClick={() => setRingkasOpen(false)} role="dialog" aria-modal="true" aria-label="Ringkasan nota">
+        <div className="modal-overlay modal-centered" onClick={() => !saving && setRingkasOpen(false)} role="dialog" aria-modal="true" aria-label="Konfirmasi simpan nota">
           <section className="manual-ringkas" onClick={(e) => e.stopPropagation()}>
             <header className="manual-ringkas-head">
-              <span><Icon name="receipt" /> Total nota</span>
-              <button type="button" aria-label="Tutup ringkasan" onClick={() => setRingkasOpen(false)}>
+              <span><Icon name="receipt" /> Simpan nota {cleanNote}</span>
+              <button type="button" aria-label="Tutup" disabled={saving} onClick={() => setRingkasOpen(false)}>
                 <Icon name="chevron" />
               </button>
             </header>
@@ -808,22 +798,46 @@ export function ManualPage() {
               {diskonNum > 0 && <div><dt>Diskon</dt><dd>-{rupiah(diskonNum)}</dd></div>}
               <div className="nota-summary-total"><dt>Total</dt><dd>{rupiah(total)}</dd></div>
             </dl>
-            <Button className="primary-button" onClick={() => setRingkasOpen(false)}>Tutup</Button>
+            {(() => {
+              const peringatan =
+                error ||
+                (!adaItem && "Pilih minimal satu layanan atau produk.") ||
+                (gagalMuat && "Data server belum termuat. Coba muat ulang halaman.") ||
+                (gabunganKosong && "Isi jumlah tunai atau QRIS untuk pembayaran gabungan.") ||
+                (paid < total && "Uang yang diterima belum mencukupi total pembayaran.") ||
+                (total <= 0 && "Total nota harus lebih dari Rp 0.") ||
+                ""
+              const info =
+                !peringatan &&
+                (live
+                  ? "Data transaksi akan dicatat ke sistem dan stok produk terkait otomatis terpotong."
+                  : "Mode demo: nota tidak disimpan ke server.")
+              return peringatan ? (
+                <p className="manual-payment-warning manual-ringkas-note" role="alert">{peringatan}</p>
+              ) : (
+                <p className="manual-qris-notice manual-ringkas-note" role="note">{info}</p>
+              )
+            })()}
+            <Button
+              className="primary-button"
+              disabled={!canSave}
+              onClick={async () => {
+                setError("")
+                if (!live) {
+                  setSuccess("Mode demo: nota tidak disimpan ke server.")
+                  setRingkasOpen(false)
+                  return
+                }
+                await executeSave()
+                setRingkasOpen(false)
+              }}
+            >
+              {saving ? "Menyimpan…" : "Simpan Nota"}
+            </Button>
           </section>
         </div>
       )}
 
-      {confirmOpen && (
-        <ConfirmModal
-          title={`Simpan Nota ${cleanNote}?`}
-          eyebrow="Konfirmasi Simpan Nota"
-          message={`Simpan nota ${cleanNote} senilai ${rupiah(total)}? Data transaksi akan dicatat ke sistem dan stok produk terkait akan otomatis terpotong.`}
-          confirmText="Simpan Nota"
-          confirmTone="primary"
-          onClose={() => setConfirmOpen(false)}
-          onConfirm={executeSave}
-        />
-      )}
     </form>
   )
 }

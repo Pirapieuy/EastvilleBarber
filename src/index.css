@@ -18404,3 +18404,57 @@ label .search-select-trigger {
     min-height: 44px;
   }
 }
+
+/* Input Manual: tidak ada ruang kosong di bawah bar total (menimpa padding bawah umum halaman) */
+@media (max-width: 1024px) {
+  .workspace > .content.narrow.manual-page {
+    padding-bottom: 0 !important;
+  }
+}
+
+.manual-page .manual-total-button:disabled {
+  opacity: 1;
+}
+
+.manual-page .manual-total-button:disabled .manual-total-label {
+  color: rgb(255 255 255 / 70%);
+}
+
+.manual-page .manual-bar {
+  padding: 8px 8px 8px 16px;
+  min-height: 56px;
+}
+
+.manual-page .manual-total-button {
+  min-height: 40px;
+}
+
+.manual-page .manual-success-note {
+  margin: 0;
+}
+
+.manual-ringkas-note {
+  margin: 0 16px;
+}
+
+.manual-page .sticky-submit {
+  margin-top: auto !important;
+}
+
+.manual-page > .panel + .sticky-submit,
+.manual-page > .manual-checkout-grid + .sticky-submit {
+  margin-top: auto !important;
+}
+
+.manual-page > section:last-of-type,
+.manual-page > .manual-checkout-grid {
+  margin-bottom: 14px;
+}
+
+.manual-ringkas .manual-ringkas-note {
+  margin: 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
