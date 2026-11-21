@@ -19529,3 +19529,22 @@ html:has(.manual-page .modal-overlay) {
 .manual-ringkas .manual-ringkas-lines .cart-clear-button:hover {
   background: transparent;
 }
+
+/* Input Manual popup: jarak antar bagian hanya satu sumber (margin atas 16px), tidak bertumpuk dengan gap/padding */
+.manual-ringkas {
+  gap: 0;
+}
+
+.manual-ringkas > .nota-summary,
+.manual-ringkas > .manual-ringkas-note,
+.manual-ringkas > .primary-button {
+  margin-top: 16px;
+}
+
+.manual-ringkas .manual-ringkas-lines .cart-clear-row {
+  min-height: 48px;
+}
+
+.manual-ringkas .manual-ringkas-line:last-child {
+  padding-bottom: 0;
+}
