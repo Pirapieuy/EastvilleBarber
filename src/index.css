@@ -19327,3 +19327,32 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
     z-index: 110;
   }
 }
+
+/* Kasbon Kapster: padding kartu, jarak antar kartu, padding bawah dan tombol sama di semua lebar (sama seperti Izin Kapster) */
+.kasbon-kapster-page > .panel {
+  padding: 18px;
+}
+
+.kasbon-kapster-page > .panel + .panel,
+.kasbon-kapster-page > .kasbon-kapster-history {
+  margin-top: 16px !important;
+}
+
+.workspace > .content.kasbon-kapster-page {
+  gap: 0 !important;
+  row-gap: 0 !important;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions .button {
+  width: auto;
+  min-height: 42px !important;
+  height: 42px;
+  padding: 0 22px !important;
+  font-size: 14px !important;
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.kasbon-kapster-page {
+    padding-bottom: 16px !important;
+  }
+}
