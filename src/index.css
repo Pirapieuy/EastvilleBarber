@@ -19356,3 +19356,12 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
     padding-bottom: 16px !important;
   }
 }
+
+/* Izin Kapster: jarak kalender ke form 16px (sama dengan jarak antar kartu); tombol Simpan selebar form */
+.izin-kapster-page .izin-layout {
+  gap: 16px;
+}
+
+.izin-kapster-page .kasbon-kapster-actions .button {
+  width: 100%;
+}
