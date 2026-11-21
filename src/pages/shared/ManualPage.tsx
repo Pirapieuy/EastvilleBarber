@@ -723,34 +723,41 @@ export function ManualPage() {
       )}
 
       <div className="sticky-submit">
-        <button
-          className="manual-total-button"
-          disabled={!adaItem}
-          onClick={() => setRingkasOpen(true)}
-          type="button"
-        >
-          <span className="manual-total-icon">
-            <Icon name="receipt" />
-          </span>
-          {adaItem && notaOk ? (
-            <span className="manual-total-text">
-              <span className="manual-total-count">{selected.length}</span>
-              Total <b className="submit-total">{rupiah(total)}</b>
+        <div className="manual-bar">
+          <button
+            aria-label="Buka total nota"
+            className="manual-total-button"
+            disabled={!adaItem}
+            onClick={() => setRingkasOpen(true)}
+            type="button"
+          >
+            <span className="manual-total-icon">
+              <Icon name="receipt" />
             </span>
-          ) : (
-            <span>
-              {!success &&
-                (notaOk
-                  ? "Pilih minimal satu layanan atau produk."
-                  : "Pilih kapster dulu untuk melanjutkan.")}
-              {error && <small className="error-text"> {error}</small>}
-              {success && <small> {success}</small>}
-            </span>
-          )}
-        </button>
-        <Button className="primary-button" disabled={!canSave} type="submit">
-          {saving ? "Menyimpan…" : "Simpan Nota"}
-        </Button>
+            {adaItem && notaOk ? (
+              <>
+                <span className="manual-total-label">Total nota</span>
+                <span className="manual-total-count">{selected.length} item</span>
+                <b className="submit-total">{rupiah(total)}</b>
+                <span className="manual-total-chevron" aria-hidden="true">
+                  <Icon name="chevron" />
+                </span>
+              </>
+            ) : (
+              <span className="manual-total-label">
+                {!success &&
+                  (notaOk
+                    ? "Pilih minimal satu layanan atau produk."
+                    : "Pilih kapster dulu untuk melanjutkan.")}
+                {error && <small className="error-text"> {error}</small>}
+                {success && <small> {success}</small>}
+              </span>
+            )}
+          </button>
+          <Button className="primary-button" disabled={!canSave} type="submit">
+            {saving ? "Menyimpan…" : "Simpan Nota"}
+          </Button>
+        </div>
       </div>
       {(error || success) && adaItem && notaOk && (
         <p className={error ? "manual-payment-warning" : "manual-qris-notice"} role={error ? "alert" : "status"}>

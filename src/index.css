@@ -18273,3 +18273,134 @@ label .search-select-trigger {
     min-height: 100svh;
   }
 }
+
+/* Input Manual: bar bawah berbentuk pil gelap seperti bar "Pesanan saat ini" di Kasir */
+.manual-page .sticky-submit {
+  display: block;
+  margin: 14px -27px 0;
+  padding: 12px 27px calc(12px + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: 0 -4px 20px rgb(20 17 15 / 8%);
+}
+
+.manual-page .manual-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  box-shadow: 0 2px 8px rgb(20 17 15 / 18%);
+}
+
+.manual-page .manual-total-button {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  color: #fff;
+  font-size: 14px;
+}
+
+.manual-page .manual-total-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 10%);
+  color: var(--brass);
+}
+
+.manual-page .manual-total-icon .icon,
+.manual-page .manual-total-button .icon {
+  color: inherit;
+}
+
+.manual-page .manual-total-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manual-page .manual-total-label small {
+  display: inline;
+  color: #fecaca;
+  font-size: 12px;
+}
+
+.manual-page .manual-total-count {
+  flex: none;
+  min-width: 0;
+  height: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brass);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.manual-page .manual-total-button .submit-total {
+  margin: 0;
+  padding: 0;
+  flex: none;
+  background: transparent;
+  color: var(--brass-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.manual-page .manual-total-chevron {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: rgb(255 255 255 / 80%);
+  transform: rotate(180deg);
+}
+
+.manual-page .manual-bar .primary-button {
+  flex: none;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 9px;
+}
+
+.manual-page .manual-bar .primary-button:disabled {
+  background: rgb(255 255 255 / 12%);
+  border-color: transparent;
+  color: rgb(255 255 255 / 45%);
+}
+
+@media (max-width: 1024px) {
+  .manual-page .sticky-submit {
+    margin: 14px -14px 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 560px) {
+  .manual-page .manual-bar {
+    flex-wrap: wrap;
+    padding: 12px 12px 12px 14px;
+  }
+
+  .manual-page .manual-total-button {
+    flex-basis: 100%;
+  }
+
+  .manual-page .manual-bar .primary-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
