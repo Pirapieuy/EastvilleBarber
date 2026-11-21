@@ -19442,3 +19442,42 @@ html:has(.izin-kapster-page)::-webkit-scrollbar,
 .manual-page .manual-payment-panel .manual-info-grid .manual-quick-cash {
   margin-top: 0;
 }
+
+/* Input Manual: jarak di dalam kartu juga 16px (daftar layanan/produk, metode bayar, komisi, uang cepat) */
+.manual-page .nota-search {
+  margin-bottom: 16px;
+}
+
+.manual-page .nota-catalog-columns {
+  gap: 16px;
+}
+
+.manual-page .nota-group {
+  padding: 16px;
+}
+
+.manual-page .nota-group h4 {
+  margin-bottom: 16px;
+}
+
+.manual-page .nota-items {
+  gap: 16px;
+}
+
+.manual-page .manual-payment-panel .manual-method-grid,
+.manual-page .manual-quick-cash {
+  gap: 16px;
+}
+
+/* Input Manual: popup ringkasan, gulir daftar tidak menggeser halaman di belakangnya (seperti popup Riwayat) */
+.manual-ringkas-lines {
+  overscroll-behavior: contain;
+}
+
+html:has(.manual-page .modal-overlay) {
+  overflow: hidden;
+}
+
+.manual-page .nota-items {
+  max-height: 140px;
+}
