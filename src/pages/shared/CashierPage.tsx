@@ -896,9 +896,6 @@ export function CashierPage({ currentUser, onNavigate }: {
               <Icon name="user" />
             </span>
             <small>Kapster</small>
-            {!selectedBarber && (
-              <span className="barber-status-badge warn">Wajib Pilih</span>
-            )}
           </div>
           <div className="barber-options">
             {barberList.map(({ id, name: barber }) => {
