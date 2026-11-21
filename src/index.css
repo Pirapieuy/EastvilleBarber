@@ -17177,10 +17177,12 @@ label .search-select-trigger {
   }
 }
 
-/* Riwayat (laptop): tanggal & kapster menyesuaikan lebar penuh seperti tab, pilihan cara bayar di kanan */
+/* Riwayat (laptop): empat bar sama lebar (cari, tanggal, kapster, metode). Jarak 14px = jarak antar kartu,
+   jadi dua bar kiri sejajar kartu daftar dan dua bar kanan sejajar kartu detail */
 @media (min-width: 1025px) {
   .history-page-content .filters {
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .history-page-content .filters .search,
@@ -17191,25 +17193,17 @@ label .search-select-trigger {
     font-size: 14px;
   }
 
-  .history-page-content .filters .calendar-picker-wrapper {
-    flex: 1 1 0;
-    min-width: 156px;
-  }
-
-  .history-page-content .filters .search-select.history-kapster-select {
-    flex: 1 1 0;
-    min-width: 156px;
-  }
-
-  .history-page-content .filters .search {
+  .history-page-content .filters .search,
+  .history-page-content .filters .calendar-picker-wrapper,
+  .history-page-content .filters .search-select.history-kapster-select,
+  .history-page-content .filters .history-method-filter {
     grid-column: auto;
-    flex: 1 1 0;
+    width: 100%;
     min-width: 0;
+    margin: 0;
   }
 
   .history-page-content .filters .history-method-filter {
-    flex: 0 0 auto;
-    margin-left: 0;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
@@ -17218,7 +17212,7 @@ label .search-select-trigger {
   .history-page-content .filters .history-method-filter .button {
     min-height: 0;
     height: 100%;
-    padding: 0 10px;
+    padding: 0 4px;
   }
 
   .history-page-content .master-detail {
