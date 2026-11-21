@@ -676,7 +676,17 @@ function TransactionDetailBody({
   const canRestore = userRole === "Owner"
   const canEdit = !isVoided && (userRole === "Owner" || userRole === "Kasir" || userRole === "Manajer")
   // Persen komisi diambil dari catatan (mis. "40% total layanan ..."); kosong bila transaksi campur produk.
-  const persenKomisi = /(\d+(?:[.,]\d+)?)\s*%/.exec(selected.commissionNote || "")?.[1] ?? ""
+  // Nota manual sering tanpa persen di catatan: hitung dari total layanan bila tanpa produk & diskon.
+  const totalLayanan = selected.items
+    .filter((it) => it.type === "Layanan")
+    .reduce((n, it) => n + it.price * it.qty, 0)
+  const tanpaProduk = selected.items.every((it) => it.type === "Layanan")
+  const persenCatatan = /(\d+(?:[.,]\d+)?)\s*%/.exec(selected.commissionNote || "")?.[1] ?? ""
+  const persenHitung =
+    tanpaProduk && !(selected.discount ?? 0) && totalLayanan > 0
+      ? String(Math.round((selected.commission / totalLayanan) * 100))
+      : ""
+  const persenKomisi = persenCatatan || persenHitung
 
   return (
     <>

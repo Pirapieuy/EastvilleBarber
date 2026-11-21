@@ -14638,6 +14638,16 @@ summary,
 
 /* Desktop: daftar item memakai sisa tinggi panel (tidak berhenti di 260px), tetap menggulir bila penuh */
 @media (min-width: 1025px) {
+  /* Ruang berlebih dirapatkan agar daftar item dapat lebih tinggi: judul kartu tidak menyisakan 2 baris kosong,
+     garis bawah header & padding atas lebih tipis */
+  .history-page-content .desktop-only-detail .detail-cards small {
+    min-height: 0;
+  }
+
+  .history-page-content .desktop-only-detail .detail-header-row {
+    padding-bottom: 10px;
+  }
+
   /* Panel detail: padding & jarak antar bagian sama dengan popup HP/tablet (14px samping, 12px antar bagian) */
   .history-page-content .desktop-only-detail {
     padding: 14px 16px 16px;
