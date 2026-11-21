@@ -5760,47 +5760,17 @@ textarea {
   min-width: 0;
 }
 
-.edit-trx-section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+
+
+
+
+
+.edit-trx-body .section-title {
   margin-bottom: 8px;
 }
 
-.edit-trx-section-heading > div {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.edit-trx-section-heading label {
-  margin: 0;
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.edit-trx-step-label {
-  width: 25px;
-  height: 25px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 8px;
-  color: var(--brass-dark);
-  background: var(--brass-soft);
-  font-size: 11px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.edit-trx-count {
-  padding: 5px 9px;
-  border-radius: 999px;
-  color: var(--slate);
-  background: var(--bone);
-  font-size: 12px;
-  font-weight: 700;
+.edit-trx-body .nota-summary {
+  margin-top: 0;
 }
 
 .edit-trx-items-list {
@@ -5814,10 +5784,6 @@ textarea {
   -webkit-overflow-scrolling: touch;
 }
 
-.edit-trx-items-list::-webkit-scrollbar,
-.edit-trx-catalog-list::-webkit-scrollbar {
-  display: none;
-}
 
 .edit-trx-item-row {
   display: grid;
@@ -5908,28 +5874,8 @@ textarea {
   justify-self: end;
 }
 
-.edit-trx-stepper {
-  height: 44px;
-  min-height: 44px;
-  padding: 2px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--bone);
-}
 
-.edit-trx-stepper .button {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  min-height: 38px;
-  border-radius: 7px;
-}
 
-.edit-trx-stepper span {
-  min-width: 28px;
-  font-size: 14px;
-  font-weight: 700;
-}
 
 .edit-trx-item-price {
   grid-area: price;
@@ -5969,95 +5915,17 @@ textarea {
   opacity: 0.45;
 }
 
-.edit-trx-stepper .icon,
-.edit-trx-item-del .icon {
-  width: 16px;
-  height: 16px;
-}
 
-.edit-trx-catalog-search {
-  margin: 0 0 8px;
-  background: var(--paper);
-}
 
-.edit-trx-catalog-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
 
-.edit-trx-catalog-group {
-  min-width: 0;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--bone);
-}
 
-.edit-trx-catalog-group h3 {
-  margin: 0 0 8px;
-  color: var(--slate);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
 
-.edit-trx-catalog-list {
-  display: grid;
-  gap: 6px;
-  max-height: 216px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
 
-.edit-trx-catalog-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 52px;
-  padding: 4px 4px 4px 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--paper);
-}
 
-.edit-trx-catalog-item > div {
-  min-width: 0;
-}
 
-.edit-trx-catalog-item strong {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
-.edit-trx-catalog-item strong {
-  color: var(--ink);
-  font-size: 14px;
-  line-height: 1.35;
-}
 
-.edit-trx-catalog-add {
-  width: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  height: 44px;
-  padding: 0;
-  flex: none;
-}
 
-.edit-trx-catalog-empty {
-  margin: 0;
-  padding: 10px 4px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
-}
 
 .edit-trx-detail-label {
   display: flex;
@@ -6173,43 +6041,10 @@ textarea {
   border-radius: 9px !important;
 }
 
-.edit-trx-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 13px;
-  background: linear-gradient(145deg, #fffaf0, #f8f0e2);
-  border: 1px solid rgb(200 150 62 / 26%);
-}
 
-.edit-trx-summary-caption {
-  color: var(--brass-dark);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
-.edit-trx-summary > div {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--slate);
-}
 
-.edit-trx-summary > div.total {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink);
-  padding-top: 10px;
-  border-top: 1px solid rgb(165 122 43 / 22%);
-}
 
-.edit-trx-summary > div.total strong {
-  font-size: 20px;
-  font-variant-numeric: tabular-nums;
-}
 
 .edit-trx-modal form > footer {
   flex-shrink: 0;
@@ -6280,20 +6115,12 @@ textarea {
     margin-top: 4px;
   }
 
-  .edit-trx-catalog-columns {
+  .edit-trx-body .nota-catalog-columns {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .edit-trx-catalog-list {
-    max-height: 180px;
   }
 
   .edit-trx-split-fields {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .edit-trx-summary > div.total strong {
-    font-size: 18px;
   }
 
   .edit-trx-modal form > footer .button {

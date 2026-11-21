@@ -388,12 +388,9 @@ export function EditTransactionModal({
 
             <div className="edit-trx-left-column">
             <div className="edit-trx-items-section">
-              <div className="edit-trx-section-heading">
-                <div>
-                  <span className="edit-trx-step-label">01</span>
-                  <label>Item transaksi</label>
-                </div>
-                <span className="edit-trx-count">{items.length} item</span>
+              <div className="section-title">
+                <h3>Item transaksi</h3>
+                <span className="nota-count">{items.length} item</span>
               </div>
               <div className="edit-trx-items-list">
                 {items.map((it, idx) => (
@@ -414,21 +411,23 @@ export function EditTransactionModal({
                     </div>
 
                     <div className="edit-trx-item-stepper">
-                      <div className="stepper edit-trx-stepper">
-                        <Button
-                          aria-label="Kurangi kuantitas"
+                      <div className="nota-stepper">
+                        <button
+                          aria-label={`Kurangi ${it.name}`}
                           disabled={it.qty <= 1}
                           onClick={() => updateItemQty(idx, -1)}
+                          type="button"
                         >
-                          <Icon name="minus" />
-                        </Button>
-                        <span>{it.qty}</span>
-                        <Button
-                          aria-label="Tambah kuantitas"
+                          −
+                        </button>
+                        <output aria-live="polite">{it.qty}</output>
+                        <button
+                          aria-label={`Tambah ${it.name}`}
                           onClick={() => updateItemQty(idx, 1)}
+                          type="button"
                         >
-                          <Icon name="plus" />
-                        </Button>
+                          +
+                        </button>
                       </div>
                     </div>
 
@@ -452,12 +451,10 @@ export function EditTransactionModal({
             </div>
 
             <div className="edit-trx-add-section">
-              <div className="edit-trx-section-heading">
-                <div>
-                  <label>Tambah layanan &amp; produk</label>
-                </div>
+              <div className="section-title">
+                <h3>Tambah layanan &amp; produk</h3>
               </div>
-              <div className="search edit-trx-catalog-search">
+              <div className="search nota-search">
                 <Icon name="search" />
                 <input
                   aria-label="Cari layanan atau produk untuk ditambahkan"
@@ -466,7 +463,7 @@ export function EditTransactionModal({
                   value={catalogSearch}
                 />
               </div>
-              <div className="edit-trx-catalog-columns">
+              <div className="nota-catalog-columns">
                 {(["Layanan", "Produk"] as const).map((type) => {
                   const visibleItems = catalog.filter(
                     (item) =>
@@ -474,23 +471,31 @@ export function EditTransactionModal({
                       item.name.toLowerCase().includes(catalogSearch.trim().toLowerCase()),
                   )
                   return (
-                    <section className="edit-trx-catalog-group" key={type}>
-                      <h3>{type}</h3>
-                      <div className="edit-trx-catalog-list">
+                    <div className="nota-group" key={type}>
+                      <h4>{type}</h4>
+                      <div className="nota-items">
                         {visibleItems.length === 0 ? (
-                          <p className="edit-trx-catalog-empty">
+                          <p className="nota-empty">
                             {catalogSearch ? "Tidak ada yang cocok." : `Belum ada ${type.toLowerCase()}.`}
                           </p>
                         ) : (
                           visibleItems.map((item) => (
-                            <div className="edit-trx-catalog-item" key={item.id}>
-                              <div>
+                            <div
+                              className="nota-item"
+                              key={item.id}
+                              onClick={() => handleAddItem(item)}
+                              role="button"
+                              style={{ cursor: "pointer" }}
+                            >
+                              <div className="nota-item-info">
                                 <strong>{item.name}</strong>
+                                <span>{rupiah(item.price)}</span>
                               </div>
                               <Button
                                 aria-label={`Tambah ${item.name}`}
-                                className="secondary-button edit-trx-catalog-add"
-                                onClick={() => handleAddItem(item)}
+                                className={`secondary-button nota-add ${
+                                  type === "Produk" ? "nota-add-product" : "nota-add-service"
+                                }`}
                               >
                                 <Icon name="plus" />
                               </Button>
@@ -498,7 +503,7 @@ export function EditTransactionModal({
                           ))
                         )}
                       </div>
-                    </section>
+                    </div>
                   )
                 })}
               </div>
@@ -506,11 +511,8 @@ export function EditTransactionModal({
             </div>
 
             <div className="edit-trx-details">
-              <div className="edit-trx-section-heading">
-                <div>
-                  <span className="edit-trx-step-label">02</span>
-                  <label>Kapster &amp; pembayaran</label>
-                </div>
+              <div className="section-title">
+                <h3>Kapster &amp; pembayaran</h3>
               </div>
               <label className="edit-trx-detail-label">
                 <span>Kapster untuk item baru</span>
@@ -615,23 +617,22 @@ export function EditTransactionModal({
                   onChange={(e) => setReason(e.target.value)}
                 />
               </label>
-              <div className="edit-trx-summary">
-                <span className="edit-trx-summary-caption">Ringkasan pembayaran</span>
+              <dl className="nota-summary">
                 <div>
-                  <span>Subtotal Item Baru</span>
-                  <b>{rupiah(subtotal)}</b>
+                  <dt>Subtotal</dt>
+                  <dd>{rupiah(subtotal)}</dd>
                 </div>
                 {diskon > 0 && (
-                  <div style={{ color: "var(--oxblood)" }}>
-                    <span>Diskon Nota</span>
-                    <b>− {rupiah(diskon)}</b>
+                  <div>
+                    <dt>Diskon</dt>
+                    <dd>− {rupiah(diskon)}</dd>
                   </div>
                 )}
-                <div className="total">
-                  <span>Total Akhir Tagihan</span>
-                  <strong>{rupiah(total)}</strong>
+                <div className="nota-summary-total">
+                  <dt>Total</dt>
+                  <dd>{rupiah(total)}</dd>
                 </div>
-              </div>
+              </dl>
             </div>
           </div>
 
