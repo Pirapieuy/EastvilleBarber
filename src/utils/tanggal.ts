@@ -79,3 +79,14 @@ export function rentangPeriode(mode: ModePeriode, tanggal: string) {
     sampai: iso(new Date(d.getFullYear(), d.getMonth() + 1, 0)),
   }
 }
+
+/** Teks tombol tanggal menurut mode: undefined (pakai format harian biasa), rentang pekan, atau nama bulan. */
+export function labelPeriode(mode: ModePeriode, tanggal: string): string | undefined {
+  if (!tanggal || mode === "Harian") return undefined
+  const r = rentangPeriode(mode, tanggal)
+  if (mode === "Mingguan") return labelRentang(r.dari, r.sampai)
+  return new Date(`${tanggal}T12:00:00`).toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  })
+}

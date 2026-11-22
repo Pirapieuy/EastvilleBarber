@@ -1,4 +1,4 @@
-import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelRentang, rentangPeriode, ModePeriode } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
@@ -804,17 +804,6 @@ function TransactionDetailBody({
   )
 }
 
-/** Teks tombol tanggal: kosong bila belum memilih (placeholder), selain Harian tampil rentang/bulan. */
-function labelPeriode(mode: ModePeriode, tanggal: string) {
-  if (!tanggal || mode === "Harian") return undefined
-  const r = rentangPeriode(mode, tanggal)
-  if (mode === "Mingguan") return labelRentang(r.dari, r.sampai)
-  return new Date(`${tanggal}T12:00:00`).toLocaleDateString("id-ID", {
-    month: "long",
-    year: "numeric",
-  })
-}
-
 function bacaFilterAwal(nama: "metode" | "kapster" | "mode" | "tanggal") {
   try {
     return sessionStorage.getItem(`eastville_riwayat_${nama}`) ?? ""
@@ -1145,6 +1134,7 @@ export function HistoryPage({ currentUser, role }: {
         <CalendarPicker
           value={dateFilter}
           label={labelPeriode(modePeriode, dateFilter)}
+          bulanSaja={modePeriode === "Bulanan"}
           popupHeader={
             <div className="segmented history-periode" role="group" aria-label="Periode">
               {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
