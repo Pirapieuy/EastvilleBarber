@@ -1,8 +1,9 @@
-import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
 import {
   apiLaporan,
   apiPengeluaran,
+  apiTransaksi,
   getToken,
   LaporanKeuangan,
 } from "../../api"
@@ -231,6 +232,124 @@ function labelPekan(dari: string, sampai: string) {
 const persen = (bagian: number, total: number) =>
   total > 0 ? Math.round((bagian / total) * 100) : 0
 
+interface BarisRincian {
+  id: string
+  date: string
+  time: string
+  items: string
+  omzet: number
+}
+
+/** Rincian satu kapster: transaksi pada periode laporan, dikelompokkan per hari. */
+function RincianKomisi({ kapster, dari, sampai, periode, onClose }: {
+  kapster: LaporanKeuangan["perKapster"][number]
+  dari: string
+  sampai: string
+  periode: string
+  onClose: () => void
+}) {
+  const [rows, setRows] = useState<BarisRincian[] | null>(null)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    if (!getToken()) {
+      setRows([])
+      return
+    }
+    let batal = false
+    apiTransaksi
+      .list({ dari, sampai })
+      .then((list) => {
+        if (batal) return
+        const hasil: BarisRincian[] = []
+        for (const t of list as {
+          id: string
+          date: string
+          time: string
+          status: string
+          items: { name: string; qty: number; price: number; kapsterId?: string; kapster?: string }[]
+        }[]) {
+          if (String(t.status).toUpperCase() === "BATAL") continue
+          const milik = t.items.filter(
+            (i) => i.kapsterId === kapster.kapsterId || i.kapster === kapster.kapster,
+          )
+          if (milik.length === 0) continue
+          hasil.push({
+            id: t.id,
+            date: t.date,
+            time: t.time,
+            items: milik.map((i) => `${i.name}${i.qty > 1 ? ` x${i.qty}` : ""}`).join(", "),
+            omzet: milik.reduce((a, i) => a + i.price * i.qty, 0),
+          })
+        }
+        setRows(hasil)
+      })
+      .catch((e) => !batal && setError(e instanceof Error ? e.message : "Gagal memuat rincian"))
+    return () => {
+      batal = true
+    }
+  }, [kapster.kapsterId, kapster.kapster, dari, sampai])
+
+  const perHari = new Map<string, BarisRincian[]>()
+  for (const r of rows ?? []) perHari.set(r.date, [...(perHari.get(r.date) ?? []), r])
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <section
+        className="simple-modal lk-rincian"
+        role="dialog"
+        aria-label={`Rincian komisi ${kapster.kapster}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header>
+          <h2>{kapster.kapster}</h2>
+          <Button type="button" onClick={onClose}>
+            <Icon name="close" />
+          </Button>
+        </header>
+        <div className="lk-rincian-body">
+          <p className="lk-rincian-periode">{periode}</p>
+          <div className="lk-rincian-sum">
+            <div><small>Transaksi</small><strong>{kapster.pelanggan}</strong></div>
+            <div><small>Omzet</small><strong>{rupiah(kapster.omzet)}</strong></div>
+            <div><small>Komisi</small><strong>{rupiah(kapster.komisi)}</strong></div>
+          </div>
+          <div className="lk-rincian-list">
+            {error ? (
+              <p className="lk-empty">{error}</p>
+            ) : rows === null ? (
+              <p className="lk-empty">Memuat rincian…</p>
+            ) : rows.length === 0 ? (
+              <p className="lk-empty">Tidak ada transaksi pada periode ini.</p>
+            ) : (
+              [...perHari.entries()].map(([tgl, list]) => (
+                <div key={tgl} className="lk-rincian-hari">
+                  <div className="lk-rincian-harihead">
+                    <strong>{tgl}</strong>
+                    <span>
+                      {list.length} transaksi, {rupiah(list.reduce((a, r) => a + r.omzet, 0))}
+                    </span>
+                  </div>
+                  {list.map((r) => (
+                    <div key={r.id} className="lk-rincian-row">
+                      <time>{r.time}</time>
+                      <span>
+                        <strong>{r.items}</strong>
+                        <small>{r.id}</small>
+                      </span>
+                      <b>{rupiah(r.omzet)}</b>
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 export function ReportsPage({ currentUser, role, onNavigate }: {
   currentUser?: AppUser
   role?: Role
@@ -279,6 +398,9 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   const [expDate, setExpDate] = useState(() => isoDate(new Date()))
   const [expSearch, setExpSearch] = useState("")
   const [expenseCancelId, setExpenseCancelId] = useState<string | null>(null)
+  const [rincianKapster, setRincianKapster] = useState<
+    LaporanKeuangan["perKapster"][number] | null
+  >(null)
 
   useEffect(() => {
     if (!getToken()) return
@@ -722,24 +844,28 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
               </div>
 
               {data.perKapster.map((k) => (
-                <div className="report-row" key={k.kapsterId + k.kapster}>
+                <div
+                  className="report-row is-tap"
+                  key={k.kapsterId + k.kapster}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Rincian komisi ${k.kapster}`}
+                  onClick={() => setRincianKapster(k)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") setRincianKapster(k)
+                  }}
+                >
                   <div>
                     <strong>{k.kapster}</strong>
                   </div>
                   <span>{k.pelanggan} transaksi</span>
                   <b>{rupiah(k.omzet)}</b>
-                  <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
+                  <b className="lk-komisi">{rupiah(k.komisi)}</b>
                 </div>
               ))}
 
               {data.perKapster.length === 0 && (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
+                <div className="lk-empty">
                   Belum ada data komisi kapster pada periode ini.
                 </div>
               )}
@@ -748,132 +874,32 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         </div>
       </div>
 
-      {/* SUB-VIEW 4: TAB OMZET */}
-      <div id="laporan-omzet" className="report-section">
-        <section className="panel owner-profit-panel" style={{ padding: 22 }}>
-          <PageTitle
-            eyebrow="Kalkulasi Keuntungan"
-            title="Kalkulasi Sisa Bersih"
-          />
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              width: "100%",
-              maxWidth: 1000,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "rgba(34, 197, 94, 0.08)",
-                border: "1px solid rgba(34, 197, 94, 0.2)",
-                flexWrap: "wrap",
-                gap: 8,
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--ink)",
-                    fontSize: 14,
-                  }}
-                >
-                  (+) Total Pemasukan Kotor
-                </strong>
-              </div>
-              <strong style={{ fontSize: 16, color: "#15803d" }}>
-                + {rupiah(data.pemasukan)}
-              </strong>
+      <section id="laporan-omzet" className="panel lk-panel report-section">
+        <div className="lk-head">
+          <h3>Sisa bersih</h3>
+          <strong className="lk-net">{rupiah(data.sisa)}</strong>
+        </div>
+        <div className="lk-calc">
+          {([
+            ["Pemasukan", "+", data.pemasukan, 100, "plus"],
+            ["Pengeluaran", "-", data.pengeluaran, persenPengeluaran, "minus"],
+            ["Komisi kapster", "-", data.komisi, persenKomisi, "minus"],
+          ] as const).map(([nama, tanda, nilai, pct, tone]) => (
+            <div key={nama} className={`lk-calc-row ${tone}`}>
+              <span>{nama}</span>
+              <small>{pct}%</small>
+              <b>
+                {tanda} {rupiah(nilai)}
+              </b>
             </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "rgba(239, 68, 68, 0.06)",
-                border: "1px solid rgba(239, 68, 68, 0.18)",
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--ink)",
-                    fontSize: 14,
-                  }}
-                >
-                  (-) Total Pengeluaran Toko
-                </strong>
-              </div>
-              <strong style={{ fontSize: 16, color: "#b91c1c" }}>
-                - {rupiah(data.pengeluaran)}
-              </strong>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "rgba(200, 150, 62, 0.08)",
-                border: "1px solid rgba(200, 150, 62, 0.25)",
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--ink)",
-                    fontSize: 14,
-                  }}
-                >
-                  (-) Total Komisi Kapster
-                </strong>
-              </div>
-              <strong style={{ fontSize: 16, color: "#8c6014" }}>
-                - {rupiah(data.komisi)}
-              </strong>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "16px",
-                borderRadius: 8,
-                background: "var(--ink)",
-                color: "#fff",
-                marginTop: 6,
-              }}
-            >
-              <div>
-                <strong
-                  style={{ display: "block", fontSize: 15, color: "#fff" }}
-                >
-                  (=) Sisa Bersih
-                </strong>
-              </div>
-              <strong style={{ fontSize: 20, color: "#facc15" }}>
-                {rupiah(data.sisa)}
-              </strong>
-            </div>
+          ))}
+          <div className="lk-calc-row total">
+            <span>Sisa bersih</span>
+            <small>{persenSisa}%</small>
+            <b>{rupiah(data.sisa)}</b>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       {/* Modal Tambah Pengeluaran: kalender di kiri, form di kanan (HP: tanggal di atas) */}
       {expenseFormOpen && (
@@ -945,6 +971,25 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
             </div>
           </form>
         </div>
+      )}
+
+      {rincianKapster && (
+        <RincianKomisi
+          kapster={rincianKapster}
+          dari={rentang.dari}
+          sampai={rentang.sampai}
+          periode={
+            mode === "Harian"
+              ? formatTanggal(rentang.dari)
+              : mode === "Mingguan"
+                ? labelPekan(rentang.dari, rentang.sampai)
+                : new Date(`${bulan}-01T12:00:00`).toLocaleDateString("id-ID", {
+                    month: "long",
+                    year: "numeric",
+                  })
+          }
+          onClose={() => setRincianKapster(null)}
+        />
       )}
 
       {expenseCancelId && (

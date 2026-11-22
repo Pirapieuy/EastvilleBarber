@@ -20465,3 +20465,230 @@ html:has(.manual-page .modal-overlay) {
     gap: 6px 16px !important;
   }
 }
+
+/* Laporan Keuangan: baris komisi bisa di-tap, popup rincian, kalkulasi sisa bersih ringkas */
+.report-page .report-row.is-tap {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.report-page .report-row.is-tap:hover,
+.report-page .report-row.is-tap:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}
+
+.lk-komisi {
+  color: #8c6014;
+}
+
+.lk-net {
+  font: 700 22px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.lk-calc {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.lk-calc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 52px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.lk-calc-row small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lk-calc-row b {
+  min-width: 130px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lk-calc-row.plus b {
+  color: #15803d;
+}
+
+.lk-calc-row.minus b {
+  color: #b91c1c;
+}
+
+.lk-calc-row.total {
+  border-bottom: 0;
+  border-radius: 0 0 12px 12px;
+  background: var(--bone);
+  font-weight: 700;
+}
+
+.simple-modal.lk-rincian {
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100svh - 32px);
+  display: flex;
+  flex-direction: column;
+}
+
+.lk-rincian-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 16px;
+}
+
+.lk-rincian-periode {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lk-rincian-sum {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lk-rincian-sum > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.lk-rincian-sum small {
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.lk-rincian-sum strong {
+  overflow: hidden;
+  font: 700 16px / 1.2 var(--heading);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lk-rincian-list {
+  min-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.lk-rincian-list::-webkit-scrollbar {
+  display: none;
+}
+
+.lk-rincian-harihead {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--bone);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.lk-rincian-harihead span {
+  color: var(--slate);
+}
+
+.lk-rincian-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.lk-rincian-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lk-rincian-row strong {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lk-rincian-row small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.lk-rincian-row b {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 620px) {
+  .lk-calc-row b {
+    min-width: 0;
+  }
+
+  .lk-rincian-sum {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+
+  .lk-rincian-sum > div {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+  }
+
+  .lk-rincian-sum > div:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* Laporan Keuangan: jarak 16px di semua lebar (mengalahkan gap 12px .content di HP) */
+.workspace > .content.report-page {
+  gap: 16px;
+  padding-bottom: 16px !important;
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.report-page {
+    padding: 70px 16px 16px !important;
+  }
+}
+
+.report-page .report-toolbar {
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.report-page .report-filter-row {
+  gap: 16px;
+}
