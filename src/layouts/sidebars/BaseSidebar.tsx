@@ -173,6 +173,7 @@ export function BaseSidebar({
             </div>
           ) : (
             <div className="sidebar-footer-nav">
+              <div className="nav-group-divider" />
               <Button
                 className="nav-item sidebar-user-pill"
                 onClick={() => setLogoutModalOpen(true)}
