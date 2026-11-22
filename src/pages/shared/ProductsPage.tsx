@@ -300,20 +300,6 @@ export function ProductsPage({ embedded = false }: {
             </small>
           </span>
         </div>
-        <div className="page-actions">
-          <Button
-            className="secondary-button"
-            onClick={() => {
-              setStockError("")
-              setStockOpen(true)
-            }}
-          >
-            <Icon name="plus" /> Restok
-          </Button>
-          <Button className="primary-button" onClick={openCreate}>
-            <Icon name="plus" /> Tambah produk
-          </Button>
-        </div>
       </div>
       <section className="panel product-admin-list fit-fill">
           <div className="filters">
@@ -333,6 +319,18 @@ export function ProductsPage({ embedded = false }: {
               <option>Aktif</option>
               <option>Non-aktif</option>
             </SearchSelect>
+            <Button
+              className="secondary-button filters-restok"
+              onClick={() => {
+                setStockError("")
+                setStockOpen(true)
+              }}
+            >
+              <Icon name="plus" /> Restok
+            </Button>
+            <Button className="primary-button filters-add" onClick={openCreate}>
+              <Icon name="plus" /> Tambah
+            </Button>
           </div>
           <div className="product-admin-scroll">
           <div className="product-admin-head">
@@ -406,7 +404,7 @@ export function ProductsPage({ embedded = false }: {
                   className="secondary-button"
                   onClick={() => openEdit(product)}
                 >
-                  Ubah
+                  <Icon name="pencil" /> Ubah
                 </Button>
                 <Button
                   className="danger-button"

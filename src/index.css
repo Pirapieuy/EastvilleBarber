@@ -21962,15 +21962,6 @@ html:has(.manual-page .modal-overlay) {
     white-space: nowrap;
   }
 
-  .catalog-page .master-summary > span > strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .catalog-page .master-summary > span > small {
-    display: none;
-  }
-
   .catalog-page .products-status-bar .page-actions {
     display: flex !important;
     flex: none;
@@ -21984,8 +21975,103 @@ html:has(.manual-page .modal-overlay) {
   }
 }
 
-@media (min-width: 1280px) {
-  .catalog-page .master-summary > span > small {
-    display: inline;
+
+/* Layanan & Produk: tombol + Tambah / Restok satu baris dengan Cari, Kategori, Status */
+.catalog-page .service-list > .filters,
+.catalog-page .product-admin-list > .filters {
+  display: flex !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.catalog-page .filters .search {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+.catalog-page .filters .search-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.catalog-page .filters .filters-add,
+.catalog-page .filters .filters-restok {
+  flex: none;
+  min-height: 44px;
+  height: 44px;
+  padding-inline: 16px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.catalog-page .service-head,
+.catalog-page .product-admin-head {
+  top: 76px;
+}
+
+@media (max-width: 760px) {
+  .catalog-page .service-list > .filters,
+  .catalog-page .product-admin-list > .filters {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 16px;
+  }
+
+  .catalog-page .filters .search {
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+
+  .catalog-page .filters .filters-add {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .catalog-page .service-list > .filters > .search-select:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .catalog-page .service-list > .filters > .search-select:nth-of-type(2) {
+    grid-column: 2 / 4;
+    grid-row: 2;
+  }
+
+  .catalog-page .product-admin-list > .filters > .search-select {
+    grid-column: 1 / 3;
+    grid-row: 2;
+  }
+
+  .catalog-page .product-admin-list > .filters .filters-restok {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .catalog-page .filters .filters-add,
+  .catalog-page .filters .filters-restok {
+    min-height: 42px;
+    height: 42px;
+  }
+}
+
+.catalog-page .filters .search-select,
+.catalog-page .filters .search-select-trigger {
+  min-height: 44px;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 760px) {
+  .catalog-page .filters .search-select,
+  .catalog-page .filters .search-select-trigger {
+    min-height: 42px;
+    height: 42px;
+  }
+
+  .catalog-page .filters .search {
+    min-height: 42px;
+    height: 42px;
   }
 }

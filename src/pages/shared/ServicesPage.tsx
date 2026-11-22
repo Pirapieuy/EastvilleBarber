@@ -234,9 +234,6 @@ export function ServicesPage({ embedded = false }: {
             <small>{rows.length - aktifCount} nonaktif</small>
           </span>
         </div>
-        <Button className="primary-button" onClick={() => openForm(null)}>
-          <Icon name="plus" /> Tambah layanan
-        </Button>
       </div>
 
       <section className="panel service-list fit-fill">
@@ -268,6 +265,12 @@ export function ServicesPage({ embedded = false }: {
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </SearchSelect>
+          <Button
+            className="primary-button filters-add"
+            onClick={() => openForm(null)}
+          >
+            <Icon name="plus" /> Tambah
+          </Button>
         </div>
         <div className="service-list-scroll">
         <div className="service-head">
