@@ -19634,3 +19634,14 @@ html:has(.manual-page .modal-overlay) {
 .cashier-page .cart-sheet-center::-webkit-scrollbar,
 .cashier-page .cart-sheet-center .cart-lines::-webkit-scrollbar,
 .cashier-page .cart-sheet-center .cart-total::-webkit-scrollbar { display: none; }
+
+/* Kasir POS popup keranjang (HP/tablet): judul stay di atas, daftar item + diskon + pembayaran satu area gulir, tombol Bayar menempel di bawah */
+@media (max-width: 820px) {
+  .cashier-page .cart-sheet-center { overflow: hidden !important; }
+  .cashier-page .cart-sheet-center .cart-panel { height: 100%; min-height: 0; max-height: 100%; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none; }
+  .cashier-page .cart-sheet-center .cart-panel::-webkit-scrollbar { display: none; }
+  .cashier-page .cart-sheet-center .cart-tabs { position: sticky; top: 0; z-index: 2; background: var(--paper); }
+  .cashier-page .cart-sheet-center .cart-lines { flex: none !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+  .cashier-page .cart-sheet-center .cart-total { flex: none !important; overflow: visible !important; }
+  .cashier-page .cart-sheet-center .cart-submit { position: sticky; bottom: 0; z-index: 1; }
+}
