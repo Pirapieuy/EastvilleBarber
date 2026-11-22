@@ -20925,10 +20925,6 @@ html:has(.manual-page .modal-overlay) {
     height: 42px;
   }
 
-  .report-page .lk-long {
-    display: none;
-  }
-
   /* HP: tanggal pindah ke bawah keterangan; tombol tetap sebaris dengan data */
   .report-page .expense-table-compact > .expense-head,
   .report-page .expense-table-compact > .expense-row {
@@ -20982,8 +20978,7 @@ html:has(.manual-page .modal-overlay) {
     font-size: 12px;
   }
 
-  .report-page .expense-table-compact > .expense-row > :nth-child(4) .icon,
-  .report-page .expense-add-button .icon {
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) .icon {
     display: none;
   }
 }
@@ -21065,3 +21060,5 @@ html:has(.manual-page .modal-overlay) {
   margin-inline: -4.5px 3.5px;
   flex: none;
 }
+
+/* Tombol Tambah: ikon + di semua lebar (HP tidak lagi menyembunyikan ikon), lebar mengikuti isi */

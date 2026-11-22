@@ -635,9 +635,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
                 onClick={() => setExpenseFormOpen(true)}
               >
                 <Icon name="plus" />
-                <span>
-                  Tambah<span className="lk-long"> pengeluaran</span>
-                </span>
+                <span>Tambah</span>
               </Button>
             </div>
 
