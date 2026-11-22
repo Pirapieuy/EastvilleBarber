@@ -20466,7 +20466,7 @@ html:has(.manual-page .modal-overlay) {
   }
 }
 
-/* Laporan Keuangan: baris komisi bisa di-tap, popup rincian, kalkulasi sisa bersih ringkas */
+/* Laporan Keuangan: baris komisi bisa di-tap (menuju Riwayat Transaksi) */
 .report-page .report-row.is-tap {
   cursor: pointer;
   transition: background-color 0.15s;
@@ -20482,193 +20482,12 @@ html:has(.manual-page .modal-overlay) {
   color: #8c6014;
 }
 
-.lk-net {
-  font: 700 22px / 1.2 var(--heading);
-  font-variant-numeric: tabular-nums;
+.od-kpi-static {
+  cursor: default;
 }
 
-.lk-calc {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--paper);
-}
-
-.lk-calc-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 16px;
-  min-height: 52px;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-}
-
-.lk-calc-row small {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.lk-calc-row b {
-  min-width: 130px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.lk-calc-row.plus b {
-  color: #15803d;
-}
-
-.lk-calc-row.minus b {
-  color: #b91c1c;
-}
-
-.lk-calc-row.total {
-  border-bottom: 0;
-  border-radius: 0 0 12px 12px;
-  background: var(--bone);
-  font-weight: 700;
-}
-
-.simple-modal.lk-rincian {
-  width: min(560px, calc(100% - 32px));
-  max-height: calc(100svh - 32px);
-  display: flex;
-  flex-direction: column;
-}
-
-.lk-rincian-body {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 0;
-  padding: 16px;
-}
-
-.lk-rincian-periode {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.lk-rincian-sum {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.lk-rincian-sum > div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-}
-
-.lk-rincian-sum small {
-  color: var(--slate);
-  font-size: 12px;
-}
-
-.lk-rincian-sum strong {
-  overflow: hidden;
-  font: 700 16px / 1.2 var(--heading);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lk-rincian-list {
-  min-height: 120px;
-  overflow-y: auto;
-  scrollbar-width: none;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-}
-
-.lk-rincian-list::-webkit-scrollbar {
-  display: none;
-}
-
-.lk-rincian-harihead {
-  position: sticky;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 16px;
-  background: var(--bone);
-  border-bottom: 1px solid var(--line);
-  font-size: 12px;
-}
-
-.lk-rincian-harihead span {
-  color: var(--slate);
-}
-
-.lk-rincian-row {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-}
-
-.lk-rincian-row > span {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.lk-rincian-row strong {
-  overflow: hidden;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lk-rincian-row small {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.lk-rincian-row b {
-  font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 620px) {
-  .lk-calc-row b {
-    min-width: 0;
-  }
-
-  .lk-rincian-sum {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-  }
-
-  .lk-rincian-sum > div {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border: 0;
-    border-bottom: 1px solid var(--line);
-    border-radius: 0;
-  }
-
-  .lk-rincian-sum > div:last-child {
-    border-bottom: 0;
-  }
+.od-kpi-static:hover {
+  border-color: var(--line);
 }
 
 /* Laporan Keuangan: jarak 16px di semua lebar (mengalahkan gap 12px .content di HP) */
@@ -20691,4 +20510,214 @@ html:has(.manual-page .modal-overlay) {
 
 .report-page .report-filter-row {
   gap: 16px;
+}
+
+/* Laporan Keuangan: bar atas sama dengan bar filter Riwayat (kartu putih sendiri-sendiri, aktif krem), tanpa kotak pembungkus */
+.report-page .report-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 16px !important;
+  padding: 0 !important;
+  border: 0;
+  background: transparent;
+}
+
+.report-page .report-filter-row {
+  display: contents !important;
+}
+
+.report-page .report-filter-row .segmented,
+.report-page .report-filter-row .calendar-picker-btn,
+.report-page .report-filter-row .month-picker-shell,
+.report-page .report-export-buttons .button {
+  height: 44px;
+  min-height: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.report-page .report-filter-row .segmented {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  width: 100%;
+}
+
+.report-page .report-filter-row .segmented .button {
+  height: 100%;
+  min-height: 0;
+  padding: 0 8px !important;
+  border: 0;
+  border-radius: 8px;
+  color: var(--slate);
+  font-size: 14px !important;
+  font-weight: 500;
+  justify-content: center;
+}
+
+.report-page .report-filter-row .segmented .button.active {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+.report-page .report-filter-row .calendar-picker-wrapper,
+.report-page .report-filter-row .month-picker-shell {
+  display: block;
+  width: 100% !important;
+  min-width: 0;
+}
+
+.report-page .report-filter-row .calendar-picker-btn {
+  width: 100% !important;
+  padding: 0 12px;
+  justify-content: flex-start !important;
+  gap: 8px;
+}
+
+.report-page .report-export-buttons {
+  display: contents !important;
+}
+
+.report-page .report-export-buttons .button {
+  padding: 0 16px;
+  justify-content: center;
+}
+
+.report-page .report-export-buttons .whatsapp-button {
+  border-color: transparent;
+  background: var(--sage);
+  color: #fff;
+}
+
+/* <=1024px: pilih periode & tanggal satu baris, tiga tombol ekspor sama lebar di bawahnya */
+@media (max-width: 1024px) {
+  .report-page .report-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-page .report-filter-row .segmented {
+    grid-column: span 2;
+  }
+
+  .report-page .report-filter-row .calendar-picker-wrapper,
+  .report-page .report-filter-row .month-picker-shell {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 620px) {
+  .report-page .report-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-page .report-filter-row .segmented {
+    grid-column: 1 / -1;
+  }
+
+  .report-page .report-filter-row .calendar-picker-wrapper,
+  .report-page .report-filter-row .month-picker-shell {
+    grid-column: 1 / -1;
+  }
+
+  .report-page .report-filter-row .segmented,
+  .report-page .report-filter-row .calendar-picker-btn,
+  .report-page .report-filter-row .month-picker-shell,
+  .report-page .report-export-buttons .button {
+    height: 42px;
+  }
+}
+
+/* Tabel Komisi: 3 kolom (kapster, transaksi, komisi) */
+.report-page .commission-table-scroll > .report-head,
+.report-page .commission-table-scroll > .report-row {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 16px;
+}
+
+.report-page .commission-table-scroll > .report-head > :last-child,
+.report-page .commission-table-scroll > .report-row > :last-child {
+  text-align: right;
+}
+
+/* Popup Tambah pengeluaran: lebar tetap, tidak bergeser di semua ukuran; hanya silang untuk menutup, Simpan selebar form */
+.simple-modal.lk-exp-form {
+  width: min(760px, calc(100% - 32px)) !important;
+  max-width: none !important;
+  max-height: none;
+  overflow: visible;
+}
+
+.lk-exp-form .lk-exp-actions {
+  display: block;
+}
+
+.lk-exp-form .lk-exp-actions .button {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .simple-modal.lk-exp-form {
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+  }
+
+  .lk-exp-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lk-exp-cal {
+    display: block;
+  }
+
+  .lk-exp-date {
+    display: none !important;
+  }
+}
+
+/* Tiga tombol ekspor selalu sebaris dan sama lebar di semua ukuran */
+.report-page .report-toolbar .report-export-buttons .whatsapp-button {
+  grid-column: auto;
+  width: auto;
+}
+
+@media (max-width: 620px) {
+  .report-page .report-export-buttons .button {
+    padding: 0 8px;
+  }
+}
+
+/* Popup Tambah pengeluaran di layar sangat pendek: kalender dirapatkan supaya tidak menggulir */
+@media (max-height: 700px) and (max-width: 760px) {
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 30px;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 760px) {
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 24px;
+    gap: 2px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 24px;
+  }
+
+  .lk-exp-cal .izin-cal-head {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-cal .izin-cal-week {
+    margin-bottom: 4px;
+  }
+
+  .simple-modal.lk-exp-form > header {
+    min-height: 56px;
+  }
 }
