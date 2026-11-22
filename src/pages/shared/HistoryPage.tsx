@@ -1,4 +1,4 @@
-import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelRentang } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelRentang, rentangPeriode, ModePeriode } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
@@ -804,7 +804,18 @@ function TransactionDetailBody({
   )
 }
 
-function bacaFilterAwal(nama: "metode" | "kapster" | "dari" | "sampai") {
+/** Teks tombol tanggal: kosong bila belum memilih (placeholder), selain Harian tampil rentang/bulan. */
+function labelPeriode(mode: ModePeriode, tanggal: string) {
+  if (!tanggal || mode === "Harian") return undefined
+  const r = rentangPeriode(mode, tanggal)
+  if (mode === "Mingguan") return labelRentang(r.dari, r.sampai)
+  return new Date(`${tanggal}T12:00:00`).toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  })
+}
+
+function bacaFilterAwal(nama: "metode" | "kapster" | "mode" | "tanggal") {
   try {
     return sessionStorage.getItem(`eastville_riwayat_${nama}`) ?? ""
   } catch {
@@ -848,17 +859,11 @@ export function HistoryPage({ currentUser, role }: {
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   // Laporan Keuangan membuka Riwayat dengan filter awal (metode/kapster/periode) lewat sessionStorage.
-  const [dateFilter, setDateFilter] = useState(() => {
-    const d = bacaFilterAwal("dari")
-    return d && d === bacaFilterAwal("sampai") ? d : ""
+  const [dateFilter, setDateFilter] = useState(() => bacaFilterAwal("tanggal"))
+  const [modePeriode, setModePeriode] = useState<ModePeriode>(() => {
+    const m = bacaFilterAwal("mode")
+    return m === "Mingguan" || m === "Bulanan" ? m : "Harian"
   })
-  const [rentang, setRentang] = useState<{ dari: string; sampai: string } | null>(
-    () => {
-      const dari = bacaFilterAwal("dari")
-      const sampai = bacaFilterAwal("sampai")
-      return dari && sampai && dari !== sampai ? { dari, sampai } : null
-    },
-  )
   const [cari, setCari] = useState("")
   const [barberFilter, setBarberFilter] = useState(
     () => bacaFilterAwal("kapster") || "Semua kapster",
@@ -871,7 +876,7 @@ export function HistoryPage({ currentUser, role }: {
   )
   useEffect(() => {
     try {
-      for (const k of ["metode", "kapster", "dari", "sampai"])
+      for (const k of ["metode", "kapster", "mode", "tanggal"])
         sessionStorage.removeItem(`eastville_riwayat_${k}`)
     } catch {
       /* tanpa penyimpanan sesi, filter awal diabaikan */
@@ -917,13 +922,7 @@ export function HistoryPage({ currentUser, role }: {
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive(isStale: () => boolean = () => false) {
     return apiTransaksi
-      .list(
-        rentang
-          ? rentang
-          : dateFilter
-            ? { dari: dateFilter, sampai: dateFilter }
-            : {},
-      )
+      .list(dateFilter ? rentangPeriode(modePeriode, dateFilter) : {})
       .then((rows) => {
         if (isStale()) return
         const list = rows as HistoryTransactionRecord[]
@@ -949,7 +948,7 @@ export function HistoryPage({ currentUser, role }: {
     return () => {
       stale = true
     }
-  }, [dateFilter, rentang])
+  }, [dateFilter, modePeriode])
 
   useEffect(() => {
     if (getToken()) {
@@ -1144,10 +1143,23 @@ export function HistoryPage({ currentUser, role }: {
           />
         </div>
         <CalendarPicker
-          value={rentang ? "" : dateFilter}
-          label={rentang ? labelRentang(rentang.dari, rentang.sampai) : undefined}
+          value={dateFilter}
+          label={labelPeriode(modePeriode, dateFilter)}
+          popupHeader={
+            <div className="segmented history-periode" role="group" aria-label="Periode">
+              {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+                <Button
+                  className={modePeriode === m ? "active" : ""}
+                  key={m}
+                  type="button"
+                  onClick={() => setModePeriode(m)}
+                >
+                  {m}
+                </Button>
+              ))}
+            </div>
+          }
           onChange={(d) => {
-            setRentang(null)
             setDateFilter(d)
           }}
           allowClear
@@ -1191,7 +1203,7 @@ export function HistoryPage({ currentUser, role }: {
           {visibleTx.length === 0 && (
             <p className="history-empty">
               {cari ? "Tidak ada nota yang cocok" : "Belum ada transaksi"}
-              {dateFilter ? " pada tanggal ini" : ""}
+              {dateFilter ? " pada periode ini" : ""}
               {activeBarber !== "Semua kapster" ? ` untuk ${activeBarber}` : ""}
               .
             </p>

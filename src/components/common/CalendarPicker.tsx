@@ -30,6 +30,8 @@ export interface CalendarPickerProps {
   placeholder?: string
   /** Teks tombol pengganti (mis. rentang tanggal); pilihan kalender tetap per hari. */
   label?: string
+  /** Isi tambahan di atas kalender dalam popup (mis. pilihan Harian/Mingguan/Bulanan). */
+  popupHeader?: React.ReactNode
   compact?: boolean
   showToday?: boolean
   style?: React.CSSProperties
@@ -45,6 +47,7 @@ export function CalendarPicker({
   clearLabel = "Semua Tanggal",
   placeholder = "Pilih tanggal",
   label,
+  popupHeader,
   compact = false,
   showToday = true,
   style,
@@ -166,6 +169,7 @@ export function CalendarPicker({
             className="panel"
             style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}
           >
+            {popupHeader}
             <div
               style={{
                 display: "flex",

@@ -58,3 +58,24 @@ export function labelRentang(dari: string, sampai: string): string {
   if (a.getMonth() !== b.getMonth()) return `${a.getDate()} ${bln(a)} - ${akhir}`
   return `${a.getDate()} - ${akhir}`
 }
+
+export type ModePeriode = "Harian" | "Mingguan" | "Bulanan"
+
+/** Rentang yyyy-MM-dd untuk satu tanggal menurut mode: hari itu, pekan Senin-Minggu, atau satu bulan penuh. */
+export function rentangPeriode(mode: ModePeriode, tanggal: string) {
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const d = new Date(`${tanggal}T12:00:00`)
+  if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
+  if (mode === "Mingguan") {
+    const senin = new Date(d)
+    senin.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+    const minggu = new Date(senin)
+    minggu.setDate(senin.getDate() + 6)
+    return { dari: iso(senin), sampai: iso(minggu) }
+  }
+  return {
+    dari: iso(new Date(d.getFullYear(), d.getMonth(), 1)),
+    sampai: iso(new Date(d.getFullYear(), d.getMonth() + 1, 0)),
+  }
+}
