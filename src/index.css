@@ -14530,7 +14530,7 @@ summary,
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding-bottom: 14px !important;
+    padding-bottom: 16px !important;
     overflow: hidden;
   }
 
@@ -15000,7 +15000,7 @@ label .search-select-trigger {
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
-    padding-bottom: 26px;
+    padding-bottom: 16px;
     overflow: hidden;
   }
 
@@ -18255,7 +18255,7 @@ label .search-select-trigger {
 
 @media (min-width: 1025px) {
   .content.narrow.manual-page {
-    min-height: calc(100svh - 52px);
+    min-height: calc(100svh - 40px);
   }
 }
 
