@@ -19703,3 +19703,6 @@ html:has(.manual-page .modal-overlay) {
   .cashier-page .catalog-sticky .modal-overlay .absensi-modal { max-height: 100% !important; overflow-y: auto !important; overscroll-behavior: none; scrollbar-width: none; }
   .cashier-page .catalog-sticky .modal-overlay .absensi-modal::-webkit-scrollbar { display: none; }
 }
+
+/* Kasir POS: kotak peringatan pembayaran tanpa margin bawaan (inline 8px) agar jarak ke garis/tombol Bayar tepat 16px */
+.cashier-page .cart-payment > div:not([class]) { margin: 0 !important; }
