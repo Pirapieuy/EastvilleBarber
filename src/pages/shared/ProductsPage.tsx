@@ -431,6 +431,9 @@ export function ProductsPage({ embedded = false }: {
                     : "Tambah Produk Baru"}
                 </h2>
               </div>
+              <Button type="button" aria-label="Tutup" onClick={() => setFormOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <div className="product-modal-body">
               <div className="form-grid">
@@ -765,13 +768,6 @@ export function ProductsPage({ embedded = false }: {
             )}
             <footer>
               <Button
-                className="secondary-button"
-                onClick={() => setFormOpen(false)}
-                type="button"
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={
                   saving ||
@@ -827,6 +823,9 @@ export function ProductsPage({ embedded = false }: {
           >
             <header>
               <h2>Restok produk</h2>
+              <Button type="button" aria-label="Tutup" onClick={() => setStockOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <label>
               <span>Produk</span>
@@ -866,12 +865,6 @@ export function ProductsPage({ embedded = false }: {
             )}
             <footer>
               <Button
-                className="secondary-button"
-                onClick={() => setStockOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={saving}
                 type="submit"
@@ -884,6 +877,7 @@ export function ProductsPage({ embedded = false }: {
       )}
       {deletingProduct && (
         <ConfirmModal
+          compact
           title={`Hapus Produk "${deletingProduct.name}"?`}
           eyebrow="Hapus Produk"
           warning={`Produk (${deletingProduct.code}) tidak akan muncul lagi di Kasir. Riwayat penjualan lama tetap aman.`}

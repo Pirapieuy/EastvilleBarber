@@ -330,18 +330,21 @@ export function PromoDiscountsTab() {
           >
             <header>
               <h2>{editingId ? "Ubah Diskon Event" : "Tambah Diskon Event"}</h2>
+              <Button type="button" aria-label="Tutup" onClick={() => setModalOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
 
             {error && (
               <div
                 style={{
                   padding: "8px 12px",
+                  margin: "16px 16px 0",
                   borderRadius: 6,
                   background: "#fef2f2",
                   border: "1px solid #fecaca",
                   color: "#991b1b",
                   fontSize: 12,
-                  marginBottom: 10,
                 }}
               >
                 <Icon name="alert" /> {error}
@@ -372,31 +375,33 @@ export function PromoDiscountsTab() {
               />
             </label>
 
-            <label>
-              <span>Jenis Diskon</span>
-              <SearchSelect
-                value={jenis}
-                onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
-              >
-                <option value="persen">Persentase (%)</option>
-                <option value="nominal">Nominal (Rp)</option>
-              </SearchSelect>
-            </label>
+            <div className="modal-row-2">
+              <label>
+                <span>Jenis Diskon</span>
+                <SearchSelect
+                  value={jenis}
+                  onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
+                >
+                  <option value="persen">Persentase (%)</option>
+                  <option value="nominal">Nominal (Rp)</option>
+                </SearchSelect>
+              </label>
 
-            <label>
-              <span>Jumlah Diskon ({jenis === "persen" ? "%" : "Rp"})</span>
-              <div className="input-shell">
-                <b>{jenis === "persen" ? "%" : "Rp"}</b>
-                <input
-                  max={jenis === "persen" ? 100 : undefined}
-                  min={1}
-                  required
-                  type="number"
-                  value={nilai}
-                  onChange={(e) => setNilai(Number(e.target.value))}
-                />
-              </div>
-            </label>
+              <label>
+                <span>Jumlah Diskon ({jenis === "persen" ? "%" : "Rp"})</span>
+                <div className="input-shell">
+                  <b>{jenis === "persen" ? "%" : "Rp"}</b>
+                  <input
+                    max={jenis === "persen" ? 100 : undefined}
+                    min={1}
+                    required
+                    type="number"
+                    value={nilai}
+                    onChange={(e) => setNilai(Number(e.target.value))}
+                  />
+                </div>
+              </label>
+            </div>
 
             <label>
               <span>Masa Berlaku Sampai</span>
@@ -420,13 +425,6 @@ export function PromoDiscountsTab() {
 
             <footer>
               <Button
-                className="secondary-button"
-                type="button"
-                onClick={() => setModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={menyimpan}
                 type="submit"
@@ -445,6 +443,7 @@ export function PromoDiscountsTab() {
           message={`Kode diskon "${deletingPromo.nama}" (${deletingPromo.kode}) akan dihapus dan tidak dapat digunakan lagi pada transaksi kasir.`}
           confirmText="Hapus Diskon"
           confirmTone="danger"
+          compact
           onClose={() => setDeletingPromo(null)}
           onConfirm={() => handleDeleteConfirm(deletingPromo)}
         />

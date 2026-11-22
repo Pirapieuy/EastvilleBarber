@@ -21729,3 +21729,148 @@ html:has(.manual-page .modal-overlay) {
     gap: 8px;
   }
 }
+
+/* ===== Layanan & Produk: popup Tambah/Ubah/Restok/Hapus ===== */
+.catalog-page .simple-modal > header,
+.catalog-page .product-modal > header {
+  min-height: 68px;
+  padding: 0 16px !important;
+  gap: 16px;
+}
+
+.catalog-page .confirm-custom-modal > header {
+  min-height: 68px;
+  padding: 16px !important;
+  gap: 16px;
+  align-items: center !important;
+}
+
+.catalog-page .simple-modal > header .button,
+.catalog-page .product-modal > header .button,
+.catalog-page .confirm-custom-modal > header .button {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  flex: none;
+  border-radius: 10px;
+}
+
+.catalog-page .simple-modal > label,
+.catalog-page .simple-modal > .modal-row-2,
+.catalog-page .simple-modal > .toggle-row,
+.catalog-page .simple-modal > .info-banner,
+.catalog-page .simple-modal > .pin-helper,
+.catalog-page .simple-modal > div[role="alert"] {
+  margin: 16px 16px 0;
+}
+
+.catalog-page .simple-modal > .modal-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.catalog-page .simple-modal > .modal-row-2 > label {
+  margin: 0;
+  min-width: 0;
+}
+
+.catalog-page .simple-modal label > span,
+.catalog-page .product-modal label > span {
+  margin: 0 0 6px;
+}
+
+.catalog-page .simple-modal label > input,
+.catalog-page .simple-modal .input-shell,
+.catalog-page .simple-modal .search-select-trigger,
+.catalog-page .simple-modal .calendar-picker-btn,
+.catalog-page .product-modal .form-grid input,
+.catalog-page .product-modal .search-select-trigger {
+  min-height: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+
+.catalog-page .simple-modal .input-shell input {
+  min-height: 0;
+  height: 100%;
+}
+
+.catalog-page .product-modal {
+  border-radius: 12px;
+}
+
+.catalog-page .product-modal-body {
+  padding: 16px;
+}
+
+.catalog-page .product-modal .form-grid {
+  gap: 16px;
+}
+
+.catalog-page .simple-modal > .toggle-row,
+.catalog-page .product-modal .toggle-row,
+.catalog-page .promo-discount-modal > .toggle-row {
+  border-radius: 12px;
+}
+
+.catalog-page .service-modal > .toggle-row,
+.catalog-page .service-modal > .info-banner,
+.catalog-page .promo-discount-modal > .toggle-row {
+  margin: 16px 16px 0;
+}
+
+.catalog-page .stock-modal > label:last-of-type,
+.catalog-page .stock-modal > .info-banner {
+  margin-bottom: 0;
+}
+
+/* Footer: satu tombol utama selebar popup, satu baris */
+.catalog-page .simple-modal > footer,
+.catalog-page .product-modal > footer,
+.catalog-page .confirm-custom-modal > footer {
+  display: flex !important;
+  min-height: 0;
+  margin: 16px 0 0;
+  padding: 16px !important;
+  gap: 16px !important;
+}
+
+.catalog-page .simple-modal > footer .button,
+.catalog-page .product-modal > footer .button,
+.catalog-page .confirm-custom-modal > footer .button {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+.catalog-page .product-modal > .info-banner {
+  margin: 0 16px 16px;
+}
+
+/* Popup Hapus: isi 16px */
+.catalog-page .confirm-custom-modal {
+  border-radius: 16px !important;
+}
+
+.catalog-page .confirm-custom-modal > div {
+  padding: 16px !important;
+  gap: 16px !important;
+}
+
+@media (max-width: 620px) {
+  .catalog-page .simple-modal > footer .button,
+  .catalog-page .product-modal > footer .button,
+  .catalog-page .confirm-custom-modal > footer .button {
+    min-height: 42px;
+  }
+
+  .catalog-page .simple-modal label > input,
+  .catalog-page .simple-modal .input-shell,
+  .catalog-page .simple-modal .search-select-trigger,
+  .catalog-page .simple-modal .calendar-picker-btn {
+    min-height: 42px;
+    height: 42px;
+  }
+}

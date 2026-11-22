@@ -14,6 +14,8 @@ export interface ConfirmModalProps {
   reasonLabel?: string
   reasonPlaceholder?: string
   minReasonLength?: number
+  /** Tombol silang menggantikan Batal; tombol konfirmasi selebar popup satu baris */
+  compact?: boolean
   onClose: () => void
   onConfirm: (reason: string) => void | Promise<void>
 }
@@ -30,6 +32,7 @@ export function ConfirmModal({
   reasonLabel = "Alasan",
   reasonPlaceholder = "Tuliskan alasan tindakan ini...",
   minReasonLength = 3,
+  compact = false,
   onClose,
   onConfirm,
 }: ConfirmModalProps) {
@@ -192,6 +195,7 @@ export function ConfirmModal({
         </div>
 
         <footer
+          className={compact ? "confirm-footer-compact" : undefined}
           style={{
             display: "flex",
             justifyContent: "flex-end",
@@ -202,9 +206,11 @@ export function ConfirmModal({
             background: "var(--paper)",
           }}
         >
-          <Button className="secondary-button" onClick={onClose} disabled={busy}>
-            {cancelText}
-          </Button>
+          {!compact && (
+            <Button className="secondary-button" onClick={onClose} disabled={busy}>
+              {cancelText}
+            </Button>
+          )}
           <Button
             className={confirmTone === "danger" ? "danger-button" : "primary-button"}
             disabled={!canSubmit || busy}

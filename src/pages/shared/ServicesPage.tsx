@@ -357,6 +357,9 @@ export function ServicesPage({ embedded = false }: {
                 <p className="eyebrow">Data layanan</p>
                 <h2>{editing ? "Ubah layanan" : "Tambah layanan"}</h2>
               </div>
+              <Button type="button" aria-label="Tutup" onClick={() => setFormOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <label>
               <span>Nama layanan</span>
@@ -367,31 +370,33 @@ export function ServicesPage({ embedded = false }: {
                 onChange={(e) => setNama(e.target.value)}
               />
             </label>
+            <div className="modal-row-2">
             <label>
-              <span>Kategori</span>
-              <SearchSelect
-                value={kategori}
-                onChange={(e) => setKategori(e.target.value)}
-              >
-                {KATEGORI_LAYANAN.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </SearchSelect>
-            </label>
-            <label>
-              <span>Harga</span>
-              <div className="input-shell">
-                <b>Rp</b>
-                <input
-                  inputMode="numeric"
-                  required
-                  value={harga}
-                  onChange={(e) => setHarga(e.target.value.replace(/\D/g, ""))}
-                />
-              </div>
-            </label>
+                <span>Kategori</span>
+                <SearchSelect
+                  value={kategori}
+                  onChange={(e) => setKategori(e.target.value)}
+                >
+                  {KATEGORI_LAYANAN.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </SearchSelect>
+              </label>
+              <label>
+                <span>Harga</span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    required
+                    value={harga}
+                    onChange={(e) => setHarga(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+              </label>
+            </div>
             <div
               className="toggle-row"
               style={{ cursor: "pointer" }}
@@ -410,13 +415,6 @@ export function ServicesPage({ embedded = false }: {
             {formError && <small className="pin-helper">{formError}</small>}
             <footer>
               <Button
-                className="secondary-button"
-                onClick={() => setFormOpen(false)}
-                type="button"
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={saving}
                 type="submit"
@@ -432,6 +430,7 @@ export function ServicesPage({ embedded = false }: {
           title={`Hapus Layanan "${deletingService.nama}"?`}
           eyebrow="Hapus Layanan"
           warning="Layanan yang dihapus tidak akan muncul lagi di Kasir. Riwayat transaksi lama tetap aman."
+          compact
           requireReason
           reasonLabel="Alasan Penghapusan"
           reasonPlaceholder="Contoh: Menu layanan sudah tidak disediakan..."
