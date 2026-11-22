@@ -16,7 +16,6 @@ import {
 import {
   Button,
   CalendarPicker,
-  Kpi,
   MonthPicker,
   PageTitle,
   rupiah,
@@ -228,9 +227,13 @@ function labelPekan(dari: string, sampai: string) {
   return `${awal} - ${m.getDate()} ${bln(m)} ${m.getFullYear()}`
 }
 
-export function ReportsPage({ currentUser, role }: {
+const persen = (bagian: number, total: number) =>
+  total > 0 ? Math.round((bagian / total) * 100) : 0
+
+export function ReportsPage({ currentUser, role, onNavigate }: {
   currentUser?: AppUser
   role?: Role
+  onNavigate?: (page: string) => void
 } = {}) {
   const [wa, setWa] = useState(false)
   const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
@@ -474,16 +477,35 @@ export function ReportsPage({ currentUser, role }: {
     return matchSearch
   })
 
-  // Calculation details for Sisa Owner
-  const totalOmzet = data.pemasukan || 1
-  const persenTunai = ((data.tunai / totalOmzet) * 100).toFixed(1)
-  const persenQris = ((data.qris / totalOmzet) * 100).toFixed(1)
-  const persenPengeluaran = ((data.pengeluaran / totalOmzet) * 100).toFixed(1)
-  const persenKomisi = ((data.komisi / totalOmzet) * 100).toFixed(1)
-  const persenSisa = ((data.sisa / totalOmzet) * 100).toFixed(1)
+  // Rincian persen terhadap pemasukan
+  const persenTunai = persen(data.tunai, data.pemasukan)
+  const persenQris = persen(data.qris, data.pemasukan)
+  const persenPengeluaran = persen(data.pengeluaran, data.pemasukan)
+  const persenKomisi = persen(data.komisi, data.pemasukan)
+  const persenSisa = persen(data.sisa, data.pemasukan)
+  const jumlahKapsterBerkomisi = data.perKapster.filter((k) => k.komisi > 0).length
+
+  /** Buka Riwayat Transaksi dengan filter metode (dan tanggal bila mode Harian). */
+  function bukaRiwayat(metode: "Tunai" | "QRIS") {
+    try {
+      sessionStorage.setItem("eastville_riwayat_metode", metode)
+      if (mode === "Harian")
+        sessionStorage.setItem("eastville_riwayat_tanggal", tanggal)
+    } catch {
+      /* filter awal hanya kemudahan */
+    }
+    onNavigate?.("RiwayatTransaksi")
+  }
+
+  const kpis = [
+    { key: "pemasukan", icon: "cash", tone: "sage", label: "Pemasukan", value: data.pemasukan, detail: `${data.jumlahTransaksi} transaksi` },
+    { key: "pengeluaran", icon: "expense", tone: "amber", label: "Pengeluaran", value: data.pengeluaran, detail: data.pemasukan > 0 ? `${persenPengeluaran}% pemasukan` : "Belum ada" },
+    { key: "komisi", icon: "people", tone: "brass", label: "Komisi", value: data.komisi, detail: jumlahKapsterBerkomisi > 0 ? `untuk ${jumlahKapsterBerkomisi} kapster` : "Belum ada" },
+    { key: "omzet", icon: "wallet", tone: "dark", label: "Sisa Bersih", value: data.sisa, detail: data.pemasukan > 0 ? `${persenSisa}% pemasukan` : "Belum ada" },
+  ] as const
 
   return (
-    <div className="content">
+    <div className="content report-page">
       <DemoNotice live={live} error={liveError} />
 
       <div className="report-toolbar">
@@ -553,186 +575,56 @@ export function ReportsPage({ currentUser, role }: {
         </div>
       </div>
 
-      {/* Interactive KPI Cards acting as direct Sub-view Tabs */}
-      <div
-        className="kpi-grid"
-        style={{ marginBottom: 14, ...(fetching ? { opacity: 0.6 } : {}) }}
-      >
-        <div
-          onClick={() => pilihBagian("pemasukan")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "pemasukan"
-                ? "0 0 0 2px var(--sage), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "pemasukan" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat rincian sumber pemasukan"
-        >
-          <Kpi
-            icon="cash"
-            label="Pemasukan"
-            tone="sage"
-            value={rupiah(data.pemasukan)}
-            detail={`Tunai ${persenTunai}% · QRIS ${persenQris}%`}
-          />
-        </div>
-
-        <div
-          onClick={() => pilihBagian("pengeluaran")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "pengeluaran"
-                ? "0 0 0 2px var(--amber), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "pengeluaran" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk mengelola & melihat rincian pengeluaran"
-        >
-          <Kpi
-            icon="expense"
-            label={`Pengeluaran (${mode})`}
-            tone="amber"
-            value={rupiah(data.pengeluaran)}
-            detail={`Total per ${mode.toLowerCase()} · ${persenPengeluaran}% dari omzet`}
-          />
-        </div>
-
-        <div
-          onClick={() => pilihBagian("komisi")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "komisi"
-                ? "0 0 0 2px var(--brass), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "komisi" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat detail komisi per kapster"
-        >
-          <Kpi
-            icon="people"
-            label="Total Komisi"
-            tone="brass"
-            value={rupiah(data.komisi)}
-            detail={`${persenKomisi}% dari omzet · ${data.perKapster.length} kapster`}
-          />
-        </div>
-
-        <div
-          onClick={() => pilihBagian("omzet")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "omzet"
-                ? "0 0 0 2px var(--ink), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "omzet" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat omzet dan laba bersih"
-        >
-          <Kpi
-            icon="wallet"
-            label="Omzet"
-            tone="dark"
-            value={rupiah(data.sisa)}
-            detail={`Margin laba bersih ${persenSisa}%`}
-          />
-        </div>
+      <div className="od-kpis" style={fetching ? { opacity: 0.6 } : undefined}>
+        {kpis.map((k) => (
+          <button
+            key={k.key}
+            type="button"
+            className={`od-kpi${subTab === k.key ? " is-active" : ""}`}
+            aria-label={`${k.label} ${rupiah(k.value)}, lihat rincian`}
+            onClick={() => pilihBagian(k.key)}
+          >
+            <span className="od-kpi-body">
+              <span className={`kpi-icon ${k.tone}`}>
+                <Icon name={k.icon} />
+              </span>
+              <span className="od-kpi-text">
+                <span className="od-kpi-label">{k.label}</span>
+                <strong className="od-kpi-value">{rupiah(k.value)}</strong>
+                <span className="od-kpi-detail">{k.detail}</span>
+              </span>
+            </span>
+          </button>
+        ))}
       </div>
 
-      {/* SUB-VIEW 1: TAB PEMASUKAN */}
-      <div id="laporan-pemasukan" className="report-section">
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section className="panel" style={{ padding: 20 }}>
-            <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: 16,
-                marginTop: 14,
-              }}
+      <section id="laporan-pemasukan" className="panel lk-panel report-section">
+        <div className="lk-head">
+          <h3>Pemasukan</h3>
+        </div>
+        <div className="lk-pay">
+          {([
+            ["Tunai", data.tunai, persenTunai, "sage-dot"],
+            ["QRIS", data.qris, persenQris, "brass-dot"],
+          ] as const).map(([nama, nilai, pct, dot]) => (
+            <button
+              key={nama}
+              type="button"
+              className="lk-pay-card"
+              aria-label={`Pembayaran ${nama} ${rupiah(nilai)}, buka Riwayat Transaksi ${nama}`}
+              onClick={() => bukaRiwayat(nama)}
             >
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                  background: "var(--paper)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    marginBottom: 8,
-                  }}
-                >
-                  <i
-                    className="dot sage-dot"
-                    style={{ width: 10, height: 10 }}
-                  />
-                  <strong style={{ fontSize: 15 }}>Pembayaran Tunai</strong>
-                  <span className="chip lunas" style={{ marginLeft: "auto" }}>
-                    {persenTunai}%
-                  </span>
-                </div>
-                <div
-                  style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}
-                >
-                  {rupiah(data.tunai)}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                  background: "var(--paper)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    marginBottom: 8,
-                  }}
-                >
-                  <i
-                    className="dot brass-dot"
-                    style={{ width: 10, height: 10 }}
-                  />
-                  <strong style={{ fontSize: 15 }}>
-                    Pembayaran QRIS / Digital
-                  </strong>
-                  <span className="chip active" style={{ marginLeft: "auto" }}>
-                    {persenQris}%
-                  </span>
-                </div>
-                <div
-                  style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}
-                >
-                  {rupiah(data.qris)}
-                </div>
-              </div>
-            </div>
-          </section>
+              <i className={`dot ${dot}`} />
+              <span className="lk-pay-main">
+                <strong>{nama}</strong>
+                <small>{pct}% pemasukan</small>
+              </span>
+              <b>{rupiah(nilai)}</b>
+              <Icon name="chevron" className="od-turn-right od-go" />
+            </button>
+          ))}
         </div>
-      </div>
+      </section>
 
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
       <div id="laporan-pengeluaran" className="report-section">

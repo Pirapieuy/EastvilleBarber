@@ -19118,9 +19118,11 @@ label .search-select-trigger {
 html:has(.izin-kapster-page),
 html:has(.manual-page),
 html:has(.od-page),
+html:has(.report-page),
 .workspace:has(> .izin-kapster-page),
 .workspace:has(> .manual-page),
-.workspace:has(> .od-page) {
+.workspace:has(> .od-page),
+.workspace:has(> .report-page) {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -19128,9 +19130,11 @@ html:has(.od-page),
 html:has(.izin-kapster-page)::-webkit-scrollbar,
 html:has(.manual-page)::-webkit-scrollbar,
 html:has(.od-page)::-webkit-scrollbar,
+html:has(.report-page)::-webkit-scrollbar,
 .workspace:has(> .izin-kapster-page)::-webkit-scrollbar,
 .workspace:has(> .manual-page)::-webkit-scrollbar,
-.workspace:has(> .od-page)::-webkit-scrollbar {
+.workspace:has(> .od-page)::-webkit-scrollbar,
+.workspace:has(> .report-page)::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
@@ -20064,5 +20068,111 @@ html:has(.manual-page .modal-overlay) {
   .od-chip {
     min-height: 28px;
     font-size: 14px;
+  }
+}
+
+/* ===== Laporan Keuangan (lk-*) =====
+   Jarak 16px di mana-mana (label ke isi 6px), radius kartu 12px / kontrol 10px / chip 8px. */
+.report-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-page .report-section + .report-section {
+  margin-top: 0;
+}
+
+.report-page .report-section {
+  scroll-margin-top: 70px;
+}
+
+.od-kpi.is-active {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 1px var(--brass), var(--shadow);
+}
+
+.lk-panel {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.lk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.lk-head h3 {
+  margin: 0;
+  font: 700 18px / 1.2 var(--heading);
+  color: var(--ink);
+}
+
+.lk-pay {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lk-pay-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.lk-pay-card:hover {
+  border-color: var(--brass);
+}
+
+.lk-pay-card:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
+}
+
+.lk-pay-card .dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+}
+
+.lk-pay-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lk-pay-main strong {
+  font-size: 15px;
+}
+
+.lk-pay-main small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lk-pay-card b {
+  font: 700 20px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .lk-pay {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

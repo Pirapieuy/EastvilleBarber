@@ -804,6 +804,14 @@ function TransactionDetailBody({
   )
 }
 
+function bacaFilterAwal(nama: "metode" | "tanggal") {
+  try {
+    return sessionStorage.getItem(`eastville_riwayat_${nama}`) ?? ""
+  } catch {
+    return ""
+  }
+}
+
 export function HistoryPage({ currentUser, role }: {
   currentUser?: AppUser
   role?: Role
@@ -839,12 +847,24 @@ export function HistoryPage({ currentUser, role }: {
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
+  // Laporan Keuangan membuka Riwayat dengan filter awal (metode/tanggal) lewat sessionStorage.
+  const [dateFilter, setDateFilter] = useState(() => bacaFilterAwal("tanggal"))
   const [cari, setCari] = useState("")
   const [barberFilter, setBarberFilter] = useState("Semua kapster")
   const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
-    "Semua",
+    () => {
+      const m = bacaFilterAwal("metode")
+      return m === "Tunai" || m === "QRIS" ? m : "Semua"
+    },
   )
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem("eastville_riwayat_metode")
+      sessionStorage.removeItem("eastville_riwayat_tanggal")
+    } catch {
+      /* tanpa penyimpanan sesi, filter awal diabaikan */
+    }
+  }, [])
 
   const barberOptions = Array.from(
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),

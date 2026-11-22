@@ -176,7 +176,7 @@ export function App() {
       return <RiwayatTransaksiOwner currentUser={currentUser} />
     }
     if (activePage === "LaporanKeuangan" || activePage === "reports") {
-      return <LaporanKeuanganOwner currentUser={currentUser} />
+      return <LaporanKeuanganOwner currentUser={currentUser} onNavigate={setActivePage} />
     }
     if (
       activePage === "LaporanProduk" ||
