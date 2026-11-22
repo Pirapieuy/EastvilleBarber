@@ -22648,3 +22648,12 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .promo-discount-actions .filters-summary > span {
   justify-content: flex-start;
 }
+
+.catalog-page .promo-discount-actions .filters-summary {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.catalog-page .promo-discount-actions .promo-discount-help-wrap {
+  flex: none;
+}
