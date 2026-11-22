@@ -21051,3 +21051,17 @@ html:has(.manual-page .modal-overlay) {
     letter-spacing: 0;
   }
 }
+
+/* Tombol Tambah pengeluaran: garis "+" hanya mengisi 12 dari 24 satuan kotak ikon, jadi kotaknya digeser agar
+   jarak terlihat kiri = kanan = 16px dan jarak ikon ke teks = 8px */
+.report-page .expense-add-button {
+  gap: 0;
+  padding-inline: 16px;
+}
+
+.report-page .expense-add-button .icon {
+  width: 18px;
+  height: 18px;
+  margin-inline: -4.5px 3.5px;
+  flex: none;
+}
