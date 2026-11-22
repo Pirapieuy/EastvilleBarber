@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
 import { apiKodeDiskon, KodeDiskonRow } from "../../api"
-import { LoadingState } from "../../components/common/UI"
+import { ErrorState, LoadingState } from "../../components/common/UI"
 import { formatTanggal, tanggalIsoLokal, TANGGAL_MAKS } from "../../utils/tanggal"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
@@ -172,9 +172,32 @@ export function PromoDiscountsTab() {
 
   const todayStr = TANGGAL_MAKS()
 
+  // Muat pertama / gagal muat tanpa data: hanya spinner atau pesan di tengah (tab ikut disembunyikan CSS)
+  if (memuat && promos.length === 0 && !gagalMuat) {
+    return (
+      <div className="catalog-embedded-view">
+        <LoadingState message="Memuat kode diskon…" />
+      </div>
+    )
+  }
+  if (gagalMuat && promos.length === 0 && !memuat) {
+    return (
+      <div className="catalog-embedded-view">
+        <ErrorState title="Kode diskon gagal dimuat" message={gagalMuat} onRetry={muat} />
+      </div>
+    )
+  }
+
   return (
     <div className="promo-discounts-tab" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div className="promo-discount-actions">
+        <div className="master-summary filters-summary">
+          <span>
+            <Icon name="cash" />
+            <strong>{promos.filter((p) => p.status === "Aktif" && p.berlakuSampai >= todayStr).length} diskon aktif</strong>
+            <small>{promos.filter((p) => p.status !== "Aktif" || p.berlakuSampai < todayStr).length} nonaktif</small>
+          </span>
+        </div>
         <div className="promo-discount-help-wrap">
           <button
             className="promo-discount-help"
@@ -187,12 +210,12 @@ export function PromoDiscountsTab() {
           </button>
           {showHelp && (
             <div className="promo-discount-tooltip" role="tooltip">
-              Belum ada diskon. Klik Tambah Diskon Event untuk membuat kode.
+              Kasir mengetik kode diskon event saat transaksi. Klik Tambah untuk membuat kode baru.
             </div>
           )}
         </div>
-        <Button className="primary-button" onClick={openCreate}>
-          <Icon name="plus" /> Tambah Diskon Event
+        <Button className="primary-button filters-add" onClick={openCreate}>
+          <Icon name="plus" /> Tambah
         </Button>
       </div>
 

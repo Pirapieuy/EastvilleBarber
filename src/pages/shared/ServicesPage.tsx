@@ -216,7 +216,7 @@ export function ServicesPage({ embedded = false }: {
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
   if (Boolean(getToken()) && !live && !liveError) {
     return (
-      <div className="content">
+      <div className={embedded ? "catalog-embedded-view" : "content"}>
         <LoadingState message="Memuat layanan..." />
       </div>
     )

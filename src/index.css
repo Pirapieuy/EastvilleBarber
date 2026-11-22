@@ -22246,3 +22246,140 @@ html:has(.manual-page .modal-overlay) {
     width: 100%;
   }
 }
+
+/* ===== Layanan & Produk: tab selebar baris, bar Diskon Event satu baris dengan ringkasan ===== */
+.catalog-page .catalog-tab-header,
+.catalog-page .catalog-segmented {
+  width: 100%;
+}
+
+.catalog-page .catalog-segmented {
+  display: flex;
+}
+
+.catalog-page .catalog-segmented .button {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+.catalog-page .promo-discount-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+}
+
+.catalog-page .promo-discount-actions .filters-summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.catalog-page .promo-discount-actions .filters-summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  white-space: nowrap;
+}
+
+.catalog-page .promo-discount-actions .filters-summary small {
+  color: var(--muted);
+}
+
+.catalog-page .promo-discount-actions .filters-add {
+  flex: none;
+  min-height: 44px;
+  height: 44px;
+  padding-inline: 16px;
+  white-space: nowrap;
+}
+
+@media (min-width: 761px) {
+  .workspace > .content.catalog-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .catalog-page .catalog-tab-header {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .catalog-page .promo-discount-actions {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+
+  .catalog-page .catalog-embedded-view > .fit-fill {
+    grid-row: 2 / span 2;
+  }
+
+  .catalog-page .promo-discounts-tab > .promo-discount-list {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .catalog-page .promo-discounts-tab > :not(.promo-discount-actions):not(.promo-discount-list) {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 620px) {
+  .catalog-page .promo-discount-actions .filters-summary > span,
+  .catalog-page .promo-discount-actions .filters-add {
+    min-height: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 760px) {
+  .catalog-page .promo-discount-actions {
+    flex-wrap: nowrap;
+  }
+}
+
+.catalog-page .catalog-tab-header {
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .catalog-page {
+    gap: 16px;
+  }
+}
+
+/* Layanan & Produk saat memuat / gagal: hanya spinner di tengah, tanpa judul dan tab (menimpa grid satu baris) */
+.workspace:has(> .content.catalog-page > .catalog-embedded-view > .loading-state:only-child) > .desktop-page-head,
+.workspace:has(> .content.catalog-page > .catalog-embedded-view > .error-state:only-child) > .desktop-page-head {
+  display: none !important;
+}
+
+.workspace > .content.catalog-page:has(> .catalog-embedded-view > .loading-state:only-child),
+.workspace > .content.catalog-page:has(> .catalog-embedded-view > .error-state:only-child) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  height: 100svh;
+  padding: 16px !important;
+}
+
+.workspace > .content.catalog-page:has(> .catalog-embedded-view > .loading-state:only-child) > .catalog-embedded-view,
+.workspace > .content.catalog-page:has(> .catalog-embedded-view > .error-state:only-child) > .catalog-embedded-view {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid !important;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
