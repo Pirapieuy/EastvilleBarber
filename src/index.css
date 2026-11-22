@@ -19626,3 +19626,11 @@ html:has(.manual-page .modal-overlay) {
 .cashier-page .cart-payment .method-grid { gap: 16px !important; }
 .cashier-page .cart-payment .quick-cash { gap: 16px !important; }
 .cashier-page .cart-payment .quick-cash button { flex: 1 1 calc((100% - 32px) / 3) !important; }
+
+/* Kasir POS: scroll popup keranjang sama seperti popup Riwayat (tidak menular ke halaman, batang scroll tersembunyi) */
+.cashier-page .cart-sheet-center,
+.cashier-page .cart-sheet-center .cart-lines,
+.cashier-page .cart-sheet-center .cart-total { overscroll-behavior: none !important; scrollbar-width: none; }
+.cashier-page .cart-sheet-center::-webkit-scrollbar,
+.cashier-page .cart-sheet-center .cart-lines::-webkit-scrollbar,
+.cashier-page .cart-sheet-center .cart-total::-webkit-scrollbar { display: none; }
