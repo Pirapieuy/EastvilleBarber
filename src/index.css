@@ -22625,3 +22625,26 @@ html:has(.manual-page .modal-overlay) {
   padding: 0 !important;
   justify-content: center;
 }
+
+/* Diskon Event: tombol Tambah lebih kecil, ringkasan melebar mengisi sisa baris */
+.catalog-page .promo-discount-actions .filters-summary,
+.catalog-page .promo-discount-actions .filters-summary > span {
+  display: flex;
+  width: 100%;
+  max-width: none;
+}
+
+.catalog-page .promo-discount-actions .filters-summary > span,
+.catalog-page .promo-discount-actions .filters-add {
+  min-height: 40px;
+  height: 40px;
+}
+
+.catalog-page .promo-discount-actions .filters-add {
+  padding-inline: 12px;
+  font-size: 14px;
+}
+
+.catalog-page .promo-discount-actions .filters-summary > span {
+  justify-content: flex-start;
+}
