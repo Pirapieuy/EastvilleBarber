@@ -20070,6 +20070,11 @@ html:has(.manual-page .modal-overlay) {
   background: var(--amber-soft);
 }
 
+.od-avatar.sick {
+  color: #b45309;
+  background: #fffbeb;
+}
+
 .od-avatar.off {
   color: var(--muted);
   background: var(--bone);
@@ -20096,6 +20101,11 @@ html:has(.manual-page .modal-overlay) {
 .od-chip.late {
   color: #8c6014;
   background: var(--amber-soft);
+}
+
+.od-chip.sick {
+  color: #b45309;
+  background: #fffbeb;
 }
 
 .od-chip.off {
