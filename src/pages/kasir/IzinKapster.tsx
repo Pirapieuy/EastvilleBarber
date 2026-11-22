@@ -19,7 +19,7 @@ const pad = (n: number) => String(n).padStart(2, "0")
 const dariIso = (iso: string) => new Date(`${iso}T12:00:00`)
 
 // Kalender bulanan yang langsung tampil di halaman; tanggal sebelum `min` abu-abu.
-function KalenderBesar({
+export function KalenderBesar({
   value,
   min,
   izin,

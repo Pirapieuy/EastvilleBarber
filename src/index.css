@@ -20176,3 +20176,117 @@ html:has(.manual-page .modal-overlay) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Laporan Keuangan: popup Tambah pengeluaran. Kalender kiri, isian + tombol kanan; <=620px tanggal biasa di atas */
+.simple-modal.lk-exp-form {
+  width: min(760px, calc(100% - 32px));
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.lk-exp-form::-webkit-scrollbar {
+  display: none;
+}
+
+.lk-exp-body {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  align-items: stretch;
+}
+
+.lk-exp-date {
+  display: none !important;
+}
+
+.lk-exp-cal .izin-cal {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.lk-exp-cal .izin-cal-head {
+  margin-bottom: 10px;
+}
+
+.lk-exp-cal .izin-cal-head strong {
+  font-size: 16px;
+}
+
+.lk-exp-cal .izin-cal-nav button {
+  width: 34px;
+  height: 34px;
+}
+
+.lk-exp-cal .izin-cal-grid {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(34px, 1fr);
+}
+
+.lk-exp-cal .izin-cal-grid button {
+  height: auto;
+}
+
+.lk-exp-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.simple-modal .lk-exp-body label,
+.simple-modal .lk-exp-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.simple-modal .lk-exp-body label > input {
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.lk-exp-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.lk-exp-actions .button {
+  flex: 1 1 0;
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+.simple-modal.lk-exp-form > header {
+  padding: 0 16px;
+}
+
+@media (max-width: 620px) {
+  .lk-exp-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lk-exp-cal {
+    display: none;
+  }
+
+  .lk-exp-date {
+    display: flex !important;
+    order: -1;
+  }
+
+  .lk-exp-actions .button {
+    min-height: 42px;
+  }
+
+  .lk-exp-actions {
+    margin-top: 0;
+  }
+}

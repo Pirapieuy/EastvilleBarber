@@ -29,6 +29,7 @@ import {
   INITIAL_PRODUCT_TRANSACTIONS,
 } from "./ProductReportsPage"
 import { ReasonDialog } from "./HistoryPage"
+import { KalenderBesar } from "../kasir/IzinKapster"
 
 export const barberReport = [
   ["Seva", 124, 12480000, 4992000],
@@ -886,50 +887,74 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         </section>
       </div>
 
-      {/* Modal Catat Pengeluaran */}
+      {/* Modal Tambah Pengeluaran: kalender di kiri, form di kanan (HP: tanggal di atas) */}
       {expenseFormOpen && (
         <div className="modal-overlay">
           <form
-            className="simple-modal expense-form"
+            className="simple-modal expense-form lk-exp-form"
             onSubmit={handleCreateExpense}
           >
-            <label>
-              <span>Tanggal</span>
-              <CalendarPicker value={expDate} onChange={setExpDate} />
-            </label>
-            <label>
-              <span>Keterangan</span>
-              <input
-                placeholder="Misal: Beli sabun cuci rambut 2 botol"
-                value={expDescription}
-                onChange={(e) => setExpDescription(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              <span>Jumlah (Rp)</span>
-              <input
-                placeholder="Contoh: 150.000"
-                value={expAmount}
-                onChange={(e) => {
-                  const num = Number(e.target.value.replace(/\D/g, ""))
-                  setExpAmount(num ? rupiah(num) : "")
-                }}
-                required
-              />
-            </label>
-            <footer>
-              <Button
-                className="secondary-button"
-                type="button"
-                onClick={() => setExpenseFormOpen(false)}
-              >
-                Batal
+            <header>
+              <h2>Tambah pengeluaran</h2>
+              <Button type="button" onClick={() => setExpenseFormOpen(false)}>
+                <Icon name="close" />
               </Button>
-              <Button className="primary-button" type="submit">
-                Simpan Pengeluaran
-              </Button>
-            </footer>
+            </header>
+            <div className="lk-exp-body">
+              <div className="lk-exp-cal">
+                <KalenderBesar
+                  izin={{}}
+                  min={TANGGAL_MULAI}
+                  onChange={setExpDate}
+                  value={expDate}
+                />
+              </div>
+              <label className="lk-exp-date">
+                <span>Tanggal</span>
+                <CalendarPicker
+                  max={TANGGAL_MAKS()}
+                  min={TANGGAL_MULAI}
+                  value={expDate}
+                  onChange={(d) => d && setExpDate(d)}
+                />
+              </label>
+              <div className="lk-exp-fields">
+                <label>
+                  <span>Keterangan</span>
+                  <input
+                    placeholder="Misal: Beli sabun cuci rambut 2 botol"
+                    value={expDescription}
+                    onChange={(e) => setExpDescription(e.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Jumlah (Rp)</span>
+                  <input
+                    inputMode="numeric"
+                    placeholder="Contoh: 150.000"
+                    value={expAmount}
+                    onChange={(e) => {
+                      const num = Number(e.target.value.replace(/\D/g, ""))
+                      setExpAmount(num ? rupiah(num) : "")
+                    }}
+                    required
+                  />
+                </label>
+                <div className="lk-exp-actions">
+                  <Button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => setExpenseFormOpen(false)}
+                  >
+                    Batal
+                  </Button>
+                  <Button className="primary-button" type="submit">
+                    Simpan
+                  </Button>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
       )}
