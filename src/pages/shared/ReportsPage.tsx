@@ -215,6 +215,19 @@ export function rentangLaporan(
   return { dari: `${bulan}-01`, sampai: `${bulan}-${pad(akhir)}` }
 }
 
+/** "16 - 22 Nov 2026" (atau "28 Okt - 3 Nov 2026" bila pekan melewati bulan). */
+function labelPekan(dari: string, sampai: string) {
+  const d = new Date(`${dari}T00:00:00`)
+  const m = new Date(`${sampai}T00:00:00`)
+  const bln = (x: Date) =>
+    x.toLocaleDateString("id-ID", { month: "short" }).replace(".", "")
+  const awal =
+    d.getMonth() === m.getMonth()
+      ? `${d.getDate()}`
+      : `${d.getDate()} ${bln(d)}`
+  return `${awal} - ${m.getDate()} ${bln(m)} ${m.getFullYear()}`
+}
+
 export function ReportsPage({ currentUser, role }: {
   currentUser?: AppUser
   role?: Role
@@ -508,17 +521,7 @@ export function ReportsPage({ currentUser, role }: {
                   className="report-week-range"
                   aria-label="Rentang tanggal minggu"
                 >
-                  <strong>
-                    {new Date(`${rentang.sampai}T00:00:00`).toLocaleDateString(
-                      "id-ID",
-                      {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        weekday: "long",
-                      },
-                    )}
-                  </strong>
+                  <strong>{labelPekan(rentang.dari, rentang.sampai)}</strong>
                 </span>
               )}
             </div>
