@@ -457,35 +457,6 @@ export function TeamPage({ currentUser, role, title }: {
                 ))}
               </div>
 
-              {selectedRole === "Kapster" && (
-                <>
-                  <label>
-                    <span>Komisi pribadi</span>
-                    <div className="input-shell">
-                      <input
-                        onChange={(e) => setCommission(Number(e.target.value))}
-                        type="number"
-                        min={10}
-                        max={90}
-                        value={commission}
-                      />
-                      <b>%</b>
-                    </div>
-                  </label>
-                  <div className="info-banner">
-                    <Icon name="alert" /> Berlaku untuk transaksi setelahnya.
-                  </div>
-                  <label>
-                    <span>Alasan perubahan komisi</span>
-                    <textarea
-                      placeholder="Wajib jika komisi berubah dari default..."
-                      value={commissionReason}
-                      onChange={(e) => setCommissionReason(e.target.value)}
-                    />
-                  </label>
-                </>
-              )}
-
               <div
                 className="toggle-row"
                 style={{ cursor: "pointer" }}
