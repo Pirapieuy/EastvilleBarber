@@ -22383,3 +22383,245 @@ html:has(.manual-page .modal-overlay) {
   width: 100%;
   height: 100%;
 }
+
+/* ===== Layanan & Produk: tabel 761px ke atas (perbaikan header menjorok, Hapus tembus, isi baris tablet) ===== */
+@media (min-width: 761px) {
+  /* daftar tabel rapat ke tepi panel: tanpa ruang atas/kiri */
+  .catalog-page .fit-fill > .service-list-scroll,
+  .catalog-page .fit-fill > .product-admin-scroll,
+  .catalog-page .service-list-scroll,
+  .catalog-page .product-admin-scroll {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .catalog-page .service-head,
+  .catalog-page .product-admin-head,
+  .catalog-page .service-row,
+  .catalog-page .product-admin-row {
+    margin: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  /* kolom boleh mengecil sampai muat; kolom Aksi tetap 216px */
+  .catalog-page .service-head,
+  .catalog-page .service-row {
+    grid-template-columns: minmax(96px, 1.2fr) minmax(60px, 0.7fr) minmax(80px, 0.9fr) minmax(72px, 0.8fr) minmax(56px, 0.6fr) 216px !important;
+  }
+
+  .catalog-page .product-admin-head,
+  .catalog-page .product-admin-row {
+    grid-template-columns: minmax(96px, 1.2fr) minmax(64px, 1fr) minmax(48px, 0.5fr) minmax(112px, 1.2fr) minmax(56px, 0.6fr) 216px !important;
+  }
+
+  .catalog-page .service-row > *,
+  .catalog-page .product-admin-row > * {
+    min-width: 0;
+  }
+
+  /* isi baris: lepas penempatan kartu HP lama, ikuti urutan kolom */
+  .catalog-page .service-details,
+  .catalog-page .product-admin-details {
+    display: contents !important;
+  }
+
+  .catalog-page .service-details > *,
+  .catalog-page .product-admin-details > *,
+  .catalog-page .service-row > *,
+  .catalog-page .product-admin-row > * {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  .catalog-page .product-admin-details > .product-stock-detail,
+  .catalog-page .product-admin-details > .product-seller-detail {
+    display: block !important;
+    flex-direction: row !important;
+  }
+
+  .catalog-page .product-admin-details > .product-seller-detail { order: 1; }
+  .catalog-page .product-admin-details > .product-stock-detail { order: 2; }
+  .catalog-page .product-admin-details > .product-scheme-detail { order: 3; }
+
+  .catalog-page .product-admin-details > .product-scheme-detail {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px;
+    padding: 0 !important;
+    min-width: 0;
+  }
+
+  .catalog-page .product-scheme-detail::before,
+  .catalog-page .product-admin-scroll .product-scheme-detail::before {
+    content: none !important;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values {
+    flex-direction: row !important;
+    width: auto;
+    gap: 8px !important;
+    min-width: 0;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values > span {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values > span > small::before {
+    content: none !important;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values > span > strong {
+    text-align: left;
+  }
+
+  .catalog-page .service-row .catalog-row-actions,
+  .catalog-page .product-admin-row .catalog-row-actions {
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  .catalog-page .chip {
+    white-space: nowrap;
+  }
+}
+
+/* urutan kolom baris Produk/Layanan di tablet & laptop, label kartu HP disembunyikan (header tabel sudah ada) */
+@media (min-width: 761px) {
+  .catalog-page .product-admin-row > span:first-child,
+  .catalog-page .service-row > span:first-child { order: 0; }
+  .catalog-page .product-admin-details > .product-seller-detail { order: 1; }
+  .catalog-page .product-admin-details > .product-stock-detail { order: 2; }
+  .catalog-page .product-admin-details > .product-scheme-detail { order: 3; }
+  .catalog-page .service-details > :nth-child(1) { order: 1; }
+  .catalog-page .service-details > :nth-child(2) { order: 2; }
+  .catalog-page .service-details > :nth-child(3) { order: 3; }
+  .catalog-page .service-row > .chip,
+  .catalog-page .product-admin-row > .chip { order: 4; align-self: center; justify-self: start; }
+  .catalog-page .service-row > .catalog-row-actions,
+  .catalog-page .product-admin-row > .catalog-row-actions { order: 5; align-self: center; }
+
+  .catalog-page .service-details > span > small,
+  .catalog-page .product-seller-detail > small,
+  .catalog-page .product-stock-detail > small {
+    display: none !important;
+  }
+
+  .catalog-page .service-details > span,
+  .catalog-page .product-seller-detail,
+  .catalog-page .product-stock-detail {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .catalog-page .service-details > span > strong,
+  .catalog-page .product-seller-detail > strong,
+  .catalog-page .product-stock-detail > strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .catalog-page .service-row,
+  .catalog-page .product-admin-row {
+    align-items: center;
+  }
+}
+
+@media (min-width: 761px) {
+  .catalog-page .service-commission-values small {
+    display: none !important;
+  }
+
+  .catalog-page .service-commission-values {
+    display: flex !important;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .catalog-page .service-commission-values > span {
+    display: block !important;
+  }
+}
+
+@media (min-width: 761px) {
+  .catalog-page .service-head,
+  .catalog-page .service-row {
+    grid-template-columns: minmax(88px, 1.2fr) minmax(56px, 0.7fr) minmax(80px, 0.9fr) minmax(72px, 0.8fr) minmax(56px, 0.6fr) 200px !important;
+  }
+
+  .catalog-page .product-admin-head,
+  .catalog-page .product-admin-row {
+    grid-template-columns: minmax(88px, 1.1fr) minmax(56px, 0.9fr) 56px minmax(176px, 1.4fr) 72px 200px !important;
+  }
+
+  .catalog-page .product-share-values {
+    gap: 8px !important;
+  }
+
+  .catalog-page .product-share-values strong {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 860px) {
+  .catalog-page .product-admin-head,
+  .catalog-page .product-admin-row {
+    grid-template-columns: minmax(72px, 1fr) minmax(48px, 0.8fr) 48px minmax(132px, 1.3fr) 64px 200px !important;
+  }
+
+  .catalog-page .product-share-values {
+    gap: 4px !important;
+  }
+
+  .catalog-page .product-share-values strong {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 761px) {
+  .catalog-page .service-details > span,
+  .catalog-page .product-admin-details > span {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .catalog-page .product-admin-details > .product-scheme-detail {
+    overflow: visible;
+  }
+}
+
+/* Diskon Event: tombol di kartu mengikuti tombol kecil 40px */
+.catalog-page .promo-discount-list > article > div:last-child {
+  padding-top: 16px !important;
+  gap: 16px !important;
+}
+
+.catalog-page .promo-discount-list > article > div:last-child > div {
+  gap: 16px !important;
+}
+
+.catalog-page .promo-discount-list > article .button {
+  min-height: 40px !important;
+  height: 40px;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  border-radius: 10px;
+}
+
+.catalog-page .promo-discount-list > article .button:has(> .icon:only-child) {
+  width: 40px;
+  padding: 0 !important;
+  justify-content: center;
+}
