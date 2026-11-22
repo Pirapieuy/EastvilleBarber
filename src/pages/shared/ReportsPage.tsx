@@ -473,11 +473,18 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   const persenSisa = persen(data.sisa, data.pemasukan)
   const jumlahKapsterBerkomisi = data.perKapster.filter((k) => k.komisi > 0).length
 
-  /** Buka Riwayat Transaksi dengan filter awal: periode laporan, plus metode atau kapster. */
+  /** Buka Riwayat Transaksi dengan filter awal: periode laporan (mode + tanggal), plus metode atau kapster. */
   function bukaRiwayat(filter: { metode?: string; kapster?: string }) {
     try {
-      sessionStorage.setItem("eastville_riwayat_dari", rentang.dari)
-      sessionStorage.setItem("eastville_riwayat_sampai", rentang.sampai)
+      sessionStorage.setItem("eastville_riwayat_mode", mode)
+      sessionStorage.setItem(
+        "eastville_riwayat_tanggal",
+        mode !== "Bulanan"
+          ? tanggal
+          : bulan === TANGGAL_MAKS().slice(0, 7)
+            ? TANGGAL_MAKS()
+            : `${bulan}-01`,
+      )
       if (filter.metode) sessionStorage.setItem("eastville_riwayat_metode", filter.metode)
       if (filter.kapster) sessionStorage.setItem("eastville_riwayat_kapster", filter.kapster)
     } catch {
@@ -546,7 +553,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
 
       <div className="od-kpis" style={fetching ? { opacity: 0.6 } : undefined}>
         {kpis.map((k) => {
-          const statis = k.key === "omzet"
+          const statis = false
           const isi = (
             <span className="od-kpi-body">
               <span className={`kpi-icon ${k.tone}`}>
@@ -727,6 +734,33 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
           </section>
         </div>
       </div>
+
+      <section id="laporan-omzet" className="panel lk-panel report-section">
+        <div className="lk-head">
+          <h3>Sisa bersih</h3>
+          <strong className="lk-net">{rupiah(data.sisa)}</strong>
+        </div>
+        <div className="lk-calc">
+          {([
+            ["Pemasukan", "+", data.pemasukan, 100, "plus"],
+            ["Pengeluaran", "-", data.pengeluaran, persenPengeluaran, "minus"],
+            ["Komisi kapster", "-", data.komisi, persenKomisi, "minus"],
+          ] as const).map(([nama, tanda, nilai, pct, tone]) => (
+            <div key={nama} className={`lk-calc-row ${tone}`}>
+              <span>{nama}</span>
+              <small>{pct}%</small>
+              <b>
+                {tanda} {rupiah(nilai)}
+              </b>
+            </div>
+          ))}
+          <div className="lk-calc-row total">
+            <span>Sisa bersih</span>
+            <small>{persenSisa}%</small>
+            <b>{rupiah(data.sisa)}</b>
+          </div>
+        </div>
+      </section>
 
       {/* Modal Tambah Pengeluaran: kalender di kiri, form di kanan (HP: tanggal di atas) */}
       {expenseFormOpen && (

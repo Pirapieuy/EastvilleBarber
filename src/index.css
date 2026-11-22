@@ -20482,12 +20482,54 @@ html:has(.manual-page .modal-overlay) {
   color: #8c6014;
 }
 
-.od-kpi-static {
-  cursor: default;
+.lk-net {
+  font: 700 22px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
 }
 
-.od-kpi-static:hover {
-  border-color: var(--line);
+.lk-calc {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.lk-calc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 52px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.lk-calc-row small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lk-calc-row b {
+  min-width: 130px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lk-calc-row.plus b {
+  color: #15803d;
+}
+
+.lk-calc-row.minus b {
+  color: #b91c1c;
+}
+
+.lk-calc-row.total {
+  border-bottom: 0;
+  border-radius: 0 0 12px 12px;
+  background: var(--bone);
+  font-weight: 700;
 }
 
 /* Laporan Keuangan: jarak 16px di semua lebar (mengalahkan gap 12px .content di HP) */
@@ -20649,8 +20691,9 @@ html:has(.manual-page .modal-overlay) {
 .simple-modal.lk-exp-form {
   width: min(760px, calc(100% - 32px)) !important;
   max-width: none !important;
-  max-height: none;
-  overflow: visible;
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
 .lk-exp-form .lk-exp-actions {
@@ -20715,6 +20758,117 @@ html:has(.manual-page .modal-overlay) {
 
   .lk-exp-cal .izin-cal-week {
     margin-bottom: 4px;
+  }
+
+  .simple-modal.lk-exp-form > header {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 620px) {
+  .lk-calc-row b {
+    min-width: 0;
+  }
+}
+
+/* Riwayat: pilihan Harian/Mingguan/Bulanan di dalam popup tanggal */
+.calendar-picker-popup .history-periode {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  margin-bottom: 10px;
+  padding: 3px;
+  border-radius: 9px;
+}
+
+.calendar-picker-popup .history-periode .button {
+  min-height: 30px;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.calendar-picker-popup .history-periode .button.active {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+/* Popup Tambah pengeluaran: kalender+form berdampingan hanya bila layar cukup tinggi; pendek (landscape) = kalender diperkecil */
+@media (min-width: 761px) and (max-height: 760px) {
+  .simple-modal.lk-exp-form {
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 28px;
+    gap: 2px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 28px;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 480px) {
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 22px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 22px;
+    font-size: 13px;
+  }
+
+  .lk-exp-cal .izin-cal {
+    padding: 12px 16px;
+  }
+
+  .lk-exp-cal .izin-cal-head {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-cal .izin-cal-week {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-body {
+    padding-block: 12px;
+  }
+
+  .simple-modal.lk-exp-form > header {
+    min-height: 56px;
+  }
+}
+
+/* Layar pendek (HP landscape): tetap berdampingan, tidak menumpuk */
+@media (max-width: 760px) and (max-height: 500px) {
+  .lk-exp-body {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 22px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 22px;
+    font-size: 13px;
+  }
+
+  .lk-exp-cal .izin-cal {
+    padding: 12px 16px;
+  }
+
+  .lk-exp-cal .izin-cal-head,
+  .lk-exp-cal .izin-cal-week {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-body {
+    padding-block: 12px;
   }
 
   .simple-modal.lk-exp-form > header {
