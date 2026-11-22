@@ -630,14 +630,9 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
       <div id="laporan-pengeluaran" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section
-            className="panel"
-            style={{ padding: 20, overflow: "hidden" }}
-          >
-            <div className="page-title expense-page-title">
-              <div>
-                <h2>Pengeluaran</h2>
-              </div>
+          <section className="panel lk-panel report-pengeluaran">
+            <div className="lk-head">
+              <h3>Pengeluaran</h3>
             </div>
 
             <div className="expense-toolbar filters">
@@ -701,13 +696,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
               ))}
 
               {filteredExpenses.length === 0 && (
-                <div
-                  style={{
-                    padding: "32px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
+                <div className="lk-empty">
                   Tidak ada data pengeluaran yang cocok dengan pencarian.
                 </div>
               )}
@@ -719,11 +708,10 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
       {/* SUB-VIEW 3: TAB TOTAL KOMISI */}
       <div id="laporan-komisi" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section
-            className="panel"
-            style={{ padding: 20, overflow: "hidden" }}
-          >
-            <PageTitle eyebrow="Total Komisi" title="Komisi Kapster" />
+          <section className="panel lk-panel report-komisi">
+            <div className="lk-head">
+              <h3>Komisi kapster</h3>
+            </div>
 
             <div className="commission-table-scroll">
               <div className="report-head">

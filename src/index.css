@@ -20290,3 +20290,178 @@ html:has(.manual-page .modal-overlay) {
     margin-top: 0;
   }
 }
+
+/* Laporan Keuangan: tabel Pengeluaran & Komisi sama dengan tabel lain (header krem, baris 52px, isi menggulir sendiri) */
+.report-page .expense-table-scroll,
+.report-page .commission-table-scroll {
+  margin-top: 0;
+  max-height: 360px;
+  overflow: auto;
+  scrollbar-width: none;
+  border-radius: 12px;
+}
+
+.report-page .expense-table-scroll::-webkit-scrollbar,
+.report-page .commission-table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.report-page .expense-head,
+.report-page .report-head {
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--bone);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.report-page .expense-table-compact > .expense-head,
+.report-page .expense-table-compact > .expense-row {
+  grid-template-columns: 90px minmax(0, 1fr) 130px 110px;
+  min-width: 520px;
+  gap: 16px;
+}
+
+.report-page .expense-table-compact > .expense-head > *,
+.report-page .expense-table-compact > .expense-row > * {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.report-page .expense-head > :last-child {
+  text-align: right;
+}
+
+.report-page .expense-row,
+.report-page .report-row {
+  min-height: 52px;
+  padding: 8px 16px;
+  border-top: 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.report-page .expense-row:last-child,
+.report-page .report-row:last-child {
+  border-bottom: 0;
+}
+
+.report-page .expense-row > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-page .expense-row > span:nth-child(3) {
+  display: block;
+}
+
+.report-page .expense-row > :last-child {
+  justify-self: end;
+}
+
+.report-page .expense-row .secondary-button,
+.report-page .expense-row .danger-button {
+  min-height: 36px;
+  padding-inline: 12px;
+  border-radius: 10px;
+}
+
+.lk-empty {
+  padding: 32px 16px;
+  color: var(--slate);
+  text-align: center;
+}
+
+.report-page .expense-toolbar {
+  margin: 0 0 16px;
+  gap: 16px;
+}
+
+.report-page .expense-toolbar .search {
+  min-width: 0;
+}
+
+.report-page .expense-add-button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+/* <=620px: baris tabel jadi kartu kecil (tanggal + jumlah, keterangan, tombol), tanpa geser samping */
+@media (max-width: 620px) {
+  .report-page .expense-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-page .expense-toolbar .search {
+    flex: 0 0 auto;
+    width: 100% !important;
+    min-height: 42px;
+  }
+
+  .report-page .expense-add-button {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .report-page .expense-table-compact > .expense-row,
+  .report-page .commission-table-scroll > .report-row {
+    margin: 0 !important;
+    border-width: 0 0 1px !important;
+    border-radius: 0 !important;
+  }
+
+  .report-page .expense-table-compact > .expense-row:last-child,
+  .report-page .commission-table-scroll > .report-row:last-child {
+    border-bottom-width: 0 !important;
+  }
+
+  .report-page .expense-table-scroll > .expense-head,
+  .report-page .commission-table-scroll > .report-head {
+    display: none !important;
+  }
+
+  .report-page .expense-table-compact > .expense-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 6px 16px !important;
+    min-width: 0 !important;
+    padding: 16px !important;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    color: var(--muted);
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: stretch;
+    margin-top: 10px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4).button {
+    width: 100%;
+  }
+
+  .report-page .commission-table-scroll > .report-row {
+    padding: 16px !important;
+    gap: 6px 16px !important;
+  }
+}
