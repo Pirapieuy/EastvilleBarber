@@ -21730,8 +21730,8 @@ html:has(.manual-page .modal-overlay) {
   }
 }
 
-/* ===== Layanan & Produk: header satu baris (laptop) ===== */
-@media (min-width: 1025px) {
+/* ===== Layanan & Produk: header satu baris (laptop & tablet ≥761px) ===== */
+@media (min-width: 761px) {
   .workspace > .content.catalog-page {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -21778,8 +21778,8 @@ html:has(.manual-page .modal-overlay) {
   }
 }
 
-/* Tab Layanan | Produk | Diskon Event satu baris selebar halaman di tablet & HP */
-@media (max-width: 1024px) {
+/* Tab Layanan | Produk | Diskon Event satu baris selebar halaman di HP */
+@media (max-width: 760px) {
   .catalog-page .catalog-tab-header,
   .catalog-page .catalog-segmented {
     width: 100%;
@@ -21937,5 +21937,55 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .simple-modal .calendar-picker-btn {
     min-height: 42px;
     height: 42px;
+  }
+}
+
+/* Header satu baris: ringkasan mengalah (teks dipotong), tombol tidak pernah membungkus */
+@media (min-width: 761px) {
+  .catalog-page .services-status-bar,
+  .catalog-page .products-status-bar {
+    display: flex !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .catalog-page .services-status-bar .master-summary,
+  .catalog-page .products-status-bar .master-summary {
+    flex: 0 1 auto;
+    min-width: 0;
+    width: auto;
+  }
+
+  .catalog-page .master-summary > span {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .catalog-page .master-summary > span > strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .catalog-page .master-summary > span > small {
+    display: none;
+  }
+
+  .catalog-page .products-status-bar .page-actions {
+    display: flex !important;
+    flex: none;
+    flex-wrap: nowrap;
+  }
+
+  .catalog-page .products-status-bar .page-actions > .button,
+  .catalog-page .services-status-bar > .primary-button {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1280px) {
+  .catalog-page .master-summary > span > small {
+    display: inline;
   }
 }
