@@ -19634,3 +19634,6 @@ html:has(.manual-page .modal-overlay) {
 .cashier-page .cart-sheet-center::-webkit-scrollbar,
 .cashier-page .cart-sheet-center .cart-lines::-webkit-scrollbar,
 .cashier-page .cart-sheet-center .cart-total::-webkit-scrollbar { display: none; }
+
+/* Kasir POS: baris "ITEM / Hapus Semua" menempel pas di tepi atas daftar (offset = padding daftar 16px), item tidak menembus */
+.cashier-page .cart-lines .cart-clear-row { top: -16px; margin: -16px -16px 0; padding-left: 16px; padding-right: 16px; }
