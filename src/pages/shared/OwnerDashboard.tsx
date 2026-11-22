@@ -3,7 +3,6 @@ import {
   apiAbsensi,
   apiKasir,
   apiLaporan,
-  apiPengeluaran,
   apiTransaksi,
   getToken,
   AbsensiRow,
@@ -11,18 +10,28 @@ import {
 } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { TANGGAL_MULAI } from "../../utils/tanggal"
 import {
-  Button,
-  CalendarPicker,
-  Kpi,
   rupiah,
   ErrorState,
+  LoadingState,
 } from "../../components/common/UI"
 
 const pad = (n: number) => String(n).padStart(2, "0")
 const toIso = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+
+/** "09.30" atau "09:30" jadi menit sejak tengah malam; "-" jadi -1. */
+const keMenit = (jam: string) => {
+  const [h, m] = jam.replace(":", ".").split(".")
+  const menit = Number(h) * 60 + Number(m)
+  return Number.isFinite(menit) ? menit : -1
+}
+
+const persen = (bagian: number, total: number) =>
+  total > 0 ? Math.round((bagian / total) * 100) : 0
+
+const BATAS_TERLAMBAT = 10 * 60
+const MAKS_TRANSAKSI = 8
 
 interface DailyServiceItem {
   id: string
@@ -31,16 +40,18 @@ interface DailyServiceItem {
   kapsterName: string
   price: number
   method: "Tunai" | "QRIS"
+  batal: boolean
 }
+
+type StatusKapster = "Tepat Waktu" | "Terlambat" | "Tidak Hadir"
 
 export function OwnerDashboard({ onNavigate, navigate }: {
   onNavigate?: (page: string) => void
   navigate?: (page: string) => void
 } = {}) {
   const nav = onNavigate ?? navigate ?? (() => {})
-  const todayIso = toIso(new Date())
-
-  const [selectedDate, setSelectedDate] = useState(todayIso)
+  // Beranda selalu menampilkan hari ini; tanggal lain dilihat lewat Riwayat/Laporan.
+  const [todayIso] = useState(() => toIso(new Date()))
 
   const [liveData, setLiveData] = useState<LaporanKeuangan | null>(null)
   // null = data absensi tidak tersedia (modul lain gagal), bukan "tidak ada yang hadir"
@@ -54,8 +65,6 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   const [reloadKey, setReloadKey] = useState(0)
   const punyaToken = Boolean(getToken())
 
-  const isToday = selectedDate === todayIso
-
   useEffect(() => {
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")
@@ -66,9 +75,9 @@ export function OwnerDashboard({ onNavigate, navigate }: {
     setLiveError("")
     // Laporan & transaksi wajib berhasil; absensi/daftar kapster milik modul lain boleh gagal.
     Promise.all([
-      apiLaporan.keuangan({ dari: selectedDate, sampai: selectedDate }),
-      apiTransaksi.list({ dari: selectedDate, sampai: selectedDate }),
-      apiAbsensi.list({ tanggal: selectedDate }).catch(() => null),
+      apiLaporan.keuangan({ dari: todayIso, sampai: todayIso }),
+      apiTransaksi.list({ dari: todayIso, sampai: todayIso }),
+      apiAbsensi.list({ tanggal: todayIso }).catch(() => null),
       apiKasir.kapster().catch(() => []),
     ])
       .then(([lap, trx, abs, kap]) => {
@@ -87,6 +96,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
             kapsterName: t.barber || "-",
             price: Number(t.total) || 0,
             method: t.method === "QRIS" ? "QRIS" : "Tunai",
+            batal: String(t.status ?? "").toUpperCase() === "BATAL",
           })),
         )
       })
@@ -101,7 +111,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
     return () => {
       batal = true
     }
-  }, [selectedDate, reloadKey])
+  }, [todayIso, reloadKey])
 
   const dailyIncome = liveData?.pemasukan ?? 0
   const dailyCash = liveData?.tunai ?? 0
@@ -111,38 +121,46 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   const dailyNet = dailyIncome - dailyExpense - dailyCommission
 
   // Kehadiran dari absensi asli (Masuk/Pulang) per kapster; jumlah layanan dari laporan keuangan.
-  const kapsterList = kapsterAll.map((k) => {
-    const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
-    const masuk = rows.find((r) => r.status === "Hadir" || r.tipe === "Masuk")
-    let statusText: "Tepat Waktu" | "Terlambat" | "Tidak Hadir" = "Tidak Hadir"
-    if (masuk) {
-      const isLate =
-        masuk.status?.toLowerCase().includes("terlambat") ||
-        (masuk.jam && (masuk.jam > "10.00" || masuk.jam > "10:00"))
-      statusText = isLate ? "Terlambat" : "Tepat Waktu"
-    }
-    return {
-      id: k.id,
-      nama: k.nama,
-      jamMasuk: masuk?.jam ?? "-",
-      status: statusText,
-      layananCount:
-        liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ?? 0,
-    }
-  })
-  const servicesList = liveServices
-  const jumlahHadir = kapsterList.filter((k) => k.jamMasuk !== "-").length
-  const statusKehadiran = !liveAbsensi
-    ? "active"
-    : jumlahHadir === 0
-      ? "batal"
-      : jumlahHadir === kapsterList.length
-        ? "active"
-        : "pending"
+  const kapsterList = kapsterAll
+    .map((k) => {
+      const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
+      const masuk = rows.find((r) => r.status === "Hadir" || r.tipe === "Masuk")
+      let status: StatusKapster = "Tidak Hadir"
+      if (masuk) {
+        const terlambat =
+          masuk.status?.toLowerCase().includes("terlambat") ||
+          keMenit(masuk.jam ?? "") > BATAS_TERLAMBAT
+        status = terlambat ? "Terlambat" : "Tepat Waktu"
+      }
+      return {
+        id: k.id,
+        nama: k.nama,
+        jamMasuk: masuk?.jam ?? "",
+        fotoUrl: masuk?.fotoUrl ?? "",
+        status,
+        layananCount:
+          liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ??
+          0,
+      }
+    })
+    // yang sudah masuk di atas (paling awal dulu), yang belum di bawah
+    .sort((a, b) => {
+      if (!a.jamMasuk !== !b.jamMasuk) return a.jamMasuk ? -1 : 1
+      return keMenit(a.jamMasuk) - keMenit(b.jamMasuk)
+    })
+
+  // Terbaru di atas
+  const servicesList = [...liveServices].sort(
+    (a, b) => keMenit(b.time) - keMenit(a.time),
+  )
+  const jumlahKapsterBerkomisi = (liveData?.perKapster ?? []).filter(
+    (p) => p.komisi > 0,
+  ).length
+  const jumlahTransaksi = servicesList.filter((s) => !s.batal).length
 
   if (punyaToken && !liveData && liveError) {
     return (
-      <div className="content owner-dashboard-page">
+      <div className="content">
         <ErrorState
           title="Beranda gagal dimuat"
           message={liveError}
@@ -152,227 +170,194 @@ export function OwnerDashboard({ onNavigate, navigate }: {
     )
   }
 
+  if (punyaToken && !liveData) {
+    return (
+      <div className="content">
+        <LoadingState message="Memuat beranda…" />
+      </div>
+    )
+  }
+
+  const kpis = [
+    {
+      key: "pemasukan",
+      icon: "cash",
+      tone: "sage",
+      label: "Pemasukan",
+      value: dailyIncome,
+      detail: `${jumlahTransaksi} transaksi`,
+      to: "RiwayatTransaksi",
+    },
+    {
+      key: "pengeluaran",
+      icon: "expense",
+      tone: "amber",
+      label: "Pengeluaran",
+      value: dailyExpense,
+      detail:
+        dailyIncome > 0
+          ? `${persen(dailyExpense, dailyIncome)}% pemasukan`
+          : "Belum ada",
+      to: "LaporanKeuangan",
+    },
+    {
+      key: "komisi",
+      icon: "people",
+      tone: "brass",
+      label: "Komisi",
+      value: dailyCommission,
+      // jumlah kapster, bukan persen: persen total mirip tarif komisi (40%/50%) dan menyesatkan
+      detail:
+        jumlahKapsterBerkomisi > 0
+          ? `untuk ${jumlahKapsterBerkomisi} kapster`
+          : "Belum ada",
+      to: "GajiKasbon",
+    },
+    {
+      key: "bersih",
+      icon: "wallet",
+      tone: "dark",
+      label: "Sisa Bersih",
+      value: dailyNet,
+      detail:
+        dailyIncome > 0
+          ? `${persen(dailyNet, dailyIncome)}% pemasukan`
+          : "Belum ada",
+      to: "LaporanKeuangan",
+    },
+  ] as const
+
+  const absenTersedia = liveAbsensi !== null
+
   return (
-    <div className="content owner-dashboard-page fit-page">
+    <div className="content od-page">
       <DemoNotice live={Boolean(liveData)} error={liveError} />
 
-      <div className="fit-page-actions">
-        <CalendarPicker
-          value={selectedDate}
-          onChange={setSelectedDate}
-          max={todayIso}
-          min={TANGGAL_MULAI}
-          align="right"
-          showToday={false}
-        />
-      </div>
-
-      <div className="kpi-grid" style={loading ? { opacity: 0.6 } : undefined}>
-        <Kpi
-          icon="cash"
-          label={`Pemasukan${isToday ? "" : " (Pilihan)"}`}
-          tone="sage"
-          value={rupiah(dailyIncome)}
-          detail={`Tunai ${rupiah(dailyCash)} · QRIS ${rupiah(dailyQris)}`}
-        />
-        <Kpi
-          icon="expense"
-          label={`Pengeluaran${isToday ? "" : " (Pilihan)"}`}
-          tone="amber"
-          value={rupiah(dailyExpense)}
-          detail="Operasional harian"
-        />
-        <Kpi
-          icon="people"
-          label="Total Komisi"
-          tone="brass"
-          value={rupiah(dailyCommission)}
-          detail="Akumulasi komisi kapster"
-        />
-        <Kpi
-          icon="wallet"
-          label="Sisa Bersih"
-          tone="dark"
-          value={rupiah(dailyNet)}
-          detail="Rangkuman sisa bersih"
-        />
-      </div>
-
-      <div className="owner-dashboard-lower-wrap">
-        <div className="dashboard-lower-grid">
-          {/* Status & Daftar Kapster */}
-          <section className="panel owner-attendance-panel" style={{ padding: 18 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-              }}
-            >
-              <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
-                Kehadiran Tim
-              </h3>
-              <span className={`chip ${statusKehadiran}`}>
-                {liveAbsensi
-                  ? jumlahHadir === 0
-                    ? `0 dari ${kapsterList.length} Hadir`
-                    : `${jumlahHadir} dari ${kapsterList.length} Hadir`
-                  : ""}
+      <div className="od-kpis" style={loading ? { opacity: 0.6 } : undefined}>
+        {kpis.map((k) => (
+          <button
+            key={k.key}
+            type="button"
+            className="od-kpi"
+            aria-label={`${k.label} ${rupiah(k.value)}, buka detail`}
+            onClick={() => nav(k.to)}
+          >
+            <span className="od-kpi-body">
+              <span className={`kpi-icon ${k.tone}`}>
+                <Icon name={k.icon} />
               </span>
-            </div>
+              <span className="od-kpi-text">
+                <span className="od-kpi-label">{k.label}</span>
+                <strong className="od-kpi-value">{rupiah(k.value)}</strong>
+                <span className="od-kpi-detail">{k.detail}</span>
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
 
-            <div className="owner-attendance-list" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {kapsterList.map((k) => {
-                const isLibur = k.jamMasuk === "-"
-                return (
-                  <div
-                    key={k.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "10px 14px",
-                      borderRadius: 8,
-                      border: "1px solid var(--line)",
-                      background: isLibur ? "var(--bg)" : "var(--paper)",
-                      opacity: isLibur ? 0.75 : 1,
-                    }}
-                  >
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 12 }}
-                    >
-                      <div
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: "50%",
-                          background:
-                            k.status === "Tepat Waktu"
-                              ? "rgba(34, 197, 94, 0.15)"
-                              : k.status === "Terlambat"
-                                ? "rgba(234, 179, 8, 0.15)"
-                                : "var(--line)",
-                          color:
-                            k.status === "Tepat Waktu"
-                              ? "#15803d"
-                              : k.status === "Terlambat"
-                                ? "#b45309"
-                                : "var(--muted)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: 700,
-                          fontSize: 13,
-                        }}
-                      >
-                        {k.nama.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <strong
-                          style={{
-                            fontSize: 14,
-                            color: "var(--ink)",
-                            display: "block",
-                          }}
-                        >
-                          {k.nama}
-                        </strong>
-                        <small style={{ color: "var(--muted)", fontSize: 12 }}>
-                          {k.jamMasuk !== "-" && `Masuk: ${k.jamMasuk} WIB`}
-                        </small>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 14 }}
-                    >
-                      {!isLibur && (
-                        <span
-                          style={{
-                            fontSize: 12,
-                            color: "var(--slate)",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {k.layananCount} layanan
-                        </span>
-                      )}
-                      <i
-                        className={`chip ${
-                          k.status === "Tepat Waktu"
-                            ? "lunas"
-                            : k.status === "Terlambat"
-                              ? "pending"
-                              : ""
-                        }`}
-                        style={
-                          k.status === "Tidak Hadir"
-                            ? {
-                                background: "var(--line)",
-                                color: "var(--muted)",
-                              }
-                            : undefined
-                        }
-                      >
-                        {k.status === "Tidak Hadir" ? "Belum Hadir" : k.status}
-                      </i>
-                    </div>
+      <div className="od-lower">
+        <section
+          className="od-panel od-trx"
+          role="link"
+          tabIndex={0}
+          aria-label="Transaksi terbaru, buka Riwayat Transaksi"
+          onClick={() => nav("RiwayatTransaksi")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") nav("RiwayatTransaksi")
+          }}
+        >
+          <div className="od-head">
+            <h3>Transaksi terbaru</h3>
+            <Icon name="chevron" className="od-turn-right od-go" />
+          </div>
+          {servicesList.length === 0 ? (
+            <p className="od-empty">Belum ada transaksi di tanggal ini.</p>
+          ) : (
+            <ul className="od-list">
+              {servicesList.slice(0, MAKS_TRANSAKSI).map((s) => (
+                <li key={s.id}>
+                  <div className="od-row od-row-trx">
+                    <time className="od-time">{s.time}</time>
+                    <span className="od-main">
+                      <strong>{s.serviceName}</strong>
+                      <small className={s.batal ? "od-void" : undefined}>
+                        {s.batal
+                          ? "Dibatalkan"
+                          : `${s.kapsterName}, ${s.method}`}
+                      </small>
+                    </span>
+                    <b className={`od-amount${s.batal ? " is-void" : ""}`}>
+                      {rupiah(s.price)}
+                    </b>
                   </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section
+          className="od-panel od-tim"
+          role="link"
+          tabIndex={0}
+          aria-label="Kehadiran tim, buka Riwayat Absensi"
+          onClick={() => nav("RiwayatAbsensi")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") nav("RiwayatAbsensi")
+          }}
+        >
+          <div className="od-head">
+            <h3>Kehadiran tim</h3>
+            <Icon name="chevron" className="od-turn-right od-go" />
+          </div>
+          {!absenTersedia ? (
+            <p className="od-empty">Data absensi belum bisa dimuat.</p>
+          ) : kapsterList.length === 0 ? (
+            <p className="od-empty">Belum ada kapster terdaftar.</p>
+          ) : (
+            <ul className="od-list">
+              {kapsterList.map((k) => {
+                const tone =
+                  k.status === "Tepat Waktu"
+                    ? "ok"
+                    : k.status === "Terlambat"
+                      ? "late"
+                      : "off"
+                return (
+                  <li key={k.id}>
+                    <div className="od-row od-row-tim">
+                      <span className={`od-avatar ${tone}`}>
+                        {k.nama.slice(0, 2).toUpperCase()}
+                        {k.fotoUrl && (
+                          <img
+                            src={k.fotoUrl}
+                            alt=""
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none"
+                            }}
+                          />
+                        )}
+                      </span>
+                      <span className="od-main">
+                        <strong>{k.nama}</strong>
+                        <small>
+                          {k.jamMasuk
+                            ? `Masuk ${k.jamMasuk} WIB, ${k.layananCount} layanan`
+                            : "Belum absen masuk"}
+                        </small>
+                      </span>
+                      <span className={`od-chip ${tone}`}>
+                        {k.status === "Tidak Hadir" ? "Belum hadir" : k.status}
+                      </span>
+                    </div>
+                  </li>
                 )
               })}
-            </div>
-          </section>
-
-          {/* Riwayat transaksi */}
-          <section className="panel owner-recent-panel">
-            <div className="owner-recent-head">
-              <div>
-                <p className="eyebrow">Aktivitas Pelayanan</p>
-                <h3>Riwayat Transaksi</h3>
-              </div>
-              <span className="owner-recent-count">
-                {servicesList.length} transaksi
-              </span>
-            </div>
-
-            <div className="owner-recent-list">
-              {servicesList.length === 0 ? (
-                <div className="owner-recent-empty">
-                  Belum ada transaksi layanan pada tanggal ini.
-                </div>
-              ) : (
-                servicesList.slice(0, 5).map((s) => (
-                  <article className="owner-recent-row" key={s.id}>
-                    <div className="owner-recent-main">
-                      <time className="owner-recent-time">{s.time}</time>
-                      <div className="owner-recent-info">
-                        <strong className="owner-recent-service">
-                          {s.serviceName}
-                        </strong>
-                        <small className="owner-recent-meta">
-                          Kapster: {s.kapsterName} · Metode: {s.method}
-                        </small>
-                      </div>
-                    </div>
-
-                    <div className="owner-recent-trailing">
-                      <b className="owner-recent-amount">{rupiah(s.price)}</b>
-                    </div>
-                  </article>
-                ))
-              )}
-            </div>
-            <div className="owner-recent-footer">
-              <Button
-                className="text-button"
-                onClick={() => nav("RiwayatTransaksi")}
-              >
-                Selengkapnya
-              </Button>
-            </div>
-          </section>
-        </div>
+            </ul>
+          )}
+        </section>
       </div>
     </div>
   )

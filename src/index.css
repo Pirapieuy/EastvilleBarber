@@ -13765,123 +13765,6 @@ summary,
   }
 }
 
-/* Beranda Owner: kunci halaman pada viewport dan gulir daftar di dalam kartu. */
-.workspace:has(> .content.owner-dashboard-page) {
-  height: 100svh;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.workspace:has(> .content.owner-dashboard-page) > .desktop-page-head {
-  flex: 0 0 auto;
-}
-
-.workspace:has(> .content.owner-dashboard-page) > .owner-dashboard-page {
-  flex: 1 1 0;
-  height: auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 16px;
-  overflow: hidden;
-}
-
-.owner-dashboard-page > .demo-notice,
-.owner-dashboard-page > .owner-dashboard-title,
-.owner-dashboard-page > .kpi-grid {
-  flex: 0 0 auto;
-}
-
-.owner-dashboard-page .kpi-grid {
-  margin-top: 12px;
-}
-
-.owner-dashboard-lower-wrap {
-  flex: 1 1 0;
-  min-height: 0;
-  display: flex;
-  margin-top: 12px;
-}
-
-.owner-dashboard-page .dashboard-lower-grid {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: 100%;
-  align-items: stretch;
-  gap: 12px;
-}
-
-.owner-dashboard-page .owner-attendance-panel,
-.owner-dashboard-page .owner-recent-panel {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.owner-dashboard-page .owner-attendance-list,
-.owner-dashboard-page .owner-recent-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: none;
-}
-
-.owner-dashboard-page .owner-recent-head,
-.owner-dashboard-page .owner-recent-footer {
-  flex: 0 0 auto;
-}
-
-.owner-dashboard-page .owner-recent-empty {
-  flex: 1 1 auto;
-  display: grid;
-  place-items: center;
-  text-align: center;
-}
-
-@media (max-width: 1024px) {
-  .owner-dashboard-page {
-    padding: 66px 14px 14px !important;
-  }
-
-  .owner-dashboard-page .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px;
-  }
-
-  .owner-dashboard-page .kpi {
-    padding: 10px;
-  }
-}
-
-@media (max-width: 820px) {
-  .owner-dashboard-page .dashboard-lower-grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-  }
-
-  .owner-dashboard-page .owner-attendance-panel,
-  .owner-dashboard-page .owner-recent-panel {
-    padding: 12px !important;
-  }
-}
-
-@media (max-width: 620px) {
-  .owner-dashboard-page {
-    padding-bottom: 10px !important;
-  }
-
-  .owner-dashboard-page .kpi-grid {
-    margin-top: 8px;
-  }
-
-  .owner-dashboard-lower-wrap {
-    margin-top: 8px;
-  }
-}
-
 @media (max-width: 820px) {
   .audit-list {
     max-height: none !important;
@@ -16940,12 +16823,6 @@ label .search-select-trigger {
 }
 
 @media (min-width: 1025px) {
-  .workspace:has(> .content.owner-dashboard-page) > .owner-dashboard-page {
-    overflow: visible;
-  }
-}
-
-@media (min-width: 1025px) {
   /* tabel di dalam panel fit-fill yang scroll sendiri; header panel tetap */
   .fit-fill > .product-tx-table-wrap,
   .fit-fill > .product-tx-list {
@@ -19240,7 +19117,9 @@ label .search-select-trigger {
 html:has(.izin-kapster-page),
 html:has(.manual-page),
 .workspace:has(> .izin-kapster-page),
-.workspace:has(> .manual-page) {
+html:has(.od-page),
+.workspace:has(> .manual-page),
+.workspace:has(> .od-page) {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -19248,7 +19127,9 @@ html:has(.manual-page),
 html:has(.izin-kapster-page)::-webkit-scrollbar,
 html:has(.manual-page)::-webkit-scrollbar,
 .workspace:has(> .izin-kapster-page)::-webkit-scrollbar,
-.workspace:has(> .manual-page)::-webkit-scrollbar {
+html:has(.od-page)::-webkit-scrollbar,
+.workspace:has(> .manual-page)::-webkit-scrollbar,
+.workspace:has(> .od-page)::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
@@ -19701,3 +19582,486 @@ html:has(.manual-page .modal-overlay) {
 
 /* Kasir POS: kotak peringatan pembayaran tanpa margin bawaan (inline 8px) agar jarak ke garis/tombol Bayar tepat 16px */
 .cashier-page .cart-payment > div:not([class]) { margin: 0 !important; }
+
+/* ===== Beranda Owner (od-*) =====
+   Skala huruf laptop: angka utama 28px, judul panel 18px, baris 15px, keterangan 14px.
+   HP/tablet (<=1024px): angka fluida, judul 16px, baris 14px, keterangan 13px.
+   Jarak 16px di mana-mana (label ke isi 6px), radius kartu 12px / kontrol 10px / chip 8px. */
+.od-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.od-turn-right {
+  transform: rotate(-90deg);
+}
+
+.od-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  transition: opacity 0.15s;
+}
+
+.od-kpi {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.od-kpi:hover {
+  border-color: var(--brass);
+}
+
+.od-kpi:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
+}
+
+.od-kpi-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  container-type: inline-size;
+}
+
+.od-kpi .kpi-icon {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.od-kpi-text {
+  display: contents;
+}
+
+.od-kpi-label {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 16px;
+}
+
+.od-kpi-value {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 6px;
+}
+
+.od-kpi-detail {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin-top: 6px;
+}
+
+.od-kpi .kpi-icon.dark {
+  color: #1e5f8a;
+  background: rgb(30 95 138 / 12%);
+}
+
+.od-kpi-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--slate);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.od-kpi-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 700 clamp(11px, 12cqi, 28px) / 1.1 var(--heading);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.od-kpi-detail {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.od-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.od-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.od-head h3 {
+  margin: 0;
+  font: 700 16px / 1.2 var(--heading);
+  letter-spacing: -0.02em;
+}
+
+.od-list {
+  min-height: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+}
+
+.od-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.od-list > li {
+  border-bottom: 1px solid var(--line);
+}
+
+.od-row {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+}
+
+.od-row-trx {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+}
+
+.od-row-tim {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
+.od-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.od-main strong {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-main small {
+  overflow: hidden;
+  color: var(--slate);
+  font-size: 13px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-main small.od-void {
+  color: var(--oxblood);
+}
+
+.od-time {
+  color: var(--slate);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.od-amount {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.od-amount.is-void {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.od-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.od-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.od-avatar.ok {
+  color: var(--sage);
+  background: var(--sage-soft);
+}
+
+.od-avatar.late {
+  color: #8c6014;
+  background: var(--amber-soft);
+}
+
+.od-avatar.off {
+  color: var(--muted);
+  background: var(--bone);
+}
+
+.od-chip {
+  width: fit-content;
+  flex: none;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.od-chip.ok {
+  color: var(--sage);
+  background: var(--sage-soft);
+}
+
+.od-chip.late {
+  color: #8c6014;
+  background: var(--amber-soft);
+}
+
+.od-chip.off {
+  color: var(--slate);
+  background: var(--bone);
+}
+
+/* Penanda ">" di pojok kartu: bukan tombol, seluruh kartu yang bisa di-tap */
+.od-go {
+  width: 16px;
+  flex: none;
+  color: var(--muted);
+}
+
+.od-panel[role="link"] {
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.od-panel[role="link"]:hover {
+  border-color: var(--brass);
+}
+
+.od-panel[role="link"]:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
+}
+
+.od-empty {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Semua lebar: halaman setinggi layar. Jendela disempitkan/dipendekkan: panel ikut mengecil, isinya menggulir di dalam. */
+.workspace:has(> .od-page) {
+  height: 100svh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.workspace > .content.od-page {
+  flex: 1 1 0;
+  min-height: auto;
+  gap: 16px;
+  padding: 70px 16px 16px !important;
+}
+
+.od-page > .od-kpis {
+  flex: 0 0 auto;
+}
+
+.od-lower {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.od-panel {
+  overflow: hidden;
+}
+
+/* selama KPI masih 4 sebaris (>=621px), dua panel di bawah juga tetap sebaris */
+@media (min-width: 621px) {
+  .od-lower {
+    min-height: 200px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* <=620px: KPI 2x2 ringkas, satu susunan di semua lebar: ikon + nama sebaris (sejajar tengah), angka lalu keterangan selebar kartu */
+@media (max-width: 620px) {
+  .od-lower {
+    min-height: 416px;
+  }
+
+  .od-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .od-kpi-body {
+    column-gap: 8px;
+    align-items: center;
+  }
+
+  .od-kpi .kpi-icon {
+    grid-column: 1;
+    grid-row: 1;
+    width: 28px;
+    height: 28px;
+  }
+
+  .od-kpi .kpi-icon .icon {
+    width: 14px;
+  }
+
+  .od-kpi-label {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    font-size: 12px;
+  }
+
+  .od-kpi-value,
+  .od-kpi-detail {
+    grid-column: 1 / -1;
+  }
+
+  .od-kpi-value {
+    grid-row: 2;
+    margin-top: 16px;
+    font-size: clamp(11px, 11.5cqi, 20px);
+  }
+
+  .od-kpi-detail {
+    grid-row: 3;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .od-kpi .kpi-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .od-kpi-body {
+    column-gap: 6px;
+  }
+
+  .od-kpi-label {
+    font-size: 11px;
+    letter-spacing: -0.01em;
+  }
+
+  .od-head h3 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 720px) {
+  .od-kpi-detail {
+    font-size: 12px;
+  }
+}
+
+/* Laptop */
+@media (min-width: 1025px) {
+  .workspace:has(> .od-page) > .desktop-page-head {
+    display: block !important;
+    flex: 0 0 auto;
+  }
+
+  .workspace > .content.od-page {
+    padding: 16px 16px 16px !important;
+  }
+
+  .od-kpi-label {
+    font-size: 14px;
+  }
+
+  .od-kpi-detail,
+  .od-main small,
+  .od-time {
+    font-size: 14px;
+  }
+
+  .od-head h3 {
+    font-size: 18px;
+  }
+
+  .od-main strong,
+  .od-amount {
+    font-size: 15px;
+  }
+
+  .od-chip {
+    min-height: 28px;
+    font-size: 14px;
+  }
+}
