@@ -18722,11 +18722,11 @@ label .search-select-trigger {
   grid-column: auto;
 }
 
-/* urutan: ukuran kertas, Cetak, Selesai, Kembali */
-.receipt-popup .receipt-aksi .flow-toolbar > .segmented { order: 0; }
-.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 1; }
-.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 2; }
-.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 3; }
+/* urutan: Ubah (paling atas setelah status), ukuran kertas, Cetak, Selesai */
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 0; }
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented { order: 1; }
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 2; }
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 3; }
 
 @media (max-width: 640px) {
   .receipt-popup {
@@ -18756,17 +18756,18 @@ label .search-select-trigger {
 
   .receipt-popup .receipt-aksi .flow-toolbar {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     padding: 12px 16px 16px;
   }
 
   .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
-    grid-column: 1 / -1;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
   }
 
-  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 0; grid-column: 1 !important; grid-row: 2 !important; }
-  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 0; grid-column: 2 !important; grid-row: 2 !important; }
-  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 0; grid-column: 3 !important; grid-row: 2 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 0; grid-column: 1 / -1 !important; grid-row: 1 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 0; grid-column: 1 !important; grid-row: 3 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 0; grid-column: 2 !important; grid-row: 3 !important; }
 }
 
 .receipt-popup.sudah-simpan .receipt-aksi .flow-toolbar {
@@ -18779,13 +18780,6 @@ label .search-select-trigger {
     justify-content: flex-start;
   }
 
-  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child {
-    margin-top: auto;
-  }
-
-  .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
-    margin-bottom: 8px;
-  }
 }
 
 /* Popup nota: struk diperkecil mengikuti tinggi layar agar tampil penuh tanpa digulir; jarak panel tombol seragam 12px */
@@ -18904,6 +18898,7 @@ label .search-select-trigger {
     align-self: flex-start;
     text-align: left;
     margin-bottom: -4px;
+    order: 1;
     font-size: 14px;
     font-weight: 600;
     color: var(--ink);
@@ -19618,3 +19613,16 @@ html:has(.manual-page .modal-overlay) {
   min-width: 0;
   padding-inline: 10px;
 }
+
+/* Kasir POS: semua jarak 16px (kecuali label ke isian), sama di semua lebar layar */
+.cashier-page .catalog-sticky { gap: 16px !important; padding-bottom: 16px !important; margin-bottom: 16px !important; }
+.cashier-page .catalog-grid { gap: 16px !important; }
+.cashier-page .barber-picker { padding: 10px 16px !important; gap: 16px !important; }
+.cashier-page .catalog-item { padding: 16px !important; }
+.cashier-page .cart-lines { padding: 16px !important; }
+.cashier-page .cart-total { padding: 16px !important; gap: 16px !important; }
+.cashier-page .cart-discount-panel { padding: 16px !important; }
+.cashier-page .cart-payment { padding-top: 0 !important; gap: 16px !important; }
+.cashier-page .cart-payment .method-grid { gap: 16px !important; }
+.cashier-page .cart-payment .quick-cash { gap: 16px !important; }
+.cashier-page .cart-payment .quick-cash button { flex: 1 1 calc((100% - 32px) / 3) !important; }
