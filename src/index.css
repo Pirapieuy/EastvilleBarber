@@ -19696,3 +19696,10 @@ html:has(.manual-page .modal-overlay) {
 @media (max-width: 820px) {
   .cashier-page:has(.catalog-sticky .modal-overlay) .mobile-cart-bar { display: none !important; }
 }
+
+/* Kasir POS (HP/tablet): popup absensi terpusat di area di bawah header 54px, jarak atas = bawah = 16px minimal */
+@media (max-width: 1024px) {
+  .cashier-page .catalog-sticky .modal-overlay { top: 54px !important; height: auto !important; bottom: 0 !important; }
+  .cashier-page .catalog-sticky .modal-overlay .absensi-modal { max-height: 100% !important; overflow-y: auto !important; overscroll-behavior: none; scrollbar-width: none; }
+  .cashier-page .catalog-sticky .modal-overlay .absensi-modal::-webkit-scrollbar { display: none; }
+}
