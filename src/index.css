@@ -365,6 +365,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 11px;
+  flex-shrink: 0;
 }
 
 .brand-mark.clickable {
@@ -975,6 +976,7 @@ textarea {
   flex-direction: column;
   padding: 20px 10px 14px;
   align-items: center;
+  overflow: hidden;
   color: var(--paper);
   background:
     radial-gradient(circle at 20% 88%, rgb(200 150 62 / 12%), transparent 30%),
@@ -1006,16 +1008,25 @@ textarea {
 
 .sidebar.collapsed nav {
   width: 100%;
-  overflow: visible;
-  margin-top: 26px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 10px;
   padding: 0;
+  scrollbar-width: none;
+}
+
+.sidebar.collapsed nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar.collapsed .nav-item {
-  width: 46px;
-  min-height: 43px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   justify-content: center;
-  margin: 0 auto 4px;
+  margin: 0 auto;
   padding: 0;
 }
 
@@ -1059,14 +1070,14 @@ textarea {
 
 .sidebar-user-pill {
   position: relative;
-  width: 46px;
-  min-height: 43px;
+  width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
   padding: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -1176,6 +1187,7 @@ textarea {
 }
 
 .sidebar nav {
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
   margin-top: 24px;
@@ -1274,8 +1286,22 @@ textarea {
 }
 
 .sidebar.collapsed .sidebar-nav-scroll {
-  overflow: visible;
-  margin-top: 20px;
+  margin-top: 10px;
+  gap: 0;
+}
+
+.sidebar.collapsed .nav-group {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.collapsed .nav-group-divider {
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: rgb(255 255 255 / 12%);
+  margin: 5px auto 4px;
 }
 
 .sidebar.collapsed .nav-group-items {
@@ -1283,6 +1309,7 @@ textarea {
   border: 0;
   margin: 0;
   align-items: center;
+  gap: 10px;
 }
 
 .sidebar.collapsed .nav-group-items.nested-indent {
@@ -16446,11 +16473,11 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    padding: 14px 14px 28px !important;
+    padding: 16px 14px 16px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
-    display: none;
+    display: none !important;
   }
 
   /* judul di sisi kiri sudah dari kerangka; tombol Refresh tetap di kanan atas */
@@ -16659,8 +16686,9 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-product-commission {
     flex: 1 1 auto;
     min-height: 0;
-    width: min(1280px, 100%);
-    margin: 0 auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 16px 14px 16px !important;
     overflow: hidden;
   }
@@ -16697,8 +16725,12 @@ label .search-select-trigger {
 @media (max-width: 1024px) {
   .app-shell-kapster .workspace > .content,
   .app-shell-kapster .workspace > .mobile-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 70px 14px 16px !important;
     gap: 16px !important;
-    padding-bottom: 16px !important;
+    box-sizing: border-box !important;
   }
 
   .app-shell-kapster .content > .kpi-grid,
@@ -16707,9 +16739,15 @@ label .search-select-trigger {
   }
 
   .app-shell-kapster .panel,
-  .app-shell-kapster .my-salary-hero {
+  .app-shell-kapster .my-salary-hero,
+  .app-shell-kapster .kpi {
     border-radius: 12px !important;
     padding: 16px !important;
+  }
+
+  .app-shell-kapster .content > .page-title:not(:has(.page-actions)):not(:has(.button)),
+  .app-shell-kapster .mobile-content > .page-title:not(:has(.page-actions)):not(:has(.button)) {
+    display: none !important;
   }
 
   .kapster-dashboard-actions {
@@ -16772,6 +16810,21 @@ label .search-select-trigger {
 }
 
 .app-shell-kapster .salary-breakdown > div:not(.page-title) {
+  gap: 16px !important;
+}
+
+.app-shell-kapster .content,
+.app-shell-kapster .mobile-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.app-shell-kapster .recent-row {
+  border-radius: 10px !important;
+  padding: 12px 16px !important;
   gap: 16px !important;
 }
 

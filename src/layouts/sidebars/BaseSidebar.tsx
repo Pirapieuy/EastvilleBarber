@@ -90,7 +90,7 @@ export function BaseSidebar({
           }
         />
         <nav className="sidebar-nav-scroll">
-          {groups.map((group) => {
+          {groups.map((group, groupIndex) => {
             const isGroupCollapsed = collapsedGroups[group.id] ?? false
             return (
               <div className="nav-group" key={group.id}>
@@ -114,7 +114,9 @@ export function BaseSidebar({
                     </span>
                   </button>
                 ) : (
-                  <div className="nav-group-divider" title={group.title} />
+                  groupIndex > 0 && (
+                    <div className="nav-group-divider" title={group.title} />
+                  )
                 )}
                 {!isGroupCollapsed && (
                   <div
@@ -129,6 +131,7 @@ export function BaseSidebar({
                         }`}
                         key={item.page}
                         onClick={() => onNavigate(item.page)}
+                        title={!isExpanded ? item.label : undefined}
                       >
                         <Icon name={item.icon} />
                         <span>{item.label}</span>
