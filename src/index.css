@@ -20389,83 +20389,6 @@ html:has(.manual-page .modal-overlay) {
   border-radius: 10px;
 }
 
-/* <=620px: baris tabel jadi kartu kecil (tanggal + jumlah, keterangan, tombol), tanpa geser samping */
-@media (max-width: 620px) {
-  .report-page .expense-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .report-page .expense-toolbar .search {
-    flex: 0 0 auto;
-    width: 100% !important;
-    min-height: 42px;
-  }
-
-  .report-page .expense-add-button {
-    width: 100%;
-    min-height: 42px;
-  }
-
-  .report-page .expense-table-compact > .expense-row,
-  .report-page .commission-table-scroll > .report-row {
-    margin: 0 !important;
-    border-width: 0 0 1px !important;
-    border-radius: 0 !important;
-  }
-
-  .report-page .expense-table-compact > .expense-row:last-child,
-  .report-page .commission-table-scroll > .report-row:last-child {
-    border-bottom-width: 0 !important;
-  }
-
-  .report-page .expense-table-scroll > .expense-head,
-  .report-page .commission-table-scroll > .report-head {
-    display: none !important;
-  }
-
-  .report-page .expense-table-compact > .expense-row {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    gap: 6px 16px !important;
-    min-width: 0 !important;
-    padding: 16px !important;
-  }
-
-  .report-page .expense-table-compact > .expense-row > :nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
-    color: var(--muted);
-  }
-
-  .report-page .expense-table-compact > .expense-row > :nth-child(3) {
-    grid-column: 2;
-    grid-row: 1;
-    text-align: right;
-  }
-
-  .report-page .expense-table-compact > .expense-row > :nth-child(2) {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .report-page .expense-table-compact > .expense-row > :nth-child(4) {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    justify-self: stretch;
-    margin-top: 10px;
-  }
-
-  .report-page .expense-table-compact > .expense-row > :nth-child(4).button {
-    width: 100%;
-  }
-
-  .report-page .commission-table-scroll > .report-row {
-    padding: 16px !important;
-    gap: 6px 16px !important;
-  }
-}
-
 /* Laporan Keuangan: baris komisi bisa di-tap (menuju Riwayat Transaksi) */
 .report-page .report-row.is-tap {
   cursor: pointer;
@@ -20873,5 +20796,258 @@ html:has(.manual-page .modal-overlay) {
 
   .simple-modal.lk-exp-form > header {
     min-height: 56px;
+  }
+}
+
+/* ===== Laporan Keuangan: tabel Pengeluaran & Komisi, header selalu tampil, tombol sebaris dengan data (semua lebar) ===== */
+.report-page .expense-table-scroll,
+.report-page .commission-table-scroll {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  width: 100% !important;
+}
+
+.report-page .expense-table-scroll > .expense-head,
+.report-page .commission-table-scroll > .report-head {
+  display: grid !important;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.report-page .expense-table-compact > .expense-head,
+.report-page .expense-table-compact > .expense-row {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr) auto 96px !important;
+  align-items: center;
+  gap: 16px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+.report-page .expense-table-compact > .expense-row {
+  padding: 8px 16px !important;
+  border-width: 0 0 1px !important;
+}
+
+.report-page .expense-table-compact > .expense-row:last-child {
+  border-bottom-width: 0 !important;
+}
+
+.report-page .expense-table-compact > .expense-row > :nth-child(3),
+.report-page .expense-table-compact > .expense-head > :nth-child(3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.report-page .expense-table-compact > .expense-row > :nth-child(4) {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  padding-inline: 8px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.report-page .expense-table-compact > .expense-row .button .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.report-page .commission-table-scroll > .report-head,
+.report-page .commission-table-scroll > .report-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 16px !important;
+  margin: 0 !important;
+  padding-inline: 16px !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+.report-page .commission-table-scroll > .report-row {
+  border-width: 0 0 1px !important;
+}
+
+.report-page .commission-table-scroll > .report-row:last-child {
+  border-bottom-width: 0 !important;
+}
+
+/* Kolom Aksi: tombol memenuhi kolom; header rata tengah di atas tombol */
+.report-page .expense-head > :last-child {
+  text-align: center;
+}
+
+/* Cari dan Tambah: tinggi, radius, huruf sama persis di semua lebar (44px laptop, 42px HP) */
+.report-page .expense-toolbar {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 16px !important;
+}
+
+.report-page .expense-toolbar .search,
+.report-page .expense-toolbar .expense-add-button {
+  height: 44px;
+  min-height: 0;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.report-page .expense-toolbar .search {
+  flex: 1 1 0;
+  width: auto !important;
+  min-width: 0;
+  padding: 0 12px;
+  gap: 8px;
+}
+
+.report-page .expense-toolbar .search input {
+  min-width: 0;
+  font-size: inherit;
+}
+
+.report-page .expense-toolbar .expense-add-button {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .report-page .expense-toolbar .search,
+  .report-page .expense-toolbar .expense-add-button {
+    height: 42px;
+  }
+
+  .report-page .lk-long {
+    display: none;
+  }
+
+  /* HP: tanggal pindah ke bawah keterangan; tombol tetap sebaris dengan data */
+  .report-page .expense-table-compact > .expense-head,
+  .report-page .expense-table-compact > .expense-row {
+    grid-template-columns: minmax(0, 1fr) auto 84px !important;
+    column-gap: 16px !important;
+    row-gap: 2px !important;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(1) {
+    display: none;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(2) {
+    grid-column: 1;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(3) {
+    grid-column: 2;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(4) {
+    grid-column: 3;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 2;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    overflow-wrap: break-word;
+    word-break: normal;
+    font-size: 13px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    padding-inline: 4px;
+    font-size: 12px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) .icon,
+  .report-page .expense-add-button .icon {
+    display: none;
+  }
+}
+
+/* Bar atas Laporan: tanggal (periode) + tiga tombol ekspor */
+.report-page .report-toolbar {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+@media (max-width: 1024px) {
+  .report-page .report-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-page .report-toolbar > .calendar-picker-wrapper {
+    grid-column: 1 / -1;
+  }
+}
+
+.report-page .report-toolbar > .calendar-picker-wrapper {
+  display: block;
+  width: 100% !important;
+  min-width: 0;
+}
+
+.report-page .report-toolbar > .calendar-picker-wrapper .calendar-picker-btn {
+  width: 100% !important;
+  height: 44px;
+  min-height: 0;
+  padding: 0 12px;
+  gap: 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  font-size: 14px;
+  font-weight: 500;
+  justify-content: flex-start !important;
+}
+
+@media (max-width: 620px) {
+  .report-page .report-toolbar > .calendar-picker-wrapper .calendar-picker-btn {
+    height: 42px;
+  }
+}
+
+@media (max-width: 360px) {
+  .report-page .expense-table-compact > .expense-head,
+  .report-page .expense-table-compact > .expense-row {
+    grid-template-columns: minmax(0, 1fr) auto 72px !important;
+    column-gap: 8px !important;
+    padding-inline: 16px !important;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(3) {
+    font-size: 12px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) {
+    font-size: 11px;
+  }
+
+  .report-page .expense-head {
+    font-size: 10px;
+    letter-spacing: 0;
   }
 }
