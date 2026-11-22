@@ -23,6 +23,8 @@ export class ApiError extends Error {
 export function clearToken() {
   try {
     localStorage.removeItem(TOKEN_KEY)
+    // Draf Input Manual tidak boleh diwarisi pengguna berikutnya
+    localStorage.removeItem("eastville_manual_draft")
   } catch {
     /* abaikan */
   }

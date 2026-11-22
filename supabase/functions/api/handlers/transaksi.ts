@@ -64,6 +64,19 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
     if (pakai?.length) return gagal("Nomor nota sudah dipakai.")
     now = new Date(`${tgl}T${jamIn.padStart(5, "0")}:00+07:00`)
   }
+  // Kasir POS: kapster pada tiap item wajib sudah absen Hadir hari ini (Input Manual untuk tanggal lampau dikecualikan).
+  if (!manual) {
+    const ids = [...new Set(items.map((it) => String(it.kapsterId ?? "")))]
+    const { data: abs } = await db.from("absensi").select("user_id,status,waktu")
+      .eq("tanggal", tanggalIso()).in("user_id", ids).order("waktu", { ascending: false })
+    const terakhir = new Map<string, string>()
+    for (const r of abs ?? []) if (!terakhir.has(r.user_id)) terakhir.set(r.user_id, r.status)
+    for (const id of ids) {
+      const nama = kapsterMap.get(id)
+      if (nama && terakhir.get(id) !== "Hadir")
+        return gagal(`Kapster ${nama} belum absen hari ini. Lakukan absensi dulu, lalu bayar.`)
+    }
+  }
   const nowJam = jamAngka(now)
   const pilihan = body.komisiLayanan
   if (pilihan && pilihan !== "Normal" && pilihan !== "OT") return gagal("Pilihan komisi layanan tidak valid.")

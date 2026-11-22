@@ -31,21 +31,56 @@ function notaOtomatis(tanggal: string) {
   return `BUKU-${d}${m}${y.slice(2)}-${pad(now.getHours())}${pad(now.getMinutes())}`
 }
 
+/** Draf Input Manual: bertahan saat pindah halaman, dibuang bila hari berganti atau setelah disimpan. PIN tidak pernah disimpan. */
+const DRAF_MANUAL = "eastville_manual_draft"
+type DrafManual = {
+  hari: string
+  tanggal: string
+  jam: string
+  note: string
+  notaDiubah: boolean
+  kapsterId: string
+  qty: Record<string, number>
+  diskon: string
+  diskonJenis: "nominal" | "persen"
+  promo: { kode: string; nama: string; jenis: "persen" | "nominal"; nilai: number } | null
+  method: "Tunai" | "QRIS" | "Gabungan"
+  cash: string
+  qris: string
+  komisiLayanan: "Normal" | "OT"
+  gabunganDari: "tunai" | "qris"
+}
+function bacaDrafManual(): DrafManual | null {
+  try {
+    const raw = localStorage.getItem(DRAF_MANUAL)
+    if (!raw) return null
+    const d = JSON.parse(raw) as DrafManual
+    if (d.hari !== today()) {
+      localStorage.removeItem(DRAF_MANUAL)
+      return null
+    }
+    return d
+  } catch {
+    return null
+  }
+}
+
 export function ManualPage() {
+  const [draf] = useState(bacaDrafManual)
   const [items, setItems] = useState<ManualItem[]>([])
   const [kapster, setKapster] = useState<{ id: string; nama: string }[]>([])
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
 
-  const [tanggal, setTanggal] = useState(today)
-  const [jam, setJam] = useState("12:00")
-  const [note, setNote] = useState(() => notaOtomatis(today()))
-  const [notaDiubah, setNotaDiubah] = useState(false)
-  const [kapsterId, setKapsterId] = useState("")
-  const [qty, setQty] = useState<Record<string, number>>({})
+  const [tanggal, setTanggal] = useState(draf?.tanggal ?? today())
+  const [jam, setJam] = useState(draf?.jam ?? "12:00")
+  const [note, setNote] = useState(() => draf?.note ?? notaOtomatis(today()))
+  const [notaDiubah, setNotaDiubah] = useState(draf?.notaDiubah ?? false)
+  const [kapsterId, setKapsterId] = useState(draf?.kapsterId ?? "")
+  const [qty, setQty] = useState<Record<string, number>>(draf?.qty ?? {})
   const [cari, setCari] = useState("")
-  const [diskon, setDiskon] = useState("")
-  const [diskonJenis, setDiskonJenis] = useState<"nominal" | "persen">("nominal")
+  const [diskon, setDiskon] = useState(draf?.diskon ?? "")
+  const [diskonJenis, setDiskonJenis] = useState<"nominal" | "persen">(draf?.diskonJenis ?? "nominal")
   const [kodeInput, setKodeInput] = useState("")
   const [kodeError, setKodeError] = useState("")
   const [kodeChecking, setKodeChecking] = useState(false)
@@ -54,21 +89,34 @@ export function ManualPage() {
     nama: string
     jenis: "persen" | "nominal"
     nilai: number
-  } | null>(null)
+  } | null>(draf?.promo ?? null)
   const [promoList, setPromoList] = useState<
     { id: string; kode: string; nama: string; persen: number; jenis: "persen" | "nominal"; nilai: number; berlakuSampai: string }[]
   >([])
   const [pin, setPin] = useState("")
-  const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
-  const [cash, setCash] = useState("")
-  const [qris, setQris] = useState("")
+  const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">(draf?.method ?? "Tunai")
+  const [cash, setCash] = useState(draf?.cash ?? "")
+  const [qris, setQris] = useState(draf?.qris ?? "")
   // Gabungan: isi salah satu (tunai atau QRIS), sisanya dihitung otomatis, sama seperti di Kasir.
-  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">("Normal")
-  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
+  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">(draf?.komisiLayanan ?? "Normal")
+  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">(draf?.gabunganDari ?? "tunai")
   const [saving, setSaving] = useState(false)
   const [ringkasOpen, setRingkasOpen] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  useEffect(() => {
+    const kosong = !Object.values(qty).some((n) => n > 0) && !kapsterId && !notaDiubah
+    if (kosong) {
+      localStorage.removeItem(DRAF_MANUAL)
+      return
+    }
+    const nilai: DrafManual = {
+      hari: today(), tanggal, jam, note, notaDiubah, kapsterId, qty, diskon, diskonJenis,
+      promo, method, cash, qris, komisiLayanan, gabunganDari,
+    }
+    localStorage.setItem(DRAF_MANUAL, JSON.stringify(nilai))
+  }, [tanggal, jam, note, notaDiubah, kapsterId, qty, diskon, diskonJenis, promo, method, cash, qris, komisiLayanan, gabunganDari])
 
   useEffect(() => {
     if (!getToken()) {
@@ -119,6 +167,7 @@ export function ManualPage() {
             ),
         ])
         setKapster(kap)
+        setKapsterId((cur) => (cur && !kap.some((k) => k.id === cur) ? "" : cur))
         setLive(true)
       })
       .catch((e) => {

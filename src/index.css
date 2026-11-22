@@ -19691,3 +19691,8 @@ html:has(.manual-page .modal-overlay) {
 @media (min-width: 1025px) {
   .cashier-page .cart-clear-row { min-height: 62px !important; }
 }
+
+/* Kasir POS (HP/tablet): saat popup absensi terbuka, bar "Pesanan saat ini" disembunyikan agar tidak tampil di atas popup */
+@media (max-width: 820px) {
+  .cashier-page:has(.catalog-sticky .modal-overlay) .mobile-cart-bar { display: none !important; }
+}
