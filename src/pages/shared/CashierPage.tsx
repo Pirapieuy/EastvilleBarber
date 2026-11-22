@@ -25,6 +25,8 @@ export type CartLine = CatalogItem & {
 }
 
 type CashierDraft = {
+  /** Tanggal draf dibuat (YYYY-MM-DD); draf hari lain dibuang agar keranjang kemarin tidak terbawa */
+  tanggal?: string
   selectedBarber: string
   cart: CartLine[]
   method: "Tunai" | "QRIS" | "Gabungan"
@@ -47,7 +49,13 @@ type CashierDraft = {
 function readCashierDraft(key: string): CashierDraft | null {
   try {
     const value = localStorage.getItem(key)
-    return value ? (JSON.parse(value) as CashierDraft) : null
+    if (!value) return null
+    const draft = JSON.parse(value) as CashierDraft
+    if (draft.tanggal !== TANGGAL_MAKS()) {
+      localStorage.removeItem(key)
+      return null
+    }
+    return draft
   } catch {
     return null
   }
@@ -92,6 +100,8 @@ export function ReceiptView({
   onComplete,
   saving,
   saveError,
+  popup = false,
+  tersimpan = false,
   /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   /** Struk dari data demo (tidak tersimpan di server) */
 }: {
@@ -115,6 +125,10 @@ export function ReceiptView({
   onComplete?: () => void | Promise<void>
   saving?: boolean
   saveError?: string
+  /** Tampil sebagai popup di atas halaman (Kasir); default: satu halaman penuh (Riwayat) */
+  popup?: boolean
+  /** Hanya untuk popup: nota sudah tercatat di server */
+  tersimpan?: boolean
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
@@ -124,163 +138,359 @@ export function ReceiptView({
     "-"
   const multipleBarbers =
     new Set(cart.map((line) => line.barber).filter(Boolean)).size > 1
-  return (
-    <div className="flow-page">
-      <div className="flow-toolbar">
-        {onEdit ? (
-          <Button className="secondary-button" onClick={onEdit}>
-            <Icon name="pencil" /> Ubah
-          </Button>
-        ) : (
-          <Button className="primary-button" onClick={onClose}>
-            <Icon name="check" /> {backLabel}
-          </Button>
-        )}
-        <div className="segmented">
-          <Button
-            className={size === "58" ? "active" : ""}
-            onClick={() => setSize("58")}
-          >
-            58 mm
-          </Button>
-          <Button
-            className={size === "80" ? "active" : ""}
-            onClick={() => setSize("80")}
-          >
-            80 mm
-          </Button>
+  const bagian = (
+    <>
+      {popup ? (
+        <div className="receipt-layout">
+          <div className="receipt-stage">
+          <article className={`thermal-receipt size-${size}`} id="print-receipt">
+            <header>
+              <div>E</div>
+              <h2>EASTVILLE</h2>
+              <p>BARBERSHOP</p>
+              {contoh && (
+                <p>
+                  <strong>*** CONTOH (DEMO) ***</strong>
+                </p>
+              )}
+            </header>
+            <hr />
+            <dl>
+              <div>
+                <dt>Tanggal</dt>
+                <dd>
+                  {tanggal ? formatTanggalWaktu(tanggal) : formatTanggalWaktu(new Date())}
+                </dd>
+              </div>
+              <div>
+                <dt>No. nota</dt>
+                <dd>{invoice ?? "Dibuat saat disimpan"}</dd>
+              </div>
+              <div>
+                <dt>Kapster</dt>
+                <dd>{barberName}</dd>
+              </div>
+            </dl>
+            <hr />
+            {cart.map((line) => (
+              <div className="receipt-item" key={line.lineId}>
+                <span>
+                  <strong>
+                    {line.name}
+                    {multipleBarbers && line.barber ? ` (${line.barber})` : ""}
+                  </strong>
+                  <small>
+                    {line.qty} ×{" "}
+                    {new Intl.NumberFormat("id-ID").format(line.price)}
+                  </small>
+                </span>
+                <b>
+                  {new Intl.NumberFormat("id-ID").format(line.price * line.qty)}
+                </b>
+              </div>
+            ))}
+            <hr />
+            <dl>
+              <div>
+                <dt>Subtotal</dt>
+                <dd>{new Intl.NumberFormat("id-ID").format(subtotal)}</dd>
+              </div>
+              {discount > 0 && (
+                <div>
+                  <dt>Diskon</dt>
+                  <dd>− {new Intl.NumberFormat("id-ID").format(discount)}</dd>
+                </div>
+              )}
+              <div className="receipt-total">
+                <dt>TOTAL</dt>
+                <dd>{rupiah(total)}</dd>
+              </div>
+            </dl>
+            <hr />
+            <dl>
+              <div>
+                <dt>Metode</dt>
+                <dd>{method}</dd>
+              </div>
+              {method !== "QRIS" && (
+                <div>
+                  <dt>{method === "Gabungan" ? "Tunai Diterima" : "Tunai"}</dt>
+                  <dd>{new Intl.NumberFormat("id-ID").format(cash)}</dd>
+                </div>
+              )}
+              {method !== "Tunai" && (
+                <div>
+                  <dt>QRIS</dt>
+                  <dd>{new Intl.NumberFormat("id-ID").format(qris)}</dd>
+                </div>
+              )}
+              {change > 0 && (
+                <div>
+                  <dt>Kembalian</dt>
+                  <dd>{new Intl.NumberFormat("id-ID").format(change)}</dd>
+                </div>
+              )}
+            </dl>
+            <hr />
+            <footer>
+              <strong>TERIMA KASIH</strong>
+              <p>Sudah mempercayakan gaya Anda kepada Eastville.</p>
+              <small>@eastvillebarbershop</small>
+            </footer>
+          </article>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {saveError && (
-            <span style={{ color: "#dc2626", fontSize: 12, fontWeight: 600 }}>
-              {saveError}
-            </span>
+          <aside className="receipt-aksi">
+          {popup && (
+            <div
+              className={`receipt-status ${tersimpan ? "ok" : "warn"}`}
+              role="status"
+            >
+              <Icon name={tersimpan ? "check" : "receipt"} />
+              <span>
+                {tersimpan
+                  ? `Nota ${invoice} sudah tersimpan`
+                  : "Belum tersimpan. Tekan Cetak atau Selesai untuk menyimpan."}
+              </span>
+            </div>
           )}
-          <Button
-            className="primary-button"
-            disabled={saving}
-            onClick={async () => {
-              if (onPrint) {
-                await onPrint()
-              } else {
-                window.print()
-              }
-            }}
-          >
-            <Icon name="print" /> {saving ? "Menyimpan..." : "Cetak"}
-          </Button>
-          {onComplete ? (
+          <div className="flow-toolbar">
+            {onEdit ? (
+              <Button className="secondary-button" onClick={onEdit}>
+                <Icon name="pencil" /> Ubah
+              </Button>
+            ) : popup ? null : (
+              <Button className="primary-button" onClick={onClose}>
+                <Icon name="check" /> {backLabel}
+              </Button>
+            )}
+            <div className="segmented">
+              <Button
+                className={size === "58" ? "active" : ""}
+                onClick={() => setSize("58")}
+              >
+                58 mm
+              </Button>
+              <Button
+                className={size === "80" ? "active" : ""}
+                onClick={() => setSize("80")}
+              >
+                80 mm
+              </Button>
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {saveError && (
+                <span style={{ color: "#dc2626", fontSize: 12, fontWeight: 600 }}>
+                  {saveError}
+                </span>
+              )}
+              <Button
+                className="primary-button"
+                disabled={saving}
+                onClick={async () => {
+                  if (onPrint) {
+                    await onPrint()
+                  } else {
+                    window.print()
+                  }
+                }}
+              >
+                <Icon name="print" /> {saving ? "Menyimpan..." : "Cetak"}
+              </Button>
+              {onComplete ? (
+                <Button
+                  className="primary-button"
+                  disabled={saving}
+                  onClick={onComplete}
+                >
+                  <Icon name="check" /> {saving ? "Menyimpan..." : "Selesai"}
+                </Button>
+              ) : (
+                <Button className="secondary-button" onClick={onClose}>
+                  <Icon name="arrow" /> Kembali
+                </Button>
+              )}
+            </div>
+          </div>
+          </aside>
+        </div>
+      ) : (
+        <>
+        <div className="flow-toolbar">
+          {onEdit ? (
+            <Button className="secondary-button" onClick={onEdit}>
+              <Icon name="pencil" /> Ubah
+            </Button>
+          ) : popup ? null : (
+            <Button className="primary-button" onClick={onClose}>
+              <Icon name="check" /> {backLabel}
+            </Button>
+          )}
+          <div className="segmented">
+            <Button
+              className={size === "58" ? "active" : ""}
+              onClick={() => setSize("58")}
+            >
+              58 mm
+            </Button>
+            <Button
+              className={size === "80" ? "active" : ""}
+              onClick={() => setSize("80")}
+            >
+              80 mm
+            </Button>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {saveError && (
+              <span style={{ color: "#dc2626", fontSize: 12, fontWeight: 600 }}>
+                {saveError}
+              </span>
+            )}
             <Button
               className="primary-button"
               disabled={saving}
-              onClick={onComplete}
+              onClick={async () => {
+                if (onPrint) {
+                  await onPrint()
+                } else {
+                  window.print()
+                }
+              }}
             >
-              <Icon name="check" /> {saving ? "Menyimpan..." : "Selesai"}
+              <Icon name="print" /> {saving ? "Menyimpan..." : "Cetak"}
             </Button>
-          ) : (
-            <Button className="secondary-button" onClick={onClose}>
-              <Icon name="arrow" /> Kembali
-            </Button>
-          )}
+            {onComplete ? (
+              <Button
+                className="primary-button"
+                disabled={saving}
+                onClick={onComplete}
+              >
+                <Icon name="check" /> {saving ? "Menyimpan..." : "Selesai"}
+              </Button>
+            ) : (
+              <Button className="secondary-button" onClick={onClose}>
+                <Icon name="arrow" /> Kembali
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="receipt-stage">
-        <article className={`thermal-receipt size-${size}`} id="print-receipt">
-          <header>
-            <div>E</div>
-            <h2>EASTVILLE</h2>
-            <p>BARBERSHOP</p>
-            {contoh && (
-              <p>
-                <strong>*** CONTOH (DEMO) ***</strong>
-              </p>
-            )}
-          </header>
-          <hr />
-          <dl>
-            <div>
-              <dt>Tanggal</dt>
-              <dd>
-                {tanggal ? formatTanggalWaktu(tanggal) : formatTanggalWaktu(new Date())}
-              </dd>
-            </div>
-            <div>
-              <dt>No. nota</dt>
-              <dd>{invoice ?? "Dibuat saat disimpan"}</dd>
-            </div>
-            <div>
-              <dt>Kapster</dt>
-              <dd>{barberName}</dd>
-            </div>
-          </dl>
-          <hr />
-          {cart.map((line) => (
-            <div className="receipt-item" key={line.lineId}>
-              <span>
-                <strong>
-                  {line.name}
-                  {multipleBarbers && line.barber ? ` (${line.barber})` : ""}
-                </strong>
-                <small>
-                  {line.qty} ×{" "}
-                  {new Intl.NumberFormat("id-ID").format(line.price)}
-                </small>
-              </span>
-              <b>
-                {new Intl.NumberFormat("id-ID").format(line.price * line.qty)}
-              </b>
-            </div>
-          ))}
-          <hr />
-          <dl>
-            <div>
-              <dt>Subtotal</dt>
-              <dd>{new Intl.NumberFormat("id-ID").format(subtotal)}</dd>
-            </div>
-            {discount > 0 && (
+        <div className="receipt-stage">
+          <article className={`thermal-receipt size-${size}`} id="print-receipt">
+            <header>
+              <div>E</div>
+              <h2>EASTVILLE</h2>
+              <p>BARBERSHOP</p>
+              {contoh && (
+                <p>
+                  <strong>*** CONTOH (DEMO) ***</strong>
+                </p>
+              )}
+            </header>
+            <hr />
+            <dl>
               <div>
-                <dt>Diskon</dt>
-                <dd>− {new Intl.NumberFormat("id-ID").format(discount)}</dd>
+                <dt>Tanggal</dt>
+                <dd>
+                  {tanggal ? formatTanggalWaktu(tanggal) : formatTanggalWaktu(new Date())}
+                </dd>
               </div>
-            )}
-            <div className="receipt-total">
-              <dt>TOTAL</dt>
-              <dd>{rupiah(total)}</dd>
-            </div>
-          </dl>
-          <hr />
-          <dl>
-            <div>
-              <dt>Metode</dt>
-              <dd>{method}</dd>
-            </div>
-            {method !== "QRIS" && (
               <div>
-                <dt>{method === "Gabungan" ? "Tunai Diterima" : "Tunai"}</dt>
-                <dd>{new Intl.NumberFormat("id-ID").format(cash)}</dd>
+                <dt>No. nota</dt>
+                <dd>{invoice ?? "Dibuat saat disimpan"}</dd>
               </div>
-            )}
-            {method !== "Tunai" && (
               <div>
-                <dt>QRIS</dt>
-                <dd>{new Intl.NumberFormat("id-ID").format(qris)}</dd>
+                <dt>Kapster</dt>
+                <dd>{barberName}</dd>
               </div>
-            )}
-            {change > 0 && (
+            </dl>
+            <hr />
+            {cart.map((line) => (
+              <div className="receipt-item" key={line.lineId}>
+                <span>
+                  <strong>
+                    {line.name}
+                    {multipleBarbers && line.barber ? ` (${line.barber})` : ""}
+                  </strong>
+                  <small>
+                    {line.qty} ×{" "}
+                    {new Intl.NumberFormat("id-ID").format(line.price)}
+                  </small>
+                </span>
+                <b>
+                  {new Intl.NumberFormat("id-ID").format(line.price * line.qty)}
+                </b>
+              </div>
+            ))}
+            <hr />
+            <dl>
               <div>
-                <dt>Kembalian</dt>
-                <dd>{new Intl.NumberFormat("id-ID").format(change)}</dd>
+                <dt>Subtotal</dt>
+                <dd>{new Intl.NumberFormat("id-ID").format(subtotal)}</dd>
               </div>
-            )}
-          </dl>
-          <hr />
-          <footer>
-            <strong>TERIMA KASIH</strong>
-            <p>Sudah mempercayakan gaya Anda kepada Eastville.</p>
-            <small>@eastvillebarbershop</small>
-          </footer>
-        </article>
-      </div>
+              {discount > 0 && (
+                <div>
+                  <dt>Diskon</dt>
+                  <dd>− {new Intl.NumberFormat("id-ID").format(discount)}</dd>
+                </div>
+              )}
+              <div className="receipt-total">
+                <dt>TOTAL</dt>
+                <dd>{rupiah(total)}</dd>
+              </div>
+            </dl>
+            <hr />
+            <dl>
+              <div>
+                <dt>Metode</dt>
+                <dd>{method}</dd>
+              </div>
+              {method !== "QRIS" && (
+                <div>
+                  <dt>{method === "Gabungan" ? "Tunai Diterima" : "Tunai"}</dt>
+                  <dd>{new Intl.NumberFormat("id-ID").format(cash)}</dd>
+                </div>
+              )}
+              {method !== "Tunai" && (
+                <div>
+                  <dt>QRIS</dt>
+                  <dd>{new Intl.NumberFormat("id-ID").format(qris)}</dd>
+                </div>
+              )}
+              {change > 0 && (
+                <div>
+                  <dt>Kembalian</dt>
+                  <dd>{new Intl.NumberFormat("id-ID").format(change)}</dd>
+                </div>
+              )}
+            </dl>
+            <hr />
+            <footer>
+              <strong>TERIMA KASIH</strong>
+              <p>Sudah mempercayakan gaya Anda kepada Eastville.</p>
+              <small>@eastvillebarbershop</small>
+            </footer>
+          </article>
+        </div>
+        </>
+      )}
+    </>
+  )
+  if (!popup) return <div className="flow-page">{bagian}</div>
+  return (
+    <div
+      aria-label="Nota"
+      aria-modal="true"
+      className="modal-overlay modal-centered"
+      onClick={() => {
+        if (!saving) (onEdit ?? onClose)?.()
+      }}
+      role="dialog"
+    >
+      <section
+        className={`receipt-popup${onEdit ? "" : " sudah-simpan"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {bagian}
+      </section>
     </div>
   )
 }
@@ -341,6 +551,9 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [saveReceiptError, setSaveReceiptError] = useState("")
   const [liveError, setLiveError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
+  // Nota yang sedang terbuka tidak boleh berubah karena pengecekan absensi ulang
+  const receiptTerbuka = useRef(false)
+  receiptTerbuka.current = receipt
   const cartSwipeStart = useRef<{ lineId: string; x: number; y: number } | null>(
     null,
   )
@@ -368,6 +581,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       return
     }
     const value: CashierDraft = {
+      tanggal: TANGGAL_MAKS(),
       selectedBarber,
       cart,
       method,
@@ -479,6 +693,19 @@ export function CashierPage({ currentUser, onNavigate }: {
         )
         setAttendedBarbers(present)
         setBarberList(kapster.map((k) => ({ id: k.id, name: k.nama })))
+        // Kapster yang belum absen hari ini tidak boleh tetap terpilih atau punya item di keranjang
+        // (mis. draf dari sesi sebelumnya): lepaskan, lalu kasir wajib memilih kapster yang sudah absen.
+        const belumAbsen = new Set(
+          kapster.filter((k) => !present.has(k.id)).map((k) => k.nama),
+        )
+        if (!receiptTerbuka.current) {
+          setSelectedBarber((cur) => (cur && belumAbsen.has(cur) ? "" : cur))
+          setCart((c) =>
+            c.some((l) => belumAbsen.has(l.barber))
+              ? c.filter((l) => !belumAbsen.has(l.barber))
+              : c,
+          )
+        }
         setLive(true)
       })
       .catch((e) => {
@@ -486,6 +713,22 @@ export function CashierPage({ currentUser, onNavigate }: {
         setLiveError(e instanceof Error ? e.message : "gagal memuat data")
       })
   }, [reloadKey])
+
+  // Kasir yang membiarkan halaman terbuka sampai hari berikutnya: cek ulang absensi saat tab dibuka
+  // kembali dan tiap 5 menit, supaya kapster/keranjang kemarin tidak bertahan tanpa absensi hari ini.
+  useEffect(() => {
+    const cekUlang = () => {
+      if (document.visibilityState === "visible") setReloadKey((k) => k + 1)
+    }
+    document.addEventListener("visibilitychange", cekUlang)
+    window.addEventListener("focus", cekUlang)
+    const timer = window.setInterval(cekUlang, 5 * 60 * 1000)
+    return () => {
+      document.removeEventListener("visibilitychange", cekUlang)
+      window.removeEventListener("focus", cekUlang)
+      window.clearInterval(timer)
+    }
+  }, [])
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 821px)")
@@ -785,48 +1028,6 @@ export function CashierPage({ currentUser, onNavigate }: {
     .sort((a, b) => a - b)
     .slice(0, 4)
 
-  if (receipt) {
-    return (
-      <ReceiptView
-        cart={cart}
-        subtotal={total}
-        discount={effectiveDiscount}
-        total={payableTotal}
-        method={method}
-        cash={
-          method === "Tunai"
-            ? cash
-            : method === "Gabungan"
-              ? cashReceived || tunaiTerpakai
-              : 0
-        }
-        qris={qris}
-        change={change}
-        cashier={currentUser?.name ?? "Siti Rahma"}
-        barber={
-          Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(
-            ", ",
-          ) || selectedBarber
-        }
-        invoice={invoice}
-        saving={savingReceipt}
-        saveError={saveReceiptError}
-        onEdit={() => {
-          setReceipt(false)
-          setSaveReceiptError("")
-        }}
-        onPrint={handlePrintReceipt}
-        onComplete={handleCompleteReceipt}
-        onClose={() => {
-          setReceipt(false)
-          if (isTransactionSaved) {
-            clearCart()
-            setIsTransactionSaved(false)
-          }
-        }}
-      />
-    )
-  }
 
   function clearCart() {
     setSelectedBarber("")
@@ -896,9 +1097,6 @@ export function CashierPage({ currentUser, onNavigate }: {
               <Icon name="user" />
             </span>
             <small>Kapster</small>
-            {!selectedBarber && (
-              <span className="barber-status-badge warn">Wajib Pilih</span>
-            )}
           </div>
           <div className="barber-options">
             {barberList.map(({ id, name: barber }) => {
@@ -927,7 +1125,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                     setSelectedBarber(barber)
                   }}
                 >
-                  <i>{barber.charAt(0)}</i>
                   <span>{barber}</span>
                 </Button>
               )
@@ -1183,20 +1380,20 @@ export function CashierPage({ currentUser, onNavigate }: {
               </button>
             </div>
           </div>
+          {cart.length > 0 && (
+            <div className="cart-clear-row">
+              <span className="cart-list-label">{itemCount} item</span>
+              <Button
+                className="cart-clear-button"
+                onClick={clearCart}
+                title="Hapus semua produk dan layanan"
+                aria-label="Hapus semua produk dan layanan"
+              >
+                <Icon name="trash" /> Hapus Semua
+              </Button>
+            </div>
+          )}
           <div className="cart-lines">
-            {cart.length > 0 && (
-              <div className="cart-clear-row">
-                <span className="cart-list-label">{itemCount} item</span>
-                <Button
-                  className="cart-clear-button"
-                  onClick={clearCart}
-                  title="Hapus semua produk dan layanan"
-                  aria-label="Hapus semua produk dan layanan"
-                >
-                  <Icon name="trash" /> Hapus Semua
-                </Button>
-              </div>
-            )}
             {cart.length === 0 ? (
               <div className="empty">
                 <Icon name="receipt" />
@@ -1373,6 +1570,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         )}
           </div>
           {cart.length > 0 && (
+          <>
           <div className="cart-total">
             <div>
               <span>Subtotal</span>
@@ -1554,7 +1752,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                       </span>
                       <strong>
                         {shortage
-                          ? `Kurang ${rupiah(shortage)}`
+                          ? rupiah(shortage)
                           : rupiah(change)}
                       </strong>
                     </div>
@@ -1706,21 +1904,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                   <span>{payDisabledReason}</span>
                 </div>
               )}
-              <Button
-                className="primary-button cart-submit"
-                disabled={Boolean(payDisabledReason) || !cart.length}
-                onClick={pay}
-              >
-                <span>
-                  Bayar{" "}
-                  {cart.length > 0
-                    ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
-                    : selectedBarber
-                      ? `(${selectedBarber})`
-                      : ""}
-                </span>
-                <Icon name="cash" />
-              </Button>
               {gagalMuat && (
                 <div className="payment-result danger" role="alert">
                   <span>
@@ -1738,9 +1921,73 @@ export function CashierPage({ currentUser, onNavigate }: {
               )}
             </section>
           </div>
+          <div className="cart-submit-bar">
+            <Button
+              className="primary-button cart-submit"
+              disabled={Boolean(payDisabledReason) || !cart.length}
+              onClick={pay}
+            >
+              <span>
+                Bayar{" "}
+                {cart.length > 0
+                  ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
+                  : selectedBarber
+                    ? `(${selectedBarber})`
+                    : ""}
+              </span>
+              <Icon name="cash" />
+            </Button>
+          </div>
+          </>
           )}
         </div>
       </aside>
+      {receipt && (
+        <ReceiptView
+          cart={cart}
+          subtotal={total}
+          discount={effectiveDiscount}
+          total={payableTotal}
+          method={method}
+          cash={
+            method === "Tunai"
+              ? cash
+              : method === "Gabungan"
+                ? cashReceived || tunaiTerpakai
+                : 0
+          }
+          qris={qris}
+          change={change}
+          cashier={currentUser?.name ?? "Siti Rahma"}
+          barber={
+            Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(
+              ", ",
+            ) || selectedBarber
+          }
+          invoice={invoice ?? "Dibuat saat disimpan"}
+          popup
+          tersimpan={isTransactionSaved}
+          saving={savingReceipt}
+          saveError={saveReceiptError}
+          onEdit={
+            isTransactionSaved
+              ? undefined
+              : () => {
+                  setReceipt(false)
+                  setSaveReceiptError("")
+                }
+          }
+          onPrint={handlePrintReceipt}
+          onComplete={handleCompleteReceipt}
+          onClose={() => {
+            setReceipt(false)
+            if (isTransactionSaved) {
+              clearCart()
+              setIsTransactionSaved(false)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

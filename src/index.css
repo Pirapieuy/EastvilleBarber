@@ -820,7 +820,7 @@ textarea {
   grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr);
   align-items: center;
   gap: 16px;
-  min-height: 58px;
+  min-height: 59px;
   padding: 10px 16px;
   border-top: 1px solid var(--line);
   font-size: 12px;
@@ -1947,7 +1947,7 @@ textarea {
 .app-header-inner {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 12px 27px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2100,7 +2100,7 @@ textarea {
 .content {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 26px 27px 42px;
+  padding: 26px 14px 42px;
 }
 
 .content.narrow {
@@ -2167,7 +2167,7 @@ textarea {
 .desktop-page-head {
   width: 100%;
   margin: 0;
-  padding: 26px 27px 0;
+  padding: 14px 14px 0;
 }
 
 .desktop-page-head h1 {
@@ -2189,7 +2189,7 @@ textarea {
     left: 0;
     z-index: 10;
     width: calc((100% - max(340px, 25%)));
-    padding: 26px 27px 0;
+    padding: 14px 14px 0;
     pointer-events: none;
   }
 
@@ -2198,18 +2198,18 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding: 0 10px 16px 27px;
+    padding: 0 10px 16px 14px;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
-    padding-top: 68px;
+    padding-top: 54px;
   }
 }
 
 @media (min-width: 1025px) {
   .desktop-page-head + .content,
   .desktop-page-head + .mobile-content {
-    padding-top: 16px !important;
+    padding-top: 14px !important;
   }
 }
 
@@ -4538,7 +4538,7 @@ textarea {
 .transaction-row {
   position: relative;
   width: 100%;
-  min-height: 58px;
+  min-height: 59px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--line);
   color: var(--slate);
@@ -4606,7 +4606,7 @@ textarea {
 }
 
 .transaction-row.voided {
-  min-height: 58px;
+  min-height: 59px;
   background: #faf7f2;
 }
 
@@ -4769,7 +4769,7 @@ textarea {
   .mobile-only-modal .transaction-modal-body {
     max-height: calc(86svh - 75px) !important;
     overflow-y: auto !important;
-    padding: 16px 20px 20px !important;
+    padding: 14px 16px 16px !important;
   }
 }
 
@@ -5207,10 +5207,14 @@ textarea {
 
 .commission-hint {
   display: block;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--slate);
   line-height: 1.3;
-  margin-top: 3px;
+  margin-top: 0;
+}
+
+.commission-hint:empty {
+  display: none;
 }
 
 .audit-timeline {
@@ -5688,7 +5692,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 26px;
+  padding: 16px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
@@ -5704,15 +5708,15 @@ textarea {
 
 .edit-trx-modal > header h2 {
   margin: 0;
-  font: 700 22px/1.2 var(--heading);
+  font: 700 20px/1.2 var(--heading);
   letter-spacing: -0.025em;
 }
 
 .edit-trx-body {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-  padding: 22px 26px;
+  overflow-y: auto;
+  padding: 16px;
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(270px, 0.85fr);
   grid-template-areas:
@@ -5720,18 +5724,12 @@ textarea {
     "left details";
   align-content: start;
   align-items: start;
-  gap: 18px 22px;
-  scrollbar-width: thin;
-  scrollbar-color: rgb(160 140 120 / 35%) transparent;
+  gap: 14px;
+  scrollbar-width: none;
 }
 
 .edit-trx-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.edit-trx-body::-webkit-scrollbar-thumb {
-  border-radius: 99px;
-  background: rgb(160 140 120 / 35%);
+  display: none;
 }
 
 .edit-trx-error {
@@ -5742,7 +5740,7 @@ textarea {
   grid-area: left;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -5758,78 +5756,44 @@ textarea {
   grid-area: details;
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
-.edit-trx-section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+
+
+
+
+
+.edit-trx-body .section-title {
+  margin-bottom: 8px;
 }
 
-.edit-trx-section-heading > div {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.edit-trx-section-heading label {
-  margin: 0;
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.edit-trx-step-label {
-  width: 25px;
-  height: 25px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 8px;
-  color: var(--brass-dark);
-  background: var(--brass-soft);
-  font-size: 10px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.edit-trx-count {
-  padding: 5px 9px;
-  border-radius: 999px;
-  color: var(--slate);
-  background: var(--bone);
-  font-size: 11px;
-  font-weight: 700;
+.edit-trx-body .nota-summary {
+  margin-top: 0;
 }
 
 .edit-trx-items-list {
   display: flex;
   flex-direction: column;
-  max-height: 220px;
+  max-height: 232px;
   overflow-y: auto;
-  gap: 9px;
+  gap: 8px;
   overscroll-behavior: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
 
-.edit-trx-items-list::-webkit-scrollbar,
-.edit-trx-catalog-list::-webkit-scrollbar {
-  display: none;
-}
 
 .edit-trx-item-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 38px;
+  grid-template-columns: minmax(0, 1fr) auto 88px 44px;
   grid-template-areas:
-    "info price del"
-    "kapster stepper del";
+    "info stepper price del"
+    "kapster stepper price del";
   align-items: center;
-  gap: 6px 10px;
-  padding: 10px;
+  gap: 4px 12px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 13px;
   background: var(--paper);
@@ -5860,7 +5824,7 @@ textarea {
 .edit-trx-item-info strong {
   min-width: 0;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
   white-space: normal;
   overflow: hidden;
@@ -5869,15 +5833,16 @@ textarea {
 
 .edit-trx-item-title .chip {
   flex: 0 0 auto;
-  padding: 2px 7px;
+  min-height: 20px;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .edit-trx-item-info small {
   color: var(--slate);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .edit-trx-item-kapster {
@@ -5887,13 +5852,13 @@ textarea {
   gap: 5px;
   min-width: 0;
   color: var(--slate);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.25;
 }
 
 .edit-trx-item-kapster .icon {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   flex: none;
   color: var(--brass-dark);
 }
@@ -5909,20 +5874,13 @@ textarea {
   justify-self: end;
 }
 
-.edit-trx-stepper {
-  padding: 2px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--bone);
-}
 
-.edit-trx-stepper .button {
-  border-radius: 7px;
-}
+
 
 .edit-trx-item-price {
   grid-area: price;
-  font-size: 13px;
+  justify-self: end;
+  font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -5934,92 +5892,40 @@ textarea {
 }
 
 .edit-trx-item-del .button {
-  border-radius: 9px;
-}
-
-.edit-trx-catalog-search {
-  margin: 0 0 10px;
-  background: var(--paper);
-}
-
-.edit-trx-catalog-columns {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.edit-trx-catalog-group {
-  min-width: 0;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--bone);
-}
-
-.edit-trx-catalog-group h3 {
-  margin: 0 0 8px;
-  color: var(--slate);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.edit-trx-catalog-list {
-  display: grid;
-  gap: 6px;
-  max-height: 216px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.edit-trx-catalog-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 48px;
-  padding: 5px 6px 5px 9px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--paper);
-}
-
-.edit-trx-catalog-item > div {
-  min-width: 0;
-}
-
-.edit-trx-catalog-item strong {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.edit-trx-catalog-item strong {
-  color: var(--ink);
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.edit-trx-catalog-add {
-  width: 34px;
-  min-width: 34px;
-  min-height: 34px;
-  height: 34px;
+  place-items: center;
   padding: 0;
-  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--oxblood);
+  background: var(--paper);
 }
 
-.edit-trx-catalog-empty {
-  margin: 0;
-  padding: 10px 4px;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.4;
+.edit-trx-item-del .button:hover:not(:disabled) {
+  border-color: var(--oxblood);
+  background: var(--oxblood-soft);
 }
+
+.edit-trx-item-del .button:disabled {
+  color: var(--slate);
+  opacity: 0.45;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 .edit-trx-detail-label {
   display: flex;
@@ -6032,7 +5938,7 @@ textarea {
 .edit-trx-detail-label > span,
 .edit-trx-detail-title {
   color: var(--slate);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -6052,24 +5958,26 @@ textarea {
 .edit-trx-method-grid {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 6px !important;
+  gap: 8px !important;
 }
 
 .edit-trx-method-grid .button {
-  min-height: 44px;
+  min-height: 60px;
+  flex-direction: column;
   justify-content: center;
-  gap: 5px;
-  padding: 5px 6px;
-  font-size: 11px;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  text-align: center;
 }
 
 .edit-trx-method-grid .button .icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
 }
 
 .edit-trx-method-grid .button strong {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .edit-trx-payment-fields {
@@ -6099,7 +6007,7 @@ textarea {
   border-radius: 9px;
   color: var(--slate);
   background: var(--bone);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -6133,52 +6041,23 @@ textarea {
   border-radius: 9px !important;
 }
 
-.edit-trx-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  padding: 16px;
-  border-radius: 13px;
-  background: linear-gradient(145deg, #fffaf0, #f8f0e2);
-  border: 1px solid rgb(200 150 62 / 26%);
-}
 
-.edit-trx-summary-caption {
-  color: var(--brass-dark);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
-.edit-trx-summary > div {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--slate);
-}
 
-.edit-trx-summary > div.total {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink);
-  padding-top: 10px;
-  border-top: 1px solid rgb(165 122 43 / 22%);
-}
 
-.edit-trx-summary > div.total strong {
-  font-size: 20px;
-  font-variant-numeric: tabular-nums;
-}
 
 .edit-trx-modal form > footer {
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 14px 26px calc(18px + env(safe-area-inset-bottom, 0px));
+  gap: 8px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   background: var(--paper);
+}
+
+.edit-trx-modal form > footer .button {
+  min-height: 44px;
 }
 
 @media (max-width: 720px) {
@@ -6195,37 +6074,12 @@ textarea {
     border-radius: 16px !important;
   }
 
-  .edit-trx-modal > header {
-    padding: 16px 18px;
-  }
-
-  .edit-trx-modal > header h2 {
-    font-size: 19px;
-  }
-
   .edit-trx-body {
-    overflow-y: auto;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "error"
       "left"
       "details";
-    gap: 18px;
-    padding: 18px;
-  }
-
-  .edit-trx-items-list {
-    max-height: 280px;
-  }
-
-  .edit-trx-modal form > footer {
-    padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
-@media (min-width: 721px) and (max-height: 760px) {
-  .edit-trx-body {
-    overflow-y: auto;
   }
 }
 
@@ -6243,69 +6097,35 @@ textarea {
     border-radius: 14px !important;
   }
 
-  .edit-trx-modal > header {
-    padding: 14px 15px;
-  }
-
   .edit-trx-modal > header h2 {
-    font-size: 17px;
     overflow-wrap: anywhere;
   }
 
-  .edit-trx-body {
-    gap: 15px;
-    padding: 15px;
-  }
-
-  .edit-trx-items-list {
-    max-height: 280px;
-  }
-
   .edit-trx-item-row {
-    grid-template-columns: minmax(0, 1fr) 38px;
+    grid-template-columns: auto minmax(0, 1fr) 44px;
     grid-template-areas:
-      "info del"
-      "price del"
-      "kapster kapster"
-      "stepper stepper";
-    gap: 8px 10px;
-    padding: 12px;
-  }
-
-  .edit-trx-item-price {
-    font-size: 12px;
+      "info info del"
+      "kapster kapster del"
+      "stepper price price";
+    gap: 4px 12px;
   }
 
   .edit-trx-item-stepper {
     justify-self: start;
+    margin-top: 4px;
   }
 
-  .edit-trx-catalog-columns {
+  .edit-trx-body .nota-catalog-columns {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .edit-trx-catalog-list {
-    max-height: 180px;
   }
 
   .edit-trx-split-fields {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .edit-trx-summary > div.total strong {
-    font-size: 18px;
-  }
-
-  .edit-trx-modal form > footer {
-    gap: 8px;
-    padding: 11px 14px calc(12px + env(safe-area-inset-bottom, 0px));
-  }
-
   .edit-trx-modal form > footer .button {
-    min-height: 44px;
     flex: 1 1 0;
     padding-inline: 10px;
-    font-size: 13px;
   }
 }
 
@@ -6352,8 +6172,35 @@ textarea {
 
 .expense-table-compact > .expense-head,
 .expense-table-compact > .expense-row {
-  grid-template-columns: minmax(80px, 0.6fr) minmax(0, 2fr) minmax(100px, 0.8fr) minmax(90px, 0.6fr);
+  grid-template-columns: minmax(70px, 0.5fr) minmax(0, 2fr) minmax(90px, 0.7fr) minmax(80px, 0.5fr);
+  min-width: 400px;
+}
+
+.expense-table-compact > .expense-head > * {
+  padding-right: 10px;
+  border-right: 1px solid var(--line);
+}
+
+.expense-table-compact > .expense-head > *:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.expense-table-compact > .expense-row {
+  border-top: 1px solid var(--line);
+}
+
+.expense-table-compact > .expense-row > * {
   min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding-right: 10px;
+  border-right: 1px solid var(--line);
+}
+
+.expense-table-compact > .expense-row > *:last-child {
+  border-right: none;
+  padding-right: 0;
 }
 
 .report-section {
@@ -8347,7 +8194,7 @@ textarea {
 }
 
 .service-row {
-  min-height: 58px;
+  min-height: 59px;
   padding: 9px 14px;
   border-top: 1px solid var(--line);
   color: var(--slate);
@@ -10087,7 +9934,7 @@ textarea {
     border-bottom: 1px solid var(--line) !important;
   }
 
-  .expense-row {
+  .expense-row:not(.expense-table-compact > .expense-row) {
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-start !important;
@@ -10568,14 +10415,11 @@ textarea {
   }
 
   .expense-add-button {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     min-width: 44px;
     min-height: 44px;
-    max-width: 44%;
-    padding-inline: 8px;
-    overflow: hidden;
+    padding-inline: 10px;
     white-space: nowrap;
-    text-overflow: ellipsis;
   }
 
   .expense-table-scroll,
@@ -10585,7 +10429,7 @@ textarea {
     margin-inline: 0;
     max-height: min(360px, 52svh);
     overflow-y: auto !important;
-    overflow-x: hidden !important;
+    overflow-x: auto !important;
     overscroll-behavior: none;
     box-sizing: border-box;
   }
@@ -10602,9 +10446,8 @@ textarea {
     overflow-wrap: anywhere;
   }
 
-  .expense-table-scroll > .expense-head,
-  .commission-table-scroll > .report-head {
-    display: none;
+  .expense-table-scroll > .expense-head {
+    display: grid !important;
   }
 
   .expense-table-compact > .expense-row,
@@ -10616,38 +10459,6 @@ textarea {
     max-width: 100% !important;
     gap: 7px 10px;
     padding: 12px;
-  }
-
-  .expense-table-compact > .expense-row {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    align-items: start;
-    width: 100%;
-  }
-
-  .expense-table-compact > .expense-row > span:first-child {
-    min-width: 0;
-    color: var(--slate);
-  }
-
-  .expense-table-compact > .expense-row > span:nth-child(2) {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .expense-table-compact > .expense-row > strong {
-    grid-column: 2;
-    grid-row: 1;
-    min-width: 0;
-    text-align: right;
-    overflow-wrap: anywhere;
-  }
-
-  .expense-table-compact > .expense-row > button {
-    grid-column: 1 / -1;
-    width: 100%;
   }
 
   .commission-table-scroll > .report-row {
@@ -13298,7 +13109,7 @@ summary,
 
 /* Pengeluaran: baris jadi kartu di layar kecil, jumlah sebagai informasi utama */
 @media (max-width: 820px) {
-  .expense-row {
+  .expense-row:not(.expense-table-compact > *) {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
@@ -13312,7 +13123,7 @@ summary,
     padding: 14px 16px !important;
   }
 
-  .expense-row > .exp-cat {
+  .expense-row:not(.expense-table-compact > *) > .exp-cat {
     grid-area: cat;
     font-size: 15px;
   }
@@ -13342,7 +13153,7 @@ summary,
     justify-self: end;
   }
 
-  .expense-row > .button {
+  .expense-row:not(.expense-table-compact > *) > .button {
     grid-area: act;
     width: 100%;
     margin-top: 6px;
@@ -14307,13 +14118,24 @@ summary,
     overflow-y: auto;
   }
 
+  .history-page-content .table-head,
   .history-page-content .transaction-row {
-    grid-template-columns: 1.3fr 1fr 1.4fr !important;
-    grid-template-areas: none !important;
+    grid-template-columns: minmax(120px, 1.3fr) minmax(0, 1fr) minmax(0, 1.4fr) !important;
     gap: 12px !important;
-    padding: 10px 16px !important;
-    min-height: 56px !important;
+    padding-inline: 16px !important;
   }
+
+  .history-page-content .transaction-row {
+    grid-template-areas: none !important;
+    padding-block: 10px !important;
+    min-height: 58px !important;
+  }
+
+  .history-page-content .table-head {
+    padding-block: 0 !important;
+    min-height: 40px !important;
+  }
+
 
   .history-page-content .transaction-row .tx-cell-col-nota {
     grid-area: auto;
@@ -14340,28 +14162,6 @@ summary,
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-}
-
-@media (max-width: 620px) {
-  .history-page-content .table-head,
-  .history-page-content .transaction-row {
-    grid-template-columns: minmax(95px, 1.35fr) minmax(65px, 0.9fr) minmax(80px, 1.15fr) !important;
-    gap: 8px !important;
-    padding: 8px 10px !important;
-  }
-
-  .history-page-content .transaction-row .tx-cell-nota strong {
-    font-size: 11px;
-  }
-
-  .history-page-content .transaction-row .tx-cell-nota small {
-    font-size: 10px;
-  }
-
-  .history-page-content .transaction-row .tx-cell-kapster,
-  .history-page-content .transaction-row .tx-cell-items {
-    font-size: 11px;
   }
 }
 
@@ -14463,7 +14263,7 @@ summary,
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 
 .detail-pinned .detail-actions-group {
@@ -14492,7 +14292,7 @@ summary,
   /* Info operasional tetap tiga kartu sejajar di HP dan tablet */
   .transaction-modal-body .detail-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
+    gap: 8px;
   }
 
   .transaction-modal-body .detail-cards > div:nth-child(3) {
@@ -14510,10 +14310,6 @@ summary,
 
   .transaction-modal-body .detail-cards strong {
     font-size: 12px;
-  }
-
-  .transaction-modal-body .commission-hint {
-    display: none;
   }
 
   /* Jarak kartu daftar ke tepi bawah sama dengan jarak samping */
@@ -14571,7 +14367,9 @@ summary,
 }
 
 .transaction-modal-body .detail-items-section {
-  flex: 0 0 auto;
+  flex: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .transaction-modal-body .detail-items-list {
@@ -14594,8 +14392,10 @@ summary,
   max-height: max(132px, calc(100svh - 560px));
 }
 
-.transaction-modal-body .detail-items-list {
-  max-height: 34svh;
+.transaction-modal-body .detail-items-section .detail-items-list {
+  flex: none;
+  min-height: 0;
+  max-height: min(121px, max(88px, calc(100svh - 446px)));
 }
 
 @media (min-width: 1025px) {
@@ -14607,8 +14407,7 @@ summary,
 /* Detail transaksi: tanpa tinggi paksaan. Daftar item mengikuti isi, digulir bila lebih dari ±3 item;
    bila layar sangat pendek, seluruh panel yang digulir. */
 .history-page-content .desktop-only-detail .detail-items-section .detail-items-list,
-.detail-items-section .detail-items-list,
-.transaction-modal-body .detail-items-list {
+.detail-items-section .detail-items-list {
   min-height: 0;
   flex: none;
   max-height: 260px;
@@ -14624,12 +14423,12 @@ summary,
   flex: none;
 }
 
-/* Riwayat: bar filter metode di samping kapster */
+/* Riwayat: bar filter metode di samping kapster. Jarak antar kontrol = ke kartu = antar kartu (14px) */
 .history-page-content .filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 14px !important;
 }
 
 .history-page-content .filters .search-select.history-kapster-select {
@@ -14639,8 +14438,10 @@ summary,
 
 .history-method-filter {
   flex: none;
+  font-size: 13px;
   height: 40px;
-  padding: 2px;
+  gap: 3px;
+  padding: 3px;
   border-radius: 9px;
   box-sizing: border-box;
 }
@@ -14650,18 +14451,42 @@ summary,
   height: 100%;
   padding: 0 14px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: inherit;
+  font-weight: 500;
 }
 
 .history-page-content .filters .search {
   flex: 1 1 200px;
-  grid-column: 1 / -1;
+  width: 100%;
   min-width: 0;
   height: 40px;
 }
 
-.history-page-content .filters .search input {
+/* Cari, tanggal, kapster: padding, jarak ikon-teks, huruf, dan ikon sama persis */
+.history-page-content .filters .search,
+.history-page-content .filters .calendar-picker-btn,
+.history-page-content .filters .search-select-trigger {
+  padding: 0 12px;
+  gap: 8px;
+  border-radius: 9px;
   font-size: 13px;
+  font-weight: 500;
+}
+
+.history-page-content .filters .search input {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.history-page-content .filters .search .icon,
+.history-page-content .filters .calendar-picker-btn .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.history-page-content .filters .calendar-picker-btn {
+  justify-content: flex-start;
 }
 
 .history-method-filter .button.active {
@@ -14671,6 +14496,22 @@ summary,
 
 /* Desktop: daftar item memakai sisa tinggi panel (tidak berhenti di 260px), tetap menggulir bila penuh */
 @media (min-width: 1025px) {
+  /* Ruang berlebih dirapatkan agar daftar item dapat lebih tinggi: judul kartu tidak menyisakan 2 baris kosong,
+     garis bawah header & padding atas lebih tipis */
+  .history-page-content .desktop-only-detail .detail-cards small {
+    min-height: 0;
+  }
+
+  .history-page-content .desktop-only-detail .detail-header-row {
+    padding-bottom: 10px;
+  }
+
+  /* Panel detail: padding & jarak antar bagian sama dengan popup HP/tablet (14px samping, 12px antar bagian) */
+  .history-page-content .desktop-only-detail {
+    padding: 14px 16px 16px;
+    gap: 12px;
+  }
+
   .history-page-content .desktop-only-detail .detail-items-section {
     flex: 1 1 auto;
     flex-shrink: 1;
@@ -14687,21 +14528,39 @@ summary,
   }
 }
 
-/* Filter metode di mobile: satu baris penuh, tiga tombol melebar sama rata */
-@media (max-width: 820px) {
+/* Tablet & HP: empat bar sama lebar. Satu baris sampai ±660px, di bawahnya 2x2 (cari | tanggal / kapster | metode) */
+@media (max-width: 1024px) {
+  .history-page-content .filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .history-page-content .filters .search {
+    grid-column: auto;
+  }
+
   .history-page-content .filters .history-method-filter {
-    grid-column: 1 / -1;
-    flex: 1 1 100%;
+    grid-column: auto;
     width: 100%;
     min-width: 0;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .history-page-content .filters .history-method-filter .button {
-    flex: 1 1 0;
     min-width: 0;
-    padding: 0 6px;
+    padding: 0 4px;
     justify-content: center;
+  }
+}
+
+.history-page-content .filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 659px) {
+  .history-page-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
@@ -14736,6 +14595,7 @@ summary,
     flex: 1 1 auto !important;
     min-height: 0;
     max-height: none !important;
+    margin-top: 0 !important;
     margin-bottom: 0 !important;
     overflow-y: auto !important;
   }
@@ -14774,6 +14634,8 @@ summary,
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 14px;
+  /* latar melebar ke samping agar bayangan kartu yang menggulir tidak tembus di sisi kapster */
+  box-shadow: -14px 0 0 var(--bone), 10px 0 0 var(--bone);
 }
 
 /* Desktop: header "Pesanan saat ini" dihapus (di mobile & tablet portrait tetap ada untuk tombol tutup) */
@@ -15285,7 +15147,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
   .mobile-content.attendance-history-page {
-    padding: 26px 27px 26px;
+    padding: 26px 14px 26px;
   }
 
   .audit-page-content {
@@ -16147,7 +16009,7 @@ label .search-select-trigger {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    padding: 24px 27px 22px !important;
+    padding: 24px 14px 22px !important;
   }
 
   .kapster-dashboard > .kpi-grid {
@@ -16210,7 +16072,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .app-shell-kapster .my-salary-page {
     width: min(1280px, 100%);
-    padding: 24px 27px 28px;
+    padding: 24px 14px 28px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
     column-gap: 14px;
@@ -16240,7 +16102,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .kapster-product-commission {
     width: min(1280px, 100%);
-    padding: 24px 27px 28px;
+    padding: 24px 14px 28px;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16323,7 +16185,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
     width: min(1280px, 100%);
-    padding: 24px 27px 28px !important;
+    padding: 24px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-dashboard > .page-title,
@@ -16581,7 +16443,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    padding: 16px 27px 28px !important;
+    padding: 14px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16592,7 +16454,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page > .page-title {
     position: absolute;
     top: 20px;
-    right: 27px;
+    right: 14px;
     height: auto;
     min-height: 0;
     margin: 0 !important;
@@ -16668,8 +16530,16 @@ label .search-select-trigger {
     animation: modal-pop 160ms cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
+  .mobile-only-modal .transaction-modal-box {
+    height: auto !important;
+  }
+
   .mobile-only-modal .transaction-modal-body {
-    max-height: calc(100svh - 110px) !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    padding: 14px 16px 16px !important;
+    gap: 12px;
   }
 }
 
@@ -16755,7 +16625,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   /* Margin desktop mengikuti acuan Riwayat Transaksi: 27px kanan, 16px bawah, 14px celah kolom, sejajar header */
   .cashier-page .cart {
-    padding: 68px 27px 16px 10px;
+    padding: 54px 14px 16px 10px;
     transform: none !important;
   }
 }
@@ -16787,7 +16657,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 16px 27px 26px !important;
+    padding: 14px 14px 26px !important;
     overflow: hidden;
   }
 
@@ -16839,7 +16709,7 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-dashboard-actions {
     position: absolute;
     top: 14px;
-    right: 27px;
+    right: 14px;
     z-index: 5;
   }
 
@@ -16918,7 +16788,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 16px 27px 26px !important;
+    padding: 14px 14px 26px !important;
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -16932,8 +16802,8 @@ label .search-select-trigger {
   /* .content jadi acuan posisi; naik ke baris judul kerangka (±52px di atasnya) */
   .fit-page-actions {
     position: absolute;
-    top: -38px;
-    right: 27px;
+    top: -35px;
+    right: 14px;
     z-index: 5;
     margin: 0;
   }
@@ -17191,38 +17061,49 @@ label .search-select-trigger {
   }
 }
 
-/* Riwayat (laptop): tanggal & kapster menyesuaikan lebar penuh seperti tab, pilihan cara bayar di kanan */
+/* Riwayat (laptop): empat bar sama lebar (cari, tanggal, kapster, metode). Jarak 14px = jarak antar kartu,
+   jadi dua bar kiri sejajar kartu daftar dan dua bar kanan sejajar kartu detail */
 @media (min-width: 1025px) {
   .history-page-content .filters {
-    flex-wrap: nowrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .history-page-content .filters .calendar-picker-wrapper {
-    flex: 0 0 auto;
-    min-width: 200px;
+  .history-page-content .filters .search,
+  .history-page-content .filters .calendar-picker-btn,
+  .history-page-content .filters .search-select-trigger,
+  .history-page-content .filters .history-method-filter {
+    height: 44px;
+    font-size: 14px;
   }
 
-  .history-page-content .filters .search-select.history-kapster-select {
-    flex: 1 1 0;
-    min-width: 180px;
-  }
-
-  .history-page-content .filters .search {
+  .history-page-content .filters .search,
+  .history-page-content .filters .calendar-picker-wrapper,
+  .history-page-content .filters .search-select.history-kapster-select,
+  .history-page-content .filters .history-method-filter {
     grid-column: auto;
-    flex: 1.4 1 0;
-    min-width: 200px;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
   }
 
   .history-page-content .filters .history-method-filter {
-    flex: 0 0 auto;
-    margin-left: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .history-page-content .filters .history-method-filter .button {
+    min-height: 0;
+    height: 100%;
+    padding: 0 4px;
   }
 
   .history-page-content .master-detail {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
+
 
 @media (max-width: 1200px) {
   .cashier-page .barber-btn > i {
@@ -17496,3 +17377,2371 @@ label .search-select-trigger {
     min-height: 42px;
   }
 }
+
+/* Kasir POS: tipografi dan jarak seragam di semua ukuran layar (Inter 14px untuk kontrol, jarak 14px) */
+.cashier-page .barber-btn,
+.cashier-page .segmented button,
+.cashier-page .catalog-tools input {
+  font-size: 14px;
+}
+
+.cashier-page .barber-picker-label small {
+  font-size: 12px;
+}
+
+.cashier-page .catalog-item strong {
+  font: 600 14px/1.25 var(--body, Inter, sans-serif);
+}
+
+.cashier-page .catalog-item b {
+  font-size: 13px;
+}
+
+.cashier-page .catalog-sticky {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+}
+
+.cashier-page .catalog-sticky > .barber-picker,
+.cashier-page .catalog-sticky > .catalog-tools {
+  margin-top: 0;
+}
+
+.cashier-page .catalog-tools {
+  display: flex;
+  gap: 12px;
+}
+
+.cashier-page .catalog-tools .search {
+  width: auto;
+  margin-top: 0;
+  flex: 1;
+}
+
+.cashier-page .catalog-grid {
+  margin-top: 0;
+  gap: 10px;
+}
+
+.cashier-page .catalog-locked-card {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.cashier-page .catalog-tools .search {
+  min-height: 46px;
+}
+
+@media (max-width: 820px) {
+  .cashier-page .barber-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .cashier-page .barber-btn {
+    min-width: 0;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1024px) {
+  .cashier-page .catalog {
+    padding-top: 0 !important;
+  }
+}
+
+/* Kasir POS: kapster 1 baris, lalu 3 per baris, lalu 2 per baris (sisa baris melebar, tidak ada yang sendiri) */
+.cashier-page .barber-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.cashier-page .barber-btn {
+  min-width: 0;
+  min-height: 40px;
+  flex: 1 1 0;
+}
+
+@media (max-width: 640px) {
+  .cashier-page .barber-btn {
+    flex: 1 1 calc((100% - 16px) / 3);
+  }
+}
+
+@media (max-width: 480px) {
+  .cashier-page .barber-btn {
+    flex: 1 1 calc((100% - 8px) / 2);
+  }
+}
+
+/* Kasir POS: blok kapster tidak menempel ke navbar atas */
+@media (max-width: 1024px) {
+  .cashier-page .catalog-sticky {
+    padding-top: 14px;
+  }
+
+  .cashier-page .cart {
+    padding-top: 14px;
+  }
+}
+
+/* Kasir POS: isi keranjang memakai satu jarak 12px dan satu skala huruf */
+.cashier-page .cart-total {
+  display: grid;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  font-size: 13px;
+}
+
+.cashier-page .cart-total > *,
+.cashier-page .cart-payment > *,
+.cashier-page .cart-total .grand,
+.cashier-page .cart-total > .cart-discount-panel,
+.cashier-page .cart-total > .primary-button {
+  margin-top: 0;
+}
+
+.cashier-page .cart-payment {
+  display: grid;
+  gap: 8px;
+}
+
+.cashier-page .cart-total > div {
+  font-size: 13px;
+}
+
+.cashier-page .cart-total .grand {
+  padding-top: 0;
+}
+
+.cashier-page .cart-total .grand strong {
+  font: 700 20px/1 var(--heading);
+}
+
+.cashier-page .commission-choice {
+  margin-top: 0;
+}
+
+.cashier-page .commission-choice > span,
+.cashier-page .pay-field > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.cashier-page .method-grid {
+  gap: 8px;
+}
+
+.cashier-page .method-grid .button,
+.cashier-page .cart-payment .method-grid .button,
+.cashier-page .cart-payment .commission-choice .method-grid .button {
+  min-height: 40px;
+  font-size: 13px;
+}
+
+.cashier-page .quick-cash {
+  gap: 8px;
+}
+
+.cashier-page .quick-cash button {
+  min-height: 40px;
+  padding: 0 6px;
+  font-size: 13px;
+}
+
+.cashier-page .cart-total .button,
+.cashier-page .cart-total .primary-button {
+  min-height: 40px;
+}
+
+.cashier-page .cart-payment .payment-result,
+.cashier-page .cart-payment .cart-submit,
+.cashier-page .cart-payment .cart-error,
+.cashier-page .commission-choice .method-grid,
+.cashier-page .cart-total .cart-qris-note,
+.cashier-page .cart-total .pay-hint {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.cashier-page .cart-payment .payment-result {
+  min-height: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.cashier-page .cart-payment-heading {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1025px) {
+  .cashier-page .cart-total > div,
+  .cashier-page .cart-payment > * {
+    margin-top: 0;
+  }
+}
+
+/* Kasir POS: kolom isian, label, dan blok pembayaran memakai ukuran dan jarak yang sama di semua mode */
+.cashier-page .cart-payment .input-shell {
+  min-height: 40px;
+  height: 40px;
+}
+
+.cashier-page .cart-payment .pay-field,
+.cashier-page .cart-payment .pay-split,
+.cashier-page .cart-payment > div:not([class]) {
+  margin-top: 0;
+}
+
+.cashier-page .cart-payment .pay-split,
+.cashier-page .cart-payment > div:not([class]) {
+  display: grid;
+  gap: 8px;
+}
+
+.cashier-page .cart-payment .pay-split {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cashier-page .cart-payment .pay-field > span,
+.cashier-page .commission-choice > span {
+  margin: 0 0 6px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cashier-page .cart-payment .pay-hint {
+  margin: 0;
+  font-size: 12px;
+}
+
+.cashier-page .cart-payment .method-grid .button strong,
+.cashier-page .cart-payment .method-grid .button small {
+  font-size: 13px;
+}
+
+/* Celah menu kiri dan keranjang kanan = 14px, sama dengan jarak antar blok */
+@media (min-width: 821px) {
+  .cashier-page .cart {
+    padding-left: 4px !important;
+  }
+}
+
+.cashier-page .cart-payment > div:not([class]),
+.cashier-page .cart-payment .quick-cash,
+.cashier-page .cart-payment .pay-field + .quick-cash {
+  margin-top: 0 !important;
+}
+
+.cashier-page .cart-payment .cart-payment-heading {
+  margin: 0;
+}
+
+.cashier-page .cart-payment .quick-cash {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cashier-page .cart-payment .quick-cash button {
+  flex: 1 1 calc((100% - 16px) / 3);
+  min-width: 0;
+}
+
+/* Kasir POS: daftar item selalu terlihat (minimal 2 baris), pembayaran di bawahnya yang menggulir */
+.cashier-page .cart-panel .cart-lines {
+  flex: 1 1 auto;
+  min-height: 160px;
+}
+
+.cashier-page .cart-panel .cart-total {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: calc(100% - 160px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.cashier-page .cart-panel .cart-total::-webkit-scrollbar {
+  display: none;
+}
+
+/* Kasir POS: bayangan keranjang tipis seperti kartu menu, supaya celah 14px tampak rata */
+.cashier-page .cart-panel {
+  box-shadow: 0 1px 3px rgb(52 40 25 / 6%);
+}
+
+/* Kasir POS: peringatan pilih kapster memakai warna kuningan merek, tanpa garis putus-putus atau denyut */
+.cashier-page .barber-picker.needs-selection {
+  border-color: var(--brass);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  animation: none;
+}
+
+.cashier-page .catalog-locked-card {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--brass);
+  border-radius: 10px;
+  background: var(--brass-soft);
+  box-shadow: none;
+}
+
+.cashier-page .catalog-locked-card .catalog-locked-content {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-areas: "icon title" "icon text";
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  min-width: 0;
+}
+
+.cashier-page .catalog-locked-card .catalog-locked-icon {
+  grid-area: icon;
+}
+
+.cashier-page .catalog-locked-card .catalog-locked-header strong {
+  grid-area: title;
+}
+
+.cashier-page .catalog-locked-card p {
+  grid-area: text;
+}
+
+.cashier-page .catalog-locked-card .catalog-locked-header {
+  display: contents;
+}
+
+.cashier-page .catalog-locked-card .catalog-locked-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--brass-dark);
+}
+
+.cashier-page .catalog-locked-card .catalog-locked-header strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.cashier-page .catalog-locked-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--slate);
+}
+
+/* Input Manual: satu skala ukuran dan jarak (panel 16px, jarak 14px, kontrol 44px, huruf 14px/12px) */
+.manual-page {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.manual-page > *,
+.manual-page .manual-checkout-grid > * {
+  margin: 0;
+}
+
+.manual-page .manual-checkout-grid {
+  gap: 14px;
+}
+
+.manual-page .form-panel {
+  padding: 16px;
+}
+
+.manual-page .form-panel > h3,
+.manual-page .section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.manual-page .section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manual-page .section-title h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.manual-page .manual-info-grid {
+  gap: 12px 14px;
+}
+
+.manual-page .form-grid-field > span,
+.manual-page label > span,
+.manual-page .manual-discount-panel label > span {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.manual-page .input-shell,
+.manual-page .search,
+.manual-page .manual-date-field .calendar-picker-btn,
+.manual-page .manual-info-grid select,
+.manual-page .manual-info-grid .secondary-button,
+.manual-page .manual-method-grid .button,
+.manual-page .manual-quick-cash button,
+.manual-page .manual-discount-panel .button {
+  height: 44px;
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.manual-page .input-shell input,
+.manual-page .search input,
+.manual-page .manual-info-grid input,
+.manual-page .manual-info-grid select {
+  font-size: 14px;
+}
+
+.manual-page .manual-quick-cash button {
+  padding: 0 6px;
+}
+
+.manual-page .nota-search {
+  margin-bottom: 12px;
+}
+
+.manual-page .nota-catalog-columns {
+  gap: 14px;
+}
+
+.manual-page .nota-group {
+  padding: 12px;
+}
+
+.manual-page .nota-group h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.manual-page .nota-items {
+  gap: 8px;
+}
+
+.manual-page .nota-item {
+  min-height: 56px;
+  padding: 8px 10px;
+  gap: 12px;
+}
+
+.manual-page .nota-item-info strong {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.manual-page .nota-item-info span {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.manual-page .nota-add {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.manual-page .nota-stepper {
+  height: 40px;
+  border-radius: 10px;
+}
+
+.manual-page .nota-stepper button {
+  width: 40px;
+  height: 38px;
+  font-size: 18px;
+}
+
+.manual-page .nota-stepper output {
+  min-width: 28px;
+  font-size: 14px;
+}
+
+.manual-page .manual-payment-panel > h3 {
+  margin-bottom: 12px;
+}
+
+.manual-page .manual-payment-panel > .form-grid,
+.manual-page .manual-payment-panel > .nota-summary,
+.manual-page .manual-qris-notice,
+.manual-page .manual-payment-warning {
+  margin-top: 12px;
+}
+
+.manual-page .nota-summary {
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.manual-page .nota-summary > div {
+  font-size: 14px;
+}
+
+.manual-page .nota-summary .nota-summary-total {
+  font-size: 16px !important;
+}
+
+.manual-page .form-grid input,
+.manual-page .form-grid select,
+.manual-page .form-grid-field > input,
+.manual-page .manual-discount-panel .input-shell,
+.manual-page .manual-payment-panel .input-shell {
+  height: 44px;
+  min-height: 44px;
+}
+
+.manual-page .input-shell input {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Input Manual: label rata kiri dengan kolomnya, tombol Terapkan dan Rp/% setinggi kolom */
+.manual-page .form-grid-field > span,
+.manual-page label > span,
+.manual-page .manual-discount-panel label > span,
+.manual-page .manual-discount-panel .manual-info-grid label > span,
+.manual-page .manual-discount-panel .cart-discount-panel > label > span,
+.manual-page .manual-payment-panel > .form-grid label > span {
+  margin: 0 0 6px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel .primary-button {
+  height: 44px;
+  min-height: 44px;
+  align-self: end;
+}
+
+.manual-page .manual-discount-manual {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.manual-page .manual-discount-manual .input-shell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.manual-page .manual-discount-manual .segmented {
+  height: 44px;
+  min-height: 44px;
+  padding: 3px;
+  flex: none;
+  align-items: stretch;
+}
+
+.manual-page .manual-discount-manual .segmented button {
+  width: 44px;
+  height: auto;
+  min-height: 0;
+}
+
+.manual-page .search-select-trigger {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 9px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.manual-page .manual-discount-manual .segmented button {
+  height: 100%;
+}
+
+/* Input Manual: uang cepat dibagi rata dalam kolom, teks tidak meluber */
+.manual-page .manual-quick-cash {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+.manual-page .manual-quick-cash button {
+  width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Input Manual: pilihan komisi layanan, sama dengan Kasir */
+.manual-page .manual-komisi {
+  margin-top: 12px;
+}
+
+.manual-page .manual-komisi > span {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--slate);
+}
+
+.manual-page .manual-komisi-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.manual-page .manual-komisi-grid .button {
+  height: 44px;
+  min-height: 44px;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+/* Input Manual: footer total bisa diketuk membuka rincian nota */
+.manual-page .manual-total-button {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--slate);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.manual-page .manual-total-button:disabled {
+  cursor: default;
+}
+
+.manual-page .manual-total-button .icon {
+  flex: none;
+  color: var(--brass-dark);
+}
+
+.manual-page .manual-total-button small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.manual-page .sticky-submit {
+  align-items: center;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.manual-page .sticky-submit .primary-button {
+  flex: none;
+  min-height: 44px;
+}
+
+/* Rincian nota: kartu di tengah seperti panel "Pesanan saat ini" di Kasir, di dalam layar */
+.manual-ringkas {
+  width: min(460px, calc(100% - 32px));
+  max-height: calc(100svh - 32px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+
+.manual-ringkas-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.manual-ringkas-head > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.manual-ringkas-head .icon {
+  color: var(--brass-dark);
+}
+
+.manual-ringkas-head button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bone);
+  color: var(--ink);
+}
+
+.manual-ringkas-lines {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 16px;
+  scrollbar-width: none;
+}
+
+.manual-ringkas-lines::-webkit-scrollbar {
+  display: none;
+}
+
+.manual-ringkas-lines .cart-clear-row {
+  position: static;
+  min-height: 40px;
+  padding: 0;
+}
+
+.manual-ringkas-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.manual-ringkas-line strong {
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink);
+}
+
+.manual-ringkas-line small {
+  font-size: 12px;
+  color: var(--slate);
+}
+
+.manual-ringkas-line b {
+  min-width: 82px;
+  text-align: right;
+  font-size: 14px;
+}
+
+.manual-ringkas .nota-stepper {
+  height: 40px;
+}
+
+.manual-ringkas .nota-stepper button {
+  width: 36px;
+  height: 38px;
+}
+
+.manual-ringkas .nota-summary {
+  margin: 0 16px;
+  padding-top: 12px;
+}
+
+.manual-ringkas > .primary-button {
+  margin: 0 16px;
+  min-height: 44px;
+}
+
+.manual-ringkas-lines .cart-clear-row {
+  margin: 0;
+  padding: 0;
+  justify-content: space-between;
+}
+
+.manual-ringkas-lines .cart-clear-button {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.manual-page .manual-quick-cash {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.manual-page .manual-quick-cash button {
+  flex: 1 1 118px;
+}
+
+/* Input Manual: bar total menempel penuh di dasar seperti bar keranjang Kasir (latar solid, tidak tembus) */
+.manual-page .sticky-submit {
+  bottom: 0;
+  margin: 14px -14px 0;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: 0 -4px 20px rgb(20 17 15 / 8%);
+}
+
+.content.narrow.manual-page:has(.sticky-submit) {
+  padding-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .manual-page .sticky-submit {
+    margin: 14px -14px 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.manual-page .manual-total-icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--brass-soft);
+  color: var(--brass-dark);
+}
+
+.manual-page .manual-total-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.manual-page .manual-total-text .submit-total {
+  font-size: 16px;
+}
+
+.manual-page .manual-total-count {
+  min-width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--brass);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Input Manual: diskon dan pembayaran tetap berdampingan sampai layanan/produk menjadi 1 kolom (620px) */
+@media (min-width: 621px) and (max-width: 820px) {
+  .manual-page .manual-checkout-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .manual-page .manual-checkout-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Input Manual: daftar layanan dan produk menampilkan 2 baris, sisanya digulir */
+.manual-page .nota-items {
+  max-height: 132px;
+  scroll-snap-type: y proximity;
+}
+
+.manual-page .nota-item {
+  scroll-snap-align: start;
+}
+
+/* Input Manual: halaman setinggi layar agar bar total selalu menempel di dasar, seperti bar keranjang Kasir */
+.content.narrow.manual-page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-content: normal;
+  box-sizing: border-box;
+}
+
+.manual-page > * {
+  flex: none;
+}
+
+.manual-page .sticky-submit {
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+}
+
+@media (min-width: 1025px) {
+  .content.narrow.manual-page {
+    min-height: calc(100svh - 52px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .content.narrow.manual-page {
+    min-height: 100svh;
+  }
+}
+
+/* Input Manual: bar bawah berbentuk pil gelap seperti bar "Pesanan saat ini" di Kasir */
+.manual-page .sticky-submit {
+  display: block;
+  margin: 14px -14px 0;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: 0 -4px 20px rgb(20 17 15 / 8%);
+}
+
+.manual-page .manual-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  box-shadow: 0 2px 8px rgb(20 17 15 / 18%);
+}
+
+.manual-page .manual-total-button {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  color: #fff;
+  font-size: 14px;
+}
+
+.manual-page .manual-total-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 10%);
+  color: var(--brass);
+}
+
+.manual-page .manual-total-icon .icon,
+.manual-page .manual-total-button .icon {
+  color: inherit;
+}
+
+.manual-page .manual-total-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manual-page .manual-total-label small {
+  display: inline;
+  color: #fecaca;
+  font-size: 12px;
+}
+
+.manual-page .manual-total-count {
+  flex: none;
+  min-width: 0;
+  height: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brass);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.manual-page .manual-total-button .submit-total {
+  margin: 0;
+  padding: 0;
+  flex: none;
+  background: transparent;
+  color: var(--brass-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.manual-page .manual-total-chevron {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: rgb(255 255 255 / 80%);
+  transform: rotate(180deg);
+}
+
+.manual-page .manual-bar .primary-button {
+  flex: none;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 9px;
+}
+
+.manual-page .manual-bar .primary-button:disabled {
+  background: rgb(255 255 255 / 12%);
+  border-color: transparent;
+  color: rgb(255 255 255 / 45%);
+}
+
+@media (max-width: 1024px) {
+  .manual-page .sticky-submit {
+    margin: 14px -14px 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 560px) {
+  .manual-page .manual-bar {
+    flex-wrap: wrap;
+    padding: 12px 12px 12px 14px;
+  }
+
+  .manual-page .manual-total-button {
+    flex-basis: 100%;
+  }
+
+  .manual-page .manual-bar .primary-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* Input Manual: tidak ada ruang kosong di bawah bar total (menimpa padding bawah umum halaman) */
+@media (max-width: 1024px) {
+  .workspace > .content.narrow.manual-page {
+    padding-bottom: 0 !important;
+  }
+}
+
+.manual-page .manual-total-button:disabled {
+  opacity: 1;
+}
+
+.manual-page .manual-total-button:disabled .manual-total-label {
+  color: rgb(255 255 255 / 70%);
+}
+
+.manual-page .manual-bar {
+  padding: 8px 8px 8px 16px;
+  min-height: 56px;
+}
+
+.manual-page .manual-total-button {
+  min-height: 40px;
+}
+
+.manual-page .manual-success-note {
+  margin: 0;
+}
+
+.manual-ringkas-note {
+  margin: 0 16px;
+}
+
+.manual-page .sticky-submit {
+  margin-top: auto !important;
+}
+
+.manual-page > .panel + .sticky-submit,
+.manual-page > .manual-checkout-grid + .sticky-submit {
+  margin-top: auto !important;
+}
+
+.manual-page > section:last-of-type,
+.manual-page > .manual-checkout-grid {
+  margin-bottom: 14px;
+}
+
+.manual-ringkas .manual-ringkas-note {
+  margin: 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Nota Kasir sebagai popup: kartu di tengah, struk digulir di dalam kartu (Riwayat tetap halaman penuh) */
+.receipt-popup {
+  width: min(460px, calc(100% - 16px));
+  max-height: calc(100svh - 32px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--shadow-modal);
+  animation: modal-pop 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.receipt-popup .flow-toolbar {
+  order: 2;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 0;
+}
+
+.receipt-popup .flow-toolbar > .segmented {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+}
+
+.receipt-popup .flow-toolbar > .segmented button {
+  flex: 1;
+  min-height: 36px;
+  font-size: 14px;
+}
+
+.receipt-popup .flow-toolbar > div:last-child {
+  display: contents !important;
+}
+
+.receipt-popup .flow-toolbar > .button:first-child,
+.receipt-popup .flow-toolbar > div:last-child .button {
+  grid-row: 2 !important;
+  width: 100%;
+  min-height: 44px;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+.receipt-popup .flow-toolbar > .button:first-child {
+  grid-column: 1 !important;
+  justify-self: stretch !important;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.receipt-popup .flow-toolbar > div:last-child .button:nth-of-type(1) {
+  grid-column: 2;
+}
+
+.receipt-popup .flow-toolbar > div:last-child .button:nth-of-type(2) {
+  grid-column: 3;
+}
+
+.receipt-popup .flow-toolbar > div:last-child > span {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  color: var(--oxblood, #9b2c2c) !important;
+  font-size: 13px !important;
+  font-weight: 600;
+}
+
+.receipt-popup .receipt-stage {
+  order: 1;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.receipt-popup .receipt-stage::-webkit-scrollbar {
+  display: none;
+}
+
+.receipt-popup .thermal-receipt {
+  max-width: 100%;
+}
+
+@media print {
+  .modal-overlay:has(.receipt-popup) {
+    position: static;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+  }
+
+  .receipt-popup {
+    max-height: none;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .receipt-popup .flow-toolbar {
+    display: none;
+  }
+
+  .receipt-popup .receipt-stage {
+    overflow: visible;
+    padding: 0;
+    background: none;
+  }
+}
+
+.receipt-popup .flow-toolbar > .segmented {
+  width: 100%;
+  max-width: none;
+  display: flex;
+}
+
+/* Nota popup: status simpan jelas, latar polos (tanpa kotak-kotak), nota tampil langsung dan tidak terlalu kecil */
+.receipt-popup .receipt-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.receipt-popup .receipt-status .icon {
+  flex: none;
+}
+
+.receipt-popup .receipt-status.warn {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+.receipt-popup .receipt-status.warn .icon {
+  color: var(--brass-dark);
+}
+
+.receipt-popup .receipt-status.ok {
+  background: #e8efe6;
+  color: #3f5b3a;
+}
+
+.receipt-popup .receipt-stage {
+  background: var(--paper);
+  padding: 16px;
+}
+
+.receipt-popup .thermal-receipt {
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+
+@media print {
+  .receipt-popup .thermal-receipt {
+    zoom: 1;
+    border: 0;
+  }
+
+  .receipt-popup .receipt-status {
+    display: none;
+  }
+}
+
+.receipt-popup.sudah-simpan .flow-toolbar {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.receipt-popup.sudah-simpan .flow-toolbar > div:last-child .button:nth-of-type(1) {
+  grid-column: 1;
+}
+
+.receipt-popup.sudah-simpan .flow-toolbar > div:last-child .button:nth-of-type(2) {
+  grid-column: 2;
+}
+
+/* Popup nota Kasir: nota di kiri, panel tombol di kanan (layar lebar); di HP nota di atas dan tombol di bawah selalu terlihat */
+.receipt-popup {
+  width: min(720px, calc(100% - 16px));
+}
+
+.receipt-popup .receipt-layout {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  overflow: hidden;
+}
+
+.receipt-popup .receipt-layout .receipt-stage {
+  order: 0;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+}
+
+.receipt-popup .receipt-aksi {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: var(--paper);
+}
+
+.receipt-popup .receipt-aksi::-webkit-scrollbar {
+  display: none;
+}
+
+.receipt-popup .receipt-aksi .receipt-status {
+  border-bottom: 1px solid var(--line);
+  align-items: flex-start;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar {
+  order: 0;
+  flex: 1 1 auto;
+  display: flex !important;
+  flex-direction: column;
+  align-content: stretch;
+  gap: 8px;
+  padding: 16px;
+  border-top: 0;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+  order: 0;
+  flex: none;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child {
+  display: contents !important;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child,
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  width: 100%;
+  min-height: 44px;
+  flex: none;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child > span {
+  order: 9;
+  grid-column: auto;
+}
+
+/* urutan: Ubah (paling atas setelah status), ukuran kertas, Cetak, Selesai */
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 0; }
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented { order: 1; }
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 2; }
+.receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 3; }
+
+@media (max-width: 640px) {
+  .receipt-popup {
+    width: min(460px, calc(100% - 16px));
+  }
+
+  .receipt-popup .receipt-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .receipt-popup .receipt-layout .receipt-stage {
+    border-right: 0;
+  }
+
+  .receipt-popup .receipt-aksi {
+    overflow: visible;
+    border-top: 1px solid var(--line);
+  }
+
+  .receipt-popup .receipt-aksi .receipt-status {
+    order: 0;
+    min-height: 0;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    padding: 12px 16px 16px;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+  }
+
+  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { order: 0; grid-column: 1 / -1 !important; grid-row: 1 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(1) { order: 0; grid-column: 1 !important; grid-row: 3 !important; }
+  .receipt-popup .receipt-aksi .flow-toolbar > div:last-child .button:nth-of-type(2) { order: 0; grid-column: 2 !important; grid-row: 3 !important; }
+}
+
+.receipt-popup.sudah-simpan .receipt-aksi .flow-toolbar {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (min-width: 641px) {
+  .receipt-popup .receipt-aksi .flow-toolbar {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+}
+
+/* Popup nota: struk diperkecil mengikuti tinggi layar agar tampil penuh tanpa digulir; jarak panel tombol seragam 12px */
+@media screen and (min-width: 641px) {
+  .receipt-popup .thermal-receipt { zoom: 1; }
+}
+@media screen and (min-width: 641px) and (max-height: 819px) {
+  .receipt-popup .thermal-receipt { zoom: 0.92; }
+}
+@media screen and (min-width: 641px) and (max-height: 739px) {
+  .receipt-popup .thermal-receipt { zoom: 0.84; }
+}
+@media screen and (min-width: 641px) and (max-height: 679px) {
+  .receipt-popup .thermal-receipt { zoom: 0.76; }
+}
+@media screen and (min-width: 641px) and (max-height: 619px) {
+  .receipt-popup .thermal-receipt { zoom: 0.68; }
+}
+@media screen and (min-width: 641px) and (max-height: 559px) {
+  .receipt-popup .thermal-receipt { zoom: 0.6; }
+}
+@media screen and (min-width: 641px) and (max-height: 499px) {
+  .receipt-popup .thermal-receipt { zoom: 0.52; }
+}
+@media screen and (max-width: 640px) {
+  .receipt-popup .thermal-receipt { zoom: 0.8; }
+}
+@media screen and (max-width: 640px) and (max-height: 740px) {
+  .receipt-popup .thermal-receipt { zoom: 0.68; }
+}
+@media screen and (max-width: 640px) and (max-height: 620px) {
+  .receipt-popup .thermal-receipt { zoom: 0.56; }
+}
+
+.receipt-popup .receipt-layout .receipt-stage {
+  padding: 16px;
+  place-items: start center;
+}
+
+.receipt-popup .receipt-aksi .receipt-status {
+  padding: 12px 16px;
+  min-height: 0;
+  gap: 10px;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar {
+  gap: 12px;
+  padding: 16px;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .segmented {
+  margin-bottom: 0;
+}
+
+.receipt-popup .receipt-aksi .flow-toolbar > .button:first-child {
+  margin-top: auto;
+}
+
+@media (max-width: 640px) {
+  .receipt-popup .receipt-aksi .flow-toolbar {
+    gap: 8px;
+    padding: 12px 16px 16px;
+  }
+}
+
+@media screen and (min-width: 641px) and (max-height: 579px) {
+  .receipt-popup .thermal-receipt { zoom: 0.56; }
+}
+@media screen and (min-width: 641px) and (max-height: 529px) {
+  .receipt-popup .thermal-receipt { zoom: 0.5; }
+}
+@media screen and (min-width: 641px) and (max-height: 479px) {
+  .receipt-popup .thermal-receipt { zoom: 0.44; }
+}
+@media screen and (max-width: 640px) and (max-height: 640px) {
+  .receipt-popup .thermal-receipt { zoom: 0.5; }
+}
+@media screen and (max-width: 640px) and (max-height: 560px) {
+  .receipt-popup .thermal-receipt { zoom: 0.44; }
+}
+
+/* Popup nota: lebar kartu mengikuti lebar struk (tanpa ruang kosong di samping nota) */
+@media (min-width: 641px) {
+  .receipt-popup {
+    width: fit-content;
+    max-width: calc(100% - 16px);
+  }
+
+  .receipt-popup .receipt-layout {
+    grid-template-columns: auto 240px;
+  }
+
+  .receipt-popup .receipt-layout .receipt-stage {
+    justify-content: center;
+  }
+}
+
+/* Popup nota: struk ukuran penuh (digulir di kiri), tombol berurutan rapat dari atas */
+.receipt-popup .thermal-receipt { zoom: 1 !important; }
+@media (min-width: 641px) {
+  .receipt-popup { height: min(720px, calc(100svh - 32px)); max-height: none; }
+  .receipt-popup .receipt-aksi .flow-toolbar > .button:first-child { margin-top: 0; }
+}
+
+/* Popup nota: area struk meregang setinggi kartu (tanpa ruang kosong di bawah), label ukuran kertas di atas pilihan mm */
+.receipt-popup .receipt-layout .receipt-stage {
+  align-self: stretch;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: 100%;
+}
+
+@media (min-width: 641px) {
+  .receipt-popup .receipt-aksi .flow-toolbar::before {
+    content: "Ukuran kertas";
+    align-self: flex-start;
+    text-align: left;
+    margin-bottom: -4px;
+    order: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+/* Kasir keranjang: daftar item selalu setinggi 2 card (sisanya digulir) di semua ukuran layar; teks tidak melewati tepi */
+.cashier-page .cart-lines {
+  flex: 0 0 auto !important;
+  height: 264px !important;
+  min-height: 264px !important;
+  max-height: 264px !important;
+}
+
+.cashier-page .cart-payment .quick-cash {
+  gap: 8px;
+}
+
+.cashier-page .cart-payment .quick-cash button {
+  padding: 0 2px;
+  font-size: 12px;
+}
+
+.cashier-page .cart-payment .payment-result {
+  gap: 12px;
+}
+
+.cashier-page .cart-payment .payment-result span {
+  min-width: 0;
+}
+
+.cashier-page .cart-payment .payment-result strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Kasir keranjang: satu barang -> daftar mengikuti tinggi barang (tidak kosong) */
+.cashier-page .cart-lines:has(article:first-of-type:last-of-type) {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 264px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Popup keranjang HP/tablet: tanpa garis warna di atas kartu dan tanpa garis kecil penggeser */
+@media (max-width: 820px) {
+  .cart.cart-sheet-center {
+    padding-top: 0 !important;
+  }
+
+  .cart.cart-sheet-center .cart-panel > .mx-auto {
+    display: none !important;
+  }
+
+  .cart.cart-sheet-center .cart-tabs {
+    padding-top: 6px;
+  }
+}
+
+/* ===== Kasbon Kapster (hanya halaman ini) ===== */
+/* Kapster dan jumlah kasbon selalu sebaris; keperluan di bawahnya; jarak isian seragam 14px */
+.kasbon-kapster-page .kasbon-kapster-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+  padding-right: 0;
+}
+
+/* Tablet (821-1024px): halaman setinggi layar, hanya daftar pengajuan yang digulir */
+@media (min-width: 821px) and (max-width: 1024px) {
+  .workspace:has(> .kasbon-kapster-page) {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.kasbon-kapster-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    padding: 68px 14px 14px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page > .panel {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .kasbon-kapster-page > .kasbon-kapster-history {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Laptop: halaman tidak menggulir, bawah sama dengan atas (16px) */
+@media (min-width: 1025px) {
+  .kasbon-kapster-page {
+    overflow: hidden;
+    padding-bottom: 16px !important;
+  }
+}
+
+.kasbon-kapster-page .kasbon-kapster-grid .input-shell {
+  height: 42px !important;
+  min-height: 42px !important;
+}
+
+/* ===== Izin Kapster (hanya halaman ini) ===== */
+/* Kalender dikecilkan; kolom kalender dan form sama tinggi */
+.izin-kapster-page .izin-layout {
+  grid-template-columns: 340px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.izin-kapster-page .izin-cal {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.izin-kapster-page .izin-cal-head {
+  margin-bottom: 10px;
+}
+
+.izin-kapster-page .izin-cal-head strong {
+  font-size: 16px;
+}
+
+.izin-kapster-page .izin-cal-nav button {
+  width: 34px;
+  height: 34px;
+}
+
+.izin-kapster-page .izin-cal-grid {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(34px, 1fr);
+}
+
+.izin-kapster-page .izin-cal-grid button {
+  height: auto;
+  font-size: 14px;
+}
+
+.izin-kapster-page .izin-cal-grid button.ada-izin::after {
+  bottom: 4px;
+  width: 5px;
+  height: 5px;
+}
+
+.izin-kapster-page .izin-pilihan {
+  margin-bottom: 14px;
+  padding: 10px 16px;
+}
+
+.izin-kapster-page .izin-pilihan strong {
+  font-size: 18px;
+}
+
+.izin-kapster-page .izin-pilihan small {
+  font-size: 16px;
+}
+
+.izin-kapster-page .izin-layout-form .kasbon-kapster-grid {
+  gap: 12px;
+  margin-top: 0;
+}
+
+.izin-kapster-page .kasbon-kapster-actions {
+  margin-top: 14px;
+}
+
+.izin-kapster-page .kasbon-kapster-history {
+  padding: 18px;
+}
+
+.izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+  margin-top: 14px;
+  padding-right: 0;
+}
+
+.izin-kapster-page > .panel + .panel {
+  margin-top: 16px;
+}
+
+/* Laptop & tablet lebar: halaman tidak menggulir, hanya daftar riwayat */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .workspace:has(> .izin-kapster-page) {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.izin-kapster-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    padding: 68px 14px 14px !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .izin-kapster-page > .panel {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .izin-kapster-page > .kasbon-kapster-history {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 1025px) {
+  .izin-kapster-page {
+    overflow: hidden;
+    padding-bottom: 16px !important;
+  }
+
+  .izin-kapster-page > .kasbon-kapster-history {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 600px) {
+  .izin-kapster-page .izin-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 601px) {
+  .izin-kapster-page .izin-layout-cal {
+    display: flex;
+  }
+
+  .izin-kapster-page .izin-layout-cal .izin-cal {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+/* Izin Kapster: kapster dan jenis sebaris, kalender lebih ringkas */
+@media (min-width: 601px) {
+  .izin-kapster-page .izin-layout {
+    grid-template-columns: clamp(240px, 38vw, 300px) minmax(0, 1fr);
+  }
+}
+
+.izin-kapster-page .izin-layout-form .kasbon-kapster-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+
+.izin-kapster-page .izin-layout-form .kasbon-kapster-note {
+  grid-column: 1 / -1;
+}
+
+.izin-kapster-page .izin-cal {
+  padding: 14px;
+}
+
+.izin-kapster-page .izin-cal-head {
+  margin-bottom: 8px;
+}
+
+.izin-kapster-page .izin-cal-nav button {
+  width: 32px;
+  height: 32px;
+}
+
+.izin-kapster-page .izin-cal-week {
+  margin-bottom: 4px;
+}
+
+.izin-kapster-page .izin-cal-grid {
+  grid-auto-rows: minmax(30px, 1fr);
+  gap: 2px;
+}
+
+.izin-kapster-page .izin-cal-grid button {
+  font-size: 13px;
+}
+
+.izin-kapster-page .izin-layout-form .segmented {
+  height: 42px;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.izin-kapster-page .izin-layout-form .segmented > * {
+  min-height: 0;
+  height: 100%;
+}
+
+.izin-kapster-page .izin-layout-form .segmented {
+  padding: 3px;
+  gap: 2px;
+}
+
+.izin-kapster-page .izin-layout-form .segmented > * {
+  padding: 0 4px;
+  min-width: 0;
+}
+
+/* Tanggal: titik merah diberi jarak dari angka */
+.izin-kapster-page .izin-cal-grid button {
+  padding-bottom: 6px;
+}
+
+.izin-kapster-page .izin-cal-grid button.ada-izin::after {
+  bottom: 3px;
+}
+
+/* Izin Kapster: halaman menggulir tanpa menampilkan batang scroll */
+html:has(.izin-kapster-page),
+.workspace:has(> .izin-kapster-page) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html:has(.izin-kapster-page)::-webkit-scrollbar,
+.workspace:has(> .izin-kapster-page)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Izin Kapster: tombol Simpan sama di semua lebar layar */
+.izin-kapster-page .kasbon-kapster-actions .button {
+  width: auto;
+}
+
+.izin-kapster-page .kasbon-kapster-actions .button {
+  min-height: 42px !important;
+  height: 42px;
+  padding: 0 22px !important;
+  font-size: 14px !important;
+}
+
+.izin-kapster-page .izin-layout-form .segmented > * {
+  font-size: 14px !important;
+}
+
+/* Izin Kapster: padding kartu dan jarak antar kartu sama di semua lebar */
+.izin-kapster-page > .panel {
+  padding: 18px;
+}
+
+.izin-kapster-page > .panel + .panel {
+  margin-top: 16px;
+}
+
+/* Bertumpuk (<=600px): halaman menggulir, riwayat tampil 3 baris lalu digulir */
+@media (max-width: 600px) {
+  .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
+    max-height: 226px;
+  }
+}
+
+.workspace > .content.izin-kapster-page {
+  gap: 0 !important;
+  row-gap: 0 !important;
+}
+
+.izin-kapster-page > .kasbon-kapster-history {
+  margin-top: 16px !important;
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.izin-kapster-page {
+    padding-bottom: 16px !important;
+  }
+}
+
+/* Kasir desktop: baris "ITEM / Hapus Semua" setinggi dan sejajar dengan kartu Kapster di sebelahnya */
+@media (min-width: 1025px) {
+  .cashier-page .cart-clear-row {
+    box-sizing: border-box;
+    min-height: 59px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* Kasir desktop: popup absensi ada di dalam bagian menempel (z-index 5), angkat di atas judul halaman saat terbuka */
+@media (min-width: 1025px) {
+  .cashier-page .catalog-sticky:has(.modal-overlay) {
+    z-index: 110;
+  }
+}
+
+/* Kasbon Kapster: padding kartu, jarak antar kartu, padding bawah dan tombol sama di semua lebar (sama seperti Izin Kapster) */
+.kasbon-kapster-page > .panel {
+  padding: 18px;
+}
+
+.kasbon-kapster-page > .panel + .panel,
+.kasbon-kapster-page > .kasbon-kapster-history {
+  margin-top: 16px !important;
+}
+
+.workspace > .content.kasbon-kapster-page {
+  gap: 0 !important;
+  row-gap: 0 !important;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions .button {
+  width: auto;
+  min-height: 42px !important;
+  height: 42px;
+  padding: 0 22px !important;
+  font-size: 14px !important;
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.kasbon-kapster-page {
+    padding-bottom: 16px !important;
+  }
+}
+
+/* Izin Kapster: jarak kalender ke form 16px (sama dengan jarak antar kartu); tombol Simpan selebar form */
+.izin-kapster-page .izin-layout {
+  gap: 16px;
+}
+
+.izin-kapster-page .kasbon-kapster-actions .button {
+  width: 100%;
+}
+
+/* Kasbon Kapster: semua jarak di dalam form 16px; tombol Ajukan selebar form */
+.kasbon-kapster-page .kasbon-kapster-grid {
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions {
+  margin-top: 16px;
+}
+
+.kasbon-kapster-page .kasbon-kapster-actions .button {
+  width: 100%;
+}
+
+/* Input Manual: jarak 16px di semua tempat; Terapkan dan Rp/% simetris (lebar, tinggi, jarak sama) */
+.manual-page .manual-info-grid,
+.manual-page .manual-discount-panel > .manual-info-grid {
+  gap: 16px;
+}
+
+.manual-page .manual-checkout-grid {
+  gap: 16px;
+}
+
+/* jarak antar kartu hanya dari gap halaman */
+.workspace > .content.manual-page {
+  gap: 16px;
+}
+
+.manual-page > section:last-of-type,
+.manual-page > .manual-checkout-grid {
+  margin-bottom: 0;
+}
+
+.manual-page .form-panel > h3,
+.manual-page .section-title {
+  margin-bottom: 16px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel {
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 16px;
+}
+
+.manual-page .manual-discount-panel .cart-discount-panel > .primary-button {
+  width: 104px;
+}
+
+.manual-page .manual-discount-manual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 16px;
+}
+
+.manual-page .manual-discount-manual .segmented.manual-discount-type {
+  width: 104px;
+}
+
+.manual-page .manual-discount-manual .segmented button {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+/* Input Manual: jarak antar bagian panel Pembayaran 16px */
+.manual-page .manual-payment-panel .commission-choice,
+.manual-page .manual-payment-panel > .form-grid,
+.manual-page .manual-payment-panel > .nota-summary,
+.manual-page .manual-qris-notice,
+.manual-page .manual-payment-warning {
+  margin-top: 16px;
+}
+
+.manual-page .manual-payment-panel .manual-info-grid .manual-quick-cash {
+  margin-top: 0;
+}
+
+/* Input Manual: jarak di dalam kartu juga 16px (daftar layanan/produk, metode bayar, komisi, uang cepat) */
+.manual-page .nota-search {
+  margin-bottom: 16px;
+}
+
+.manual-page .nota-catalog-columns {
+  gap: 16px;
+}
+
+.manual-page .nota-group {
+  padding: 16px;
+}
+
+.manual-page .nota-group h4 {
+  margin-bottom: 16px;
+}
+
+.manual-page .nota-items {
+  gap: 16px;
+}
+
+.manual-page .manual-payment-panel .manual-method-grid,
+.manual-page .manual-quick-cash {
+  gap: 16px;
+}
+
+/* Input Manual: popup ringkasan, gulir daftar tidak menggeser halaman di belakangnya (seperti popup Riwayat) */
+.manual-ringkas-lines {
+  overscroll-behavior: contain;
+}
+
+html:has(.manual-page .modal-overlay) {
+  overflow: hidden;
+}
+
+.manual-page .nota-items {
+  max-height: 140px;
+}
+
+/* Input Manual: jarak tombol Normal/OT sama dengan metode bayar (16px) */
+.manual-page .manual-payment-panel .manual-komisi-grid {
+  gap: 16px;
+}
+
+/* Input Manual popup: Hapus Semua tidak menempel di tepi, peringatan segaris dengan isi popup, jarak antar bagian 16px */
+.manual-ringkas .manual-ringkas-lines .cart-clear-button {
+  margin-right: -8px;
+  padding: 0 8px;
+}
+
+.manual-ringkas .manual-ringkas-note {
+  margin: 0 16px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.manual-ringkas {
+  gap: 16px;
+}
+
+/* Input Manual: tinggi baris label = ukuran font supaya jarak terlihat ke tulisan sama dengan jarak samping (16px) */
+.manual-page .form-grid-field > span,
+.manual-page label > span,
+.manual-page .manual-discount-panel label > span,
+.manual-page .commission-choice > span {
+  line-height: 12px;
+}
+
+/* Input Manual popup: padding vertikal 16px di semua bagian; Hapus Semua tanpa kotak latar supaya tidak keluar dari garis */
+.manual-ringkas .manual-ringkas-lines .cart-clear-row {
+  min-height: 44px;
+}
+
+.manual-ringkas .manual-ringkas-line {
+  padding: 16px 0;
+}
+
+.manual-ringkas .nota-summary {
+  padding-top: 16px;
+}
+
+.manual-ringkas .manual-ringkas-lines .cart-clear-button,
+.manual-ringkas .manual-ringkas-lines .cart-clear-button:hover {
+  background: transparent;
+}
+
+/* Input Manual popup: jarak antar bagian hanya satu sumber (margin atas 16px), tidak bertumpuk dengan gap/padding */
+.manual-ringkas {
+  gap: 0;
+}
+
+.manual-ringkas > .nota-summary,
+.manual-ringkas > .manual-ringkas-note,
+.manual-ringkas > .primary-button {
+  margin-top: 16px;
+}
+
+.manual-ringkas .manual-ringkas-lines .cart-clear-row {
+  min-height: 48px;
+}
+
+.manual-ringkas .manual-ringkas-line:last-child {
+  padding-bottom: 0;
+}
+
+/* Ubah Transaksi (popup Riwayat): semua jarak 16px, tombol + bulat-kotak 40px seperti Input Manual, footer dua tombol sebaris penuh */
+.edit-trx-body,
+.edit-trx-left-column,
+.edit-trx-details,
+.edit-trx-payment,
+.edit-trx-payment-fields,
+.edit-trx-method-grid {
+  gap: 16px !important;
+}
+
+.edit-trx-items-list {
+  gap: 16px;
+}
+
+.edit-trx-item-row {
+  padding: 16px;
+  gap: 4px 16px;
+}
+
+.edit-trx-body .section-title {
+  margin-bottom: 16px;
+}
+
+.edit-trx-modal .nota-search {
+  margin-bottom: 16px;
+}
+
+.edit-trx-modal .nota-catalog-columns {
+  gap: 16px;
+}
+
+.edit-trx-modal .nota-group {
+  padding: 16px;
+}
+
+.edit-trx-modal .nota-group h4 {
+  margin-bottom: 16px;
+}
+
+.edit-trx-modal .nota-items {
+  gap: 16px;
+}
+
+.edit-trx-modal .nota-item {
+  min-height: 56px;
+  padding: 8px 10px;
+  gap: 16px;
+}
+
+.edit-trx-modal .nota-add {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  flex: none;
+  border-radius: 10px;
+}
+
+.edit-trx-modal form > footer {
+  gap: 16px;
+  padding: 16px;
+}
+
+.edit-trx-modal form > footer .button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 10px;
+}
+
+/* Kasir POS: semua jarak 16px (kecuali label ke isian), sama di semua lebar layar */
+.cashier-page .catalog-sticky { gap: 16px !important; padding-bottom: 16px !important; margin-bottom: 16px !important; }
+.cashier-page .catalog-grid { gap: 16px !important; }
+.cashier-page .barber-picker { padding: 10px 16px !important; gap: 16px !important; }
+.cashier-page .catalog-item { padding: 16px !important; }
+.cashier-page .cart-lines { padding: 16px !important; }
+.cashier-page .cart-total { padding: 16px !important; gap: 16px !important; }
+.cashier-page .cart-discount-panel { padding: 16px !important; }
+.cashier-page .cart-payment { padding-top: 0 !important; gap: 16px !important; }
+.cashier-page .cart-payment .method-grid { gap: 16px !important; }
+.cashier-page .cart-payment .quick-cash { gap: 16px !important; }
+.cashier-page .cart-payment .quick-cash button { flex: 1 1 calc((100% - 32px) / 3) !important; }
+
+/* Kasir POS: scroll popup keranjang sama seperti popup Riwayat (tidak menular ke halaman, batang scroll tersembunyi) */
+.cashier-page .cart-sheet-center,
+.cashier-page .cart-sheet-center .cart-lines,
+.cashier-page .cart-sheet-center .cart-total { overscroll-behavior: none !important; scrollbar-width: none; }
+.cashier-page .cart-sheet-center::-webkit-scrollbar,
+.cashier-page .cart-sheet-center .cart-lines::-webkit-scrollbar,
+.cashier-page .cart-sheet-center .cart-total::-webkit-scrollbar { display: none; }
+
+
+/* Kasir POS keranjang (kanan & popup): daftar item tetap 264px menggulir sendiri; bagian bawah menggulir bersama daftar (satu area luar), judul popup tetap di atas */
+.cashier-page .cart-panel { overflow-y: auto !important; overscroll-behavior: none; scrollbar-width: none; }
+.cashier-page .cart-panel::-webkit-scrollbar { display: none; }
+.cashier-page .cart-panel .cart-total { flex: 0 0 auto !important; overflow: visible !important; min-height: 0 !important; max-height: none !important; height: auto !important; }
+.cashier-page .cart-panel .cart-lines { overscroll-behavior: auto; }
+@media (max-width: 820px) {
+  .cashier-page .cart-sheet-center { overflow: hidden !important; }
+  .cashier-page .cart-sheet-center .cart-panel { height: 100%; max-height: 100%; min-height: 0; }
+  .cashier-page .cart-sheet-center .cart-tabs { position: sticky; top: 0; z-index: 3; background: var(--paper); }
+}
+
+/* Kasir POS keranjang: baris "N item / Hapus Semua" dan tombol Bayar stay (menempel) saat bagian lain digulir; Bayar punya bar berlatar + garis */
+.cashier-page .cart-panel > .cart-clear-row { position: sticky; top: 0; z-index: 3; margin: 0; padding: 10px 16px; flex: none; }
+.cashier-page .cart-panel .cart-lines { height: 211px !important; min-height: 211px !important; max-height: 211px !important; }
+.cashier-page .cart-panel .cart-lines:has(article:first-of-type:last-of-type) { height: auto !important; min-height: 0 !important; max-height: 211px !important; }
+.cashier-page .cart-submit-bar { position: sticky; bottom: 0; z-index: 3; flex: none; margin: 0; padding: 16px; background: var(--paper); border-top: 1px solid var(--line); }
+.cashier-page .cart-submit-bar .cart-submit { width: 100%; margin: 0; }
+@media (max-width: 820px) {
+  .cashier-page .cart-sheet-center .cart-panel > .cart-clear-row { top: 54px; }
+}
+
+/* Kasir POS keranjang: bar Bayar selalu di dasar panel (layar tinggi: isi pendek tidak membuat bar mengambang di tengah) */
+.cashier-page .cart-panel .cart-total { flex: 1 0 auto !important; display: flex; flex-direction: column; }
+.cashier-page .cart-panel .cart-submit-bar { margin-top: auto; }
+
+/* Kasir POS: border radius satu skala (kartu 12px, kontrol/tombol/input 10px, chip kecil 8px) dan jarak tersembunyi disamakan 16px */
+.cashier-page .barber-picker,
+.cashier-page .catalog-item,
+.cashier-page .catalog-click-ripple,
+.cashier-page .cart-panel,
+.cashier-page .cart-discount-panel { border-radius: 12px !important; }
+.cashier-page .barber-options button,
+.cashier-page .segmented,
+.cashier-page .catalog-tools .search,
+.cashier-page .catalog-add,
+.cashier-page .stepper,
+.cashier-page .cart-discount-panel .input-shell,
+.cashier-page .cart-discount-panel button,
+.cashier-page .cart-payment .method-grid button,
+.cashier-page .cart-payment .input-shell,
+.cashier-page .cart-payment .quick-cash button,
+.cashier-page .cart-payment .payment-result,
+.cashier-page .cart-payment > div:not([class]),
+.cashier-page .cart-submit { border-radius: 10px !important; }
+.cashier-page .segmented button { border-radius: 8px !important; }
+.cashier-page .cart-barber-group-header,
+.cashier-page .barber-picker-label .item-icon { border-radius: 8px !important; }
+.cashier-page .cart-barber-group-header { margin: 0 !important; }
+@media (min-width: 821px) {
+  .cashier-page .catalog { padding-right: 8px !important; }
+  .cashier-page .cart { padding-left: 8px !important; }
+}
+@media (min-width: 1025px) {
+  .cashier-page .cart-clear-row { min-height: 62px !important; }
+}
+
+/* Kasir POS (HP/tablet): saat popup absensi terbuka, bar "Pesanan saat ini" disembunyikan agar tidak tampil di atas popup */
+@media (max-width: 820px) {
+  .cashier-page:has(.catalog-sticky .modal-overlay) .mobile-cart-bar { display: none !important; }
+}
+
+/* Kasir POS (HP/tablet): popup absensi terpusat di area di bawah header 54px, jarak atas = bawah = 16px minimal */
+@media (max-width: 1024px) {
+  .cashier-page .catalog-sticky .modal-overlay { top: 54px !important; height: auto !important; bottom: 0 !important; }
+  .cashier-page .catalog-sticky .modal-overlay .absensi-modal { max-height: 100% !important; overflow-y: auto !important; overscroll-behavior: none; scrollbar-width: none; }
+  .cashier-page .catalog-sticky .modal-overlay .absensi-modal::-webkit-scrollbar { display: none; }
+}
+
+/* Kasir POS: kotak peringatan pembayaran tanpa margin bawaan (inline 8px) agar jarak ke garis/tombol Bayar tepat 16px */
+.cashier-page .cart-payment > div:not([class]) { margin: 0 !important; }

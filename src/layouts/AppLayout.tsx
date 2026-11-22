@@ -30,8 +30,6 @@ const PAGE_TITLE_MAP: Record<string, string> = {
   "product-reports": "Laporan Produk",
   "laporan-produk": "Laporan Produk",
   "product-report": "Laporan Produk",
-  Pengeluaran: "Pengeluaran",
-  expenses: "Pengeluaran",
   RekapManual: "Input Manual",
   manual: "Input Manual",
   KatalogLayananProduk: "Layanan & Produk",

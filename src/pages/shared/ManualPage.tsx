@@ -1,7 +1,6 @@
 import { TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
 import { apiKasir, apiKodeDiskon, apiTransaksi, getToken } from "../../api"
-import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { TimePicker } from "../../components/common/TimePicker"
@@ -10,7 +9,6 @@ import {
   CalendarPicker,
   LoadingState,
   rupiah, ErrorState } from "../../components/common/UI"
-import { ConfirmModal } from "../../components/common/ConfirmModal"
 
 interface ManualItem {
   tipe: "Layanan" | "Produk"
@@ -19,15 +17,6 @@ interface ManualItem {
   price: number
   stok?: number
 }
-const demoItems: ManualItem[] = [
-  { tipe: "Layanan", id: "1", name: "Haircut", price: 40000 },
-  { tipe: "Layanan", id: "3", name: "Shaving", price: 25000 },
-  { tipe: "Layanan", id: "5", name: "Treatment", price: 60000 },
-]
-const demoKapster = [
-  { id: "u-kapster", nama: "Ferdi" },
-  { id: "u-kapster2", nama: "Seva" },
-]
 
 function today() {
   const d = new Date()
@@ -42,21 +31,56 @@ function notaOtomatis(tanggal: string) {
   return `BUKU-${d}${m}${y.slice(2)}-${pad(now.getHours())}${pad(now.getMinutes())}`
 }
 
+/** Draf Input Manual: bertahan saat pindah halaman, dibuang bila hari berganti atau setelah disimpan. PIN tidak pernah disimpan. */
+const DRAF_MANUAL = "eastville_manual_draft"
+type DrafManual = {
+  hari: string
+  tanggal: string
+  jam: string
+  note: string
+  notaDiubah: boolean
+  kapsterId: string
+  qty: Record<string, number>
+  diskon: string
+  diskonJenis: "nominal" | "persen"
+  promo: { kode: string; nama: string; jenis: "persen" | "nominal"; nilai: number } | null
+  method: "Tunai" | "QRIS" | "Gabungan"
+  cash: string
+  qris: string
+  komisiLayanan: "Normal" | "OT"
+  gabunganDari: "tunai" | "qris"
+}
+function bacaDrafManual(): DrafManual | null {
+  try {
+    const raw = localStorage.getItem(DRAF_MANUAL)
+    if (!raw) return null
+    const d = JSON.parse(raw) as DrafManual
+    if (d.hari !== today()) {
+      localStorage.removeItem(DRAF_MANUAL)
+      return null
+    }
+    return d
+  } catch {
+    return null
+  }
+}
+
 export function ManualPage() {
-  const [items, setItems] = useState<ManualItem[]>(demoItems)
-  const [kapster, setKapster] = useState(demoKapster)
+  const [draf] = useState(bacaDrafManual)
+  const [items, setItems] = useState<ManualItem[]>([])
+  const [kapster, setKapster] = useState<{ id: string; nama: string }[]>([])
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
 
-  const [tanggal, setTanggal] = useState(today)
-  const [jam, setJam] = useState("12:00")
-  const [note, setNote] = useState(() => notaOtomatis(today()))
-  const [notaDiubah, setNotaDiubah] = useState(false)
-  const [kapsterId, setKapsterId] = useState("")
-  const [qty, setQty] = useState<Record<string, number>>({})
+  const [tanggal, setTanggal] = useState(draf?.tanggal ?? today())
+  const [jam, setJam] = useState(draf?.jam ?? "12:00")
+  const [note, setNote] = useState(() => draf?.note ?? notaOtomatis(today()))
+  const [notaDiubah, setNotaDiubah] = useState(draf?.notaDiubah ?? false)
+  const [kapsterId, setKapsterId] = useState(draf?.kapsterId ?? "")
+  const [qty, setQty] = useState<Record<string, number>>(draf?.qty ?? {})
   const [cari, setCari] = useState("")
-  const [diskon, setDiskon] = useState("")
-  const [diskonJenis, setDiskonJenis] = useState<"nominal" | "persen">("nominal")
+  const [diskon, setDiskon] = useState(draf?.diskon ?? "")
+  const [diskonJenis, setDiskonJenis] = useState<"nominal" | "persen">(draf?.diskonJenis ?? "nominal")
   const [kodeInput, setKodeInput] = useState("")
   const [kodeError, setKodeError] = useState("")
   const [kodeChecking, setKodeChecking] = useState(false)
@@ -65,20 +89,34 @@ export function ManualPage() {
     nama: string
     jenis: "persen" | "nominal"
     nilai: number
-  } | null>(null)
+  } | null>(draf?.promo ?? null)
   const [promoList, setPromoList] = useState<
     { id: string; kode: string; nama: string; persen: number; jenis: "persen" | "nominal"; nilai: number; berlakuSampai: string }[]
   >([])
   const [pin, setPin] = useState("")
-  const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">("Tunai")
-  const [cash, setCash] = useState("")
-  const [qris, setQris] = useState("")
+  const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">(draf?.method ?? "Tunai")
+  const [cash, setCash] = useState(draf?.cash ?? "")
+  const [qris, setQris] = useState(draf?.qris ?? "")
   // Gabungan: isi salah satu (tunai atau QRIS), sisanya dihitung otomatis, sama seperti di Kasir.
-  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">("tunai")
+  const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">(draf?.komisiLayanan ?? "Normal")
+  const [gabunganDari, setGabunganDari] = useState<"tunai" | "qris">(draf?.gabunganDari ?? "tunai")
   const [saving, setSaving] = useState(false)
-  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [ringkasOpen, setRingkasOpen] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  useEffect(() => {
+    const kosong = !Object.values(qty).some((n) => n > 0) && !kapsterId && !notaDiubah
+    if (kosong) {
+      localStorage.removeItem(DRAF_MANUAL)
+      return
+    }
+    const nilai: DrafManual = {
+      hari: today(), tanggal, jam, note, notaDiubah, kapsterId, qty, diskon, diskonJenis,
+      promo, method, cash, qris, komisiLayanan, gabunganDari,
+    }
+    localStorage.setItem(DRAF_MANUAL, JSON.stringify(nilai))
+  }, [tanggal, jam, note, notaDiubah, kapsterId, qty, diskon, diskonJenis, promo, method, cash, qris, komisiLayanan, gabunganDari])
 
   useEffect(() => {
     if (!getToken()) {
@@ -129,6 +167,7 @@ export function ManualPage() {
             ),
         ])
         setKapster(kap)
+        setKapsterId((cur) => (cur && !kap.some((k) => k.id === cur) ? "" : cur))
         setLive(true)
       })
       .catch((e) => {
@@ -137,8 +176,6 @@ export function ManualPage() {
       })
   }, [])
 
-  // Tidak blocking — form langsung tampil dengan data sementara (demo/cache),
-  // data server akan otomatis menggantikan saat selesai dimuat.
 
   const keyOf = (i: ManualItem) => `${i.tipe}:${i.id}`
   const selected = items.filter((i) => (qty[keyOf(i)] ?? 0) > 0)
@@ -190,7 +227,7 @@ export function ManualPage() {
     .filter((n) => n > total)
     .sort((a, b) => a - b)
     .slice(0, 5)
-  const gagalMuat = Boolean(getToken()) && !live
+  const gagalMuat = !live
   const gabunganKosong = method === "Gabungan" && cashNum <= 0 && qrisNum <= 0
   const kembalian = method === "Tunai" ? Math.max(0, cashNum - total) : 0
   const canSave =
@@ -246,13 +283,7 @@ export function ManualPage() {
 
   function handleSave(e: FormEvent) {
     e.preventDefault()
-    setError("")
-    setSuccess("")
-    if (!live) {
-      setSuccess("Mode demo: nota tidak disimpan ke server.")
-      return
-    }
-    setConfirmOpen(true)
+    if (notaOk) setRingkasOpen(true)
   }
 
   async function executeSave() {
@@ -267,6 +298,7 @@ export function ManualPage() {
         bayarTunai: tunaiPakai,
         bayarQris: qrisPakai,
         kodeDiskon: promo ? promo.kode : undefined,
+        komisiLayanan: selected.some((i) => i.tipe === "Layanan") ? komisiLayanan : undefined,
         pinOtorisasi: !promo && diskonNum > 0 && pin ? pin : undefined,
         items: selected.map((i) => ({
           tipe: i.tipe,
@@ -364,7 +396,7 @@ export function ManualPage() {
   }
 
   // Sudah login tapi data belum datang: tutup seluruh halaman dengan tulisan memuat.
-  if (Boolean(getToken()) && !live && !liveError) {
+  if (!live && !liveError) {
     return (
       <div className="content narrow manual-page">
         <LoadingState message="Memuat data Input Manual…" />
@@ -373,7 +405,7 @@ export function ManualPage() {
   }
 
   // Gagal memuat: bedakan jelas dari "sedang memuat" dan beri jalan keluar.
-  if (Boolean(getToken()) && !live && liveError) {
+  if (!live && liveError) {
     return (
       <div className="content narrow manual-page">
         <ErrorState
@@ -387,8 +419,6 @@ export function ManualPage() {
 
   return (
     <form className="content narrow manual-page" onSubmit={handleSave}>
-      <DemoNotice live={live} error={liveError} />
-
       <section className="panel form-panel">
         <h3>Data nota</h3>
         <div className="form-grid manual-info-grid">
@@ -443,7 +473,6 @@ export function ManualPage() {
             <TimePicker align="right" onChange={setJam} value={jam} />
           </div>
           </div>
-          <small className="manual-jam-note">Di luar jam kerja dihitung lembur.</small>
         </div>
       </section>
 
@@ -602,6 +631,23 @@ export function ManualPage() {
             </Button>
           ))}
         </div>
+        {selected.some((i) => i.tipe === "Layanan") && (
+          <div className="commission-choice manual-komisi">
+            <span>Komisi layanan</span>
+            <div className="method-grid manual-komisi-grid" role="group" aria-label="Pilih komisi layanan">
+              {(["Normal", "OT"] as const).map((value) => (
+                <Button
+                  className={komisiLayanan === value ? "active" : ""}
+                  key={value}
+                  onClick={() => setKomisiLayanan(value)}
+                >
+                  <strong>{value}</strong>
+                  <small>{value === "Normal" ? "40%" : "50%"}</small>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="form-grid manual-info-grid">
           {method !== "QRIS" && (
             <label>
@@ -704,36 +750,122 @@ export function ManualPage() {
       )}
 
       <div className="sticky-submit">
-        <span>
-          {adaItem && notaOk ? (
-            <>
-              Total <b className="submit-total">{rupiah(total)}</b>
-            </>
-          ) : (
-            !success &&
-            (notaOk
-              ? "Pilih minimal satu layanan atau produk."
-              : "Pilih kapster dulu untuk melanjutkan.")
-          )}
-          {error && <small className="error-text"> {error}</small>}
-          {success && <small> {success}</small>}
-        </span>
-        <Button className="primary-button" disabled={!canSave} type="submit">
-          {saving ? "Menyimpan…" : "Simpan Nota"}
-        </Button>
+        <div className="manual-bar">
+          <button
+            aria-label="Buka rincian nota dan simpan"
+            className="manual-total-button"
+            disabled={!notaOk}
+            onClick={() => {
+              setError("")
+              setSuccess("")
+              setRingkasOpen(true)
+            }}
+            type="button"
+          >
+            <span className="manual-total-icon">
+              <Icon name="receipt" />
+            </span>
+            {adaItem && notaOk ? (
+              <>
+                <span className="manual-total-label">Simpan Nota</span>
+                <span className="manual-total-count">{selected.length} item</span>
+                <b className="submit-total">{rupiah(total)}</b>
+                <span className="manual-total-chevron" aria-hidden="true">
+                  <Icon name="chevron" />
+                </span>
+              </>
+            ) : (
+              <span className="manual-total-label">
+                {notaOk
+                  ? "Pilih minimal satu layanan atau produk."
+                  : "Pilih kapster dulu untuk melanjutkan."}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
-
-      {confirmOpen && (
-        <ConfirmModal
-          title={`Simpan Nota ${cleanNote}?`}
-          eyebrow="Konfirmasi Simpan Nota"
-          message={`Simpan nota ${cleanNote} senilai ${rupiah(total)}? Data transaksi akan dicatat ke sistem dan stok produk terkait akan otomatis terpotong.`}
-          confirmText="Simpan Nota"
-          confirmTone="primary"
-          onClose={() => setConfirmOpen(false)}
-          onConfirm={executeSave}
-        />
+      {success && (
+        <p className="manual-qris-notice manual-success-note" role="status">
+          {success}
+        </p>
       )}
+
+      {ringkasOpen && (
+        <div className="modal-overlay modal-centered" onClick={() => !saving && setRingkasOpen(false)} role="dialog" aria-modal="true" aria-label="Konfirmasi simpan nota">
+          <section className="manual-ringkas" onClick={(e) => e.stopPropagation()}>
+            <header className="manual-ringkas-head">
+              <span><Icon name="receipt" /> Simpan nota {cleanNote}</span>
+              <button type="button" aria-label="Tutup" disabled={saving} onClick={() => setRingkasOpen(false)}>
+                <Icon name="chevron" />
+              </button>
+            </header>
+            <div className="manual-ringkas-lines">
+              <div className="cart-clear-row">
+                <span className="cart-list-label">{selected.length} item</span>
+                <Button
+                  className="cart-clear-button"
+                  onClick={() => {
+                    setQty({})
+                    setRingkasOpen(false)
+                  }}
+                  aria-label="Hapus semua layanan dan produk"
+                >
+                  <Icon name="trash" /> Hapus Semua
+                </Button>
+              </div>
+              {selected.map((i) => (
+                <div className="manual-ringkas-line" key={keyOf(i)}>
+                  <div>
+                    <strong>{i.name}</strong>
+                    <small>{rupiah(i.price)}</small>
+                  </div>
+                  <div className="nota-stepper">
+                    <button type="button" aria-label={`Kurangi ${i.name}`} onClick={() => ubahQty(i, -1)}>−</button>
+                    <output>{qty[keyOf(i)]}</output>
+                    <button type="button" aria-label={`Tambah ${i.name}`} onClick={() => ubahQty(i, 1)}>+</button>
+                  </div>
+                  <b>{rupiah(i.price * qty[keyOf(i)])}</b>
+                </div>
+              ))}
+            </div>
+            <dl className="nota-summary">
+              <div><dt>Subtotal</dt><dd>{rupiah(subtotal)}</dd></div>
+              {diskonNum > 0 && <div><dt>Diskon</dt><dd>-{rupiah(diskonNum)}</dd></div>}
+              <div className="nota-summary-total"><dt>Total</dt><dd>{rupiah(total)}</dd></div>
+            </dl>
+            {(() => {
+              const peringatan =
+                error ||
+                (!adaItem && "Pilih minimal satu layanan atau produk.") ||
+                (gagalMuat && "Data server belum termuat. Coba muat ulang halaman.") ||
+                (gabunganKosong && "Isi jumlah tunai atau QRIS untuk pembayaran gabungan.") ||
+                (paid < total && "Uang yang diterima belum mencukupi total pembayaran.") ||
+                (total <= 0 && "Total nota harus lebih dari Rp 0.") ||
+                ""
+              const info =
+                !peringatan &&
+                "Data transaksi akan dicatat ke sistem dan stok produk terkait otomatis terpotong."
+              return peringatan ? (
+                <p className="manual-payment-warning manual-ringkas-note" role="alert">{peringatan}</p>
+              ) : (
+                <p className="manual-qris-notice manual-ringkas-note" role="note">{info}</p>
+              )
+            })()}
+            <Button
+              className="primary-button"
+              disabled={!canSave}
+              onClick={async () => {
+                setError("")
+                await executeSave()
+                setRingkasOpen(false)
+              }}
+            >
+              {saving ? "Menyimpan…" : "Simpan Nota"}
+            </Button>
+          </section>
+        </div>
+      )}
+
     </form>
   )
 }
