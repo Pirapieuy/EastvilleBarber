@@ -1380,20 +1380,20 @@ export function CashierPage({ currentUser, onNavigate }: {
               </button>
             </div>
           </div>
+          {cart.length > 0 && (
+            <div className="cart-clear-row">
+              <span className="cart-list-label">{itemCount} item</span>
+              <Button
+                className="cart-clear-button"
+                onClick={clearCart}
+                title="Hapus semua produk dan layanan"
+                aria-label="Hapus semua produk dan layanan"
+              >
+                <Icon name="trash" /> Hapus Semua
+              </Button>
+            </div>
+          )}
           <div className="cart-lines">
-            {cart.length > 0 && (
-              <div className="cart-clear-row">
-                <span className="cart-list-label">{itemCount} item</span>
-                <Button
-                  className="cart-clear-button"
-                  onClick={clearCart}
-                  title="Hapus semua produk dan layanan"
-                  aria-label="Hapus semua produk dan layanan"
-                >
-                  <Icon name="trash" /> Hapus Semua
-                </Button>
-              </div>
-            )}
             {cart.length === 0 ? (
               <div className="empty">
                 <Icon name="receipt" />
@@ -1903,21 +1903,23 @@ export function CashierPage({ currentUser, onNavigate }: {
                   <span>{payDisabledReason}</span>
                 </div>
               )}
-              <Button
-                className="primary-button cart-submit"
-                disabled={Boolean(payDisabledReason) || !cart.length}
-                onClick={pay}
-              >
-                <span>
-                  Bayar{" "}
-                  {cart.length > 0
-                    ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
-                    : selectedBarber
-                      ? `(${selectedBarber})`
-                      : ""}
-                </span>
-                <Icon name="cash" />
-              </Button>
+              <div className="cart-submit-bar">
+                <Button
+                  className="primary-button cart-submit"
+                  disabled={Boolean(payDisabledReason) || !cart.length}
+                  onClick={pay}
+                >
+                  <span>
+                    Bayar{" "}
+                    {cart.length > 0
+                      ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
+                      : selectedBarber
+                        ? `(${selectedBarber})`
+                        : ""}
+                  </span>
+                  <Icon name="cash" />
+                </Button>
+              </div>
               {gagalMuat && (
                 <div className="payment-result danger" role="alert">
                   <span>
