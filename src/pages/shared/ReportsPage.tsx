@@ -594,10 +594,10 @@ export function ReportsPage({ currentUser, role }: {
         >
           <Kpi
             icon="expense"
-            label="Pengeluaran"
+            label={`Pengeluaran (${mode})`}
             tone="amber"
             value={rupiah(data.pengeluaran)}
-            detail={`${persenPengeluaran}% dari omzet · ${expensesList.length} transaksi`}
+            detail={`Total per ${mode.toLowerCase()} · ${persenPengeluaran}% dari omzet`}
           />
         </div>
 
