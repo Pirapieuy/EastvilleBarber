@@ -21730,6 +21730,71 @@ html:has(.manual-page .modal-overlay) {
   }
 }
 
+/* ===== Layanan & Produk: header satu baris (laptop) ===== */
+@media (min-width: 1025px) {
+  .workspace > .content.catalog-page {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 16px;
+  }
+
+  .catalog-page .catalog-tab-header {
+    grid-column: 1;
+    grid-row: 1;
+    padding-bottom: 0 !important;
+    border-bottom: 0;
+  }
+
+  .catalog-page > .catalog-embedded-view:not(:has(> .loading-state:only-child)):not(:has(> .error-state:only-child)),
+  .catalog-page > .promo-discounts-tab {
+    display: contents !important;
+  }
+
+  .catalog-page .services-status-bar,
+  .catalog-page .products-status-bar,
+  .catalog-page .promo-discount-actions {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .catalog-page .promo-discount-actions {
+    justify-content: flex-end;
+  }
+
+  .catalog-page .catalog-embedded-view > .fit-fill,
+  .catalog-page .promo-discounts-tab > .promo-discount-list {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .catalog-page .promo-discounts-tab > :not(.promo-discount-actions):not(.promo-discount-list) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* Tab Layanan | Produk | Diskon Event satu baris selebar halaman di tablet & HP */
+@media (max-width: 1024px) {
+  .catalog-page .catalog-tab-header,
+  .catalog-page .catalog-segmented {
+    width: 100%;
+  }
+
+  .catalog-page .catalog-segmented {
+    display: flex;
+  }
+
+  .catalog-page .catalog-segmented .button {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+}
+
 /* ===== Layanan & Produk: popup Tambah/Ubah/Restok/Hapus ===== */
 .catalog-page .simple-modal > header,
 .catalog-page .product-modal > header {
