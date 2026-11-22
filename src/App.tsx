@@ -183,7 +183,7 @@ export function App() {
       activePage === "product-reports" ||
       activePage === "laporan-produk"
     ) {
-      return <LaporanProdukOwner currentUser={currentUser} />
+      return <LaporanProdukOwner currentUser={currentUser} onNavigate={setActivePage} />
     }
     if (activePage === "RekapManual" || activePage === "manual") {
       return <RekapManualOwner />

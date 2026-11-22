@@ -21080,3 +21080,356 @@ html:has(.manual-page .modal-overlay) {
     --lk-aksi: 88px;
   }
 }
+
+/* ===== Laporan Produk (lp-*): memakai pola Laporan Keuangan (.report-page, .od-kpi, .lk-panel) =====
+   Jarak 16px di mana-mana (label ke isi 4-6px), radius kartu 12px / kontrol 10px; tabel menggulir sendiri tanpa batang scroll. */
+.lp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lp-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.lp-stat span,
+.lp-stat small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lp-stat strong {
+  font: 700 20px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-table {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.lp-tx-table {
+  margin-top: 0;
+}
+
+.lp-table-inner {
+  /* header 40px + 2 baris (56px); sisanya menggulir */
+  max-height: 154px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+}
+
+.lp-table-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bone);
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lp-row {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--slate);
+  font-size: 13px;
+}
+
+.lp-row:last-child {
+  border-bottom: 0;
+}
+
+.lp-row > div,
+.lp-head > span {
+  min-width: 0;
+}
+
+.lp-row > div {
+  overflow-wrap: anywhere;
+}
+
+.lp-row strong,
+.lp-row b {
+  color: var(--ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-row .lk-komisi {
+  color: #8c6014;
+}
+
+.lp-row .lp-amber {
+  color: var(--amber);
+}
+
+.lp-head .is-right,
+.lp-row .is-right {
+  text-align: right;
+}
+
+.lp-rincian .lp-grid {
+  grid-template-columns: var(--lp-cols);
+}
+
+/* Riwayat transaksi produk: baris bisa di-tap untuk membuka rincian */
+.lp-tx {
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-tx:last-child {
+  border-bottom: 0;
+}
+
+.lp-tx-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 20px;
+}
+
+.lp-tx-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.lp-tx-row:hover,
+.lp-tx-row:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}
+
+.lp-nota,
+.lp-prod {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lp-nota small,
+.lp-prod small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.lp-nota strong,
+.lp-prod strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-total {
+  white-space: nowrap;
+}
+
+.lp-chev {
+  width: 16px;
+  height: 16px;
+  justify-self: end;
+  color: var(--brass-dark);
+  transition: transform 0.2s;
+}
+
+.lp-chev.is-open {
+  transform: rotate(180deg);
+}
+
+.lp-tx.is-void {
+  background: rgb(140 47 42 / 3%);
+}
+
+.lp-tx.is-void .lp-total {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.lp-detail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  background: var(--bone);
+}
+
+.lp-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lp-cell span,
+.lp-cell small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lp-cell b {
+  color: var(--ink);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.lp-void {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--oxblood-soft);
+  color: var(--oxblood);
+  font-size: 13px;
+}
+
+.lp-void .icon {
+  flex: 0 0 auto;
+}
+
+/* Baris transaksi dua baris teks: header 40 + 2 x (64 + garis 1) */
+.lp-tx-table .lp-tx-row {
+  min-height: 64px;
+}
+
+.lp-tx-table .lp-table-inner {
+  max-height: 170px;
+}
+
+/* Baris yang dibuka menampilkan rincian, jadi tabel diberi ruang lebih (tetap menggulir sendiri) */
+.lp-tx-table .lp-table-inner:has(.lp-detail) {
+  max-height: 360px;
+}
+
+@media (min-width: 1025px) {
+  .lp-row,
+  .lp-row strong,
+  .lp-row b,
+  .lp-stat span,
+  .lp-stat small,
+  .lp-cell span,
+  .lp-cell small,
+  .lp-nota small,
+  .lp-prod small,
+  .lp-void {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .lp-detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .lp-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-hide-sm {
+    display: none !important;
+  }
+
+  .lp-tx-table .lp-head {
+    display: none;
+  }
+
+  .lp-rincian .lp-grid {
+    grid-template-columns: var(--lp-cols-sm);
+  }
+
+  .lp-tx-grid {
+    grid-template-columns: minmax(0, 1fr) auto 20px;
+    grid-template-areas:
+      "nota total chev"
+      "prod prod chev";
+    row-gap: 4px;
+  }
+
+  .lp-tx-table .lp-tx-row {
+    min-height: 76px;
+    padding-block: 12px;
+  }
+
+  .lp-tx-table .lp-table-inner {
+    max-height: 180px;
+  }
+
+  .lp-tx-table .lp-table-inner:has(.lp-detail) {
+    max-height: 360px;
+  }
+
+  .lp-tx-grid > .lp-nota {
+    grid-area: nota;
+  }
+
+  .lp-tx-grid > .lp-prod {
+    grid-area: prod;
+    flex-direction: row;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .lp-tx-grid > .lp-total {
+    grid-area: total;
+  }
+
+  .lp-tx-grid > .lp-chev {
+    grid-area: chev;
+  }
+
+  .lp-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Laporan Produk: baris rincian yang membuka Riwayat Transaksi */
+.lp-row.is-link {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.lp-row.is-link:hover,
+.lp-row.is-link:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}
