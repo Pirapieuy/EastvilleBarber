@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { Icon } from "../../components/common/Icon"
 import { Button, BrandMark } from "../../components/common/UI"
@@ -50,6 +50,18 @@ export function BaseSidebar({
   const [collapsedGroups, setCollapsedGroups] =
     useState<Record<string, boolean>>({})
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia("(max-width: 1024px)").matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1024px)")
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+
+  const isExpanded = isMobile || expanded
 
   function toggleGroup(groupId: string) {
     setCollapsedGroups((prev) => ({
@@ -66,13 +78,15 @@ export function BaseSidebar({
 
   return (
     <>
-      <aside className={`sidebar ${expanded ? "expanded" : "collapsed"}`}>
+      <aside className={`sidebar ${isExpanded ? "expanded" : "collapsed"}`}>
         <BrandMark
-          onClick={onToggleExpanded}
+          onClick={isMobile ? undefined : onToggleExpanded}
           title={
-            expanded
-              ? "Klik logo untuk ringkas sidebar"
-              : "Klik logo untuk buka menu lengkap"
+            isMobile
+              ? undefined
+              : isExpanded
+                ? "Klik logo untuk ringkas sidebar"
+                : "Klik logo untuk buka menu lengkap"
           }
         />
         <nav className="sidebar-nav-scroll">
@@ -80,7 +94,7 @@ export function BaseSidebar({
             const isGroupCollapsed = collapsedGroups[group.id] ?? false
             return (
               <div className="nav-group" key={group.id}>
-                {expanded ? (
+                {isExpanded ? (
                   <button
                     type="button"
                     className="nav-group-header"
@@ -105,7 +119,7 @@ export function BaseSidebar({
                 {!isGroupCollapsed && (
                   <div
                     className={`nav-group-items ${
-                      expanded ? "nested-indent" : ""
+                      isExpanded ? "nested-indent" : ""
                     }`}
                   >
                     {group.items.map((item) => (
@@ -127,7 +141,7 @@ export function BaseSidebar({
           })}
         </nav>
         <div className="sidebar-bottom">
-          {expanded ? (
+          {isExpanded ? (
             <div className="sidebar-footer-nav">
               <div className="sidebar-account-row">
                 <div className="sidebar-user-card">
