@@ -285,7 +285,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
               </div>
             ))}
             {rows && rows.length === 0 && (
-              <p style={{ color: "var(--slate)", padding: "12px 0" }}>
+              <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
                 Belum ada pengerjaan hari ini.
               </p>
             )}

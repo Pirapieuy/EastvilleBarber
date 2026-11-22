@@ -1615,7 +1615,7 @@ textarea {
 @media (max-width: 700px) {
   .kapster-dashboard .kpi-grid {
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 16px;
   }
 }
 
@@ -1645,7 +1645,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 14px;
+  gap: 16px;
   margin-top: 16px;
   padding: 16px;
   border-radius: 12px;
@@ -15962,13 +15962,14 @@ label .search-select-trigger {
 .kapster-sales-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .kapster-sales-summary > div {
   min-width: 0;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: var(--bone);
 }
@@ -16014,7 +16015,7 @@ label .search-select-trigger {
 
   .kapster-dashboard > .kpi-grid {
     flex: 0 0 auto;
-    margin-top: 14px;
+    margin-top: 16px;
   }
 
   .kapster-dashboard > .dashboard-grid {
@@ -16657,7 +16658,7 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 14px 14px 26px !important;
+    padding: 16px 14px 16px !important;
     overflow: hidden;
   }
 
@@ -16691,6 +16692,11 @@ label .search-select-trigger {
 }
 
 @media (max-width: 1024px) {
+  .app-shell-kapster .workspace > .content,
+  .app-shell-kapster .workspace > .mobile-content {
+    padding-bottom: 16px !important;
+  }
+
   .kapster-dashboard-actions {
     margin-bottom: 4px;
   }
@@ -19284,15 +19290,35 @@ label .search-select-trigger {
   bottom: 3px;
 }
 
-/* Izin Kapster: halaman menggulir tanpa menampilkan batang scroll */
+/* Izin Kapster & Halaman Kapster: halaman menggulir tanpa menampilkan batang scroll */
 html:has(.izin-kapster-page),
-.workspace:has(> .izin-kapster-page) {
+html:has(.kapster-dashboard),
+html:has(.my-salary-page),
+html:has(.kapster-product-commission),
+.workspace:has(> .izin-kapster-page),
+.workspace:has(> .kapster-dashboard),
+.workspace:has(> .my-salary-page),
+.workspace:has(> .kapster-product-commission),
+.app-shell-kapster .content,
+.app-shell-kapster .mobile-content,
+.app-shell-kapster .recent-list,
+.app-shell-kapster .customer-list {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 html:has(.izin-kapster-page)::-webkit-scrollbar,
-.workspace:has(> .izin-kapster-page)::-webkit-scrollbar {
+html:has(.kapster-dashboard)::-webkit-scrollbar,
+html:has(.my-salary-page)::-webkit-scrollbar,
+html:has(.kapster-product-commission)::-webkit-scrollbar,
+.workspace:has(> .izin-kapster-page)::-webkit-scrollbar,
+.workspace:has(> .kapster-dashboard)::-webkit-scrollbar,
+.workspace:has(> .my-salary-page)::-webkit-scrollbar,
+.workspace:has(> .kapster-product-commission)::-webkit-scrollbar,
+.app-shell-kapster .content::-webkit-scrollbar,
+.app-shell-kapster .mobile-content::-webkit-scrollbar,
+.app-shell-kapster .recent-list::-webkit-scrollbar,
+.app-shell-kapster .customer-list::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
