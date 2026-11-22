@@ -19637,3 +19637,14 @@ html:has(.manual-page .modal-overlay) {
 
 /* Kasir POS: baris "ITEM / Hapus Semua" menempel pas di tepi atas daftar (offset = padding daftar 16px), item tidak menembus */
 .cashier-page .cart-lines .cart-clear-row { top: -16px; margin: -16px -16px 0; padding-left: 16px; padding-right: 16px; }
+
+/* Kasir POS keranjang (kanan & popup): daftar item tetap 264px menggulir sendiri; bagian bawah menggulir bersama daftar (satu area luar), judul popup tetap di atas */
+.cashier-page .cart-panel { overflow-y: auto !important; overscroll-behavior: none; scrollbar-width: none; }
+.cashier-page .cart-panel::-webkit-scrollbar { display: none; }
+.cashier-page .cart-panel .cart-total { flex: 0 0 auto !important; overflow: visible !important; min-height: 0 !important; }
+.cashier-page .cart-panel .cart-lines { overscroll-behavior: auto; }
+@media (max-width: 820px) {
+  .cashier-page .cart-sheet-center { overflow: hidden !important; }
+  .cashier-page .cart-sheet-center .cart-panel { height: 100%; max-height: 100%; min-height: 0; }
+  .cashier-page .cart-sheet-center .cart-tabs { position: sticky; top: 0; z-index: 3; background: var(--paper); }
+}
