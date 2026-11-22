@@ -44,3 +44,17 @@ export const TANGGAL_MAKS = () => {
 
 export const tanggalIsoLokal = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+
+/** "16 - 22 Nov 2026" (atau "28 Okt - 3 Nov 2026" bila melewati bulan, "28 Des 2026 - 3 Jan 2027" bila melewati tahun). */
+export function labelRentang(dari: string, sampai: string): string {
+  const a = new Date(`${dari}T12:00:00`)
+  const b = new Date(`${sampai}T12:00:00`)
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return ""
+  const bln = (x: Date) =>
+    new Intl.DateTimeFormat("id-ID", { month: "short" }).format(x).replace(".", "")
+  const akhir = `${b.getDate()} ${bln(b)} ${b.getFullYear()}`
+  if (a.getFullYear() !== b.getFullYear())
+    return `${a.getDate()} ${bln(a)} ${a.getFullYear()} - ${akhir}`
+  if (a.getMonth() !== b.getMonth()) return `${a.getDate()} ${bln(a)} - ${akhir}`
+  return `${a.getDate()} - ${akhir}`
+}

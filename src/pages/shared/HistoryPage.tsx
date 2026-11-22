@@ -1,4 +1,4 @@
-import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelRentang } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
@@ -804,7 +804,7 @@ function TransactionDetailBody({
   )
 }
 
-function bacaFilterAwal(nama: "metode" | "tanggal") {
+function bacaFilterAwal(nama: "metode" | "kapster" | "dari" | "sampai") {
   try {
     return sessionStorage.getItem(`eastville_riwayat_${nama}`) ?? ""
   } catch {
@@ -847,10 +847,22 @@ export function HistoryPage({ currentUser, role }: {
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
-  // Laporan Keuangan membuka Riwayat dengan filter awal (metode/tanggal) lewat sessionStorage.
-  const [dateFilter, setDateFilter] = useState(() => bacaFilterAwal("tanggal"))
+  // Laporan Keuangan membuka Riwayat dengan filter awal (metode/kapster/periode) lewat sessionStorage.
+  const [dateFilter, setDateFilter] = useState(() => {
+    const d = bacaFilterAwal("dari")
+    return d && d === bacaFilterAwal("sampai") ? d : ""
+  })
+  const [rentang, setRentang] = useState<{ dari: string; sampai: string } | null>(
+    () => {
+      const dari = bacaFilterAwal("dari")
+      const sampai = bacaFilterAwal("sampai")
+      return dari && sampai && dari !== sampai ? { dari, sampai } : null
+    },
+  )
   const [cari, setCari] = useState("")
-  const [barberFilter, setBarberFilter] = useState("Semua kapster")
+  const [barberFilter, setBarberFilter] = useState(
+    () => bacaFilterAwal("kapster") || "Semua kapster",
+  )
   const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
     () => {
       const m = bacaFilterAwal("metode")
@@ -859,8 +871,8 @@ export function HistoryPage({ currentUser, role }: {
   )
   useEffect(() => {
     try {
-      sessionStorage.removeItem("eastville_riwayat_metode")
-      sessionStorage.removeItem("eastville_riwayat_tanggal")
+      for (const k of ["metode", "kapster", "dari", "sampai"])
+        sessionStorage.removeItem(`eastville_riwayat_${k}`)
     } catch {
       /* tanpa penyimpanan sesi, filter awal diabaikan */
     }
@@ -905,7 +917,13 @@ export function HistoryPage({ currentUser, role }: {
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive(isStale: () => boolean = () => false) {
     return apiTransaksi
-      .list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {})
+      .list(
+        rentang
+          ? rentang
+          : dateFilter
+            ? { dari: dateFilter, sampai: dateFilter }
+            : {},
+      )
       .then((rows) => {
         if (isStale()) return
         const list = rows as HistoryTransactionRecord[]
@@ -931,7 +949,7 @@ export function HistoryPage({ currentUser, role }: {
     return () => {
       stale = true
     }
-  }, [dateFilter])
+  }, [dateFilter, rentang])
 
   useEffect(() => {
     if (getToken()) {
@@ -1126,8 +1144,12 @@ export function HistoryPage({ currentUser, role }: {
           />
         </div>
         <CalendarPicker
-          value={dateFilter}
-          onChange={setDateFilter}
+          value={rentang ? "" : dateFilter}
+          label={rentang ? labelRentang(rentang.dari, rentang.sampai) : undefined}
+          onChange={(d) => {
+            setRentang(null)
+            setDateFilter(d)
+          }}
           allowClear
           clearLabel="Semua Tanggal"
           placeholder="Semua Tanggal"

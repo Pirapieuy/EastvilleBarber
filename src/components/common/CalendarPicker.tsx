@@ -28,6 +28,8 @@ export interface CalendarPickerProps {
   allowClear?: boolean
   clearLabel?: string
   placeholder?: string
+  /** Teks tombol pengganti (mis. rentang tanggal); pilihan kalender tetap per hari. */
+  label?: string
   compact?: boolean
   showToday?: boolean
   style?: React.CSSProperties
@@ -42,6 +44,7 @@ export function CalendarPicker({
   allowClear = false,
   clearLabel = "Semua Tanggal",
   placeholder = "Pilih tanggal",
+  label,
   compact = false,
   showToday = true,
   style,
@@ -154,7 +157,7 @@ export function CalendarPicker({
         title="Pilih tanggal"
       >
         <Icon name="calendar" />
-        <span className="calendar-picker-text">{formatted}</span>
+        <span className="calendar-picker-text">{label ?? formatted}</span>
       </button>
 
       {open && (
