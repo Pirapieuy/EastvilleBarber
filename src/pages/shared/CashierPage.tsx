@@ -1570,6 +1570,7 @@ export function CashierPage({ currentUser, onNavigate }: {
         )}
           </div>
           {cart.length > 0 && (
+          <>
           <div className="cart-total">
             <div>
               <span>Subtotal</span>
@@ -1903,23 +1904,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                   <span>{payDisabledReason}</span>
                 </div>
               )}
-              <div className="cart-submit-bar">
-                <Button
-                  className="primary-button cart-submit"
-                  disabled={Boolean(payDisabledReason) || !cart.length}
-                  onClick={pay}
-                >
-                  <span>
-                    Bayar{" "}
-                    {cart.length > 0
-                      ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
-                      : selectedBarber
-                        ? `(${selectedBarber})`
-                        : ""}
-                  </span>
-                  <Icon name="cash" />
-                </Button>
-              </div>
               {gagalMuat && (
                 <div className="payment-result danger" role="alert">
                   <span>
@@ -1937,6 +1921,24 @@ export function CashierPage({ currentUser, onNavigate }: {
               )}
             </section>
           </div>
+          <div className="cart-submit-bar">
+            <Button
+              className="primary-button cart-submit"
+              disabled={Boolean(payDisabledReason) || !cart.length}
+              onClick={pay}
+            >
+              <span>
+                Bayar{" "}
+                {cart.length > 0
+                  ? `(${Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ")})`
+                  : selectedBarber
+                    ? `(${selectedBarber})`
+                    : ""}
+              </span>
+              <Icon name="cash" />
+            </Button>
+          </div>
+          </>
           )}
         </div>
       </aside>

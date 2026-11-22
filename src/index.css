@@ -19639,7 +19639,7 @@ html:has(.manual-page .modal-overlay) {
 /* Kasir POS keranjang (kanan & popup): daftar item tetap 264px menggulir sendiri; bagian bawah menggulir bersama daftar (satu area luar), judul popup tetap di atas */
 .cashier-page .cart-panel { overflow-y: auto !important; overscroll-behavior: none; scrollbar-width: none; }
 .cashier-page .cart-panel::-webkit-scrollbar { display: none; }
-.cashier-page .cart-panel .cart-total { flex: 0 0 auto !important; overflow: visible !important; min-height: 0 !important; }
+.cashier-page .cart-panel .cart-total { flex: 0 0 auto !important; overflow: visible !important; min-height: 0 !important; max-height: none !important; height: auto !important; }
 .cashier-page .cart-panel .cart-lines { overscroll-behavior: auto; }
 @media (max-width: 820px) {
   .cashier-page .cart-sheet-center { overflow: hidden !important; }
@@ -19651,7 +19651,7 @@ html:has(.manual-page .modal-overlay) {
 .cashier-page .cart-panel > .cart-clear-row { position: sticky; top: 0; z-index: 3; margin: 0; padding: 10px 16px; flex: none; }
 .cashier-page .cart-panel .cart-lines { height: 211px !important; min-height: 211px !important; max-height: 211px !important; }
 .cashier-page .cart-panel .cart-lines:has(article:first-of-type:last-of-type) { height: auto !important; min-height: 0 !important; max-height: 211px !important; }
-.cashier-page .cart-submit-bar { position: sticky; bottom: 0; z-index: 3; margin: 0 -16px -16px; padding: 16px; background: var(--paper); border-top: 1px solid var(--line); }
+.cashier-page .cart-submit-bar { position: sticky; bottom: 0; z-index: 3; flex: none; margin: 0; padding: 16px; background: var(--paper); border-top: 1px solid var(--line); }
 .cashier-page .cart-submit-bar .cart-submit { width: 100%; margin: 0; }
 @media (max-width: 820px) {
   .cashier-page .cart-sheet-center .cart-panel > .cart-clear-row { top: 54px; }
@@ -19659,5 +19659,35 @@ html:has(.manual-page .modal-overlay) {
 
 /* Kasir POS keranjang: bar Bayar selalu di dasar panel (layar tinggi: isi pendek tidak membuat bar mengambang di tengah) */
 .cashier-page .cart-panel .cart-total { flex: 1 0 auto !important; display: flex; flex-direction: column; }
-.cashier-page .cart-panel .cart-total .cart-payment { flex: 1 0 auto; display: flex; flex-direction: column; }
-.cashier-page .cart-submit-bar { margin-top: auto; }
+.cashier-page .cart-panel .cart-submit-bar { margin-top: auto; }
+
+/* Kasir POS: border radius satu skala (kartu 12px, kontrol/tombol/input 10px, chip kecil 8px) dan jarak tersembunyi disamakan 16px */
+.cashier-page .barber-picker,
+.cashier-page .catalog-item,
+.cashier-page .catalog-click-ripple,
+.cashier-page .cart-panel,
+.cashier-page .cart-discount-panel { border-radius: 12px !important; }
+.cashier-page .barber-options button,
+.cashier-page .segmented,
+.cashier-page .catalog-tools .search,
+.cashier-page .catalog-add,
+.cashier-page .stepper,
+.cashier-page .cart-discount-panel .input-shell,
+.cashier-page .cart-discount-panel button,
+.cashier-page .cart-payment .method-grid button,
+.cashier-page .cart-payment .input-shell,
+.cashier-page .cart-payment .quick-cash button,
+.cashier-page .cart-payment .payment-result,
+.cashier-page .cart-payment > div:not([class]),
+.cashier-page .cart-submit { border-radius: 10px !important; }
+.cashier-page .segmented button { border-radius: 8px !important; }
+.cashier-page .cart-barber-group-header,
+.cashier-page .barber-picker-label .item-icon { border-radius: 8px !important; }
+.cashier-page .cart-barber-group-header { margin: 0 !important; }
+@media (min-width: 821px) {
+  .cashier-page .catalog { padding-right: 8px !important; }
+  .cashier-page .cart { padding-left: 8px !important; }
+}
+@media (min-width: 1025px) {
+  .cashier-page .cart-clear-row { min-height: 62px !important; }
+}
