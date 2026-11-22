@@ -44,3 +44,49 @@ export const TANGGAL_MAKS = () => {
 
 export const tanggalIsoLokal = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+
+/** "16 - 22 Nov 2026" (atau "28 Okt - 3 Nov 2026" bila melewati bulan, "28 Des 2026 - 3 Jan 2027" bila melewati tahun). */
+export function labelRentang(dari: string, sampai: string): string {
+  const a = new Date(`${dari}T12:00:00`)
+  const b = new Date(`${sampai}T12:00:00`)
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return ""
+  const bln = (x: Date) =>
+    new Intl.DateTimeFormat("id-ID", { month: "short" }).format(x).replace(".", "")
+  const akhir = `${b.getDate()} ${bln(b)} ${b.getFullYear()}`
+  if (a.getFullYear() !== b.getFullYear())
+    return `${a.getDate()} ${bln(a)} ${a.getFullYear()} - ${akhir}`
+  if (a.getMonth() !== b.getMonth()) return `${a.getDate()} ${bln(a)} - ${akhir}`
+  return `${a.getDate()} - ${akhir}`
+}
+
+export type ModePeriode = "Harian" | "Mingguan" | "Bulanan"
+
+/** Rentang yyyy-MM-dd untuk satu tanggal menurut mode: hari itu, pekan Senin-Minggu, atau satu bulan penuh. */
+export function rentangPeriode(mode: ModePeriode, tanggal: string) {
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const d = new Date(`${tanggal}T12:00:00`)
+  if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
+  if (mode === "Mingguan") {
+    const senin = new Date(d)
+    senin.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+    const minggu = new Date(senin)
+    minggu.setDate(senin.getDate() + 6)
+    return { dari: iso(senin), sampai: iso(minggu) }
+  }
+  return {
+    dari: iso(new Date(d.getFullYear(), d.getMonth(), 1)),
+    sampai: iso(new Date(d.getFullYear(), d.getMonth() + 1, 0)),
+  }
+}
+
+/** Teks tombol tanggal menurut mode: undefined (pakai format harian biasa), rentang pekan, atau nama bulan. */
+export function labelPeriode(mode: ModePeriode, tanggal: string): string | undefined {
+  if (!tanggal || mode === "Harian") return undefined
+  const r = rentangPeriode(mode, tanggal)
+  if (mode === "Mingguan") return labelRentang(r.dari, r.sampai)
+  return new Date(`${tanggal}T12:00:00`).toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  })
+}

@@ -176,14 +176,14 @@ export function App() {
       return <RiwayatTransaksiOwner currentUser={currentUser} />
     }
     if (activePage === "LaporanKeuangan" || activePage === "reports") {
-      return <LaporanKeuanganOwner currentUser={currentUser} />
+      return <LaporanKeuanganOwner currentUser={currentUser} onNavigate={setActivePage} />
     }
     if (
       activePage === "LaporanProduk" ||
       activePage === "product-reports" ||
       activePage === "laporan-produk"
     ) {
-      return <LaporanProdukOwner currentUser={currentUser} />
+      return <LaporanProdukOwner currentUser={currentUser} onNavigate={setActivePage} />
     }
     if (activePage === "RekapManual" || activePage === "manual") {
       return <RekapManualOwner />

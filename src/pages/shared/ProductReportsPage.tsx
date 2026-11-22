@@ -1,12 +1,17 @@
-import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
-import { useEffect, useMemo, useState } from "react"
+import {
+  labelPeriode,
+  ModePeriode,
+  rentangPeriode,
+  TANGGAL_MAKS,
+  TANGGAL_MULAI,
+} from "../../utils/tanggal"
+import { ReactNode, useEffect, useMemo, useState } from "react"
 import { apiLaporan, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
   CalendarPicker,
-  Kpi,
   LoadingState,
   MonthPicker,
   PageTitle,
@@ -154,34 +159,89 @@ const pad2 = (n: number) => String(n).padStart(2, "0")
 const isoLokal = (d: Date) =>
   `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 
-/** Rentang yyyy-MM-dd: satu hari, satu pekan (Senin-Minggu) yang memuat tanggal, atau satu bulan. */
-function rentangProduk(
-  mode: "Harian" | "Mingguan" | "Bulanan",
-  tanggal: string,
-  bulan: string,
-) {
-  if (mode === "Harian") return { dari: tanggal, sampai: tanggal }
-  if (mode === "Mingguan") {
-    const d = new Date(`${tanggal}T00:00:00`)
-    const mundur = (d.getDay() + 6) % 7
-    const senin = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mundur)
-    const minggu = new Date(
-      senin.getFullYear(),
-      senin.getMonth(),
-      senin.getDate() + 6,
-    )
-    return { dari: isoLokal(senin), sampai: isoLokal(minggu) }
-  }
-  const [y, m] = bulan.split("-").map(Number)
-  return {
-    dari: `${bulan}-01`,
-    sampai: `${bulan}-${pad2(new Date(y, m, 0).getDate())}`,
-  }
+const persen = (bagian: number, total: number) =>
+  total > 0 ? Math.round((bagian / total) * 100) : 0
+
+type KolomDetail = { label: string; kanan?: boolean; kecil?: boolean }
+
+/** Satu bagian rincian (kartu angka + tabel) yang dibuka dari kartu KPI. Tabel menggulir sendiri. */
+function RincianProduk({
+  judul,
+  statistik,
+  kolom,
+  lebar,
+  lebarHP,
+  baris,
+  kosong,
+  onBuka,
+}: {
+  judul: string
+  statistik: { label: string; nilai: string; catatan: string }[]
+  kolom: KolomDetail[]
+  lebar: string
+  lebarHP: string
+  baris: { key: string; sel: ReactNode[] }[]
+  kosong: string
+  /** Bila ada, baris bisa di-tap untuk membuka halaman rincian (Riwayat Transaksi). */
+  onBuka?: (key: string) => void
+}) {
+  const cls = (k?: KolomDetail) =>
+    [k?.kanan && "is-right", k?.kecil && "lp-hide-sm"].filter(Boolean).join(" ") || undefined
+  const tabel = { "--lp-cols": lebar, "--lp-cols-sm": lebarHP } as React.CSSProperties
+  return (
+    <section className="panel lk-panel lp-section">
+      <div className="lk-head">
+        <h3>{judul}</h3>
+      </div>
+      <div className="lp-stats">
+        {statistik.map((x) => (
+          <div className="lp-stat" key={x.label}>
+            <span>{x.label}</span>
+            <strong>{x.nilai}</strong>
+            <small>{x.catatan}</small>
+          </div>
+        ))}
+      </div>
+      <div className="lp-table lp-rincian" style={tabel}>
+        <div className="lp-table-inner">
+          <div className="lp-head lp-grid">
+            {kolom.map((k) => (
+              <span className={cls(k)} key={k.label}>
+                {k.label}
+              </span>
+            ))}
+          </div>
+          {baris.map((r) => (
+            <div
+              className={`lp-row lp-grid${onBuka ? " is-link" : ""}`}
+              key={r.key}
+              {...(onBuka && {
+                role: "button",
+                tabIndex: 0,
+                onClick: () => onBuka(r.key),
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key === "Enter") onBuka(r.key)
+                },
+              })}
+            >
+              {r.sel.map((c, i) => (
+                <div className={cls(kolom[i])} key={i}>
+                  {c}
+                </div>
+              ))}
+            </div>
+          ))}
+          {baris.length === 0 && <div className="lk-empty">{kosong}</div>}
+        </div>
+      </div>
+    </section>
+  )
 }
 
-export function ProductReportsPage({ currentUser, role: forcedRole }: {
+export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }: {
   currentUser?: AppUser
   role?: Role
+  onNavigate?: (page: string) => void
 } = {}) {
   const [role, setRole] = useState<"Owner" | "Kapster">(
     forcedRole === "Kapster" || currentUser?.role === "Kapster"
@@ -190,13 +250,26 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   )
   const [wa, setWa] = useState(false)
   const [cari, setCari] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"Semua" | "Lunas" | "Batal">(
-    "Semua",
-  )
-  const [activeTab, setActiveTab] =
-    useState<"transaksi" | "omzet" | "komisi" | "pemasok" | "eastville" | "ringkasan">(
-      "transaksi",
-    )
+  const [subTab, setSubTab] =
+    useState<"omzet" | "komisi" | "pemasok" | "eastville">("omzet")
+  const pilihBagian = (bagian: "omzet" | "komisi" | "pemasok" | "eastville") => {
+    setSubTab(bagian)
+    document.getElementById(`lp-${bagian}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }
+  /** Buka Riwayat Transaksi untuk satu kapster pada periode laporan ini. */
+  const bukaRiwayatKapster = (kapster: string) => {
+    try {
+      sessionStorage.setItem("eastville_riwayat_mode", mode)
+      sessionStorage.setItem("eastville_riwayat_tanggal", tanggal)
+      sessionStorage.setItem("eastville_riwayat_kapster", kapster)
+    } catch {
+      /* filter awal hanya kemudahan */
+    }
+    onNavigate?.("RiwayatTransaksi")
+  }
   const [expandedTxId, setExpandedTxId] = useState<string | null>(null)
   const toggleExpand = (id: string) => {
     setExpandedTxId((prev) => (prev === id ? null : id))
@@ -204,12 +277,9 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
   const [txList, setTxList] = useState<ProductTransactionRecord[]>(
     INITIAL_PRODUCT_TRANSACTIONS,
   )
-  const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
+  const [mode, setMode] = useState<ModePeriode>("Bulanan")
   const [tanggal, setTanggal] = useState(() => isoLokal(new Date()))
-  const [bulan, setBulan] = useState(() => {
-    const d = new Date()
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
-  })
+  const bulan = tanggal.slice(0, 7)
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   const [fetching, setFetching] = useState(false)
@@ -220,7 +290,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
     forcedRole === "Kapster" ||
     currentUser?.role === "Kapster"
 
-  const rentang = rentangProduk(mode, tanggal, bulan)
+  const rentang = rentangPeriode(mode, tanggal)
 
   // Tampilan Owner memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
   useEffect(() => {
@@ -486,7 +556,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
               max={TANGGAL_MAKS()}
               min={TANGGAL_MULAI}
               value={bulan}
-              onChange={(b) => b && setBulan(b)}
+              onChange={(b) => b && setTanggal(`${b}-01`)}
             />
           </div>
         ) : (
@@ -589,64 +659,49 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
     )
   }
 
-  // Tidak blocking — tampilan langsung muncul dengan data sementara;
-  // data server otomatis menggantikan saat selesai dimuat.
+  const unitTotal = validTransactions.reduce((n, tx) => n + tx.qty, 0)
+  const kpis = [
+    { key: "omzet", icon: "product", tone: "sage", label: "Omzet Produk", value: totalOmzet, detail: `${validTransactions.length} transaksi lunas` },
+    { key: "komisi", icon: "people", tone: "brass", label: "Komisi Kapster", value: totalBarber, detail: totalOmzet > 0 ? `${persen(totalBarber, totalOmzet)}% omzet` : "Belum ada" },
+    { key: "pemasok", icon: "home", tone: "amber", label: "Bagian Pemasok", value: totalSeller, detail: totalOmzet > 0 ? `${persen(totalSeller, totalOmzet)}% omzet` : "Belum ada" },
+    { key: "eastville", icon: "wallet", tone: "dark", label: "Bagian Eastville", value: totalEastville, detail: totalOmzet > 0 ? `${persen(totalEastville, totalOmzet)}% omzet` : "Belum ada" },
+  ] as const
+
+  const bagianTx = (nilai: number, total: number) =>
+    `${rupiah(nilai)} (${persen(nilai, total)}%)`
 
   return (
-    <div className="content fit-page">
+    <div className="content report-page lp-page">
       <DemoNotice live={live} error={liveError} />
+
       <div className="report-toolbar">
-        <div className="report-filter-row">
-          <div className="segmented">
-            {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
-              <Button
-                className={mode === m ? "active" : ""}
-                key={m}
-                onClick={() => setMode(m)}
-              >
-                {m}
-              </Button>
-            ))}
-          </div>
-          {mode === "Bulanan" ? (
-            <MonthPicker
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
-              value={bulan}
-              onChange={(b) => b && setBulan(b)}
-            />
-          ) : (
-            <CalendarPicker
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
-              value={tanggal}
-              onChange={(d) => d && setTanggal(d)}
-            />
-          )}
-        </div>
-        {!forcedRole && !getToken() && (
-          <div className="role-preview">
-            <span>Peran</span>
-            <SearchSelect
-              onChange={(e) => setRole(e.target.value as "Owner" | "Kapster")}
-              value={role}
-            >
-              <option>Owner</option>
-              <option>Kapster</option>
-            </SearchSelect>
-          </div>
-        )}
+        <CalendarPicker
+          max={TANGGAL_MAKS()}
+          min={TANGGAL_MULAI}
+          value={tanggal}
+          label={labelPeriode(mode, tanggal)}
+          bulanSaja={mode === "Bulanan"}
+          popupHeader={
+            <div className="segmented history-periode" role="group" aria-label="Periode">
+              {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+                <Button
+                  className={mode === m ? "active" : ""}
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                >
+                  {m}
+                </Button>
+              ))}
+            </div>
+          }
+          onChange={(d) => d && setTanggal(d)}
+        />
         <div className="report-export-buttons">
-          <Button
-            className="secondary-button"
-            onClick={() => eksporExcel(tabelEkspor())}
-          >
+          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
             Excel
           </Button>
-          <Button
-            className="secondary-button"
-            onClick={() => eksporPdf(tabelEkspor())}
-          >
+          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>
             PDF
           </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
@@ -654,1390 +709,246 @@ export function ProductReportsPage({ currentUser, role: forcedRole }: {
           </Button>
         </div>
       </div>
-      <div className="kpi-grid">
-        <div
-          onClick={() => setActiveTab("omzet")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              activeTab === "omzet"
-                ? "0 0 0 2px var(--sage), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: activeTab === "omzet" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat detail total omzet produk"
-        >
-          <Kpi
-            icon="product"
-            label="Total Omzet Produk"
-            tone="sage"
-            value={rupiah(totalOmzet)}
-            detail={`${validTransactions.length} transaksi lunas`}
-          />
-        </div>
 
-        <div
-          onClick={() => setActiveTab("komisi")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              activeTab === "komisi"
-                ? "0 0 0 2px var(--brass), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: activeTab === "komisi" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat detail total komisi kapster"
-        >
-          <Kpi
-            icon="people"
-            label="Total Komisi Kapster"
-            tone="brass"
-            value={rupiah(totalBarber)}
-            detail={`${
-              totalOmzet > 0 ? ((totalBarber / totalOmzet) * 100).toFixed(1) : 0
-            }% bagian kapster`}
-          />
-        </div>
-
-        <div
-          onClick={() => setActiveTab("pemasok")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              activeTab === "pemasok"
-                ? "0 0 0 2px var(--amber), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: activeTab === "pemasok" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat detail total bagian pemasok"
-        >
-          <Kpi
-            icon="home"
-            label="Total Bagian Pemasok"
-            tone="amber"
-            value={rupiah(totalSeller)}
-            detail={`${
-              totalOmzet > 0 ? ((totalSeller / totalOmzet) * 100).toFixed(1) : 0
-            }% bagian pemasok`}
-          />
-        </div>
-
-        <div
-          onClick={() => setActiveTab("eastville")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              activeTab === "eastville"
-                ? "0 0 0 2px var(--ink), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: activeTab === "eastville" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat detail total bagian Eastville"
-        >
-          <Kpi
-            icon="wallet"
-            label="Total Bagian Eastville"
-            tone="dark"
-            value={rupiah(totalEastville)}
-            detail={`${
-              totalOmzet > 0
-                ? ((totalEastville / totalOmzet) * 100).toFixed(1)
-                : 0
-            }% sisa barbershop`}
-          />
-        </div>
+      <div className="od-kpis" style={fetching ? { opacity: 0.6 } : undefined}>
+        {kpis.map((k) => (
+          <button
+            key={k.key}
+            type="button"
+            className={`od-kpi${subTab === k.key ? " is-active" : ""}`}
+            aria-label={`${k.label} ${rupiah(k.value)}, lihat rincian`}
+            onClick={() => pilihBagian(k.key)}
+          >
+            <span className="od-kpi-body">
+              <span className={`kpi-icon ${k.tone}`}>
+                <Icon name={k.icon} />
+              </span>
+              <span className="od-kpi-text">
+                <span className="od-kpi-label">{k.label}</span>
+                <strong className="od-kpi-value">{rupiah(k.value)}</strong>
+                <span className="od-kpi-detail">{k.detail}</span>
+              </span>
+            </span>
+          </button>
+        ))}
       </div>
 
-      <div className="report-subnav-row" style={{ overflowX: "auto" }}></div>
-
-      {activeTab === "transaksi" && (
-        <section className="panel product-tx-panel fit-fill">
-          <div className="product-tx-toolbar">
-            <PageTitle
-              eyebrow="Rincian Transaksi"
-              title="Riwayat Transaksi Produk"
-            />
-            <div className="search">
-              <Icon name="search" />
-              <input
-                placeholder="Cari nota, produk, kapster, pemasok..."
-                value={cari}
-                onChange={(e) => setCari(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div
-            className="product-report-table"
-            style={{
-              border: "1px solid var(--line)",
-              borderRadius: 10,
-              overflow: "hidden",
-              marginTop: 14,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.3fr 1.8fr 1.2fr 1.2fr 36px",
-                  alignItems: "center",
-                  padding: "10px 16px",
-                  background: "var(--bone)",
-                  color: "var(--slate)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  gap: 12,
-                }}
-              >
-                <span>Nota &amp; Waktu</span>
-                <span>Produk &amp; Qty</span>
-                <span>Pemasok</span>
-                <span style={{ textAlign: "right" }}>Total Omzet</span>
-                <span aria-hidden="true" />
-              </div>
-
-              {filteredTransactions.map((tx, index) => {
-                const rowId = `${tx.id}-${index}`
-                const isOpen = expandedTxId === rowId
-
-                return (
-                  <div
-                    key={rowId}
-                    style={{
-                      borderTop: "1px solid var(--line)",
-                    }}
-                  >
-                    <div
-                      className="product-report-mobile-card"
-                      onClick={() => toggleExpand(rowId)}
-                      title="Klik untuk melihat rincian transaksi"
-                    >
-                      <div className="product-report-mobile-top">
-                        <strong>{tx.id}</strong>
-                        <strong
-                          className={
-                            tx.status === "Batal" ? "voided" : undefined
-                          }
-                        >
-                          {rupiah(tx.totalOmzet)}
-                        </strong>
-                      </div>
-                      <div className="product-report-mobile-bottom">
-                        <div>
-                          <strong>{tx.product}</strong>
-                          <span>({tx.qty} unit)</span>
-                        </div>
-                        <div>
-                          <span>{tx.time}</span>
-                          <Icon name="chevron" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      className="product-report-desktop-row"
-                      onClick={() => toggleExpand(rowId)}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1.3fr 1.8fr 1.2fr 1.2fr 36px",
-                        alignItems: "center",
-
-                        padding: "12px 16px",
-                        gap: 12,
-                        cursor: "pointer",
-                        background: isOpen
-                          ? "rgba(0, 0, 0, 0.02)"
-                          : tx.status === "Batal"
-                            ? "rgb(140 47 42 / 3%)"
-                            : "transparent",
-                        transition: "background 0.15s ease",
-                      }}
-                      title="Klik untuk melihat rincian transaksi"
-                    >
-                      <div style={{ minWidth: 0 }}>
-                        <strong
-                          style={{
-                            display: "block",
-                            color: "var(--ink)",
-                            fontSize: 13,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {tx.id}
-                        </strong>
-                        <small style={{ color: "var(--muted)", fontSize: 11 }}>
-                          {tx.time}
-                        </small>
-                      </div>
-
-                      <div style={{ minWidth: 0 }}>
-                        <strong
-                          style={{
-                            color: "var(--ink)",
-                            fontSize: 13,
-                            display: "block",
-                          }}
-                        >
-                          {tx.product}
-                        </strong>
-                        <span style={{ color: "var(--slate)", fontSize: 12 }}>
-                          {tx.qty} unit
-                        </span>
-                      </div>
-
-                      <div>
-                        <span style={{ color: "var(--slate)", fontSize: 12 }}>
-                          {tx.seller}
-                        </span>
-                      </div>
-
-                      <div style={{ textAlign: "right" }}>
-                        <strong
-                          style={{
-                            fontSize: 13,
-                            color:
-                              tx.status === "Batal"
-                                ? "var(--muted)"
-                                : "var(--ink)",
-                            textDecoration:
-                              tx.status === "Batal" ? "line-through" : "none",
-                          }}
-                        >
-                          {rupiah(tx.totalOmzet)}
-                        </strong>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-end",
-                          minWidth: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 4,
-                            color: "var(--brass-dark)",
-                            fontSize: 12,
-                            fontWeight: 600,
-                          }}
-                        >
-                          <span
-                            style={{
-                              transform: isOpen
-                                ? "rotate(180deg)"
-                                : "rotate(0deg)",
-                              transition: "transform 0.2s ease",
-                              display: "inline-flex",
-                            }}
-                          >
-                            <Icon name="chevron" />
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {isOpen && (
-                      <div className="product-report-mobile-detail flex flex-col divide-y divide-stone-200/70 px-4 py-2 w-full">
-                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">
-                            Harga Satuan
-                          </span>
-                          <span className="text-sm font-semibold text-stone-900 text-right">
-                            {rupiah(tx.unitPrice)} × {tx.qty} unit
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">
-                            Kapster Penjual
-                          </span>
-                          <span className="flex flex-col items-end text-right">
-                            <span className="text-sm font-semibold text-stone-900">
-                              {tx.barber}
-                            </span>
-                            <span className="text-xs text-amber-700">
-                              Komisi: {rupiah(tx.barberShare)} (
-                              {tx.totalOmzet > 0
-                                ? (
-                                    (tx.barberShare / tx.totalOmzet) *
-                                    100
-                                  ).toFixed(0)
-                                : 0}
-                              %)
-                            </span>
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">
-                            Bagian Pemasok
-                          </span>
-                          <span className="flex flex-col items-end text-right">
-                            <span className="text-sm font-semibold text-stone-900">
-                              {tx.seller}
-                            </span>
-                            <span className="text-xs text-amber-700">
-                              {rupiah(tx.sellerShare)} (
-                              {tx.totalOmzet > 0
-                                ? (
-                                    (tx.sellerShare / tx.totalOmzet) *
-                                    100
-                                  ).toFixed(0)
-                                : 0}
-                              %)
-                            </span>
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between gap-4 py-2.5 w-full">
-                          <span className="text-xs text-stone-500 text-left">
-                            Bagian Eastville
-                          </span>
-                          <span className="flex flex-col items-end text-right">
-                            <span className="text-sm font-semibold text-stone-900">
-                              {rupiah(tx.eastvilleShare)} (
-                              {tx.totalOmzet > 0
-                                ? (
-                                    (tx.eastvilleShare / tx.totalOmzet) *
-                                    100
-                                  ).toFixed(0)
-                                : 0}
-                              %)
-                            </span>
-                            <span className="text-xs text-stone-500">
-                              Laba toko barbershop
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {isOpen && (
-                      <div
-                        className="product-report-detail flex flex-col divide-y divide-stone-200/70 px-4 py-2 md:grid md:grid-cols-[1.3fr_1.8fr_1.2fr_1.2fr] md:items-start md:gap-x-6 md:gap-y-4 md:divide-y-0 md:px-6 md:py-4"
-                        style={{
-                          background: "#f1eadf",
-                          borderTop: "1px solid #d8c7ae",
-                        }}
-                      >
-                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
-                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
-                            Harga Satuan
-                          </span>
-                          <span className="break-words text-right text-sm font-semibold text-stone-900 md:font-bold md:text-left">
-                            {rupiah(tx.unitPrice)} × {tx.qty} unit
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
-                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
-                            Kapster Penjual
-                          </span>
-                          <span className="flex min-w-0 flex-col items-end text-right md:items-start md:text-left">
-                            <span className="break-words text-sm font-semibold text-stone-900 md:font-bold">
-                              {tx.barber}
-                            </span>
-                            <span className="break-words text-xs text-amber-700 md:font-medium md:text-[color:var(--brass-dark)]">
-                              Komisi: {rupiah(tx.barberShare)} (
-                              {tx.totalOmzet > 0
-                                ? (
-                                    (tx.barberShare / tx.totalOmzet) *
-                                    100
-                                  ).toFixed(0)
-                                : 0}
-                              %)
-                            </span>
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
-                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
-                            Bagian Pemasok
-                          </span>
-                          <span className="flex min-w-0 flex-col items-end text-right md:items-start md:text-left">
-                            <span className="break-words text-sm font-semibold text-stone-900 md:font-bold">
-                              {tx.seller}
-                            </span>
-                            <span className="break-words text-xs text-amber-700 md:font-medium md:text-[color:var(--amber)]">
-                              {rupiah(tx.sellerShare)} (
-                              {tx.totalOmzet > 0
-                                ? (
-                                    (tx.sellerShare / tx.totalOmzet) *
-                                    100
-                                  ).toFixed(0)
-                                : 0}
-                              %)
-                            </span>
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col items-start py-2.5 md:space-y-1 md:py-0">
-                          <span className="text-xs text-stone-500 whitespace-nowrap md:text-[11px] md:font-semibold md:uppercase md:tracking-wider md:text-stone-400">
-                            Bagian Eastville
-                          </span>
-                          <span className="flex min-w-0 flex-col items-end text-right md:items-start md:text-left">
-                            <span className="break-words text-sm font-bold text-stone-900">
-                              {rupiah(tx.eastvilleShare)} (
-                              {tx.totalOmzet > 0
-                                ? (
-                                    (tx.eastvilleShare / tx.totalOmzet) *
-                                    100
-                                  ).toFixed(0)
-                                : 0}
-                              %)
-                            </span>
-                            <span className="break-words text-xs text-stone-500 md:text-[color:var(--slate)]">
-                              Laba toko barbershop
-                            </span>
-                          </span>
-                        </div>
-
-                        {tx.status === "Batal" && (
-                          <div
-                            style={{
-                              gridColumn: "1 / -1",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 6,
-                              padding: "8px 12px",
-                              background: "var(--oxblood-soft)",
-                              color: "var(--oxblood)",
-                              borderRadius: 6,
-                              fontSize: 12,
-                            }}
-                          >
-                            <Icon name="alert" />
-                            <span>
-                              Dibatalkan oleh {tx.voidBy} · {tx.voidAt}:{" "}
-                              {tx.voidReason}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-
-              {filteredTransactions.length === 0 && (
-                <div
-                  style={{
-                    padding: "32px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
-                  Tidak ada data transaksi yang cocok dengan pencarian.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* DETAIL HALAMAN 1: TOTAL OMZET PRODUK */}
-      {activeTab === "omzet" && (
-        <section className="panel" style={{ padding: 20 }}>
-          <PageTitle
-            eyebrow="Penjualan Produk"
-            title="Detail Total Omzet Produk"
-          />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 14,
-              marginTop: 16,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Total Omzet Produk
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {rupiah(totalOmzet)}
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Dari {validTransactions.length} transaksi lunas
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Total Unit Terjual
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "#166534",
-                  marginTop: 4,
-                }}
-              >
-                {validTransactions.reduce((acc, tx) => acc + tx.qty, 0)} unit
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                {omzetPerProduk.length} varian produk terjual
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Rata-rata per Unit
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {rupiah(
-                  validTransactions.reduce((acc, tx) => acc + tx.qty, 0) > 0
-                    ? Math.round(
-                        totalOmzet /
-                          validTransactions.reduce(
-                            (acc, tx) => acc + tx.qty,
-                            0,
-                          ),
-                      )
-                    : 0,
-                )}
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Nilai rata-rata produk
-              </small>
-            </div>
-          </div>
-
-          <div
-            style={{
-              border: "1px solid var(--line)",
-              borderRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <div
-                style={{
-                  minWidth: 650,
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1.2fr 1.5fr 1fr",
-                  padding: "10px 16px",
-                  background: "var(--bone)",
-                  color: "var(--slate)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  gap: 12,
-                }}
-              >
-                <span>Nama Produk</span>
-                <span>Unit Terjual</span>
-                <span>Harga Rata-rata</span>
-                <span>Total Omzet</span>
-                <span>Kontribusi</span>
-              </div>
-              {omzetPerProduk.map((p) => {
-                const pct =
-                  totalOmzet > 0
-                    ? ((p.omzet / totalOmzet) * 100).toFixed(1)
-                    : "0"
-                return (
-                  <div
-                    key={p.product}
-                    style={{
-                      minWidth: 650,
-                      display: "grid",
-                      gridTemplateColumns: "2fr 1fr 1.2fr 1.5fr 1fr",
-                      padding: "12px 16px",
-                      borderTop: "1px solid var(--line)",
-                      gap: 12,
-                      alignItems: "center",
-                      fontSize: 13,
-                    }}
-                  >
-                    <strong style={{ color: "var(--ink)" }}>{p.product}</strong>
-                    <span>{p.qty} unit</span>
-                    <span style={{ color: "var(--slate)" }}>
-                      {rupiah(Math.round(p.omzet / p.qty))}
-                    </span>
-                    <strong style={{ color: "var(--ink)" }}>
-                      {rupiah(p.omzet)}
-                    </strong>
-                    <span
-                      className="chip lunas"
-                      style={{ width: "fit-content" }}
-                    >
-                      {pct}%
-                    </span>
-                  </div>
-                )
-              })}
-              {omzetPerProduk.length === 0 && (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
-                  Belum ada penjualan produk lunas pada periode ini.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* DETAIL HALAMAN 2: TOTAL KOMISI KAPSTER */}
-      {activeTab === "komisi" && (
-        <section className="panel" style={{ padding: 20 }}>
-          <PageTitle
-            eyebrow="Penjualan Produk"
-            title="Detail Total Komisi Kapster"
-          />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 14,
-              marginTop: 16,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Total Komisi Kapster
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--brass-dark)",
-                  marginTop: 4,
-                }}
-              >
-                {rupiah(totalBarber)}
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Bagian yang diterima kapster
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Porsi Komisi dari Omzet
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {totalOmzet > 0
-                  ? ((totalBarber / totalOmzet) * 100).toFixed(1)
-                  : 0}
-                %
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Persentase bagi hasil kapster
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Kapster Berhasil Jual
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {komisiPerKapster.length} orang
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Kapster dengan penjualan aktif
-              </small>
-            </div>
-          </div>
-
-          <div
-            style={{
-              border: "1px solid var(--line)",
-              borderRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <div
-                style={{
-                  minWidth: 650,
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 1.5fr 1.5fr",
-                  padding: "10px 16px",
-                  background: "var(--bone)",
-                  color: "var(--slate)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  gap: 12,
-                }}
-              >
-                <span>Nama Kapster</span>
-                <span>Transaksi</span>
-                <span>Unit Terjual</span>
-                <span>Omzet Dihasilkan</span>
-                <span>Total Komisi</span>
-              </div>
-              {komisiPerKapster.map((k) => {
-                const pct =
-                  k.omzet > 0 ? ((k.komisi / k.omzet) * 100).toFixed(0) : 0
-                return (
-                  <div
-                    key={k.barber}
-                    style={{
-                      minWidth: 650,
-                      display: "grid",
-                      gridTemplateColumns: "2fr 1fr 1fr 1.5fr 1.5fr",
-                      padding: "12px 16px",
-                      borderTop: "1px solid var(--line)",
-                      gap: 12,
-                      alignItems: "center",
-                      fontSize: 13,
-                    }}
-                  >
-                    <div>
-                      <strong style={{ color: "var(--ink)", display: "block" }}>
-                        {k.barber}
-                      </strong>
-                      <small style={{ color: "var(--muted)" }}>
-                        Porsi komisi: ~{pct}%
-                      </small>
-                    </div>
-                    <span>{k.txCount} nota</span>
-                    <span>{k.qty} unit</span>
-                    <span style={{ color: "var(--slate)" }}>
-                      {rupiah(k.omzet)}
-                    </span>
-                    <strong style={{ color: "var(--brass-dark)" }}>
-                      {rupiah(k.komisi)}
-                    </strong>
-                  </div>
-                )
-              })}
-              {komisiPerKapster.length === 0 && (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
-                  Belum ada data komisi kapster pada periode ini.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* DETAIL HALAMAN 3: TOTAL BAGIAN PEMASOK */}
-      {activeTab === "pemasok" && (
-        <section className="panel" style={{ padding: 20 }}>
-          <PageTitle
-            eyebrow="Penjualan Produk"
-            title="Detail Total Bagian Pemasok"
-          />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 14,
-              marginTop: 16,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Total Hak Pemasok
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--amber)",
-                  marginTop: 4,
-                }}
-              >
-                {rupiah(totalSeller)}
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Kewajiban bayar ke supplier
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Porsi dari Total Omzet
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {totalOmzet > 0
-                  ? ((totalSeller / totalOmzet) * 100).toFixed(1)
-                  : 0}
-                %
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Persentase bagi vendor
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Jumlah Mitra Pemasok
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {bagianPerPemasok.length} mitra
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Vendor aktif periode ini
-              </small>
-            </div>
-          </div>
-
-          <div
-            style={{
-              border: "1px solid var(--line)",
-              borderRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <div
-                style={{
-                  minWidth: 650,
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1.5fr 1fr 1.5fr 1.5fr",
-                  padding: "10px 16px",
-                  background: "var(--bone)",
-                  color: "var(--slate)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  gap: 12,
-                }}
-              >
-                <span>Nama Pemasok</span>
-                <span>Produk Dipasok</span>
-                <span>Unit Terjual</span>
-                <span>Omzet Kotor</span>
-                <span>Hak Pemasok</span>
-              </div>
-              {bagianPerPemasok.map((s) => {
-                const pct =
-                  s.omzet > 0
-                    ? ((s.sellerShare / s.omzet) * 100).toFixed(1)
-                    : "0"
-                return (
-                  <div
-                    key={s.seller}
-                    style={{
-                      minWidth: 650,
-                      display: "grid",
-                      gridTemplateColumns: "2fr 1.5fr 1fr 1.5fr 1.5fr",
-                      padding: "12px 16px",
-                      borderTop: "1px solid var(--line)",
-                      gap: 12,
-                      alignItems: "center",
-                      fontSize: 13,
-                    }}
-                  >
-                    <div>
-                      <strong style={{ color: "var(--ink)", display: "block" }}>
-                        {s.seller}
-                      </strong>
-                      <small style={{ color: "var(--muted)" }}>
-                        Bagi hasil supplier: {pct}%
-                      </small>
-                    </div>
-                    <span style={{ color: "var(--slate)", fontSize: 12 }}>
-                      {s.productsList}
-                    </span>
-                    <span>{s.qty} unit</span>
-                    <span style={{ color: "var(--slate)" }}>
-                      {rupiah(s.omzet)}
-                    </span>
-                    <strong style={{ color: "var(--amber)" }}>
-                      {rupiah(s.sellerShare)}
-                    </strong>
-                  </div>
-                )
-              })}
-              {bagianPerPemasok.length === 0 && (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
-                  Belum ada data pemasok pada periode ini.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* DETAIL HALAMAN 4: TOTAL BAGIAN EASTVILLE */}
-      {activeTab === "eastville" && (
-        <section className="panel" style={{ padding: 20 }}>
-          <PageTitle
-            eyebrow="Penjualan Produk"
-            title="Detail Total Bagian Eastville"
-          />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 14,
-              marginTop: 16,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Total Bagian Toko
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {rupiah(totalEastville)}
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Laba kotor barbershop
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Margin Toko dari Omzet
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "#15803d",
-                  marginTop: 4,
-                }}
-              >
-                {totalOmzet > 0
-                  ? ((totalEastville / totalOmzet) * 100).toFixed(1)
-                  : 0}
-                %
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Setelah komisi kapster &amp; pemasok
-              </small>
-            </div>
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 8,
-                border: "1px solid var(--line)",
-                background: "var(--paper)",
-              }}
-            >
-              <small
-                style={{
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                Total Omzet Penjualan
-              </small>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--ink)",
-                  marginTop: 4,
-                }}
-              >
-                {rupiah(totalOmzet)}
-              </div>
-              <small style={{ color: "var(--slate)" }}>
-                Basis perhitungan bagi hasil
-              </small>
-            </div>
-          </div>
-
-          <div
-            style={{
-              border: "1px solid var(--line)",
-              borderRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <div
-                style={{
-                  minWidth: 700,
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1.3fr 1.3fr 1.3fr 1.3fr",
-                  padding: "10px 16px",
-                  background: "var(--bone)",
-                  color: "var(--slate)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  gap: 12,
-                }}
-              >
-                <span>Nama Produk</span>
-                <span>Unit</span>
-                <span>Omzet</span>
-                <span>Porsi Kapster</span>
-                <span>Porsi Pemasok</span>
-                <span>Bersih Eastville</span>
-              </div>
-              {bagianEastvillePerProduk.map((item) => {
-                const pct =
-                  item.omzet > 0
-                    ? ((item.eastvilleShare / item.omzet) * 100).toFixed(1)
-                    : "0"
-                return (
-                  <div
-                    key={item.product}
-                    style={{
-                      minWidth: 700,
-                      display: "grid",
-                      gridTemplateColumns: "2fr 1fr 1.3fr 1.3fr 1.3fr 1.3fr",
-                      padding: "12px 16px",
-                      borderTop: "1px solid var(--line)",
-                      gap: 12,
-                      alignItems: "center",
-                      fontSize: 13,
-                    }}
-                  >
-                    <div>
-                      <strong style={{ color: "var(--ink)", display: "block" }}>
-                        {item.product}
-                      </strong>
-                      <small style={{ color: "var(--muted)" }}>
-                        Margin: {pct}%
-                      </small>
-                    </div>
-                    <span>{item.qty} unit</span>
-                    <span style={{ color: "var(--slate)" }}>
-                      {rupiah(item.omzet)}
-                    </span>
-                    <span style={{ color: "var(--brass-dark)" }}>
-                      - {rupiah(item.barberShare)}
-                    </span>
-                    <span style={{ color: "var(--amber)" }}>
-                      - {rupiah(item.sellerShare)}
-                    </span>
-                    <strong style={{ color: "var(--ink)" }}>
-                      + {rupiah(item.eastvilleShare)}
-                    </strong>
-                  </div>
-                )
-              })}
-              {bagianEastvillePerProduk.length === 0 && (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
-                  Belum ada data bagi hasil produk pada periode ini.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {activeTab === "ringkasan" && (
-        <>
-          <section className="panel distribution">
-            <div>
-              <PageTitle
-                eyebrow="Pembagian tiga pihak"
-                title="Distribusi hasil penjualan"
-              />
-              <div className="legend">
-                <span>
-                  <i className="sage-dot" />
-                  Kapster{" "}
-                  {totalOmzet > 0
-                    ? ((totalBarber / totalOmzet) * 100).toFixed(1)
-                    : 0}
-                  %
-                </span>
-                <span>
-                  <i className="brass-dot" />
-                  Pemasok{" "}
-                  {totalOmzet > 0
-                    ? ((totalSeller / totalOmzet) * 100).toFixed(1)
-                    : 0}
-                  %
-                </span>
-                <span>
-                  <i className="dark-dot" />
-                  Eastville{" "}
-                  {totalOmzet > 0
-                    ? ((totalEastville / totalOmzet) * 100).toFixed(1)
-                    : 0}
-                  %
-                </span>
-              </div>
-            </div>
-            <div className="donut">
-              <span>
-                <small>Total dibagi</small>
-                <strong>{rupiah(totalOmzet)}</strong>
-              </span>
-            </div>
-            <div className="success-banner">
-              <Icon name="check" />
-              <span>
-                <strong>Hanya penjualan aktif</strong>
-                <small>Penjualan batal tidak dihitung</small>
-              </span>
-            </div>
-          </section>
-          <div className="product-detail-grid">
-            <ProductDetail
-              rows={live ? ringkas((tx) => tx.product) : undefined}
-            />
-            <CompactDetail
-              title="Per kapster"
-              icon="user"
-              rows={
-                live
-                  ? ringkas((tx) => tx.barber)
-                  : [
-                      ["Seva", "44 unit", "Rp 520.000"],
-                      ["Tata", "36 unit", "Rp 420.000"],
-                    ]
-              }
-            />
-            <CompactDetail
-              title="Per pemasok"
-              icon="home"
-              rows={
-                live
-                  ? ringkas((tx) => tx.seller)
-                  : [
-                      ["HAIRPRO Official", "118 unit", "Rp 5.840.000"],
-                      ["Mitra Grooming", "29 unit", "Rp 1.160.000"],
-                    ]
-              }
+      <section id="lp-transaksi" className="panel lk-panel report-section">
+        <div className="lk-head">
+          <h3>Riwayat Transaksi Produk</h3>
+        </div>
+        <div className="expense-toolbar filters">
+          <div className="search">
+            <Icon name="search" />
+            <input
+              placeholder="Cari nota, produk, kapster, pemasok..."
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
             />
           </div>
-        </>
-      )}
+        </div>
+        <div className="lp-table lp-tx-table">
+          <div className="lp-table-inner">
+            <div className="lp-head lp-tx-grid">
+              <span>Nota &amp; Waktu</span>
+              <span>Produk</span>
+              <span className="lp-hide-sm">Pemasok</span>
+              <span className="is-right">Total</span>
+              <span aria-hidden="true" />
+            </div>
+            {filteredTransactions.map((tx, index) => {
+              const rowId = `${tx.id}-${index}`
+              const isOpen = expandedTxId === rowId
+              const batal = tx.status === "Batal"
+              return (
+                <div className={`lp-tx${batal ? " is-void" : ""}`} key={rowId}>
+                  <button
+                    type="button"
+                    className="lp-row lp-tx-grid lp-tx-row"
+                    aria-expanded={isOpen}
+                    onClick={() => toggleExpand(rowId)}
+                  >
+                    <span className="lp-nota">
+                      <strong>{tx.id}</strong>
+                      <small>{tx.time}</small>
+                    </span>
+                    <span className="lp-prod">
+                      <strong>{tx.product}</strong>
+                      <small>{tx.qty} unit</small>
+                    </span>
+                    <span className="lp-sup lp-hide-sm">{tx.seller}</span>
+                    <b className="lp-total is-right">{rupiah(tx.totalOmzet)}</b>
+                    <Icon name="chevron" className={`lp-chev${isOpen ? " is-open" : ""}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="lp-detail">
+                      <div className="lp-cell">
+                        <span>Harga satuan</span>
+                        <b>{rupiah(tx.unitPrice)} × {tx.qty} unit</b>
+                      </div>
+                      <div className="lp-cell">
+                        <span>Kapster penjual</span>
+                        <b>{tx.barber}</b>
+                        <small>Komisi {bagianTx(tx.barberShare, tx.totalOmzet)}</small>
+                      </div>
+                      <div className="lp-cell">
+                        <span>Bagian pemasok</span>
+                        <b>{tx.seller}</b>
+                        <small>{bagianTx(tx.sellerShare, tx.totalOmzet)}</small>
+                      </div>
+                      <div className="lp-cell">
+                        <span>Bagian Eastville</span>
+                        <b>{bagianTx(tx.eastvilleShare, tx.totalOmzet)}</b>
+                        <small>Laba toko barbershop</small>
+                      </div>
+                      {batal && (
+                        <div className="lp-void">
+                          <Icon name="alert" />
+                          <span>
+                            Dibatalkan oleh {tx.voidBy} · {tx.voidAt}: {tx.voidReason}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            {filteredTransactions.length === 0 && (
+              <div className="lk-empty">
+                Tidak ada data transaksi yang cocok dengan pencarian.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div id="lp-omzet" className="report-section">
+        <RincianProduk
+          judul="Total omzet produk"
+          statistik={[
+            { label: "Total omzet", nilai: rupiah(totalOmzet), catatan: `Dari ${validTransactions.length} transaksi lunas` },
+            { label: "Unit terjual", nilai: `${unitTotal} unit`, catatan: `${omzetPerProduk.length} varian produk` },
+            { label: "Rata-rata per unit", nilai: rupiah(unitTotal > 0 ? Math.round(totalOmzet / unitTotal) : 0), catatan: "Nilai rata-rata produk" },
+          ]}
+          kolom={[
+            { label: "Produk" },
+            { label: "Unit" },
+            { label: "Harga rata-rata", kecil: true },
+            { label: "Omzet", kanan: true },
+            { label: "Kontribusi", kecil: true },
+          ]}
+          lebar="minmax(0,1.6fr) minmax(0,.7fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,.8fr)"
+          lebarHP="minmax(0,1.4fr) minmax(0,.8fr) minmax(0,1.1fr)"
+          baris={omzetPerProduk.map((x) => ({
+            key: x.product,
+            sel: [
+              <strong key="n">{x.product}</strong>,
+              `${x.qty} unit`,
+              rupiah(Math.round(x.omzet / x.qty)),
+              <b key="o">{rupiah(x.omzet)}</b>,
+              `${persen(x.omzet, totalOmzet)}%`,
+            ],
+          }))}
+          kosong="Belum ada penjualan produk lunas pada periode ini."
+        />
+      </div>
+
+      <div id="lp-komisi" className="report-section">
+        <RincianProduk
+          judul="Komisi kapster"
+          statistik={[
+            { label: "Total komisi", nilai: rupiah(totalBarber), catatan: "Bagian yang diterima kapster" },
+            { label: "Porsi dari omzet", nilai: `${persen(totalBarber, totalOmzet)}%`, catatan: "Persentase bagi hasil kapster" },
+            { label: "Kapster berhasil jual", nilai: `${komisiPerKapster.length} orang`, catatan: "Kapster dengan penjualan aktif" },
+          ]}
+          kolom={[
+            { label: "Kapster" },
+            { label: "Transaksi" },
+            { label: "Unit", kecil: true },
+            { label: "Omzet", kecil: true },
+            { label: "Komisi", kanan: true },
+          ]}
+          lebar="minmax(0,1.6fr) minmax(0,.9fr) minmax(0,.7fr) minmax(0,1.1fr) minmax(0,1.1fr)"
+          lebarHP="minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.1fr)"
+          baris={komisiPerKapster.map((x) => ({
+            key: x.barber,
+            sel: [
+              <strong key="n">{x.barber}</strong>,
+              `${x.txCount} nota`,
+              `${x.qty} unit`,
+              rupiah(x.omzet),
+              <b className="lk-komisi" key="k">{rupiah(x.komisi)}</b>,
+            ],
+          }))}
+          kosong="Belum ada data komisi kapster pada periode ini."
+          onBuka={onNavigate ? bukaRiwayatKapster : undefined}
+        />
+      </div>
+
+      <div id="lp-pemasok" className="report-section">
+        <RincianProduk
+          judul="Bagian pemasok"
+          statistik={[
+            { label: "Total hak pemasok", nilai: rupiah(totalSeller), catatan: "Kewajiban bayar ke pemasok" },
+            { label: "Porsi dari omzet", nilai: `${persen(totalSeller, totalOmzet)}%`, catatan: "Persentase bagi pemasok" },
+            { label: "Jumlah pemasok", nilai: `${bagianPerPemasok.length} mitra`, catatan: "Pemasok aktif periode ini" },
+          ]}
+          kolom={[
+            { label: "Pemasok" },
+            { label: "Produk dipasok", kecil: true },
+            { label: "Unit" },
+            { label: "Omzet kotor", kecil: true },
+            { label: "Hak pemasok", kanan: true },
+          ]}
+          lebar="minmax(0,1.4fr) minmax(0,1.6fr) minmax(0,.7fr) minmax(0,1.1fr) minmax(0,1.1fr)"
+          lebarHP="minmax(0,1.3fr) minmax(0,.7fr) minmax(0,1.1fr)"
+          baris={bagianPerPemasok.map((x) => ({
+            key: x.seller,
+            sel: [
+              <strong key="n">{x.seller}</strong>,
+              x.productsList,
+              `${x.qty} unit`,
+              rupiah(x.omzet),
+              <b className="lp-amber" key="h">{rupiah(x.sellerShare)}</b>,
+            ],
+          }))}
+          kosong="Belum ada data pemasok pada periode ini."
+        />
+      </div>
+
+      <div id="lp-eastville" className="report-section">
+        <RincianProduk
+          judul="Bagian Eastville"
+          statistik={[
+            { label: "Total bagian toko", nilai: rupiah(totalEastville), catatan: "Laba kotor barbershop" },
+            { label: "Margin dari omzet", nilai: `${persen(totalEastville, totalOmzet)}%`, catatan: "Setelah komisi kapster & pemasok" },
+            { label: "Total omzet", nilai: rupiah(totalOmzet), catatan: "Dasar perhitungan bagi hasil" },
+          ]}
+          kolom={[
+            { label: "Produk" },
+            { label: "Unit", kecil: true },
+            { label: "Omzet" },
+            { label: "Kapster", kecil: true },
+            { label: "Pemasok", kecil: true },
+            { label: "Eastville", kanan: true },
+          ]}
+          lebar="minmax(0,1.5fr) minmax(0,.6fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr)"
+          lebarHP="minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)"
+          baris={bagianEastvillePerProduk.map((x) => ({
+            key: x.product,
+            sel: [
+              <strong key="n">{x.product}</strong>,
+              `${x.qty} unit`,
+              rupiah(x.omzet),
+              `- ${rupiah(x.barberShare)}`,
+              `- ${rupiah(x.sellerShare)}`,
+              <b key="e">{rupiah(x.eastvilleShare)}</b>,
+            ],
+          }))}
+          kosong="Belum ada data bagi hasil produk pada periode ini."
+        />
+      </div>
       {wa && (
         <WhatsAppDialog
           onClose={() => setWa(false)}

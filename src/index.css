@@ -683,7 +683,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 11px 14px;
   border: 1px solid rgb(79 122 90 / 25%);
   border-radius: 10px;
@@ -763,7 +763,7 @@ textarea {
 }
 
 .product-tx-panel {
-  margin-top: 14px;
+  margin-top: 16px;
   overflow: hidden;
 }
 
@@ -772,7 +772,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 16px;
   padding: 16px;
   border-bottom: 1px solid var(--line);
 }
@@ -881,7 +881,7 @@ textarea {
 }
 
 .correction-panel {
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 18px;
 }
 
@@ -1361,7 +1361,7 @@ textarea {
 .logout-card-header {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 16px;
 }
 
 .logout-icon-shell {
@@ -1944,7 +1944,7 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .role-denied-box h3 {
@@ -1978,7 +1978,7 @@ textarea {
 .app-header-inner {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 12px 14px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2131,7 +2131,7 @@ textarea {
 .content {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 26px 14px 42px;
+  padding: 26px 16px 42px;
 }
 
 .content.narrow {
@@ -2198,7 +2198,7 @@ textarea {
 .desktop-page-head {
   width: 100%;
   margin: 0;
-  padding: 14px 14px 0;
+  padding: 16px 16px 0;
 }
 
 .desktop-page-head h1 {
@@ -2220,7 +2220,7 @@ textarea {
     left: 0;
     z-index: 10;
     width: calc((100% - max(340px, 25%)));
-    padding: 14px 14px 0;
+    padding: 16px 16px 0;
     pointer-events: none;
   }
 
@@ -2229,18 +2229,18 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding: 0 10px 16px 14px;
+    padding: 0 10px 16px 16px;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
-    padding-top: 54px;
+    padding-top: 58px;
   }
 }
 
 @media (min-width: 1025px) {
   .desktop-page-head + .content,
   .desktop-page-head + .mobile-content {
-    padding-top: 14px !important;
+    padding-top: 16px !important;
   }
 }
 
@@ -2435,8 +2435,8 @@ textarea {
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
-  gap: 14px;
-  margin-top: 14px;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .chart-panel,
@@ -2797,7 +2797,7 @@ textarea {
 .absensi-loading-heading {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   text-align: left;
 }
 
@@ -2952,8 +2952,8 @@ textarea {
 }
 
 .catalog-locked-card {
-  margin-top: 14px;
-  padding: 14px 16px;
+  margin-top: 16px;
+  padding: 16px 16px;
   background: #fffbeb;
   border: 1.5px dashed #f59e0b;
   border-radius: 12px;
@@ -3166,7 +3166,7 @@ textarea {
   justify-content: space-between;
   gap: 8px;
   margin: -10px -12px 0;
-  padding: 10px 14px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
@@ -3458,7 +3458,7 @@ textarea {
   max-height: none;
   flex: 0 0 auto;
   overflow-y: visible;
-  padding: 14px 16px 16px;
+  padding: 16px 16px 16px;
   border-top: 1px solid var(--line);
   background: var(--paper);
   scrollbar-gutter: stable;
@@ -3621,7 +3621,7 @@ textarea {
 }
 
 .commission-choice {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .commission-choice > span {
@@ -3737,7 +3737,7 @@ textarea {
 }
 
 .promo-discount-modal > .toggle-row {
-  margin: 14px 18px 16px;
+  margin: 16px 18px 16px;
 }
 
 .promo-discount-actions {
@@ -3751,7 +3751,7 @@ textarea {
 .promo-discount-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: 14px;
+  gap: 16px;
   max-height: 520px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -4159,7 +4159,7 @@ textarea {
 .simple-modal > .pay-preview,
 .simple-modal > pre {
   display: block;
-  margin: 14px 18px 0;
+  margin: 16px 18px 0;
 }
 
 .stock-modal > label:last-of-type {
@@ -4227,7 +4227,7 @@ textarea {
 }
 
 .reason-dialog > footer {
-  margin: 14px -18px -16px;
+  margin: 16px -18px -16px;
 }
 
 /* Success / receipt */
@@ -4536,8 +4536,8 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(360px, 420px);
   align-items: start;
-  gap: 14px;
-  margin-top: 14px;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .transaction-list {
@@ -5029,7 +5029,7 @@ textarea {
   gap: 12px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 }
 
 .detail {
@@ -5048,7 +5048,7 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 14px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -5470,7 +5470,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .manual-info-grid {
@@ -5572,7 +5572,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
   flex-wrap: wrap;
 }
 
@@ -5755,7 +5755,7 @@ textarea {
     "left details";
   align-content: start;
   align-items: start;
-  gap: 14px;
+  gap: 16px;
   scrollbar-width: none;
 }
 
@@ -5771,7 +5771,7 @@ textarea {
   grid-area: left;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   min-width: 0;
 }
 
@@ -5787,7 +5787,7 @@ textarea {
   grid-area: details;
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 16px;
   min-width: 0;
 }
 
@@ -6249,7 +6249,7 @@ textarea {
 }
 
 .expense-page-title + .expense-toolbar {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .owner-profit-panel > .page-title {
@@ -6497,7 +6497,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 9px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .kasbon-history-panel {
@@ -6852,7 +6852,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -7041,7 +7041,7 @@ textarea {
 .absensi-capture-button {
   position: absolute;
   left: 50%;
-  bottom: 14px;
+  bottom: 16px;
   transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
@@ -7109,7 +7109,7 @@ textarea {
 }
 
 .my-salary-hero {
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 21px;
   border-radius: 14px;
   color: var(--paper);
@@ -7844,7 +7844,7 @@ textarea {
   align-items: center;
   gap: 8px;
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
 }
 
@@ -8061,7 +8061,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .services-status-bar .master-summary {
@@ -8073,7 +8073,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 }
 
 .products-status-bar .master-summary {
@@ -8268,7 +8268,7 @@ textarea {
 .service-commission-values {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .service-commission-values > span {
@@ -8351,7 +8351,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 14px 18px 0;
+  margin: 16px 18px 0;
 }
 
 .branch-price-grid label {
@@ -8755,7 +8755,7 @@ textarea {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 16px;
   border-radius: 12px;
   color: var(--paper);
@@ -9131,7 +9131,7 @@ textarea {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
-  margin: 14px 18px 0;
+  margin: 16px 18px 0;
 }
 
 .old-new > span {
@@ -9201,7 +9201,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 9px 11px;
   border-radius: 8px;
   color: var(--sage);
@@ -9255,7 +9255,7 @@ textarea {
   display: grid;
   grid-template-columns: 1.5fr 0.8fr;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .backup-hero {
@@ -9487,7 +9487,7 @@ textarea {
 
 .restore-confirm label {
   display: block;
-  margin-top: 14px;
+  margin-top: 16px;
   text-align: left;
 }
 
@@ -9774,12 +9774,12 @@ textarea {
   }
 
   .app-header-inner {
-    padding: 10px 14px;
+    padding: 10px 16px;
     gap: 10px;
   }
 
   .content {
-    padding: 18px 14px 30px;
+    padding: 18px 16px 30px;
   }
 
   .kpi-grid {
@@ -9801,7 +9801,7 @@ textarea {
 
   .catalog {
     overflow: visible;
-    padding: 18px 14px 96px;
+    padding: 18px 16px 96px;
   }
 
   .cashier-page .cart {
@@ -9869,7 +9869,7 @@ textarea {
     flex: 1 1 auto !important;
     display: flex !important;
     flex-direction: column !important;
-    margin-inline: -14px !important;
+    margin-inline: -16px !important;
     margin-bottom: 0 !important;
     min-height: 0 !important;
   }
@@ -10043,7 +10043,7 @@ textarea {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px 14px;
+    gap: 9px 16px;
     padding: 3px 0 1px;
   }
 
@@ -10060,7 +10060,7 @@ textarea {
   .service-commission-values {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 16px;
   }
 
   .service-commission-values > span > small {
@@ -10085,7 +10085,7 @@ textarea {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 14px;
+    gap: 10px 16px;
     padding: 4px 0 2px;
   }
 
@@ -10368,7 +10368,7 @@ textarea {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 10px !important;
-    margin-bottom: 14px !important;
+    margin-bottom: 16px !important;
     padding-bottom: 10px !important;
   }
 
@@ -10424,7 +10424,7 @@ textarea {
   .report-section > div > .panel {
     box-sizing: border-box;
     width: 100%;
-    padding: 14px !important;
+    padding: 16px !important;
   }
 
   .expense-toolbar {
@@ -10572,7 +10572,7 @@ textarea {
     grid-row: 2 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    gap: 9px 14px !important;
+    gap: 9px 16px !important;
     padding: 3px 0 1px !important;
   }
 
@@ -10736,8 +10736,8 @@ textarea {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 4px;
-    margin-inline: -14px;
-    padding-inline: 14px;
+    margin-inline: -16px;
+    padding-inline: 16px;
   }
 
   .report-subnav-row .segmented {
@@ -11310,7 +11310,7 @@ textarea {
   .content .page-title > .page-actions,
   .mobile-content .page-title > .button,
   .mobile-content .page-title > .page-actions {
-    margin-top: 14px;
+    margin-top: 16px;
   }
 
   .content .page-actions,
@@ -11380,7 +11380,7 @@ textarea {
   }
 
   .mobile-content {
-    padding-inline: 14px;
+    padding-inline: 16px;
   }
 
   .mobile-content .my-salary-hero > strong {
@@ -11650,7 +11650,7 @@ textarea {
 
 @media (max-width: 820px) {
   .mobile-content.absensi-kasir {
-    padding: 68px 14px 28px !important;
+    padding: 70px 16px 28px !important;
   }
 }
 
@@ -11693,7 +11693,7 @@ textarea {
 .attendance-setting-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -11894,7 +11894,7 @@ textarea {
     align-items: center;
     gap: 12px;
     height: 54px;
-    padding: 0 14px;
+    padding: 0 16px;
     background: var(--paper);
     border-bottom: 1px solid var(--line);
     box-shadow: 0 2px 8px rgb(20 17 15 / 5%);
@@ -11965,7 +11965,7 @@ textarea {
 
   .content,
   .mobile-content {
-    padding-top: 66px;
+    padding-top: 70px;
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -12071,7 +12071,7 @@ textarea {
   }
 
   .catalog {
-    padding-top: 66px;
+    padding-top: 70px;
   }
 }
 
@@ -12267,7 +12267,7 @@ textarea {
   .content.narrow,
   .mobile-content {
     width: 100%;
-    padding: 66px 14px 28px;
+    padding: 70px 16px 28px;
   }
 
   .content.history-page-content {
@@ -12275,7 +12275,7 @@ textarea {
   }
 
   .form-panel {
-    padding: 14px;
+    padding: 16px;
   }
 
   .app-header-inner {
@@ -12291,7 +12291,7 @@ textarea {
   }
 
   .catalog {
-    padding: 66px 14px 18px;
+    padding: 70px 16px 18px;
   }
 
   .barber-picker {
@@ -12725,7 +12725,7 @@ summary,
 .nota-catalog-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .nota-group {
@@ -12919,7 +12919,7 @@ summary,
   display: grid;
   grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.4fr);
   align-items: start;
-  gap: 14px;
+  gap: 16px;
   margin-top: 11px;
 }
 
@@ -12952,7 +12952,7 @@ summary,
   grid-row: 2;
   width: fit-content;
   max-width: 100%;
-  gap: 14px;
+  gap: 16px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -13103,7 +13103,7 @@ summary,
   .manual-payment-panel > .nota-summary {
     grid-column: auto;
     grid-row: auto;
-    margin-top: 14px;
+    margin-top: 16px;
     padding-top: 12px;
     border-top: 1px solid var(--line);
   }
@@ -13151,7 +13151,7 @@ summary,
     align-items: center !important;
     justify-content: stretch !important;
     gap: 6px 12px !important;
-    padding: 14px 16px !important;
+    padding: 16px 16px !important;
   }
 
   .expense-row:not(.expense-table-compact > *) > .exp-cat {
@@ -13532,7 +13532,7 @@ summary,
   .audit-row {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    gap: 0 14px !important;
+    gap: 0 16px !important;
     min-height: 0 !important;
     margin: 10px 12px !important;
     padding: 10px 12px !important;
@@ -13667,7 +13667,7 @@ summary,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .owner-recent-head h3 {
@@ -13764,7 +13764,7 @@ summary,
 
 @media (max-width: 620px) {
   .owner-recent-panel {
-    padding: 14px 14px 24px !important;
+    padding: 16px 16px 24px !important;
   }
 
   .owner-recent-head {
@@ -13841,123 +13841,6 @@ summary,
 
   .owner-recent-footer .text-button {
     min-height: 36px;
-  }
-}
-
-/* Beranda Owner: kunci halaman pada viewport dan gulir daftar di dalam kartu. */
-.workspace:has(> .content.owner-dashboard-page) {
-  height: 100svh;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.workspace:has(> .content.owner-dashboard-page) > .desktop-page-head {
-  flex: 0 0 auto;
-}
-
-.workspace:has(> .content.owner-dashboard-page) > .owner-dashboard-page {
-  flex: 1 1 0;
-  height: auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 16px;
-  overflow: hidden;
-}
-
-.owner-dashboard-page > .demo-notice,
-.owner-dashboard-page > .owner-dashboard-title,
-.owner-dashboard-page > .kpi-grid {
-  flex: 0 0 auto;
-}
-
-.owner-dashboard-page .kpi-grid {
-  margin-top: 12px;
-}
-
-.owner-dashboard-lower-wrap {
-  flex: 1 1 0;
-  min-height: 0;
-  display: flex;
-  margin-top: 12px;
-}
-
-.owner-dashboard-page .dashboard-lower-grid {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: 100%;
-  align-items: stretch;
-  gap: 12px;
-}
-
-.owner-dashboard-page .owner-attendance-panel,
-.owner-dashboard-page .owner-recent-panel {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.owner-dashboard-page .owner-attendance-list,
-.owner-dashboard-page .owner-recent-list {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: none;
-}
-
-.owner-dashboard-page .owner-recent-head,
-.owner-dashboard-page .owner-recent-footer {
-  flex: 0 0 auto;
-}
-
-.owner-dashboard-page .owner-recent-empty {
-  flex: 1 1 auto;
-  display: grid;
-  place-items: center;
-  text-align: center;
-}
-
-@media (max-width: 1024px) {
-  .owner-dashboard-page {
-    padding: 66px 14px 14px !important;
-  }
-
-  .owner-dashboard-page .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px;
-  }
-
-  .owner-dashboard-page .kpi {
-    padding: 10px;
-  }
-}
-
-@media (max-width: 820px) {
-  .owner-dashboard-page .dashboard-lower-grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-  }
-
-  .owner-dashboard-page .owner-attendance-panel,
-  .owner-dashboard-page .owner-recent-panel {
-    padding: 12px !important;
-  }
-}
-
-@media (max-width: 620px) {
-  .owner-dashboard-page {
-    padding-bottom: 10px !important;
-  }
-
-  .owner-dashboard-page .kpi-grid {
-    margin-top: 8px;
-  }
-
-  .owner-dashboard-lower-wrap {
-    margin-top: 8px;
   }
 }
 
@@ -14056,7 +13939,7 @@ summary,
 
 @media (max-width: 820px) {
   .cashier-page .catalog {
-    padding-top: 14px;
+    padding-top: 16px;
   }
 }
 
@@ -14130,7 +14013,7 @@ summary,
     border: 1px solid var(--line) !important;
     border-radius: 12px !important;
     box-shadow: var(--shadow) !important;
-    margin-bottom: 14px !important;
+    margin-bottom: 16px !important;
   }
 
   .content.history-page-content {
@@ -14364,7 +14247,7 @@ summary,
 
 @media (max-width: 620px) {
   .content.history-page-content {
-    padding-bottom: 14px !important;
+    padding-bottom: 16px !important;
   }
 }
 
@@ -14459,7 +14342,7 @@ summary,
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px !important;
+  gap: 16px !important;
 }
 
 .history-page-content .filters .search-select.history-kapster-select {
@@ -14539,7 +14422,7 @@ summary,
 
   /* Panel detail: padding & jarak antar bagian sama dengan popup HP/tablet (14px samping, 12px antar bagian) */
   .history-page-content .desktop-only-detail {
-    padding: 14px 16px 16px;
+    padding: 16px 16px 16px;
     gap: 12px;
   }
 
@@ -14608,8 +14491,8 @@ summary,
     height: 100svh;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding-bottom: 14px !important;
+    gap: 16px;
+    padding-bottom: 16px !important;
     overflow: hidden;
   }
 
@@ -14656,15 +14539,15 @@ summary,
   }
 
   .cashier-page .catalog-sticky {
-    padding-top: 14px;
+    padding-top: 16px;
   }
 }
 
 /* Kasir: jarak + garis pemisah di bawah bagian yang menempel */
 .cashier-page .catalog-sticky {
-  padding-bottom: 14px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   /* latar melebar ke samping agar bayangan kartu yang menggulir tidak tembus di sisi kapster */
   box-shadow: -14px 0 0 var(--bone), 10px 0 0 var(--bone);
 }
@@ -14747,7 +14630,7 @@ summary,
 
 .manual-page .manual-discount-panel .manual-info-grid {
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 16px;
 }
 
 .manual-page .manual-payment-panel {
@@ -14765,7 +14648,7 @@ summary,
 
 .manual-page .manual-payment-panel > .form-grid {
   grid-template-columns: 1fr;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .manual-page .manual-payment-panel > .form-grid label > span {
@@ -14773,7 +14656,7 @@ summary,
 }
 
 .manual-page .manual-payment-panel > .nota-summary {
-  margin-top: 14px;
+  margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
@@ -14818,13 +14701,13 @@ summary,
 .manual-date-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 14px;
+  gap: 12px 16px;
   grid-column: 1 / -1;
 }
 
 /* Input Manual: jarak antarkolom sama di semua kartu, uang cepat melebar penuh */
 .manual-page .manual-info-grid {
-  gap: 12px 14px;
+  gap: 12px 16px;
 }
 
 .manual-page .manual-quick-cash {
@@ -15079,7 +14962,7 @@ label .search-select-trigger {
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
-    padding-bottom: 26px;
+    padding-bottom: 16px;
     overflow: hidden;
   }
 
@@ -15178,7 +15061,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
   .mobile-content.attendance-history-page {
-    padding: 26px 14px 26px;
+    padding: 26px 16px 26px;
   }
 
   .audit-page-content {
@@ -15250,8 +15133,8 @@ label .search-select-trigger {
 
 .kasbon-kapster-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 14px;
-  margin-top: 14px;
+  gap: 12px 16px;
+  margin-top: 16px;
 }
 
 .kasbon-kapster-grid .kasbon-kapster-note {
@@ -15281,7 +15164,7 @@ label .search-select-trigger {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -15343,8 +15226,8 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-grid {
-  gap: 12px 14px;
-  margin-top: 14px;
+  gap: 12px 16px;
+  margin-top: 16px;
 }
 
 .kasbon-kapster-page .input-shell input,
@@ -15368,7 +15251,7 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-actions {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-actions .button {
@@ -15391,7 +15274,7 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 /* Kasir POS: seluruh kotak item dapat diklik untuk menambah ke keranjang */
@@ -15609,7 +15492,7 @@ label .search-select-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .izin-cal-head strong {
   font-size: 18px;
@@ -15690,7 +15573,7 @@ label .search-select-trigger {
 .izin-pilihan {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   margin: 0 0 16px;
   padding: 12px 16px;
   border: 1px solid var(--line);
@@ -15830,7 +15713,7 @@ label .search-select-trigger {
     min-height: 0;
     width: 100%;
     margin: 0;
-    padding: 68px 14px 14px !important;
+    padding: 70px 16px 16px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -15864,7 +15747,7 @@ label .search-select-trigger {
   .workspace > .content.izin-kapster-page {
     width: 100%;
     margin: 0;
-    padding: 68px 14px 30px !important;
+    padding: 70px 16px 30px !important;
     overflow: visible;
   }
 
@@ -15916,7 +15799,7 @@ label .search-select-trigger {
     min-height: 80px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 10px 14px 12px;
+    padding: 10px 16px 12px;
   }
 
   .cashier-page .cart-total {
@@ -15924,7 +15807,7 @@ label .search-select-trigger {
     max-height: calc(100% - 80px);
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 12px 14px 16px;
+    padding: 12px 16px 16px;
     border-top: 1px solid var(--line);
   }
 }
@@ -15950,7 +15833,7 @@ label .search-select-trigger {
   .cashier-page .cart-total {
     gap: 0;
     font-size: 13px;
-    padding: 10px 14px 14px;
+    padding: 10px 16px 16px;
   }
 
   .cashier-page .cart-total .grand strong {
@@ -15979,7 +15862,7 @@ label .search-select-trigger {
 /* Kasir di layar dengan navbar atas (≤1024px): beri ruang untuk navbar agar bagian kapster tidak tertutup */
 @media (max-width: 1024px) {
   .cashier-page {
-    padding-top: 56px;
+    padding-top: 54px;
   }
 
   /* Blok kapster+tab+cari ikut menggulir (tidak menempel), supaya layar kecil tidak tertutup */
@@ -16041,7 +15924,7 @@ label .search-select-trigger {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    padding: 24px 14px 22px !important;
+    padding: 24px 16px 22px !important;
   }
 
   .kapster-dashboard > .kpi-grid {
@@ -16104,7 +15987,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .app-shell-kapster .my-salary-page {
     width: min(1280px, 100%);
-    padding: 24px 14px 28px;
+    padding: 24px 16px 28px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
     gap: 16px;
@@ -16133,7 +16016,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .kapster-product-commission {
     width: min(1280px, 100%);
-    padding: 24px 14px 28px;
+    padding: 24px 16px 28px;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16216,7 +16099,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
     width: min(1280px, 100%);
-    padding: 24px 14px 28px !important;
+    padding: 24px 16px 28px !important;
   }
 
   .app-shell-kapster .kapster-dashboard > .page-title,
@@ -16224,7 +16107,7 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-product-commission > .page-title {
     min-height: 48px;
     align-items: center;
-    margin: 0 0 14px;
+    margin: 0 0 16px;
     padding: 0;
   }
 
@@ -16415,7 +16298,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page > .page-title,
   .app-shell-kapster .kapster-product-commission > .page-title {
     height: 48px;
-    margin: 0 0 14px !important;
+    margin: 0 0 16px !important;
   }
 
   .app-shell-kapster .kapster-dashboard > .kpi-grid,
@@ -16488,7 +16371,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page > .page-title {
     position: absolute;
     top: 20px;
-    right: 14px;
+    right: 16px;
     height: auto;
     min-height: 0;
     margin: 0 !important;
@@ -16536,7 +16419,7 @@ label .search-select-trigger {
 
 @media (min-width: 1025px) {
   .app-shell-kapster .my-salary-page > .page-title {
-    top: 14px;
+    top: 16px;
   }
 }
 
@@ -16628,7 +16511,7 @@ label .search-select-trigger {
   .cashier-page .cart {
     height: 100%;
     min-height: 0;
-    padding: 16px 20px 16px 14px;
+    padding: 16px 20px 16px 16px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -16660,7 +16543,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   /* Margin desktop mengikuti acuan Riwayat Transaksi: 27px kanan, 16px bawah, 14px celah kolom, sejajar header */
   .cashier-page .cart {
-    padding: 54px 14px 16px 10px;
+    padding: 58px 16px 16px 10px;
     transform: none !important;
   }
 }
@@ -16856,8 +16739,8 @@ label .search-select-trigger {
 
   .app-shell-kapster .kapster-dashboard-actions {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 16px;
+    right: 16px;
     z-index: 5;
   }
 
@@ -16936,11 +16819,11 @@ label .search-select-trigger {
     min-height: 0;
     width: min(1280px, 100%);
     margin: 0 auto;
-    padding: 14px 14px 26px !important;
+    padding: 16px 16px 26px !important;
     overflow: visible;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
   }
 
   .fit-page > .kpi-grid {
@@ -16951,7 +16834,7 @@ label .search-select-trigger {
   .fit-page-actions {
     position: absolute;
     top: -35px;
-    right: 14px;
+    right: 16px;
     z-index: 5;
     margin: 0;
   }
@@ -16972,7 +16855,7 @@ label .search-select-trigger {
     min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
   }
 
   .catalog-embedded-view > .fit-fill {
@@ -17103,7 +16986,7 @@ label .search-select-trigger {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 68px 14px 20px !important;
+    padding: 70px 16px 20px !important;
     margin: 0 auto;
   }
 
@@ -17120,7 +17003,7 @@ label .search-select-trigger {
 
   /* kartu KPI: isi tidak menempel ke tepi kartu */
   .kpi {
-    padding: 14px 16px;
+    padding: 16px 16px;
   }
 
   .panel {
@@ -17132,12 +17015,6 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .workspace > .fit-page {
     position: relative;
-  }
-}
-
-@media (min-width: 1025px) {
-  .workspace:has(> .content.owner-dashboard-page) > .owner-dashboard-page {
-    overflow: visible;
   }
 }
 
@@ -17278,7 +17155,7 @@ label .search-select-trigger {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     overflow: hidden;
-    padding-top: 56px;
+    padding-top: 54px;
     box-sizing: border-box;
   }
 
@@ -17288,13 +17165,14 @@ label .search-select-trigger {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 0 14px;
+    padding: 0 16px;
+    border-right: 0;
   }
 
   .cashier-page .catalog-sticky {
     position: static;
     flex: 0 0 auto;
-    padding-top: 14px;
+    padding-top: 16px;
   }
 
   .cashier-page .catalog-tools {
@@ -17396,7 +17274,7 @@ label .search-select-trigger {
     height: 100%;
     min-height: 0;
     overflow-y: auto;
-    padding: 10px 10px 14px 18px;
+    padding: 16px 8px 16px 16px;
     overscroll-behavior: contain;
     border-right: 0;
   }
@@ -17406,8 +17284,8 @@ label .search-select-trigger {
     top: 0;
     z-index: 5;
     padding-top: 0;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
     border-bottom: 1px solid var(--line);
     background: var(--bone);
   }
@@ -17415,7 +17293,7 @@ label .search-select-trigger {
   .cashier-page .cart {
     height: 100%;
     min-height: 0;
-    padding: 10px 18px 14px 10px;
+    padding: 16px 16px 16px 8px;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
@@ -17547,9 +17425,9 @@ label .search-select-trigger {
 
 .cashier-page .catalog-sticky {
   display: grid;
-  gap: 14px;
-  padding-bottom: 14px;
-  margin-bottom: 14px;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .cashier-page .catalog-sticky > .barber-picker,
@@ -17575,7 +17453,7 @@ label .search-select-trigger {
 
 .cashier-page .catalog-locked-card {
   margin-top: 0;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .cashier-page .catalog-tools .search {
@@ -17631,11 +17509,11 @@ label .search-select-trigger {
 /* Kasir POS: blok kapster tidak menempel ke navbar atas */
 @media (max-width: 1024px) {
   .cashier-page .catalog-sticky {
-    padding-top: 14px;
+    padding-top: 16px;
   }
 
   .cashier-page .cart {
-    padding-top: 14px;
+    padding-top: 16px;
   }
 }
 
@@ -17839,7 +17717,7 @@ label .search-select-trigger {
 }
 
 .cashier-page .catalog-locked-card {
-  padding: 12px 14px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-left: 3px solid var(--brass);
   border-radius: 10px;
@@ -17899,7 +17777,7 @@ label .search-select-trigger {
 /* Input Manual: satu skala ukuran dan jarak (panel 16px, jarak 14px, kontrol 44px, huruf 14px/12px) */
 .manual-page {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   align-content: start;
 }
 
@@ -17909,7 +17787,7 @@ label .search-select-trigger {
 }
 
 .manual-page .manual-checkout-grid {
-  gap: 14px;
+  gap: 16px;
 }
 
 .manual-page .form-panel {
@@ -17936,7 +17814,7 @@ label .search-select-trigger {
 }
 
 .manual-page .manual-info-grid {
-  gap: 12px 14px;
+  gap: 12px 16px;
 }
 
 .manual-page .form-grid-field > span,
@@ -17977,7 +17855,7 @@ label .search-select-trigger {
 }
 
 .manual-page .nota-catalog-columns {
-  gap: 14px;
+  gap: 16px;
 }
 
 .manual-page .nota-group {
@@ -18350,8 +18228,8 @@ label .search-select-trigger {
 /* Input Manual: bar total menempel penuh di dasar seperti bar keranjang Kasir (latar solid, tidak tembus) */
 .manual-page .sticky-submit {
   bottom: 0;
-  margin: 14px -14px 0;
-  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 16px -16px 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
@@ -18365,8 +18243,8 @@ label .search-select-trigger {
 
 @media (max-width: 1024px) {
   .manual-page .sticky-submit {
-    margin: 14px -14px 0;
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    margin: 16px -16px 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -18451,7 +18329,7 @@ label .search-select-trigger {
 
 @media (min-width: 1025px) {
   .content.narrow.manual-page {
-    min-height: calc(100svh - 52px);
+    min-height: calc(100svh - 40px);
   }
 }
 
@@ -18464,8 +18342,8 @@ label .search-select-trigger {
 /* Input Manual: bar bawah berbentuk pil gelap seperti bar "Pesanan saat ini" di Kasir */
 .manual-page .sticky-submit {
   display: block;
-  margin: 14px -14px 0;
-  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 16px -16px 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
@@ -18571,15 +18449,15 @@ label .search-select-trigger {
 
 @media (max-width: 1024px) {
   .manual-page .sticky-submit {
-    margin: 14px -14px 0;
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    margin: 16px -16px 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (max-width: 560px) {
   .manual-page .manual-bar {
     flex-wrap: wrap;
-    padding: 12px 12px 12px 14px;
+    padding: 12px 12px 12px 16px;
   }
 
   .manual-page .manual-total-button {
@@ -18635,7 +18513,7 @@ label .search-select-trigger {
 
 .manual-page > section:last-of-type,
 .manual-page > .manual-checkout-grid {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .manual-ringkas .manual-ringkas-note {
@@ -19149,7 +19027,7 @@ label .search-select-trigger {
 /* Kapster dan jumlah kasbon selalu sebaris; keperluan di bawahnya; jarak isian seragam 14px */
 .kasbon-kapster-page .kasbon-kapster-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
@@ -19171,7 +19049,7 @@ label .search-select-trigger {
     min-height: 0;
     width: 100%;
     margin: 0;
-    padding: 68px 14px 14px !important;
+    padding: 70px 16px 16px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -19254,7 +19132,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .izin-pilihan {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   padding: 10px 16px;
 }
 
@@ -19272,7 +19150,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .kasbon-kapster-actions {
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .izin-kapster-page .kasbon-kapster-history {
@@ -19280,7 +19158,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
-  margin-top: 14px;
+  margin-top: 16px;
   padding-right: 0;
 }
 
@@ -19303,7 +19181,7 @@ label .search-select-trigger {
     min-height: 0;
     width: 100%;
     margin: 0;
-    padding: 68px 14px 14px !important;
+    padding: 70px 16px 16px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -19369,7 +19247,7 @@ label .search-select-trigger {
 
 .izin-kapster-page .izin-layout-form .kasbon-kapster-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 14px;
+  gap: 12px 16px;
 }
 
 .izin-kapster-page .izin-layout-form .kasbon-kapster-note {
@@ -19377,7 +19255,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .izin-cal {
-  padding: 14px;
+  padding: 16px;
 }
 
 .izin-kapster-page .izin-cal-head {
@@ -19432,12 +19310,18 @@ label .search-select-trigger {
   bottom: 3px;
 }
 
-/* Izin Kapster & Halaman Kapster: halaman menggulir tanpa menampilkan batang scroll */
+/* Izin Kapster, Input Manual, Laporan & Halaman Kapster: halaman menggulir tanpa menampilkan batang scroll */
 html:has(.izin-kapster-page),
+html:has(.manual-page),
+html:has(.od-page),
+html:has(.report-page),
 html:has(.kapster-dashboard),
 html:has(.my-salary-page),
 html:has(.kapster-product-commission),
 .workspace:has(> .izin-kapster-page),
+.workspace:has(> .manual-page),
+.workspace:has(> .od-page),
+.workspace:has(> .report-page),
 .workspace:has(> .kapster-dashboard),
 .workspace:has(> .my-salary-page),
 .workspace:has(> .kapster-product-commission),
@@ -19450,10 +19334,16 @@ html:has(.kapster-product-commission),
 }
 
 html:has(.izin-kapster-page)::-webkit-scrollbar,
+html:has(.manual-page)::-webkit-scrollbar,
+html:has(.od-page)::-webkit-scrollbar,
+html:has(.report-page)::-webkit-scrollbar,
 html:has(.kapster-dashboard)::-webkit-scrollbar,
 html:has(.my-salary-page)::-webkit-scrollbar,
 html:has(.kapster-product-commission)::-webkit-scrollbar,
 .workspace:has(> .izin-kapster-page)::-webkit-scrollbar,
+.workspace:has(> .manual-page)::-webkit-scrollbar,
+.workspace:has(> .od-page)::-webkit-scrollbar,
+.workspace:has(> .report-page)::-webkit-scrollbar,
 .workspace:has(> .kapster-dashboard)::-webkit-scrollbar,
 .workspace:has(> .my-salary-page)::-webkit-scrollbar,
 .workspace:has(> .kapster-product-commission)::-webkit-scrollbar,
@@ -19913,3 +19803,1849 @@ html:has(.manual-page .modal-overlay) {
 
 /* Kasir POS: kotak peringatan pembayaran tanpa margin bawaan (inline 8px) agar jarak ke garis/tombol Bayar tepat 16px */
 .cashier-page .cart-payment > div:not([class]) { margin: 0 !important; }
+
+/* ===== Beranda Owner (od-*) =====
+   Skala huruf laptop: angka utama 28px, judul panel 18px, baris 15px, keterangan 14px.
+   HP/tablet (<=1024px): angka fluida, judul 16px, baris 14px, keterangan 13px.
+   Jarak 16px di mana-mana (label ke isi 6px), radius kartu 12px / kontrol 10px / chip 8px. */
+.od-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.od-turn-right {
+  transform: rotate(-90deg);
+}
+
+.od-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  transition: opacity 0.15s;
+}
+
+.od-kpi {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.od-kpi:hover {
+  border-color: var(--brass);
+}
+
+.od-kpi:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
+}
+
+.od-kpi-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  container-type: inline-size;
+}
+
+.od-kpi .kpi-icon {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.od-kpi-text {
+  display: contents;
+}
+
+.od-kpi-label {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 16px;
+}
+
+.od-kpi-value {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 6px;
+}
+
+.od-kpi-detail {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin-top: 6px;
+}
+
+.od-kpi .kpi-icon.dark {
+  color: #1e5f8a;
+  background: rgb(30 95 138 / 12%);
+}
+
+.od-kpi-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--slate);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.od-kpi-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 700 clamp(11px, 12cqi, 28px) / 1.1 var(--heading);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.od-kpi-detail {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.od-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.od-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.od-head h3 {
+  margin: 0;
+  font: 700 16px / 1.2 var(--heading);
+  letter-spacing: -0.02em;
+}
+
+.od-list {
+  min-height: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+}
+
+.od-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.od-list > li {
+  border-bottom: 1px solid var(--line);
+}
+
+.od-row {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+}
+
+.od-row-trx {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+}
+
+.od-row-tim {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
+.od-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.od-main strong {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-main small {
+  overflow: hidden;
+  color: var(--slate);
+  font-size: 13px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-main small.od-void {
+  color: var(--oxblood);
+}
+
+.od-time {
+  color: var(--slate);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.od-amount {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.od-amount.is-void {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.od-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.od-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.od-avatar.ok {
+  color: var(--sage);
+  background: var(--sage-soft);
+}
+
+.od-avatar.late {
+  color: #8c6014;
+  background: var(--amber-soft);
+}
+
+.od-avatar.off {
+  color: var(--muted);
+  background: var(--bone);
+}
+
+.od-chip {
+  width: fit-content;
+  flex: none;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.od-chip.ok {
+  color: var(--sage);
+  background: var(--sage-soft);
+}
+
+.od-chip.late {
+  color: #8c6014;
+  background: var(--amber-soft);
+}
+
+.od-chip.off {
+  color: var(--slate);
+  background: var(--bone);
+}
+
+/* Penanda ">" di pojok kartu: bukan tombol, seluruh kartu yang bisa di-tap */
+.od-go {
+  width: 16px;
+  flex: none;
+  color: var(--muted);
+}
+
+.od-panel[role="link"] {
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.od-panel[role="link"]:hover {
+  border-color: var(--brass);
+}
+
+.od-panel[role="link"]:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
+}
+
+.od-empty {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Semua lebar: halaman setinggi layar. Jendela disempitkan/dipendekkan: panel ikut mengecil, isinya menggulir di dalam. */
+.workspace:has(> .od-page) {
+  height: 100svh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.workspace > .content.od-page {
+  flex: 1 1 0;
+  min-height: auto;
+  gap: 16px;
+  padding: 70px 16px 16px !important;
+}
+
+.od-page > .od-kpis {
+  flex: 0 0 auto;
+}
+
+.od-lower {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.od-panel {
+  overflow: hidden;
+}
+
+/* selama KPI masih 4 sebaris (>=621px), dua panel di bawah juga tetap sebaris */
+@media (min-width: 621px) {
+  .od-lower {
+    min-height: 200px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* <=620px: KPI 2x2 ringkas, satu susunan di semua lebar: ikon + nama sebaris (sejajar tengah), angka lalu keterangan selebar kartu */
+@media (max-width: 620px) {
+  .od-lower {
+    min-height: 416px;
+  }
+
+  .od-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .od-kpi-body {
+    column-gap: 8px;
+    align-items: center;
+  }
+
+  .od-kpi .kpi-icon {
+    grid-column: 1;
+    grid-row: 1;
+    width: 28px;
+    height: 28px;
+  }
+
+  .od-kpi .kpi-icon .icon {
+    width: 14px;
+  }
+
+  .od-kpi-label {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    font-size: 12px;
+  }
+
+  .od-kpi-value,
+  .od-kpi-detail {
+    grid-column: 1 / -1;
+  }
+
+  .od-kpi-value {
+    grid-row: 2;
+    margin-top: 16px;
+    font-size: clamp(11px, 11.5cqi, 20px);
+  }
+
+  .od-kpi-detail {
+    grid-row: 3;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .od-kpi .kpi-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .od-kpi-body {
+    column-gap: 6px;
+  }
+
+  .od-kpi-label {
+    font-size: 11px;
+    letter-spacing: -0.01em;
+  }
+
+  .od-head h3 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 720px) {
+  .od-kpi-detail {
+    font-size: 12px;
+  }
+}
+
+/* Laptop */
+@media (min-width: 1025px) {
+  .workspace:has(> .od-page) > .desktop-page-head {
+    display: block !important;
+    flex: 0 0 auto;
+  }
+
+  .workspace > .content.od-page {
+    padding: 16px 16px 16px !important;
+  }
+
+  .od-kpi-label {
+    font-size: 14px;
+  }
+
+  .od-kpi-detail,
+  .od-main small,
+  .od-time {
+    font-size: 14px;
+  }
+
+  .od-head h3 {
+    font-size: 18px;
+  }
+
+  .od-main strong,
+  .od-amount {
+    font-size: 15px;
+  }
+
+  .od-chip {
+    min-height: 28px;
+    font-size: 14px;
+  }
+}
+
+/* ===== Laporan Keuangan (lk-*) =====
+   Jarak 16px di mana-mana (label ke isi 6px), radius kartu 12px / kontrol 10px / chip 8px. */
+.report-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-page .report-section + .report-section {
+  margin-top: 0;
+}
+
+.report-page .report-section {
+  scroll-margin-top: 70px;
+}
+
+.od-kpi.is-active {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 1px var(--brass), var(--shadow);
+}
+
+.lk-panel {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.lk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.lk-head h3 {
+  margin: 0;
+  font: 700 18px / 1.2 var(--heading);
+  color: var(--ink);
+}
+
+.lk-pay {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lk-pay-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.lk-pay-card:hover {
+  border-color: var(--brass);
+}
+
+.lk-pay-card:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
+}
+
+.lk-pay-card .dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+}
+
+.lk-pay-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lk-pay-main strong {
+  font-size: 15px;
+}
+
+.lk-pay-main small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lk-pay-card b {
+  font: 700 20px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .lk-pay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Laporan Keuangan: popup Tambah pengeluaran. Kalender kiri, isian + tombol kanan; <=620px tanggal biasa di atas */
+.simple-modal.lk-exp-form {
+  width: min(760px, calc(100% - 32px));
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.lk-exp-form::-webkit-scrollbar {
+  display: none;
+}
+
+.lk-exp-body {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  align-items: stretch;
+}
+
+.lk-exp-date {
+  display: none !important;
+}
+
+.lk-exp-cal .izin-cal {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.lk-exp-cal .izin-cal-head {
+  margin-bottom: 10px;
+}
+
+.lk-exp-cal .izin-cal-head strong {
+  font-size: 16px;
+}
+
+.lk-exp-cal .izin-cal-nav button {
+  width: 34px;
+  height: 34px;
+}
+
+.lk-exp-cal .izin-cal-grid {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(34px, 1fr);
+}
+
+.lk-exp-cal .izin-cal-grid button {
+  height: auto;
+}
+
+.lk-exp-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.simple-modal .lk-exp-body label,
+.simple-modal .lk-exp-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.simple-modal .lk-exp-body label > input {
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.lk-exp-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.lk-exp-actions .button {
+  flex: 1 1 0;
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+.simple-modal.lk-exp-form > header {
+  padding: 0 16px;
+}
+
+@media (max-width: 620px) {
+  .lk-exp-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lk-exp-cal {
+    display: none;
+  }
+
+  .lk-exp-date {
+    display: flex !important;
+    order: -1;
+  }
+
+  .lk-exp-actions .button {
+    min-height: 42px;
+  }
+
+  .lk-exp-actions {
+    margin-top: 0;
+  }
+}
+
+/* Laporan Keuangan: tabel Pengeluaran & Komisi sama dengan tabel lain (header krem, baris 52px, isi menggulir sendiri) */
+.report-page .expense-table-scroll,
+.report-page .commission-table-scroll {
+  margin-top: 0;
+  max-height: 360px;
+  overflow: auto;
+  scrollbar-width: none;
+  border-radius: 12px;
+}
+
+.report-page .expense-table-scroll::-webkit-scrollbar,
+.report-page .commission-table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.report-page .expense-head,
+.report-page .report-head {
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--bone);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.report-page .expense-table-compact > .expense-head,
+.report-page .expense-table-compact > .expense-row {
+  grid-template-columns: 90px minmax(0, 1fr) 130px 110px;
+  min-width: 520px;
+  gap: 16px;
+}
+
+.report-page .expense-table-compact > .expense-head > *,
+.report-page .expense-table-compact > .expense-row > * {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.report-page .expense-head > :last-child {
+  text-align: right;
+}
+
+.report-page .expense-row,
+.report-page .report-row {
+  min-height: 52px;
+  padding: 8px 16px;
+  border-top: 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.report-page .expense-row:last-child,
+.report-page .report-row:last-child {
+  border-bottom: 0;
+}
+
+.report-page .expense-row > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-page .expense-row > span:nth-child(3) {
+  display: block;
+}
+
+.report-page .expense-row > :last-child {
+  justify-self: end;
+}
+
+.report-page .expense-row .secondary-button,
+.report-page .expense-row .danger-button {
+  min-height: 36px;
+  padding-inline: 12px;
+  border-radius: 10px;
+}
+
+.lk-empty {
+  padding: 32px 16px;
+  color: var(--slate);
+  text-align: center;
+}
+
+.report-page .expense-toolbar {
+  margin: 0 0 16px;
+  gap: 16px;
+}
+
+.report-page .expense-toolbar .search {
+  min-width: 0;
+}
+
+.report-page .expense-add-button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+/* Laporan Keuangan: baris komisi bisa di-tap (menuju Riwayat Transaksi) */
+.report-page .report-row.is-tap {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.report-page .report-row.is-tap:hover,
+.report-page .report-row.is-tap:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}
+
+.lk-komisi {
+  color: #8c6014;
+}
+
+.lk-net {
+  font: 700 22px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.lk-calc {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.lk-calc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 52px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.lk-calc-row small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lk-calc-row b {
+  min-width: 130px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lk-calc-row.plus b {
+  color: #15803d;
+}
+
+.lk-calc-row.minus b {
+  color: #b91c1c;
+}
+
+.lk-calc-row.total {
+  border-bottom: 0;
+  border-radius: 0 0 12px 12px;
+  background: var(--bone);
+  font-weight: 700;
+}
+
+/* Laporan Keuangan: jarak 16px di semua lebar (mengalahkan gap 12px .content di HP) */
+.workspace > .content.report-page {
+  gap: 16px;
+  padding-bottom: 16px !important;
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.report-page {
+    padding: 70px 16px 16px !important;
+  }
+}
+
+.report-page .report-toolbar {
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.report-page .report-filter-row {
+  gap: 16px;
+}
+
+/* Laporan Keuangan: bar atas sama dengan bar filter Riwayat (kartu putih sendiri-sendiri, aktif krem), tanpa kotak pembungkus */
+.report-page .report-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 16px !important;
+  padding: 0 !important;
+  border: 0;
+  background: transparent;
+}
+
+.report-page .report-filter-row {
+  display: contents !important;
+}
+
+.report-page .report-filter-row .segmented,
+.report-page .report-filter-row .calendar-picker-btn,
+.report-page .report-filter-row .month-picker-shell,
+.report-page .report-export-buttons .button {
+  height: 44px;
+  min-height: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.report-page .report-filter-row .segmented {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  width: 100%;
+}
+
+.report-page .report-filter-row .segmented .button {
+  height: 100%;
+  min-height: 0;
+  padding: 0 8px !important;
+  border: 0;
+  border-radius: 8px;
+  color: var(--slate);
+  font-size: 14px !important;
+  font-weight: 500;
+  justify-content: center;
+}
+
+.report-page .report-filter-row .segmented .button.active {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+.report-page .report-filter-row .calendar-picker-wrapper,
+.report-page .report-filter-row .month-picker-shell {
+  display: block;
+  width: 100% !important;
+  min-width: 0;
+}
+
+.report-page .report-filter-row .calendar-picker-btn {
+  width: 100% !important;
+  padding: 0 12px;
+  justify-content: flex-start !important;
+  gap: 8px;
+}
+
+.report-page .report-export-buttons {
+  display: contents !important;
+}
+
+.report-page .report-export-buttons .button {
+  padding: 0 16px;
+  justify-content: center;
+}
+
+.report-page .report-export-buttons .whatsapp-button {
+  border-color: transparent;
+  background: var(--sage);
+  color: #fff;
+}
+
+/* <=1024px: pilih periode & tanggal satu baris, tiga tombol ekspor sama lebar di bawahnya */
+@media (max-width: 1024px) {
+  .report-page .report-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-page .report-filter-row .segmented {
+    grid-column: span 2;
+  }
+
+  .report-page .report-filter-row .calendar-picker-wrapper,
+  .report-page .report-filter-row .month-picker-shell {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 620px) {
+  .report-page .report-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-page .report-filter-row .segmented {
+    grid-column: 1 / -1;
+  }
+
+  .report-page .report-filter-row .calendar-picker-wrapper,
+  .report-page .report-filter-row .month-picker-shell {
+    grid-column: 1 / -1;
+  }
+
+  .report-page .report-filter-row .segmented,
+  .report-page .report-filter-row .calendar-picker-btn,
+  .report-page .report-filter-row .month-picker-shell,
+  .report-page .report-export-buttons .button {
+    height: 42px;
+  }
+}
+
+/* Tabel Komisi: 3 kolom (kapster, transaksi, komisi) */
+.report-page .commission-table-scroll > .report-head,
+.report-page .commission-table-scroll > .report-row {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 16px;
+}
+
+.report-page .commission-table-scroll > .report-head > :last-child,
+.report-page .commission-table-scroll > .report-row > :last-child {
+  text-align: right;
+}
+
+/* Popup Tambah pengeluaran: lebar tetap, tidak bergeser di semua ukuran; hanya silang untuk menutup, Simpan selebar form */
+.simple-modal.lk-exp-form {
+  width: min(760px, calc(100% - 32px)) !important;
+  max-width: none !important;
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.lk-exp-form .lk-exp-actions {
+  display: block;
+}
+
+.lk-exp-form .lk-exp-actions .button {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .simple-modal.lk-exp-form {
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+  }
+
+  .lk-exp-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lk-exp-cal {
+    display: block;
+  }
+
+  .lk-exp-date {
+    display: none !important;
+  }
+}
+
+/* Tiga tombol ekspor selalu sebaris dan sama lebar di semua ukuran */
+.report-page .report-toolbar .report-export-buttons .whatsapp-button {
+  grid-column: auto;
+  width: auto;
+}
+
+@media (max-width: 620px) {
+  .report-page .report-export-buttons .button {
+    padding: 0 8px;
+  }
+}
+
+/* Popup Tambah pengeluaran di layar sangat pendek: kalender dirapatkan supaya tidak menggulir */
+@media (max-height: 700px) and (max-width: 760px) {
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 30px;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 760px) {
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 24px;
+    gap: 2px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 24px;
+  }
+
+  .lk-exp-cal .izin-cal-head {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-cal .izin-cal-week {
+    margin-bottom: 4px;
+  }
+
+  .simple-modal.lk-exp-form > header {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 620px) {
+  .lk-calc-row b {
+    min-width: 0;
+  }
+}
+
+/* Riwayat: pilihan Harian/Mingguan/Bulanan di dalam popup tanggal */
+.calendar-picker-popup .history-periode {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  margin-bottom: 10px;
+  padding: 3px;
+  border-radius: 9px;
+}
+
+.calendar-picker-popup .history-periode .button {
+  min-height: 30px;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.calendar-picker-popup .history-periode .button.active {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+/* Popup Tambah pengeluaran: kalender+form berdampingan hanya bila layar cukup tinggi; pendek (landscape) = kalender diperkecil */
+@media (min-width: 761px) and (max-height: 760px) {
+  .simple-modal.lk-exp-form {
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 28px;
+    gap: 2px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 28px;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 480px) {
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 22px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 22px;
+    font-size: 13px;
+  }
+
+  .lk-exp-cal .izin-cal {
+    padding: 12px 16px;
+  }
+
+  .lk-exp-cal .izin-cal-head {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-cal .izin-cal-week {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-body {
+    padding-block: 12px;
+  }
+
+  .simple-modal.lk-exp-form > header {
+    min-height: 56px;
+  }
+}
+
+/* Layar pendek (HP landscape): tetap berdampingan, tidak menumpuk */
+@media (max-width: 760px) and (max-height: 500px) {
+  .lk-exp-body {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+
+  .lk-exp-cal .izin-cal-grid {
+    grid-auto-rows: 22px;
+  }
+
+  .lk-exp-cal .izin-cal-grid button {
+    height: 22px;
+    font-size: 13px;
+  }
+
+  .lk-exp-cal .izin-cal {
+    padding: 12px 16px;
+  }
+
+  .lk-exp-cal .izin-cal-head,
+  .lk-exp-cal .izin-cal-week {
+    margin-bottom: 4px;
+  }
+
+  .lk-exp-body {
+    padding-block: 12px;
+  }
+
+  .simple-modal.lk-exp-form > header {
+    min-height: 56px;
+  }
+}
+
+/* ===== Laporan Keuangan: tabel Pengeluaran & Komisi, header selalu tampil, tombol sebaris dengan data (semua lebar) ===== */
+.report-page .expense-table-scroll,
+.report-page .commission-table-scroll {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  width: 100% !important;
+}
+
+.report-page .expense-table-scroll > .expense-head,
+.report-page .commission-table-scroll > .report-head {
+  display: grid !important;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.report-page .expense-table-compact > .expense-head,
+.report-page .expense-table-compact > .expense-row {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr) auto var(--lk-aksi) !important;
+  align-items: center;
+  gap: 16px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+.report-page .expense-table-compact > .expense-row {
+  padding: 8px 16px !important;
+  border-width: 0 0 1px !important;
+}
+
+.report-page .expense-table-compact > .expense-row:last-child {
+  border-bottom-width: 0 !important;
+}
+
+.report-page .expense-table-compact > .expense-row > :nth-child(3),
+.report-page .expense-table-compact > .expense-head > :nth-child(3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.report-page .expense-table-compact > .expense-row > :nth-child(4) {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  padding-inline: 8px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.report-page .expense-table-compact > .expense-row .button .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.report-page .commission-table-scroll > .report-head,
+.report-page .commission-table-scroll > .report-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 16px !important;
+  margin: 0 !important;
+  padding-inline: 16px !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+.report-page .commission-table-scroll > .report-row {
+  border-width: 0 0 1px !important;
+}
+
+.report-page .commission-table-scroll > .report-row:last-child {
+  border-bottom-width: 0 !important;
+}
+
+/* Kolom Aksi: tombol memenuhi kolom; header rata tengah di atas tombol */
+.report-page .expense-head > :last-child {
+  text-align: center;
+}
+
+/* Cari dan Tambah: tinggi, radius, huruf sama persis di semua lebar (44px laptop, 42px HP) */
+.report-page .expense-toolbar {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 16px !important;
+}
+
+.report-page .expense-toolbar .search,
+.report-page .expense-toolbar .expense-add-button {
+  height: 44px;
+  min-height: 0;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.report-page .expense-toolbar .search {
+  flex: 1 1 0;
+  width: auto !important;
+  min-width: 0;
+  padding: 0 12px;
+  gap: 8px;
+}
+
+.report-page .expense-toolbar .search input {
+  min-width: 0;
+  font-size: inherit;
+}
+
+.report-page .expense-toolbar .expense-add-button {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .report-page .expense-toolbar .search,
+  .report-page .expense-toolbar .expense-add-button {
+    height: 42px;
+  }
+
+  /* HP: tanggal pindah ke bawah keterangan; tombol tetap sebaris dengan data */
+  .report-page .expense-table-compact > .expense-head,
+  .report-page .expense-table-compact > .expense-row {
+    grid-template-columns: minmax(0, 1fr) auto var(--lk-aksi) !important;
+    column-gap: 16px !important;
+    row-gap: 2px !important;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(1) {
+    display: none;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(2) {
+    grid-column: 1;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(3) {
+    grid-column: 2;
+  }
+
+  .report-page .expense-table-compact > .expense-head > :nth-child(4) {
+    grid-column: 3;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 2;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    overflow-wrap: break-word;
+    word-break: normal;
+    font-size: 13px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    padding-inline: 4px;
+    font-size: 12px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) .icon {
+    display: none;
+  }
+}
+
+/* Bar atas Laporan: tanggal (periode) + tiga tombol ekspor */
+.report-page .report-toolbar {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+@media (max-width: 1024px) {
+  .report-page .report-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-page .report-toolbar > .calendar-picker-wrapper {
+    grid-column: 1 / -1;
+  }
+}
+
+.report-page .report-toolbar > .calendar-picker-wrapper {
+  display: block;
+  width: 100% !important;
+  min-width: 0;
+}
+
+.report-page .report-toolbar > .calendar-picker-wrapper .calendar-picker-btn {
+  width: 100% !important;
+  height: 44px;
+  min-height: 0;
+  padding: 0 12px;
+  gap: 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  font-size: 14px;
+  font-weight: 500;
+  justify-content: flex-start !important;
+}
+
+@media (max-width: 620px) {
+  .report-page .report-toolbar > .calendar-picker-wrapper .calendar-picker-btn {
+    height: 42px;
+  }
+}
+
+@media (max-width: 360px) {
+  .report-page .expense-table-compact > .expense-head,
+  .report-page .expense-table-compact > .expense-row {
+    grid-template-columns: minmax(0, 1fr) auto var(--lk-aksi) !important;
+    column-gap: 8px !important;
+    padding-inline: 16px !important;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(3) {
+    font-size: 12px;
+  }
+
+  .report-page .expense-table-compact > .expense-row > :nth-child(4) {
+    font-size: 11px;
+  }
+
+  .report-page .expense-head {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+}
+
+/* Tombol Tambah pengeluaran: garis "+" hanya mengisi 12 dari 24 satuan kotak ikon, jadi kotaknya digeser agar
+   jarak terlihat kiri = kanan = 16px dan jarak ikon ke teks = 8px */
+.report-page .expense-add-button {
+  gap: 0;
+  padding-inline: 16px;
+}
+
+.report-page .expense-add-button .icon {
+  width: 18px;
+  height: 18px;
+  margin-inline: -4.5px 3.5px;
+  flex: none;
+}
+
+/* Tombol Tambah: ikon + di semua lebar (HP tidak lagi menyembunyikan ikon), lebar mengikuti isi */
+
+/* Kolom Aksi dan tombol Tambah berbagi satu lebar: sisi kiri "+ Tambah" lurus dengan sisi kiri Batalkan/Pulihkan
+   (Batalkan menjorok 16px + 1px garis tabel dari tepi, Tambah rata ke tepi, jadi Tambah = kolom Aksi + 17px) */
+.report-page {
+  --lk-aksi: 96px;
+}
+
+.report-page .expense-toolbar .expense-add-button {
+  width: calc(var(--lk-aksi) + 17px);
+  padding-inline: 0;
+  justify-content: center;
+}
+
+@media (max-width: 620px) {
+  .report-page {
+    --lk-aksi: 88px;
+  }
+}
+
+/* ===== Laporan Produk (lp-*): memakai pola Laporan Keuangan (.report-page, .od-kpi, .lk-panel) =====
+   Jarak 16px di mana-mana (label ke isi 4-6px), radius kartu 12px / kontrol 10px; tabel menggulir sendiri tanpa batang scroll. */
+.lp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lp-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.lp-stat span,
+.lp-stat small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lp-stat strong {
+  font: 700 20px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-table {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.lp-tx-table {
+  margin-top: 0;
+}
+
+.lp-table-inner {
+  /* header 40px + 2 baris (56px); sisanya menggulir */
+  max-height: 154px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+}
+
+.lp-table-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bone);
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lp-row {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--slate);
+  font-size: 13px;
+}
+
+.lp-row:last-child {
+  border-bottom: 0;
+}
+
+.lp-row > div,
+.lp-head > span {
+  min-width: 0;
+}
+
+.lp-row > div {
+  overflow-wrap: anywhere;
+}
+
+.lp-row strong,
+.lp-row b {
+  color: var(--ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-row .lk-komisi {
+  color: #8c6014;
+}
+
+.lp-row .lp-amber {
+  color: var(--amber);
+}
+
+.lp-head .is-right,
+.lp-row .is-right {
+  text-align: right;
+}
+
+.lp-rincian .lp-grid {
+  grid-template-columns: var(--lp-cols);
+}
+
+/* Riwayat transaksi produk: baris bisa di-tap untuk membuka rincian */
+.lp-tx {
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-tx:last-child {
+  border-bottom: 0;
+}
+
+.lp-tx-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 20px;
+}
+
+.lp-tx-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.lp-tx-row:hover,
+.lp-tx-row:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}
+
+.lp-nota,
+.lp-prod {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lp-nota small,
+.lp-prod small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.lp-nota strong,
+.lp-prod strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-total {
+  white-space: nowrap;
+}
+
+.lp-chev {
+  width: 16px;
+  height: 16px;
+  justify-self: end;
+  color: var(--brass-dark);
+  transition: transform 0.2s;
+}
+
+.lp-chev.is-open {
+  transform: rotate(180deg);
+}
+
+.lp-tx.is-void {
+  background: rgb(140 47 42 / 3%);
+}
+
+.lp-tx.is-void .lp-total {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.lp-detail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  background: var(--bone);
+}
+
+.lp-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lp-cell span,
+.lp-cell small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lp-cell b {
+  color: var(--ink);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.lp-void {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--oxblood-soft);
+  color: var(--oxblood);
+  font-size: 13px;
+}
+
+.lp-void .icon {
+  flex: 0 0 auto;
+}
+
+/* Baris transaksi dua baris teks: header 40 + 2 x (64 + garis 1) */
+.lp-tx-table .lp-tx-row {
+  min-height: 64px;
+}
+
+.lp-tx-table .lp-table-inner {
+  max-height: 170px;
+}
+
+/* Baris yang dibuka menampilkan rincian, jadi tabel diberi ruang lebih (tetap menggulir sendiri) */
+.lp-tx-table .lp-table-inner:has(.lp-detail) {
+  max-height: 360px;
+}
+
+@media (min-width: 1025px) {
+  .lp-row,
+  .lp-row strong,
+  .lp-row b,
+  .lp-stat span,
+  .lp-stat small,
+  .lp-cell span,
+  .lp-cell small,
+  .lp-nota small,
+  .lp-prod small,
+  .lp-void {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .lp-detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .lp-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-hide-sm {
+    display: none !important;
+  }
+
+  .lp-tx-table .lp-head {
+    display: none;
+  }
+
+  .lp-rincian .lp-grid {
+    grid-template-columns: var(--lp-cols-sm);
+  }
+
+  .lp-tx-grid {
+    grid-template-columns: minmax(0, 1fr) auto 20px;
+    grid-template-areas:
+      "nota total chev"
+      "prod prod chev";
+    row-gap: 4px;
+  }
+
+  .lp-tx-table .lp-tx-row {
+    min-height: 76px;
+    padding-block: 12px;
+  }
+
+  .lp-tx-table .lp-table-inner {
+    max-height: 180px;
+  }
+
+  .lp-tx-table .lp-table-inner:has(.lp-detail) {
+    max-height: 360px;
+  }
+
+  .lp-tx-grid > .lp-nota {
+    grid-area: nota;
+  }
+
+  .lp-tx-grid > .lp-prod {
+    grid-area: prod;
+    flex-direction: row;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .lp-tx-grid > .lp-total {
+    grid-area: total;
+  }
+
+  .lp-tx-grid > .lp-chev {
+    grid-area: chev;
+  }
+
+  .lp-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Laporan Produk: baris rincian yang membuka Riwayat Transaksi */
+.lp-row.is-link {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.lp-row.is-link:hover,
+.lp-row.is-link:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}

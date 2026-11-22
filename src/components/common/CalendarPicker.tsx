@@ -28,6 +28,12 @@ export interface CalendarPickerProps {
   allowClear?: boolean
   clearLabel?: string
   placeholder?: string
+  /** Teks tombol pengganti (mis. rentang tanggal); pilihan kalender tetap per hari. */
+  label?: string
+  /** Isi tambahan di atas kalender dalam popup (mis. pilihan Harian/Mingguan/Bulanan). */
+  popupHeader?: React.ReactNode
+  /** Tampilkan pilihan bulan saja (tanpa kalender harian); nilai yang dikirim tanggal 1 bulan itu. */
+  bulanSaja?: boolean
   compact?: boolean
   showToday?: boolean
   style?: React.CSSProperties
@@ -42,6 +48,9 @@ export function CalendarPicker({
   allowClear = false,
   clearLabel = "Semua Tanggal",
   placeholder = "Pilih tanggal",
+  label,
+  popupHeader,
+  bulanSaja = false,
   compact = false,
   showToday = true,
   style,
@@ -154,7 +163,7 @@ export function CalendarPicker({
         title="Pilih tanggal"
       >
         <Icon name="calendar" />
-        <span className="calendar-picker-text">{formatted}</span>
+        <span className="calendar-picker-text">{label ?? formatted}</span>
       </button>
 
       {open && (
@@ -163,6 +172,90 @@ export function CalendarPicker({
             className="panel"
             style={{ padding: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.18)" }}
           >
+            {popupHeader}
+            {bulanSaja ? (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <strong style={{ fontSize: 13 }}>Tahun {calYear}</strong>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      style={{ padding: "4px 8px" }}
+                      data-dir="prev"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCalYear((y) => y - 1)
+                      }}
+                    >
+                      <Icon name="chevron" />
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      style={{ padding: "4px 8px" }}
+                      data-dir="next"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCalYear((y) => y + 1)
+                      }}
+                    >
+                      <Icon name="chevron" />
+                    </button>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 6,
+                  }}
+                >
+                  {NAMA_BULAN.map((nama, idx) => {
+                    const isoBulan = `${calYear}-${pad(idx + 1)}`
+                    const sel = isoBulan === value.slice(0, 7)
+                    const disabled = Boolean(
+                      (max && isoBulan > max.slice(0, 7)) ||
+                        (min && isoBulan < min.slice(0, 7)),
+                    )
+                    return (
+                      <button
+                        key={nama}
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => {
+                          onChange(`${isoBulan}-01`)
+                          setOpen(false)
+                        }}
+                        style={{
+                          height: 34,
+                          borderRadius: 6,
+                          border: sel
+                            ? "1px solid var(--ink)"
+                            : "1px solid var(--line)",
+                          background: sel ? "var(--ink)" : "transparent",
+                          color: sel ? "#fff" : "var(--ink)",
+                          fontSize: 12,
+                          fontWeight: sel ? 700 : 500,
+                          cursor: disabled ? "not-allowed" : "pointer",
+                          opacity: disabled ? 0.35 : 1,
+                        }}
+                      >
+                        {nama.slice(0, 3)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
             <div
               style={{
                 display: "flex",
@@ -262,6 +355,9 @@ export function CalendarPicker({
                 )
               })}
             </div>
+
+              </>
+            )}
 
             <div
               style={{

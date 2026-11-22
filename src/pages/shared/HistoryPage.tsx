@@ -1,4 +1,4 @@
-import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
@@ -804,6 +804,14 @@ function TransactionDetailBody({
   )
 }
 
+function bacaFilterAwal(nama: "metode" | "kapster" | "mode" | "tanggal") {
+  try {
+    return sessionStorage.getItem(`eastville_riwayat_${nama}`) ?? ""
+  } catch {
+    return ""
+  }
+}
+
 export function HistoryPage({ currentUser, role }: {
   currentUser?: AppUser
   role?: Role
@@ -839,12 +847,30 @@ export function HistoryPage({ currentUser, role }: {
 
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
+  // Laporan Keuangan membuka Riwayat dengan filter awal (metode/kapster/periode) lewat sessionStorage.
+  const [dateFilter, setDateFilter] = useState(() => bacaFilterAwal("tanggal"))
+  const [modePeriode, setModePeriode] = useState<ModePeriode>(() => {
+    const m = bacaFilterAwal("mode")
+    return m === "Mingguan" || m === "Bulanan" ? m : "Harian"
+  })
   const [cari, setCari] = useState("")
-  const [barberFilter, setBarberFilter] = useState("Semua kapster")
-  const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
-    "Semua",
+  const [barberFilter, setBarberFilter] = useState(
+    () => bacaFilterAwal("kapster") || "Semua kapster",
   )
+  const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
+    () => {
+      const m = bacaFilterAwal("metode")
+      return m === "Tunai" || m === "QRIS" ? m : "Semua"
+    },
+  )
+  useEffect(() => {
+    try {
+      for (const k of ["metode", "kapster", "mode", "tanggal"])
+        sessionStorage.removeItem(`eastville_riwayat_${k}`)
+    } catch {
+      /* tanpa penyimpanan sesi, filter awal diabaikan */
+    }
+  }, [])
 
   const barberOptions = Array.from(
     new Set(txList.flatMap((tx) => tx.barber.split(", ").filter(Boolean))),
@@ -885,7 +911,7 @@ export function HistoryPage({ currentUser, role }: {
   // Dengan token login, riwayat diambil dari backend; tanpa token tetap data demo.
   function loadLive(isStale: () => boolean = () => false) {
     return apiTransaksi
-      .list(dateFilter ? { dari: dateFilter, sampai: dateFilter } : {})
+      .list(dateFilter ? rentangPeriode(modePeriode, dateFilter) : {})
       .then((rows) => {
         if (isStale()) return
         const list = rows as HistoryTransactionRecord[]
@@ -911,7 +937,7 @@ export function HistoryPage({ currentUser, role }: {
     return () => {
       stale = true
     }
-  }, [dateFilter])
+  }, [dateFilter, modePeriode])
 
   useEffect(() => {
     if (getToken()) {
@@ -1107,7 +1133,25 @@ export function HistoryPage({ currentUser, role }: {
         </div>
         <CalendarPicker
           value={dateFilter}
-          onChange={setDateFilter}
+          label={labelPeriode(modePeriode, dateFilter)}
+          bulanSaja={modePeriode === "Bulanan"}
+          popupHeader={
+            <div className="segmented history-periode" role="group" aria-label="Periode">
+              {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+                <Button
+                  className={modePeriode === m ? "active" : ""}
+                  key={m}
+                  type="button"
+                  onClick={() => setModePeriode(m)}
+                >
+                  {m}
+                </Button>
+              ))}
+            </div>
+          }
+          onChange={(d) => {
+            setDateFilter(d)
+          }}
           allowClear
           clearLabel="Semua Tanggal"
           placeholder="Semua Tanggal"
@@ -1149,7 +1193,7 @@ export function HistoryPage({ currentUser, role }: {
           {visibleTx.length === 0 && (
             <p className="history-empty">
               {cari ? "Tidak ada nota yang cocok" : "Belum ada transaksi"}
-              {dateFilter ? " pada tanggal ini" : ""}
+              {dateFilter ? " pada periode ini" : ""}
               {activeBarber !== "Semua kapster" ? ` untuk ${activeBarber}` : ""}
               .
             </p>

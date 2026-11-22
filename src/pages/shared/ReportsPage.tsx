@@ -1,7 +1,8 @@
-import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { labelPeriode, ModePeriode, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { FormEvent, useEffect, useState } from "react"
 import {
   apiLaporan,
+  apiPengaturan,
   apiPengeluaran,
   getToken,
   LaporanKeuangan,
@@ -16,8 +17,6 @@ import {
 import {
   Button,
   CalendarPicker,
-  Kpi,
-  MonthPicker,
   PageTitle,
   rupiah,
   ErrorState,
@@ -30,6 +29,7 @@ import {
   INITIAL_PRODUCT_TRANSACTIONS,
 } from "./ProductReportsPage"
 import { ReasonDialog } from "./HistoryPage"
+import { KalenderBesar } from "../kasir/IzinKapster"
 
 export const barberReport = [
   ["Seva", 124, 12480000, 4992000],
@@ -215,15 +215,19 @@ export function rentangLaporan(
   return { dari: `${bulan}-01`, sampai: `${bulan}-${pad(akhir)}` }
 }
 
-export function ReportsPage({ currentUser, role }: {
+const persen = (bagian: number, total: number) =>
+  total > 0 ? Math.round((bagian / total) * 100) : 0
+
+export function ReportsPage({ currentUser, role, onNavigate }: {
   currentUser?: AppUser
   role?: Role
+  onNavigate?: (page: string) => void
 } = {}) {
   const [wa, setWa] = useState(false)
-  const [mode, setMode] = useState<"Harian" | "Mingguan" | "Bulanan">("Bulanan")
+  const [mode, setMode] = useState<ModePeriode>("Bulanan")
   const [reloadKey, setReloadKey] = useState(0)
   const [tanggal, setTanggal] = useState(() => isoDate(new Date()))
-  const [bulan, setBulan] = useState(() => isoDate(new Date()).slice(0, 7))
+  const bulan = tanggal.slice(0, 7)
   const [data, setData] = useState<LaporanKeuangan>(
     getToken() ? laporanKosong : demoLaporan,
   )
@@ -250,6 +254,27 @@ export function ReportsPage({ currentUser, role }: {
     getToken() ? [] : INITIAL_PRODUCT_TRANSACTIONS,
   )
   const [productLive, setProductLive] = useState(false)
+  // Tarif komisi asli (mis. 40% / 50% lembur), bukan persen gabungan yang menyesatkan.
+  const [tarifKomisi, setTarifKomisi] = useState<number[]>([40, 50])
+  useEffect(() => {
+    if (!getToken()) return
+    let batal = false
+    apiPengaturan
+      .get()
+      .then((p) => {
+        if (batal) return
+        const semua = [
+          p.komisiDefault,
+          p.komisiLembur,
+          ...p.kapster.map((k) => k.persen),
+        ].filter((n): n is number => typeof n === "number" && Number.isFinite(n))
+        if (semua.length) setTarifKomisi([...new Set(semua)].sort((a, b) => a - b))
+      })
+      .catch(() => {})
+    return () => {
+      batal = true
+    }
+  }, [])
 
   // Expenses management state
   const [expensesList, setExpensesList] = useState<ExpenseRecord[]>(
@@ -461,87 +486,65 @@ export function ReportsPage({ currentUser, role }: {
     return matchSearch
   })
 
-  // Calculation details for Sisa Owner
-  const totalOmzet = data.pemasukan || 1
-  const persenTunai = ((data.tunai / totalOmzet) * 100).toFixed(1)
-  const persenQris = ((data.qris / totalOmzet) * 100).toFixed(1)
-  const persenPengeluaran = ((data.pengeluaran / totalOmzet) * 100).toFixed(1)
-  const persenKomisi = ((data.komisi / totalOmzet) * 100).toFixed(1)
-  const persenSisa = ((data.sisa / totalOmzet) * 100).toFixed(1)
+  // Rincian persen terhadap pemasukan
+  const persenTunai = persen(data.tunai, data.pemasukan)
+  const persenQris = persen(data.qris, data.pemasukan)
+  const persenPengeluaran = persen(data.pengeluaran, data.pemasukan)
+  const persenSisa = persen(data.sisa, data.pemasukan)
+  const jumlahKapsterBerkomisi = data.perKapster.filter((k) => k.komisi > 0).length
+
+  /** Buka Riwayat Transaksi dengan filter awal: periode laporan (mode + tanggal), plus metode atau kapster. */
+  function bukaRiwayat(filter: { metode?: string; kapster?: string }) {
+    try {
+      sessionStorage.setItem("eastville_riwayat_mode", mode)
+      sessionStorage.setItem("eastville_riwayat_tanggal", tanggal)
+      if (filter.metode) sessionStorage.setItem("eastville_riwayat_metode", filter.metode)
+      if (filter.kapster) sessionStorage.setItem("eastville_riwayat_kapster", filter.kapster)
+    } catch {
+      /* filter awal hanya kemudahan */
+    }
+    onNavigate?.("RiwayatTransaksi")
+  }
+
+  const kpis = [
+    { key: "pemasukan", icon: "cash", tone: "sage", label: "Pemasukan", value: data.pemasukan, detail: `${data.jumlahTransaksi} transaksi` },
+    { key: "pengeluaran", icon: "expense", tone: "amber", label: "Pengeluaran", value: data.pengeluaran, detail: data.pemasukan > 0 ? `${persenPengeluaran}% pemasukan` : "Belum ada" },
+    { key: "komisi", icon: "people", tone: "brass", label: "Komisi", value: data.komisi, detail: jumlahKapsterBerkomisi > 0 ? `untuk ${jumlahKapsterBerkomisi} kapster` : "Belum ada" },
+    { key: "omzet", icon: "wallet", tone: "dark", label: "Sisa Bersih", value: data.sisa, detail: data.pemasukan > 0 ? `${persenSisa}% pemasukan` : "Belum ada" },
+  ] as const
 
   return (
-    <div className="content">
+    <div className="content report-page">
       <DemoNotice live={live} error={liveError} />
 
       <div className="report-toolbar">
-        <div className="report-filter-row">
-          <div className="segmented">
-            <Button
-              className={mode === "Harian" ? "active" : ""}
-              onClick={() => setMode("Harian")}
-            >
-              Harian
-            </Button>
-            <Button
-              className={mode === "Mingguan" ? "active" : ""}
-              onClick={() => setMode("Mingguan")}
-            >
-              Mingguan
-            </Button>
-            <Button
-              className={mode === "Bulanan" ? "active" : ""}
-              onClick={() => setMode("Bulanan")}
-            >
-              Bulanan
-            </Button>
-          </div>
-          {mode !== "Bulanan" ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <CalendarPicker
-                max={TANGGAL_MAKS()}
-                min={TANGGAL_MULAI}
-                value={tanggal}
-                onChange={(d) => d && setTanggal(d)}
-              />
-              {mode === "Mingguan" && (
-                <span
-                  className="report-week-range"
-                  aria-label="Rentang tanggal minggu"
+        <CalendarPicker
+          max={TANGGAL_MAKS()}
+          min={TANGGAL_MULAI}
+          value={tanggal}
+          label={labelPeriode(mode, tanggal)}
+          bulanSaja={mode === "Bulanan"}
+          popupHeader={
+            <div className="segmented history-periode" role="group" aria-label="Periode">
+              {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+                <Button
+                  className={mode === m ? "active" : ""}
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
                 >
-                  <strong>
-                    {new Date(`${rentang.sampai}T00:00:00`).toLocaleDateString(
-                      "id-ID",
-                      {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        weekday: "long",
-                      },
-                    )}
-                  </strong>
-                </span>
-              )}
+                  {m}
+                </Button>
+              ))}
             </div>
-          ) : (
-            <MonthPicker
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
-              value={bulan}
-              onChange={(b) => b && setBulan(b)}
-            />
-          )}
-        </div>
+          }
+          onChange={(d) => d && setTanggal(d)}
+        />
         <div className="report-export-buttons">
-          <Button
-            className="secondary-button"
-            onClick={() => eksporExcel(tabelEkspor())}
-          >
+          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
             Excel
           </Button>
-          <Button
-            className="secondary-button"
-            onClick={() => eksporPdf(tabelEkspor())}
-          >
+          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>
             PDF
           </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
@@ -550,198 +553,72 @@ export function ReportsPage({ currentUser, role }: {
         </div>
       </div>
 
-      {/* Interactive KPI Cards acting as direct Sub-view Tabs */}
-      <div
-        className="kpi-grid"
-        style={{ marginBottom: 14, ...(fetching ? { opacity: 0.6 } : {}) }}
-      >
-        <div
-          onClick={() => pilihBagian("pemasukan")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "pemasukan"
-                ? "0 0 0 2px var(--sage), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "pemasukan" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat rincian sumber pemasukan"
-        >
-          <Kpi
-            icon="cash"
-            label="Pemasukan"
-            tone="sage"
-            value={rupiah(data.pemasukan)}
-            detail={`Tunai ${persenTunai}% · QRIS ${persenQris}%`}
-          />
-        </div>
-
-        <div
-          onClick={() => pilihBagian("pengeluaran")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "pengeluaran"
-                ? "0 0 0 2px var(--amber), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "pengeluaran" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk mengelola & melihat rincian pengeluaran"
-        >
-          <Kpi
-            icon="expense"
-            label={`Pengeluaran (${mode})`}
-            tone="amber"
-            value={rupiah(data.pengeluaran)}
-            detail={`Total per ${mode.toLowerCase()} · ${persenPengeluaran}% dari omzet`}
-          />
-        </div>
-
-        <div
-          onClick={() => pilihBagian("komisi")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "komisi"
-                ? "0 0 0 2px var(--brass), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "komisi" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat detail komisi per kapster"
-        >
-          <Kpi
-            icon="people"
-            label="Total Komisi"
-            tone="brass"
-            value={rupiah(data.komisi)}
-            detail={`${persenKomisi}% dari omzet · ${data.perKapster.length} kapster`}
-          />
-        </div>
-
-        <div
-          onClick={() => pilihBagian("omzet")}
-          style={{
-            cursor: "pointer",
-            borderRadius: 12,
-            transition: "all 0.15s ease",
-            boxShadow:
-              subTab === "omzet"
-                ? "0 0 0 2px var(--ink), 0 4px 12px rgba(0,0,0,0.08)"
-                : "none",
-            transform: subTab === "omzet" ? "translateY(-2px)" : "none",
-          }}
-          title="Klik untuk melihat omzet dan laba bersih"
-        >
-          <Kpi
-            icon="wallet"
-            label="Omzet"
-            tone="dark"
-            value={rupiah(data.sisa)}
-            detail={`Margin laba bersih ${persenSisa}%`}
-          />
-        </div>
-      </div>
-
-      {/* SUB-VIEW 1: TAB PEMASUKAN */}
-      <div id="laporan-pemasukan" className="report-section">
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section className="panel" style={{ padding: 20 }}>
-            <PageTitle eyebrow="Sumber Pendapatan" title="Pemasukan" />
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: 16,
-                marginTop: 14,
-              }}
-            >
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                  background: "var(--paper)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    marginBottom: 8,
-                  }}
-                >
-                  <i
-                    className="dot sage-dot"
-                    style={{ width: 10, height: 10 }}
-                  />
-                  <strong style={{ fontSize: 15 }}>Pembayaran Tunai</strong>
-                  <span className="chip lunas" style={{ marginLeft: "auto" }}>
-                    {persenTunai}%
-                  </span>
-                </div>
-                <div
-                  style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}
-                >
-                  {rupiah(data.tunai)}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                  background: "var(--paper)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    marginBottom: 8,
-                  }}
-                >
-                  <i
-                    className="dot brass-dot"
-                    style={{ width: 10, height: 10 }}
-                  />
-                  <strong style={{ fontSize: 15 }}>
-                    Pembayaran QRIS / Digital
-                  </strong>
-                  <span className="chip active" style={{ marginLeft: "auto" }}>
-                    {persenQris}%
-                  </span>
-                </div>
-                <div
-                  style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}
-                >
-                  {rupiah(data.qris)}
-                </div>
-              </div>
+      <div className="od-kpis" style={fetching ? { opacity: 0.6 } : undefined}>
+        {kpis.map((k) => {
+          const statis = false
+          const isi = (
+            <span className="od-kpi-body">
+              <span className={`kpi-icon ${k.tone}`}>
+                <Icon name={k.icon} />
+              </span>
+              <span className="od-kpi-text">
+                <span className="od-kpi-label">{k.label}</span>
+                <strong className="od-kpi-value">{rupiah(k.value)}</strong>
+                <span className="od-kpi-detail">{k.detail}</span>
+              </span>
+            </span>
+          )
+          return statis ? (
+            <div key={k.key} className="od-kpi od-kpi-static">
+              {isi}
             </div>
-          </section>
-        </div>
+          ) : (
+            <button
+              key={k.key}
+              type="button"
+              className={`od-kpi${subTab === k.key ? " is-active" : ""}`}
+              aria-label={`${k.label} ${rupiah(k.value)}, lihat rincian`}
+              onClick={() => pilihBagian(k.key)}
+            >
+              {isi}
+            </button>
+          )
+        })}
       </div>
+
+      <section id="laporan-pemasukan" className="panel lk-panel report-section">
+        <div className="lk-head">
+          <h3>Pemasukan</h3>
+        </div>
+        <div className="lk-pay">
+          {([
+            ["Tunai", data.tunai, persenTunai],
+            ["QRIS", data.qris, persenQris],
+          ] as const).map(([nama, nilai, pct]) => (
+            <button
+              key={nama}
+              type="button"
+              className="lk-pay-card"
+              aria-label={`Pembayaran ${nama} ${rupiah(nilai)}, buka Riwayat Transaksi ${nama}`}
+              onClick={() => bukaRiwayat({ metode: nama })}
+            >
+              <span className="lk-pay-main">
+                <strong>{nama}</strong>
+                <small>{pct}% pemasukan</small>
+              </span>
+              <b>{rupiah(nilai)}</b>
+              <Icon name="chevron" className="od-turn-right od-go" />
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
       <div id="laporan-pengeluaran" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section
-            className="panel"
-            style={{ padding: 20, overflow: "hidden" }}
-          >
-            <div className="page-title expense-page-title">
-              <div>
-                <h2>Pengeluaran</h2>
-              </div>
+          <section className="panel lk-panel report-pengeluaran">
+            <div className="lk-head">
+              <h3>Pengeluaran</h3>
             </div>
 
             <div className="expense-toolbar filters">
@@ -757,7 +634,8 @@ export function ReportsPage({ currentUser, role }: {
                 className="primary-button expense-add-button"
                 onClick={() => setExpenseFormOpen(true)}
               >
-                <Icon name="plus" /> Tambah pengeluaran
+                <Icon name="plus" />
+                <span>Tambah</span>
               </Button>
             </div>
 
@@ -805,13 +683,7 @@ export function ReportsPage({ currentUser, role }: {
               ))}
 
               {filteredExpenses.length === 0 && (
-                <div
-                  style={{
-                    padding: "32px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
+                <div className="lk-empty">
                   Tidak ada data pengeluaran yang cocok dengan pencarian.
                 </div>
               )}
@@ -823,39 +695,40 @@ export function ReportsPage({ currentUser, role }: {
       {/* SUB-VIEW 3: TAB TOTAL KOMISI */}
       <div id="laporan-komisi" className="report-section">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <section
-            className="panel"
-            style={{ padding: 20, overflow: "hidden" }}
-          >
-            <PageTitle eyebrow="Total Komisi" title="Komisi Kapster" />
+          <section className="panel lk-panel report-komisi">
+            <div className="lk-head">
+              <h3>Komisi kapster</h3>
+            </div>
 
             <div className="commission-table-scroll">
               <div className="report-head">
                 <span>Kapster</span>
-                <span>Pelanggan</span>
-                <span>Omzet Dihasilkan</span>
-                <span>Total Komisi</span>
+                <span>Transaksi</span>
+                <span>Komisi</span>
               </div>
 
               {data.perKapster.map((k) => (
-                <div className="report-row" key={k.kapsterId + k.kapster}>
+                <div
+                  className="report-row is-tap"
+                  key={k.kapsterId + k.kapster}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Komisi ${k.kapster}, buka Riwayat Transaksi`}
+                  onClick={() => bukaRiwayat({ kapster: k.kapster })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") bukaRiwayat({ kapster: k.kapster })
+                  }}
+                >
                   <div>
                     <strong>{k.kapster}</strong>
                   </div>
                   <span>{k.pelanggan} transaksi</span>
-                  <b>{rupiah(k.omzet)}</b>
-                  <b style={{ color: "#8c6014" }}>{rupiah(k.komisi)}</b>
+                  <b className="lk-komisi">{rupiah(k.komisi)}</b>
                 </div>
               ))}
 
               {data.perKapster.length === 0 && (
-                <div
-                  style={{
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    color: "var(--slate)",
-                  }}
-                >
+                <div className="lk-empty">
                   Belum ada data komisi kapster pada periode ini.
                 </div>
               )}
@@ -864,177 +737,94 @@ export function ReportsPage({ currentUser, role }: {
         </div>
       </div>
 
-      {/* SUB-VIEW 4: TAB OMZET */}
-      <div id="laporan-omzet" className="report-section">
-        <section className="panel owner-profit-panel" style={{ padding: 22 }}>
-          <PageTitle
-            eyebrow="Kalkulasi Keuntungan"
-            title="Kalkulasi Sisa Bersih"
-          />
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              width: "100%",
-              maxWidth: 1000,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "rgba(34, 197, 94, 0.08)",
-                border: "1px solid rgba(34, 197, 94, 0.2)",
-                flexWrap: "wrap",
-                gap: 8,
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--ink)",
-                    fontSize: 14,
-                  }}
-                >
-                  (+) Total Pemasukan Kotor
-                </strong>
-              </div>
-              <strong style={{ fontSize: 16, color: "#15803d" }}>
-                + {rupiah(data.pemasukan)}
-              </strong>
+      <section id="laporan-omzet" className="panel lk-panel report-section">
+        <div className="lk-head">
+          <h3>Sisa bersih</h3>
+          <strong className="lk-net">{rupiah(data.sisa)}</strong>
+        </div>
+        <div className="lk-calc">
+          {([
+            ["Pemasukan", "+", data.pemasukan, "", "plus"],
+            ["Pengeluaran", "-", data.pengeluaran, `${persenPengeluaran}%`, "minus"],
+            ["Komisi kapster", "-", data.komisi, tarifKomisi.map((n) => `${n}%`).join(" / "), "minus"],
+          ] as const).map(([nama, tanda, nilai, pct, tone]) => (
+            <div key={nama} className={`lk-calc-row ${tone}`}>
+              <span>{nama}</span>
+              <small>{pct}</small>
+              <b>
+                {tanda} {rupiah(nilai)}
+              </b>
             </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "rgba(239, 68, 68, 0.06)",
-                border: "1px solid rgba(239, 68, 68, 0.18)",
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--ink)",
-                    fontSize: 14,
-                  }}
-                >
-                  (-) Total Pengeluaran Toko
-                </strong>
-              </div>
-              <strong style={{ fontSize: 16, color: "#b91c1c" }}>
-                - {rupiah(data.pengeluaran)}
-              </strong>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "rgba(200, 150, 62, 0.08)",
-                border: "1px solid rgba(200, 150, 62, 0.25)",
-              }}
-            >
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    color: "var(--ink)",
-                    fontSize: 14,
-                  }}
-                >
-                  (-) Total Komisi Kapster
-                </strong>
-              </div>
-              <strong style={{ fontSize: 16, color: "#8c6014" }}>
-                - {rupiah(data.komisi)}
-              </strong>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "16px",
-                borderRadius: 8,
-                background: "var(--ink)",
-                color: "#fff",
-                marginTop: 6,
-              }}
-            >
-              <div>
-                <strong
-                  style={{ display: "block", fontSize: 15, color: "#fff" }}
-                >
-                  (=) Sisa Bersih
-                </strong>
-              </div>
-              <strong style={{ fontSize: 20, color: "#facc15" }}>
-                {rupiah(data.sisa)}
-              </strong>
-            </div>
+          ))}
+          <div className="lk-calc-row total">
+            <span>Sisa bersih</span>
+            <small>{persenSisa}%</small>
+            <b>{rupiah(data.sisa)}</b>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
-      {/* Modal Catat Pengeluaran */}
+      {/* Modal Tambah Pengeluaran: kalender di kiri, form di kanan (HP: tanggal di atas) */}
       {expenseFormOpen && (
         <div className="modal-overlay">
           <form
-            className="simple-modal expense-form"
+            className="simple-modal expense-form lk-exp-form"
             onSubmit={handleCreateExpense}
           >
-            <label>
-              <span>Tanggal</span>
-              <CalendarPicker value={expDate} onChange={setExpDate} />
-            </label>
-            <label>
-              <span>Keterangan</span>
-              <input
-                placeholder="Misal: Beli sabun cuci rambut 2 botol"
-                value={expDescription}
-                onChange={(e) => setExpDescription(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              <span>Jumlah (Rp)</span>
-              <input
-                placeholder="Contoh: 150.000"
-                value={expAmount}
-                onChange={(e) => {
-                  const num = Number(e.target.value.replace(/\D/g, ""))
-                  setExpAmount(num ? rupiah(num) : "")
-                }}
-                required
-              />
-            </label>
-            <footer>
-              <Button
-                className="secondary-button"
-                type="button"
-                onClick={() => setExpenseFormOpen(false)}
-              >
-                Batal
+            <header>
+              <h2>Tambah pengeluaran</h2>
+              <Button type="button" onClick={() => setExpenseFormOpen(false)}>
+                <Icon name="close" />
               </Button>
-              <Button className="primary-button" type="submit">
-                Simpan Pengeluaran
-              </Button>
-            </footer>
+            </header>
+            <div className="lk-exp-body">
+              <div className="lk-exp-cal">
+                <KalenderBesar
+                  izin={{}}
+                  min={TANGGAL_MULAI}
+                  onChange={setExpDate}
+                  value={expDate}
+                />
+              </div>
+              <label className="lk-exp-date">
+                <span>Tanggal</span>
+                <CalendarPicker
+                  max={TANGGAL_MAKS()}
+                  min={TANGGAL_MULAI}
+                  value={expDate}
+                  onChange={(d) => d && setExpDate(d)}
+                />
+              </label>
+              <div className="lk-exp-fields">
+                <label>
+                  <span>Keterangan</span>
+                  <input
+                    placeholder="Misal: Beli sabun cuci rambut 2 botol"
+                    value={expDescription}
+                    onChange={(e) => setExpDescription(e.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Jumlah (Rp)</span>
+                  <input
+                    inputMode="numeric"
+                    placeholder="Contoh: 150.000"
+                    value={expAmount}
+                    onChange={(e) => {
+                      const num = Number(e.target.value.replace(/\D/g, ""))
+                      setExpAmount(num ? rupiah(num) : "")
+                    }}
+                    required
+                  />
+                </label>
+                <div className="lk-exp-actions">
+                  <Button className="primary-button" type="submit">
+                    Simpan
+                  </Button>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
       )}
