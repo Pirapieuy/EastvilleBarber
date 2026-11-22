@@ -288,21 +288,19 @@ export function ProductsPage({ embedded = false }: {
   return (
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
-      <div className="products-status-bar">
-        <div className="master-summary">
-          <span>
-            <Icon name="product" />
-            <strong>
-              {productsList.filter((product) => product.status === "Aktif").length} produk aktif
-            </strong>
-            <small>
-              {productsList.filter((product) => product.status !== "Aktif").length} nonaktif
-            </small>
-          </span>
-        </div>
-      </div>
       <section className="panel product-admin-list fit-fill">
           <div className="filters">
+            <div className="master-summary filters-summary">
+              <span>
+                <Icon name="product" />
+                <strong>
+                  {productsList.filter((product) => product.status === "Aktif").length} produk aktif
+                </strong>
+                <small>
+                  {productsList.filter((product) => product.status !== "Aktif").length} nonaktif
+                </small>
+              </span>
+            </div>
             <div className="search">
               <Icon name="search" />
               <input

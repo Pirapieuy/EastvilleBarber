@@ -226,18 +226,15 @@ export function ServicesPage({ embedded = false }: {
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
       {!embedded && <PageTitle eyebrow="Data master" title="Layanan & Harga" />}
-      <div className="services-status-bar">
-        <div className="master-summary">
-          <span>
-            <Icon name="cashier" />
-            <strong>{aktifCount} layanan aktif</strong>
-            <small>{rows.length - aktifCount} nonaktif</small>
-          </span>
-        </div>
-      </div>
-
       <section className="panel service-list fit-fill">
         <div className="filters">
+          <div className="master-summary filters-summary">
+            <span>
+              <Icon name="cashier" />
+              <strong>{aktifCount} layanan aktif</strong>
+              <small>{rows.length - aktifCount} nonaktif</small>
+            </span>
+          </div>
           <div className="search">
             <Icon name="search" />
             <input
