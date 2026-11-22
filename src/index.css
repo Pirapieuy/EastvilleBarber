@@ -22657,3 +22657,86 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .promo-discount-actions .promo-discount-help-wrap {
   flex: none;
 }
+
+/* Layanan & Produk: semua kontrol baris filter (Cari, Kategori, Status, Restok, Tambah, ringkasan) satu gaya */
+.catalog-page .filters .search,
+.catalog-page .filters .search-select,
+.catalog-page .filters .search-select-trigger,
+.catalog-page .filters .filters-add,
+.catalog-page .filters .filters-restok,
+.catalog-page .filters .filters-summary > span,
+.catalog-page .promo-discount-actions .filters-add,
+.catalog-page .promo-discount-actions .filters-summary > span {
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: none !important;
+}
+
+.catalog-page .filters .search input,
+.catalog-page .filters .search-select-trigger,
+.catalog-page .filters .search-select-trigger * {
+  font-size: 14px;
+}
+
+.catalog-page .filters .filters-summary strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.catalog-page .promo-discount-actions .filters-add,
+.catalog-page .filters .filters-add {
+  font-weight: 700;
+}
+
+.catalog-page .promo-discount-actions .filters-add {
+  min-height: 44px;
+  height: 44px;
+}
+
+.catalog-page .promo-discount-actions .filters-summary > span {
+  min-height: 44px;
+  height: 44px;
+}
+
+@media (max-width: 620px) {
+  .catalog-page .promo-discount-actions .filters-add,
+  .catalog-page .promo-discount-actions .filters-summary > span {
+    min-height: 42px;
+    height: 42px;
+  }
+}
+
+/* Isi kolom tabel rata kiri, lurus dengan header */
+@media (min-width: 761px) {
+  .catalog-page .service-details > span,
+  .catalog-page .product-admin-details > span,
+  .catalog-page .service-commission-values,
+  .catalog-page .service-commission-values > span {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin: 0 !important;
+  }
+
+  .catalog-page .service-details > span > strong,
+  .catalog-page .product-admin-details > span > strong {
+    text-align: left !important;
+  }
+}
+
+@media (min-width: 761px) {
+  .catalog-page .service-details > span,
+  .catalog-page .product-admin-details > span {
+    padding: 0 !important;
+  }
+}
+
+@media (min-width: 761px) {
+  .catalog-page .service-head,
+  .catalog-page .product-admin-head,
+  .catalog-page .service-row,
+  .catalog-page .product-admin-row {
+    column-gap: 16px !important;
+    padding-inline: 16px !important;
+  }
+}
