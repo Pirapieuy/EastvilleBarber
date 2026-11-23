@@ -24926,3 +24926,20 @@ html:has(.manual-page .modal-overlay) {
     max-height: 500px;
   }
 }
+
+/* Gaji & Kasbon: layar sempit (320px) filter tidak melebihi panel */
+.gaji-page .gj-filter-grid,
+.gaji-page .gj-filter-grid .search-select,
+.gaji-page .gj-filter-grid .calendar-picker-wrapper,
+.gaji-page .gj-filter-grid .calendar-picker-btn {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.gaji-page .gj-filter-grid .search-select-trigger,
+.gaji-page .gj-filter-grid .calendar-picker-btn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
