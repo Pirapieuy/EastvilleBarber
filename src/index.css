@@ -23168,3 +23168,65 @@ html:has(.manual-page .modal-overlay) {
   background: var(--paper);
   border-top: 1px solid var(--line);
 }
+
+/* Tablet & laptop kecil: skema komisi ditumpuk (label kiri, nilai kanan) agar nilai Rp tidak saling menimpa */
+@media (min-width: 761px) and (max-width: 1279px) {
+  .catalog-page .product-admin-scroll .product-share-values {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values > span {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values > span > small {
+    display: inline !important;
+    font-size: 11px !important;
+    white-space: nowrap;
+  }
+
+  .catalog-page .product-admin-scroll .product-share-values > span > strong {
+    font-size: 12px !important;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .catalog-page .product-admin-scroll .product-admin-row {
+    padding-block: 8px !important;
+  }
+}
+
+/* Laptop >=1280: tiga bagian sejajar dengan jarak tetap, nilai tidak boleh melewati kolom */
+@media (min-width: 1280px) {
+  .catalog-page .product-share-values {
+    gap: 16px !important;
+  }
+
+  .catalog-page .product-share-values > span {
+    min-width: 0;
+  }
+}
+
+/* HP: Stok lurus dengan kolom Eastville (grid 3 kolom sama dengan baris skema) */
+@media (max-width: 760px) {
+  .catalog-page .product-admin-scroll .product-admin-row > .product-admin-details {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .catalog-page .product-admin-scroll .product-admin-row > .product-admin-details > .product-seller-detail {
+    grid-column: 1 / span 2 !important;
+  }
+
+  .catalog-page .product-admin-scroll .product-admin-row > .product-admin-details > .product-stock-detail {
+    grid-column: 3 !important;
+  }
+}
