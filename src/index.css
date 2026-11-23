@@ -15046,6 +15046,271 @@ label .search-select-trigger {
   gap: 16px !important;
 }
 
+/* Ringkasan Riwayat Absensi: lima kartu dengan kedalaman ringan dan jarak seragam. */
+.attendance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin: 16px 16px 16px;
+}
+
+.attendance-history-filters {
+  display: grid !important;
+  grid-template-columns: max-content minmax(0, 1fr);
+  width: auto !important;
+  box-sizing: border-box;
+  gap: 16px !important;
+  margin-top: 16px !important;
+  margin-bottom: 16px !important;
+  margin-right: 16px;
+  margin-left: 16px;
+}
+
+.attendance-record-list {
+  display: grid;
+  gap: 6px;
+  margin: 0 16px 16px;
+}
+
+.attendance-record-card {
+  gap: 12px;
+  height: 88px;
+  min-height: 88px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border-color: #e8e1d8;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(53, 46, 37, 0.045);
+  transition: box-shadow 160ms ease;
+}
+
+.attendance-record-card:hover {
+  box-shadow: 0 4px 10px rgba(53, 46, 37, 0.075);
+}
+
+.attendance-record-photo {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 9px;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(50, 38, 24, 0.18);
+}
+
+.attendance-record-icon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border: 1px solid #e8e3dc;
+  border-radius: 10px;
+  background: #f7f6f3;
+  color: #766f65;
+}
+
+.attendance-state-message {
+  margin: 0 16px 12px;
+  padding: 4px 0;
+  color: var(--muted);
+}
+
+.attendance-record-person {
+  display: grid;
+  gap: 3px;
+}
+
+.attendance-record-person > strong {
+  font-size: 16px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attendance-record-date {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .workspace:has(> .mobile-content.attendance-history-page) {
+    height: 100svh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .workspace > .mobile-content.attendance-history-page {
+    flex: 1 1 auto;
+    height: 100svh;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 70px 16px 12px !important;
+  }
+
+  .mobile-content.attendance-history-page > .attendance-history-panel {
+    width: 100%;
+    min-height: 0;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .attendance-summary-grid,
+  .attendance-history-filters {
+    flex: 0 0 auto;
+  }
+
+  .attendance-record-list {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .attendance-record-list::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .mobile-content.attendance-history-page .attendance-history-filters {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters > .search-select {
+    grid-column: 2 !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .search-select-trigger {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+    padding-inline: 8px !important;
+  }
+
+  .attendance-record-card {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .attendance-record-icon,
+  .attendance-record-photo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .attendance-edit-button {
+    min-width: 76px;
+    gap: 5px;
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-record-card {
+    transition: none;
+  }
+}
+
+.attendance-summary-card {
+  min-width: 0;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 8px;
+  border: 1px solid #e5d7c4;
+  border-bottom: 3px solid #d8c6ae;
+  border-radius: 12px;
+  background: linear-gradient(155deg, #fffefa 0%, #f8f1e7 100%);
+  box-shadow: 0 3px 0 rgba(107, 79, 47, 0.08), 0 8px 16px rgba(67, 49, 29, 0.07), inset 0 1px 0 #fff;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.attendance-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(107, 79, 47, 0.08), 0 12px 20px rgba(67, 49, 29, 0.1), inset 0 1px 0 #fff;
+}
+
+.attendance-summary-card:focus-visible {
+  outline: 3px solid rgba(196, 145, 58, 0.45);
+  outline-offset: 2px;
+}
+
+.attendance-summary-card.selected {
+  border-color: #bd8732;
+  border-bottom-color: #9e6d20;
+  box-shadow: 0 2px 0 rgba(107, 79, 47, 0.1), inset 0 0 0 1px rgba(189, 135, 50, 0.3), 0 8px 16px rgba(67, 49, 29, 0.08);
+}
+
+.attendance-summary-card strong {
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.attendance-summary-card[data-status="hadir"] strong { color: #27745f; }
+.attendance-summary-card[data-status="tidak-hadir"] strong { color: #a54137; }
+.attendance-summary-card[data-status="sakit"] strong { color: #587294; }
+.attendance-summary-card[data-status="cuti"] strong { color: #906c32; }
+.attendance-summary-card[data-status="izin"] strong { color: #765a8b; }
+
+.attendance-summary-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.attendance-edit-button {
+  min-height: 44px;
+  min-width: 108px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .attendance-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .attendance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-summary-card {
+    transition: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .workspace > .content.team-page,
   .workspace > .content.fit-page.team-page {
@@ -19463,6 +19728,7 @@ html:has(.od-page),
 html:has(.report-page),
 html:has(.catalog-page),
 html:has(.team-page),
+html:has(.attendance-history-page),
 html:has(.kapster-dashboard),
 html:has(.my-salary-page),
 html:has(.kapster-product-commission),
@@ -19471,6 +19737,7 @@ html:has(.kapster-product-commission),
 .workspace:has(> .od-page),
 .workspace:has(> .report-page),
 .workspace:has(> .catalog-page),
+.workspace:has(> .mobile-content.attendance-history-page),
 .workspace:has(> .team-page),
 .workspace:has(> .kapster-dashboard),
 .workspace:has(> .my-salary-page),
@@ -19483,12 +19750,19 @@ html:has(.kapster-product-commission),
   -ms-overflow-style: none;
 }
 
+.attendance-history-page,
+.attendance-history-page * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 html:has(.izin-kapster-page)::-webkit-scrollbar,
 html:has(.manual-page)::-webkit-scrollbar,
 html:has(.od-page)::-webkit-scrollbar,
 html:has(.report-page)::-webkit-scrollbar,
 html:has(.catalog-page)::-webkit-scrollbar,
 html:has(.team-page)::-webkit-scrollbar,
+html:has(.attendance-history-page)::-webkit-scrollbar,
 html:has(.kapster-dashboard)::-webkit-scrollbar,
 html:has(.my-salary-page)::-webkit-scrollbar,
 html:has(.kapster-product-commission)::-webkit-scrollbar,
@@ -19497,6 +19771,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 .workspace:has(> .od-page)::-webkit-scrollbar,
 .workspace:has(> .report-page)::-webkit-scrollbar,
 .workspace:has(> .catalog-page)::-webkit-scrollbar,
+.workspace:has(> .mobile-content.attendance-history-page)::-webkit-scrollbar,
 .workspace:has(> .team-page)::-webkit-scrollbar,
 .workspace:has(> .kapster-dashboard)::-webkit-scrollbar,
 .workspace:has(> .my-salary-page)::-webkit-scrollbar,
@@ -19505,6 +19780,13 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 .app-shell-kapster .mobile-content::-webkit-scrollbar,
 .app-shell-kapster .recent-list::-webkit-scrollbar,
 .app-shell-kapster .customer-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.attendance-history-page::-webkit-scrollbar,
+.attendance-history-page *::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
