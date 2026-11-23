@@ -22748,3 +22748,37 @@ html:has(.manual-page .modal-overlay) {
   padding-inline: 12px !important;
   font-weight: 600;
 }
+
+/* Popup Tambah/Ubah Produk: footer tidak menyusut (tombol tidak menempel garis), isi yang menggulir */
+.catalog-page .product-modal > header,
+.catalog-page .product-modal > footer {
+  flex: none;
+}
+
+.catalog-page .product-modal > .product-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.catalog-page .product-modal > footer {
+  margin: 0;
+  padding: 16px !important;
+  min-height: 0;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.catalog-page .product-modal > footer .button {
+  flex: none;
+  height: 44px;
+}
+
+.catalog-page .product-modal > footer .button {
+  flex: 1 1 0;
+}
+
+@media (max-width: 620px) {
+  .catalog-page .product-modal > footer .button {
+    height: 42px;
+  }
+}
