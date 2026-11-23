@@ -191,7 +191,7 @@ export function MySalaryPage() {
       </section>
 
       {data.kasbonAktif.length > 0 && (
-        <section className="panel customer-list" style={{ marginTop: 16 }}>
+        <section className="panel customer-list">
           <PageTitle eyebrow="Kewajiban" title="Daftar Kasbon Aktif" />
           {data.kasbonAktif.map((k) => (
             <div key={k.id}>
@@ -206,7 +206,7 @@ export function MySalaryPage() {
         </section>
       )}
 
-      <section className="panel kapster-activity-panel" style={{ marginTop: 16, padding: 15 }}>
+      <section className="panel kapster-activity-panel">
         <PageTitle
           eyebrow="Aktivitas pribadi"
           title="Rincian Transaksi Layanan"
@@ -227,9 +227,9 @@ export function MySalaryPage() {
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: 8,
-            marginBottom: 12,
-            padding: "8px 12px",
+            gap: 16,
+            marginBottom: 16,
+            padding: "10px 14px",
             background: "rgb(20 17 15 / 3%)",
             borderRadius: 8,
             fontSize: 12,
@@ -257,7 +257,7 @@ export function MySalaryPage() {
             Belum ada pengerjaan layanan/produk pada tanggal ini.
           </p>
         ) : (
-          <div className="recent-list" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="recent-list" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {aktivitas.map((row, idx) => (
               <div key={idx} className="recent-row">
                 <div className="recent-icon">

@@ -305,17 +305,16 @@ export function AttendanceHistoryPage() {
 
   const displayRows: DisplayRow[] = useMemo(() => {
     const latestByPerson = new Map<string, AbsensiRow>()
-    for (const row of rows) {
+    const terbaruDulu = [...rows].sort((a, b) => {
+      const waktuA = a.waktu || `${a.tanggal} ${a.jam || ""}`
+      const waktuB = b.waktu || `${b.tanggal} ${b.jam || ""}`
+      return waktuB.localeCompare(waktuA)
+    })
+    for (const row of terbaruDulu) {
       const keyById = (row.userId || "").trim().toLowerCase()
       const keyByNama = (row.nama || "").trim().toLowerCase()
-      if (keyById && latestByPerson.has(keyById)) {
-        latestByPerson.set(keyById, row)
-      } else if (keyByNama && latestByPerson.has(keyByNama)) {
-        latestByPerson.set(keyByNama, row)
-      } else {
-        const key = keyById || keyByNama
-        latestByPerson.set(key, row)
-      }
+      const key = keyById || keyByNama
+      if (key && !latestByPerson.has(key)) latestByPerson.set(key, row)
     }
 
     const recordRows: DisplayRow[] = [...latestByPerson.values()].map((row) => ({
@@ -375,10 +374,11 @@ export function AttendanceHistoryPage() {
   }, [displayRows, search, filterStatus, filterKapster])
 
   const stats = useMemo(() => {
-    const counts = { Hadir: 0, "Tidak Hadir": 0 }
+    const counts = { Hadir: 0, "Tidak Hadir": 0, Sakit: 0 }
     for (const row of displayRows) {
       if (row.status === "Hadir") counts.Hadir++
-      else counts["Tidak Hadir"]++
+      else if (row.status === "Sakit") counts.Sakit++
+      else if (row.status === "Tidak Hadir") counts["Tidak Hadir"]++
     }
     return counts
   }, [displayRows])
@@ -386,6 +386,7 @@ export function AttendanceHistoryPage() {
   const statItems: { label: string; status: AbsensiStatus; count: number }[] = [
     { label: "Hadir", status: "Hadir", count: stats.Hadir },
     { label: "Tidak Hadir", status: "Tidak Hadir", count: stats["Tidak Hadir"] },
+    { label: "Sakit", status: "Sakit", count: stats.Sakit },
   ]
 
   return (

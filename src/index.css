@@ -365,6 +365,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 11px;
+  flex-shrink: 0;
 }
 
 .brand-mark.clickable {
@@ -975,6 +976,7 @@ textarea {
   flex-direction: column;
   padding: 20px 10px 14px;
   align-items: center;
+  overflow: hidden;
   color: var(--paper);
   background:
     radial-gradient(circle at 20% 88%, rgb(200 150 62 / 12%), transparent 30%),
@@ -1006,16 +1008,25 @@ textarea {
 
 .sidebar.collapsed nav {
   width: 100%;
-  overflow: visible;
-  margin-top: 26px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 10px;
   padding: 0;
+  scrollbar-width: none;
+}
+
+.sidebar.collapsed nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar.collapsed .nav-item {
-  width: 46px;
-  min-height: 43px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   justify-content: center;
-  margin: 0 auto 4px;
+  margin: 0 auto;
   padding: 0;
 }
 
@@ -1059,14 +1070,14 @@ textarea {
 
 .sidebar-user-pill {
   position: relative;
-  width: 46px;
-  min-height: 43px;
+  width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
   padding: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -1176,6 +1187,7 @@ textarea {
 }
 
 .sidebar nav {
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
   margin-top: 24px;
@@ -1274,8 +1286,26 @@ textarea {
 }
 
 .sidebar.collapsed .sidebar-nav-scroll {
-  overflow: visible;
-  margin-top: 20px;
+  margin-top: 10px;
+  gap: 0;
+}
+
+.sidebar.collapsed .nav-group {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.collapsed .nav-group-divider {
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: rgb(255 255 255 / 12%);
+  margin: 5px auto 4px;
+}
+
+.sidebar.collapsed .sidebar-footer-nav .nav-group-divider {
+  margin: 0 auto 10px;
 }
 
 .sidebar.collapsed .nav-group-items {
@@ -1283,6 +1313,7 @@ textarea {
   border: 0;
   margin: 0;
   align-items: center;
+  gap: 10px;
 }
 
 .sidebar.collapsed .nav-group-items.nested-indent {
@@ -9627,9 +9658,81 @@ textarea {
     transform: translateX(0);
   }
 
-  .sidebar {
+  .sidebar,
+  .sidebar.collapsed,
+  .sidebar.expanded {
     width: 218px;
+    align-items: stretch;
+    padding: 24px 14px 18px;
     z-index: 60;
+  }
+
+  .sidebar.collapsed .brand-mark {
+    justify-content: flex-start;
+    padding: 4px;
+    margin: -4px;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .sidebar.collapsed .brand-text {
+    display: block;
+  }
+
+  .sidebar.collapsed nav {
+    width: 100%;
+    overflow-y: auto;
+    margin-top: 34px;
+    padding-right: 2px;
+  }
+
+  .sidebar.collapsed .nav-item,
+  .sidebar.collapsed .sidebar-user-pill {
+    width: 100%;
+    min-height: 43px;
+    justify-content: flex-start;
+    margin: 0 0 4px;
+    padding: 0 11px;
+  }
+
+  .sidebar.collapsed .nav-item > span,
+  .sidebar.collapsed .sidebar-user-pill > span {
+    position: static;
+    width: auto;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    box-shadow: none;
+    font-size: 12px;
+    opacity: 1;
+    transform: none;
+  }
+
+  .sidebar.collapsed .nav-group-items {
+    padding: 0;
+    border: 0;
+    margin: 0;
+  }
+
+  .sidebar.collapsed .nav-group-items.nested-indent {
+    padding-left: 12px;
+    border-left: 2px solid rgb(255 255 255 / 8%);
+    margin-left: 6px;
+  }
+
+  .sidebar.collapsed .sidebar-nav-scroll {
+    overflow-y: auto;
+    margin-top: 20px;
+  }
+
+  .sidebar.collapsed .sidebar-bottom {
+    width: 100%;
+  }
+
+  .brand-mark.clickable {
+    pointer-events: none;
+    cursor: default;
   }
 
   .mobile-overlay {
@@ -11113,58 +11216,6 @@ textarea {
 }
 
 @media (max-width: 820px) {
-  .sidebar-wrap,
-  .app-shell.sidebar-expanded .sidebar-wrap {
-    width: 240px;
-  }
-
-  .sidebar,
-  .sidebar.collapsed,
-  .sidebar.expanded {
-    width: 240px;
-    align-items: stretch;
-    padding: 24px 14px 18px;
-  }
-
-  .sidebar.collapsed .brand-mark {
-    justify-content: flex-start;
-    padding: 4px;
-    margin: -4px;
-  }
-
-  .sidebar.collapsed .brand-text {
-    display: block;
-  }
-
-  .sidebar.collapsed nav {
-    overflow-y: auto;
-    margin-top: 34px;
-    padding-right: 2px;
-  }
-
-  .sidebar.collapsed .nav-item,
-  .sidebar.collapsed .sidebar-user-pill {
-    width: 100%;
-    min-height: 43px;
-    justify-content: flex-start;
-    margin: 0 0 4px;
-    padding: 0 11px;
-  }
-
-  .sidebar.collapsed .nav-item > span,
-  .sidebar.collapsed .sidebar-user-pill > span {
-    position: static;
-    width: auto;
-    padding: 0;
-    border: 0;
-    color: inherit;
-    background: transparent;
-    box-shadow: none;
-    font-size: 12px;
-    opacity: 1;
-    transform: none;
-  }
-
   .content .page-actions,
   .mobile-content .page-actions {
     width: 100%;
@@ -11747,6 +11798,8 @@ textarea {
     justify-content: flex-start;
     padding: 4px;
     margin: -4px;
+    pointer-events: none;
+    cursor: default;
   }
 
   .sidebar.collapsed .brand-text {
@@ -11785,6 +11838,32 @@ textarea {
     font-size: 12px;
     opacity: 1;
     transform: none;
+  }
+
+  .sidebar.collapsed .nav-group-items {
+    padding: 0;
+    border: 0;
+    margin: 0;
+  }
+
+  .sidebar.collapsed .nav-group-items.nested-indent {
+    padding-left: 12px;
+    border-left: 2px solid rgb(255 255 255 / 8%);
+    margin-left: 6px;
+  }
+
+  .sidebar.collapsed .sidebar-nav-scroll {
+    overflow-y: auto;
+    margin-top: 20px;
+  }
+
+  .sidebar.collapsed .sidebar-bottom {
+    width: 100%;
+  }
+
+  .brand-mark.clickable {
+    pointer-events: none;
+    cursor: default;
   }
 
   .mobile-overlay {
@@ -15797,13 +15876,14 @@ label .search-select-trigger {
 .kapster-sales-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .kapster-sales-summary > div {
   min-width: 0;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: var(--bone);
 }
@@ -15910,8 +15990,7 @@ label .search-select-trigger {
     padding: 24px 16px 28px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    column-gap: 16px;
-    row-gap: 12px;
+    gap: 16px;
     align-items: start;
   }
 
@@ -16053,8 +16132,9 @@ label .search-select-trigger {
     display: grid;
     grid-template-columns: 420px 300px minmax(0, 1fr);
     justify-content: start;
-    column-gap: 12px;
-    row-gap: 12px;
+    column-gap: 16px;
+    row-gap: 16px;
+    gap: 16px;
     align-content: start;
   }
 
@@ -16075,7 +16155,7 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-product-commission > .commission-month-shell .calendar-picker-btn {
     width: 100%;
     height: 100%;
-    min-height: 48px;
+    min-height: 44px;
     justify-content: center;
   }
 }
@@ -16230,6 +16310,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
+    gap: 16px;
     row-gap: 16px;
     column-gap: 16px;
   }
@@ -16243,16 +16324,17 @@ label .search-select-trigger {
     gap: 16px;
   }
 
-  /* kartu hero (gelap) dan panel punya radius & padding yang sama */
+  /* kartu hero (gelap) dan panel punya radius 12px & padding 16px */
   .app-shell-kapster .my-salary-hero {
-    padding: 22px 24px;
-    border-radius: 14px;
+    padding: 16px;
+    border-radius: 12px;
   }
 
   .app-shell-kapster .kapster-dashboard .panel,
   .app-shell-kapster .my-salary-page .panel,
   .app-shell-kapster .kapster-product-commission .panel {
-    border-radius: 14px;
+    border-radius: 12px;
+    padding: 16px;
   }
 }
 
@@ -16278,11 +16360,11 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    padding: 16px 16px 28px !important;
+    padding: 16px 14px 16px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
-    display: none;
+    display: none !important;
   }
 
   /* judul di sisi kiri sudah dari kerangka; tombol Refresh tetap di kanan atas */
@@ -16302,6 +16384,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page {
     row-gap: 16px;
+    gap: 16px;
   }
 
   .app-shell-kapster .my-salary-page > .kapster-activity-panel {
@@ -16490,9 +16573,10 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-product-commission {
     flex: 1 1 auto;
     min-height: 0;
-    width: min(1280px, 100%);
-    margin: 0 auto;
-    padding: 16px 16px 26px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 14px 16px !important;
     overflow: hidden;
   }
 
@@ -16516,6 +16600,9 @@ label .search-select-trigger {
     margin-top: 0 !important;
     flex: 1 1 0;
     min-height: 0;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
   }
 
   .app-shell-kapster .my-salary-page > .customer-list,
@@ -16526,6 +16613,33 @@ label .search-select-trigger {
 }
 
 @media (max-width: 1024px) {
+  .app-shell-kapster .workspace > .content,
+  .app-shell-kapster .workspace > .mobile-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 70px 14px 16px !important;
+    gap: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-shell-kapster .content > .kpi-grid,
+  .app-shell-kapster .mobile-content > .kpi-grid {
+    gap: 16px !important;
+  }
+
+  .app-shell-kapster .panel,
+  .app-shell-kapster .my-salary-hero,
+  .app-shell-kapster .kpi {
+    border-radius: 12px !important;
+    padding: 16px !important;
+  }
+
+  .app-shell-kapster .content > .page-title:not(:has(.page-actions)):not(:has(.button)),
+  .app-shell-kapster .mobile-content > .page-title:not(:has(.page-actions)):not(:has(.button)) {
+    display: none !important;
+  }
+
   .kapster-dashboard-actions {
     margin-bottom: 4px;
   }
@@ -16533,6 +16647,88 @@ label .search-select-trigger {
   .kapster-dashboard-actions .button {
     width: 100%;
   }
+
+  .app-shell-kapster .kapster-dashboard > .dashboard-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 820px) {
+  .app-shell-kapster .kapster-dashboard > .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Role Kapster: radius kontrol 10px, tombol/chip 8px, ukuran tanpa loncatan */
+.app-shell-kapster .segmented {
+  border-radius: 10px !important;
+}
+
+.app-shell-kapster .segmented button,
+.app-shell-kapster .segmented .button {
+  min-height: 40px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+}
+
+.app-shell-kapster .calendar-picker-btn {
+  border-radius: 10px !important;
+}
+
+.app-shell-kapster .commission-month-shell .calendar-picker-btn {
+  border-radius: 10px !important;
+}
+
+@media (min-width: 1025px) {
+  .app-shell-kapster .calendar-picker-btn,
+  .app-shell-kapster .commission-month-shell .calendar-picker-btn {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-shell-kapster .calendar-picker-btn,
+  .app-shell-kapster .commission-month-shell .calendar-picker-btn {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+}
+
+.app-shell-kapster .recent-list {
+  gap: 16px !important;
+}
+
+.app-shell-kapster .customer-list > div:not(.page-title) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.app-shell-kapster .customer-list > div:not(.page-title) > b {
+  margin-left: auto;
+}
+
+.app-shell-kapster .salary-breakdown > div:not(.page-title) {
+  gap: 16px !important;
+}
+
+.app-shell-kapster .content,
+.app-shell-kapster .mobile-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.app-shell-kapster .recent-row {
+  border-radius: 10px !important;
+  padding: 12px 16px !important;
+  gap: 16px !important;
 }
 
 @media (min-width: 1025px) {
@@ -19114,17 +19310,27 @@ label .search-select-trigger {
   bottom: 3px;
 }
 
-/* Izin Kapster & Input Manual: halaman menggulir tanpa menampilkan batang scroll */
+/* Izin Kapster, Input Manual, Laporan & Halaman Kapster: halaman menggulir tanpa menampilkan batang scroll */
 html:has(.izin-kapster-page),
 html:has(.manual-page),
 html:has(.od-page),
 html:has(.report-page),
 html:has(.catalog-page),
+html:has(.kapster-dashboard),
+html:has(.my-salary-page),
+html:has(.kapster-product-commission),
 .workspace:has(> .izin-kapster-page),
 .workspace:has(> .manual-page),
 .workspace:has(> .od-page),
 .workspace:has(> .report-page),
-.workspace:has(> .catalog-page) {
+.workspace:has(> .catalog-page),
+.workspace:has(> .kapster-dashboard),
+.workspace:has(> .my-salary-page),
+.workspace:has(> .kapster-product-commission),
+.app-shell-kapster .content,
+.app-shell-kapster .mobile-content,
+.app-shell-kapster .recent-list,
+.app-shell-kapster .customer-list {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -19134,11 +19340,21 @@ html:has(.manual-page)::-webkit-scrollbar,
 html:has(.od-page)::-webkit-scrollbar,
 html:has(.report-page)::-webkit-scrollbar,
 html:has(.catalog-page)::-webkit-scrollbar,
+html:has(.kapster-dashboard)::-webkit-scrollbar,
+html:has(.my-salary-page)::-webkit-scrollbar,
+html:has(.kapster-product-commission)::-webkit-scrollbar,
 .workspace:has(> .izin-kapster-page)::-webkit-scrollbar,
 .workspace:has(> .manual-page)::-webkit-scrollbar,
 .workspace:has(> .od-page)::-webkit-scrollbar,
 .workspace:has(> .report-page)::-webkit-scrollbar,
-.workspace:has(> .catalog-page)::-webkit-scrollbar {
+.workspace:has(> .catalog-page)::-webkit-scrollbar,
+.workspace:has(> .kapster-dashboard)::-webkit-scrollbar,
+.workspace:has(> .my-salary-page)::-webkit-scrollbar,
+.workspace:has(> .kapster-product-commission)::-webkit-scrollbar,
+.app-shell-kapster .content::-webkit-scrollbar,
+.app-shell-kapster .mobile-content::-webkit-scrollbar,
+.app-shell-kapster .recent-list::-webkit-scrollbar,
+.app-shell-kapster .customer-list::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
@@ -19858,6 +20074,11 @@ html:has(.manual-page .modal-overlay) {
   background: var(--amber-soft);
 }
 
+.od-avatar.sick {
+  color: #b45309;
+  background: #fffbeb;
+}
+
 .od-avatar.off {
   color: var(--muted);
   background: var(--bone);
@@ -19884,6 +20105,11 @@ html:has(.manual-page .modal-overlay) {
 .od-chip.late {
   color: #8c6014;
   background: var(--amber-soft);
+}
+
+.od-chip.sick {
+  color: #b45309;
+  background: #fffbeb;
 }
 
 .od-chip.off {

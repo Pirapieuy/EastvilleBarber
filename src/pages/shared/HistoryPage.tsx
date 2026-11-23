@@ -224,7 +224,7 @@ export function EditTransactionModal({
     bayarQris: number
     reason: string
   }) => Promise<void>
-  catalog: { id: string; name: string; price: number; type: "Layanan" | "Produk" }[]
+  catalog: { id: string; name: string; price: number; type: "Layanan" | "Produk"; stock?: number }[]
   barberList: { id: string; name: string }[]
 }) {
   const [items, setItems] = useState<HistoryItemDetail[]>(() =>
@@ -271,12 +271,42 @@ export function EditTransactionModal({
   const tunaiShortage = Math.max(0, total - paymentCash)
   const tunaiChange = Math.max(0, paymentCash - total)
 
-  function updateItemQty(idx: number, delta: number) {
-    setItems((cur) =>
-      cur.map((it, i) =>
-        i === idx ? { ...it, qty: Math.max(1, it.qty + delta) } : it,
-      ),
+  function jumlahProdukDiNota(lines: HistoryItemDetail[], refId: string) {
+    return lines.reduce((sum, item) => {
+      if (item.type !== "Produk") return sum
+      const itemRefId =
+        item.refId || catalog.find((product) => product.name === item.name)?.id
+      return itemRefId === refId ? sum + item.qty : sum
+    }, 0)
+  }
+
+  function batasQtyProduk(refId: string) {
+    const product = catalog.find(
+      (item) => item.id === refId && item.type === "Produk",
     )
+    if (product?.stock == null) return Infinity
+    return product.stock + jumlahProdukDiNota(transaction.items, refId)
+  }
+
+  function produkSudahMaksimal(refId: string, lines = items) {
+    return jumlahProdukDiNota(lines, refId) >= batasQtyProduk(refId)
+  }
+
+  function updateItemQty(idx: number, delta: number) {
+    setItems((cur) => {
+      const item = cur[idx]
+      if (
+        delta > 0 &&
+        item?.type === "Produk" &&
+        item.refId &&
+        produkSudahMaksimal(item.refId, cur)
+      ) {
+        return cur
+      }
+      return cur.map((it, i) =>
+        i === idx ? { ...it, qty: Math.max(1, it.qty + delta) } : it,
+      )
+    })
   }
 
   function removeItem(idx: number) {
@@ -293,6 +323,8 @@ export function EditTransactionModal({
     const bId = barberList.find((b) => b.name === bName)?.id || ""
 
     setItems((cur) => {
+      if (catItem.type === "Produk" && produkSudahMaksimal(catItem.id, cur))
+        return cur
       const existing = cur.findIndex(
         (item) => item.refId === catItem.id && item.kapsterId === bId,
       )
@@ -423,6 +455,11 @@ export function EditTransactionModal({
                         <output aria-live="polite">{it.qty}</output>
                         <button
                           aria-label={`Tambah ${it.name}`}
+                          disabled={
+                            it.type === "Produk" &&
+                            it.refId != null &&
+                            produkSudahMaksimal(it.refId)
+                          }
                           onClick={() => updateItemQty(idx, 1)}
                           type="button"
                         >
@@ -479,28 +516,47 @@ export function EditTransactionModal({
                             {catalogSearch ? "Tidak ada yang cocok." : `Belum ada ${type.toLowerCase()}.`}
                           </p>
                         ) : (
-                          visibleItems.map((item) => (
-                            <div
-                              className="nota-item"
-                              key={item.id}
-                              onClick={() => handleAddItem(item)}
-                              role="button"
-                              style={{ cursor: "pointer" }}
-                            >
-                              <div className="nota-item-info">
-                                <strong>{item.name}</strong>
-                                <span>{rupiah(item.price)}</span>
-                              </div>
-                              <Button
-                                aria-label={`Tambah ${item.name}`}
-                                className={`secondary-button nota-add ${
-                                  type === "Produk" ? "nota-add-product" : "nota-add-service"
-                                }`}
+                          visibleItems.map((item) => {
+                            const disabled =
+                              item.type === "Produk" && produkSudahMaksimal(item.id)
+                            return (
+                              <div
+                                aria-disabled={disabled}
+                                className={`nota-item ${disabled ? "maxed" : ""}`}
+                                key={item.id}
+                                onClick={
+                                  disabled ? undefined : () => handleAddItem(item)
+                                }
+                                role="button"
+                                style={{
+                                  cursor: disabled ? "default" : "pointer",
+                                }}
                               >
-                                <Icon name="plus" />
-                              </Button>
-                            </div>
-                          ))
+                                <div className="nota-item-info">
+                                  <strong>{item.name}</strong>
+                                  <span>
+                                    {rupiah(item.price)}
+                                    {item.stock != null && (
+                                      <i className="nota-stock">
+                                        {` · stok ${item.stock}`}
+                                      </i>
+                                    )}
+                                  </span>
+                                </div>
+                                <Button
+                                  aria-label={`Tambah ${item.name}`}
+                                  disabled={disabled}
+                                  className={`secondary-button nota-add ${
+                                    type === "Produk"
+                                      ? "nota-add-product"
+                                      : "nota-add-service"
+                                  }`}
+                                >
+                                  <Icon name="plus" />
+                                </Button>
+                              </div>
+                            )
+                          })
                         )}
                       </div>
                     </div>
@@ -701,7 +757,7 @@ function TransactionDetailBody({
           )}
           {(selected.voidBy || selected.voidTime) && (
             <small className="detail-void-meta">
-              Dibatalkan oleh {selected.voidBy ?? "-"} · {selected.voidTime ?? ""}
+              Dibatalkan oleh {selected.barber || "Kapster"} · Kapster · {selected.voidTime ?? ""}
             </small>
           )}
         </div>
@@ -829,7 +885,7 @@ export function HistoryPage({ currentUser, role }: {
   const [showReceipt, setShowReceipt] = useState(false)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
 
-  const [catalog, setCatalog] = useState<{ id: string; name: string; price: number; type: "Layanan" | "Produk" }[]>([
+  const [catalog, setCatalog] = useState<{ id: string; name: string; price: number; type: "Layanan" | "Produk"; stock?: number }[]>([
     { id: "1", name: "Haircut", price: 40000, type: "Layanan" },
     { id: "2", name: "Haircut + Cuci", price: 50000, type: "Layanan" },
     { id: "3", name: "Shaving", price: 20000, type: "Layanan" },
@@ -953,7 +1009,7 @@ export function HistoryPage({ currentUser, role }: {
               .map((l) => ({ id: String(l.id), name: l.nama, price: l.harga, type: "Layanan" as const })),
             ...prod
               .filter((p) => p.status === "Aktif")
-              .map((p) => ({ id: p.kode, name: p.nama, price: p.harga, type: "Produk" as const })),
+              .map((p) => ({ id: p.kode, name: p.nama, price: p.harga, type: "Produk" as const, stock: p.stok == null ? undefined : Number(p.stok) })),
           ])
         }
         if (kap.length) {
