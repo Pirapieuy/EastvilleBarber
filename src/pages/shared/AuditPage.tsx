@@ -327,43 +327,45 @@ export function AuditPage() {
           )}
         </div>
 
-        <div className="audit-head">
-          <span>Waktu</span>
-          <span>Pengguna</span>
-          <span>Aksi</span>
-          <span>Objek</span>
-          <span>Detail</span>
-          <span>Alasan</span>
-        </div>
+        <div className="audit-table-scroll">
+          <div className="audit-head">
+            <span>Waktu</span>
+            <span>Pengguna</span>
+            <span>Aksi</span>
+            <span>Objek</span>
+            <span>Detail</span>
+            <span>Alasan</span>
+          </div>
 
-        {loading ? (
-          <div style={{ padding: 14 }}>
-            <LoadingState message="Memuat jejak audit dari server..." compact />
-          </div>
-        ) : rowsToDisplay.length === 0 ? (
-          <div style={{ padding: "24px 14px", color: "var(--slate)" }}>
-            Tidak ada jejak audit yang cocok dengan filter.
-          </div>
-        ) : (
-          rowsToDisplay.map((row, idx) => (
-            <article className="audit-row" key={`${row[0]}-${row[1]}-${idx}`}>
-              {row.map((value, index) => (
-                <span
-                  data-label={
-                    ["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][
-                      index
-                    ]
-                  }
-                  key={`${value}-${index}`}
-                >
-                  <span className={index === 2 ? "audit-action" : undefined}>
-                    {value}
+          {loading ? (
+            <div style={{ padding: 14 }}>
+              <LoadingState message="Memuat jejak audit dari server..." compact />
+            </div>
+          ) : rowsToDisplay.length === 0 ? (
+            <div style={{ padding: "24px 14px", color: "var(--slate)" }}>
+              Tidak ada jejak audit yang cocok dengan filter.
+            </div>
+          ) : (
+            rowsToDisplay.map((row, idx) => (
+              <article className="audit-row" key={`${row[0]}-${row[1]}-${idx}`}>
+                {row.map((value, index) => (
+                  <span
+                    data-label={
+                      ["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][
+                        index
+                      ]
+                    }
+                    key={`${value}-${index}`}
+                  >
+                    <span className={index === 2 ? "audit-action" : undefined}>
+                      {value}
+                    </span>
                   </span>
-                </span>
-              ))}
-            </article>
-          ))
-        )}
+                ))}
+              </article>
+            ))
+          )}
+        </div>
       </section>
     </div>
   )

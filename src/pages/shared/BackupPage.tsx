@@ -237,70 +237,72 @@ export function BackupPage() {
       </section>
       <section className="panel backup-list fit-fill">
         <PageTitle eyebrow="Arsip tersimpan" title="Daftar backup" />
-        <div className="backup-head">
-          <span>Nama backup</span>
-          <span className="desktop-col">Dibuat</span>
-          <span className="desktop-col">Isi</span>
-          <span className="desktop-col">Status</span>
-          <span style={{ textAlign: "right" }}>Aksi</span>
-        </div>
-        {backups.map((row) => (
-          <article className="backup-row" key={row.nama}>
-            <div className="backup-info-cell">
-              <span className="backup-file-name">
-                <Icon name="file" />
-                <strong>{row.nama}</strong>
-              </span>
-              <small className="backup-date-sub">
-                {row.dibuat} · {row.baris} baris
-              </small>
-            </div>
-            <span className="desktop-col">{row.dibuat}</span>
-            <span className="desktop-col">{row.baris} baris</span>
-            <i className="chip lunas desktop-col">Siap</i>
-            <div className="backup-action-cell">
-              <Button
-                className="secondary-button"
-                disabled={busyNama === row.nama || restoring}
-                onClick={() => unduh(row.nama)}
-                title={`Unduh file backup ${row.nama}.json`}
-              >
-                <Icon name="download" />
-                {busyNama === row.nama ? "..." : "Unduh"}
-              </Button>
-              <Button
-                className="restore-danger-button"
-                disabled={busyNama === row.nama || restoring}
-                onClick={() => {
-                  setTarget(row.nama)
-                  setRestore(1)
-                }}
-                title={`Pulihkan data dari ${row.nama}`}
-              >
-                <Icon name="restore" /> Pulihkan
-              </Button>
-              <Button
-                className="backup-delete-btn"
-                disabled={busyNama === row.nama || restoring}
-                onClick={() => setDeletingBackup(row.nama)}
-                title={`Hapus ${row.nama}`}
-              >
-                <Icon name="trash" /> Hapus
-              </Button>
-            </div>
-          </article>
-        ))}
-        {backups.length === 0 && (
-          <div
-            style={{
-              padding: "24px 16px",
-              textAlign: "center",
-              color: "var(--slate)",
-            }}
-          >
-            Belum ada backup.
+        <div className="backup-table-scroll">
+          <div className="backup-head">
+            <span>Nama backup</span>
+            <span className="desktop-col">Dibuat</span>
+            <span className="desktop-col">Isi</span>
+            <span className="desktop-col">Status</span>
+            <span style={{ textAlign: "right" }}>Aksi</span>
           </div>
-        )}
+          {backups.map((row) => (
+            <article className="backup-row" key={row.nama}>
+              <div className="backup-info-cell">
+                <span className="backup-file-name">
+                  <Icon name="file" />
+                  <strong>{row.nama}</strong>
+                </span>
+                <small className="backup-date-sub">
+                  {row.dibuat} · {row.baris} baris
+                </small>
+              </div>
+              <span className="desktop-col">{row.dibuat}</span>
+              <span className="desktop-col">{row.baris} baris</span>
+              <i className="chip lunas desktop-col">Siap</i>
+              <div className="backup-action-cell">
+                <Button
+                  className="secondary-button"
+                  disabled={busyNama === row.nama || restoring}
+                  onClick={() => unduh(row.nama)}
+                  title={`Unduh file backup ${row.nama}.json`}
+                >
+                  <Icon name="download" />
+                  {busyNama === row.nama ? "..." : "Unduh"}
+                </Button>
+                <Button
+                  className="restore-danger-button"
+                  disabled={busyNama === row.nama || restoring}
+                  onClick={() => {
+                    setTarget(row.nama)
+                    setRestore(1)
+                  }}
+                  title={`Pulihkan data dari ${row.nama}`}
+                >
+                  <Icon name="restore" /> Pulihkan
+                </Button>
+                <Button
+                  className="backup-delete-btn"
+                  disabled={busyNama === row.nama || restoring}
+                  onClick={() => setDeletingBackup(row.nama)}
+                  title={`Hapus ${row.nama}`}
+                >
+                  <Icon name="trash" /> Hapus
+                </Button>
+              </div>
+            </article>
+          ))}
+          {backups.length === 0 && (
+            <div
+              style={{
+                padding: "24px 16px",
+                textAlign: "center",
+                color: "var(--slate)",
+              }}
+            >
+              Belum ada backup.
+            </div>
+          )}
+        </div>
       </section>
       <div className="info-banner">
         <Icon name="alert" /> Pulihkan mengganti data layanan, produk,
