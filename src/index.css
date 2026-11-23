@@ -25272,3 +25272,11 @@ html:has(.manual-page .modal-overlay) {
     box-sizing: border-box;
   }
 }
+
+/* Layanan & Produk + Gaji & Kasbon: selebar area kerja (tanpa batas 1280px dan tanpa di tengah), kiri = kanan = 16px di semua lebar layar & sidebar ciut/lebar */
+.workspace > .content.catalog-page,
+.workspace > .content.gaji-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
