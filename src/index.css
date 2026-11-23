@@ -24980,3 +24980,13 @@ html:has(.manual-page .modal-overlay) {
   flex: 1 1 0;
   justify-content: center;
 }
+
+/* Layanan & Produk (laptop/tablet >=761px): tombol Ubah + Hapus mengisi kolom Aksi penuh, sisi kanan sejajar tombol Tambah (kiri = kanan = 16px) */
+@media (min-width: 761px) {
+  .catalog-page .service-row .catalog-row-actions,
+  .catalog-page .product-admin-row .catalog-row-actions {
+    justify-self: stretch !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
