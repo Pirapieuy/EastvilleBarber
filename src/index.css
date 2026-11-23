@@ -7534,20 +7534,61 @@ textarea {
 
 /* Team */
 .team-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 12px;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-content: start;
+  gap: 16px;
+  margin-top: 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.team-grid::-webkit-scrollbar {
+  display: none;
+}
+
+/* Filter toolbar Tim Eastville */
+.filters.team-filters {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 0;
+  width: 100%;
+}
+
+.team-filters .search {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+.content.team-page .filters.team-filters .search {
+  width: auto;
+  max-width: none;
+}
+
+.team-filters .search input {
+  height: 42px;
+  border-radius: 10px;
+}
+
+.team-filters .team-add-btn {
+  flex: 0 0 auto;
+  margin-left: auto;
+  min-height: 44px;
+  font-size: 14px;
+  border-radius: 10px;
+  white-space: nowrap;
 }
 
 .team-role-filter {
+  flex: 0 0 auto;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 6px;
   padding: 4px;
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--paper);
   overflow-x: auto;
   scrollbar-width: none;
@@ -7559,13 +7600,13 @@ textarea {
 
 .team-role-filter button {
   flex: 0 0 auto;
-  min-height: 32px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--slate);
   background: transparent;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -7576,34 +7617,128 @@ textarea {
   background: var(--ink);
 }
 
+.team-role-label-mobile {
+  display: none;
+}
+
+.team-role-label-desktop {
+  display: inline;
+}
+
 @media (max-width: 620px) {
-  .content .filters .team-role-filter {
-    grid-column: 1 / -1;
-    justify-self: stretch;
-    flex: none;
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    overflow: visible;
-    box-sizing: border-box;
+  .team-role-label-desktop {
+    display: none;
   }
 
-  .team-role-filter button {
-    min-width: 0;
-    padding-inline: 2px;
-    font-size: 10px;
+  .team-role-label-mobile {
+    display: inline;
+  }
+}
+
+/* Tablet (621px–1024px): baris 1 Search + Tambah, baris 2 Filter Peran selebar layar */
+@media (max-width: 1024px) and (min-width: 621px) {
+  .content.team-page .filters.team-filters {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 12px 16px !important;
+    width: 100% !important;
+  }
+
+  .content.team-page .team-filters .search {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .content.team-page .team-filters .team-add-btn {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin-left: 0 !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .content.team-page .content .filters .team-role-filter,
+  .content.team-page .team-filters .team-role-filter {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    display: flex !important;
+    gap: 6px !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  .content.team-page .team-role-filter button {
+    flex: 1 1 0 !important;
+    min-height: 38px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 0 10px !important;
+  }
+}
+
+/* Mobile (≤620px): tersusun vertikal penuh, seimbang, tombol tidak tumpang tindih */
+@media (max-width: 620px) {
+  .content.team-page .filters.team-filters {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .content.team-page .team-filters .search {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+
+  .content.team-page .content .filters .team-role-filter,
+  .content.team-page .team-filters .team-role-filter {
+    width: 100% !important;
+    flex: none !important;
+    display: flex !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .content.team-page .team-role-filter button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding: 0 2px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .content.team-page .team-filters .team-add-btn {
+    width: 100% !important;
+    flex: none !important;
+    margin-left: 0 !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 }
 
 .team-card {
   min-width: 0;
-  min-height: 220px;
   align-self: start;
   display: flex;
   flex-direction: column;
-  padding: 15px;
+  padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 11px;
+  border-radius: 12px;
   background: var(--paper);
   box-shadow: var(--shadow);
 }
@@ -7746,23 +7881,23 @@ textarea {
 }
 
 .team-card header > span {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--brass-dark);
   background: var(--brass-soft);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .team-card header > i {
-  padding: 4px 9px;
-  border-radius: 999px;
+  padding: 4px 10px;
+  border-radius: 8px;
   color: #9b463c;
   background: #f8e9e5;
-  font-size: 11px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
 }
@@ -7781,22 +7916,22 @@ textarea {
   display: block;
   margin-top: 4px;
   color: var(--slate);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .roles {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
   margin-top: 10px;
 }
 
 .roles i {
-  padding: 4px 7px;
-  border-radius: 999px;
+  padding: 4px 10px;
+  border-radius: 8px;
   color: var(--brass-dark);
   background: var(--brass-soft);
-  font-size: 11px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
 }
@@ -7839,17 +7974,21 @@ textarea {
 }
 
 .team-card-actions {
-  width: fit-content;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
 
 .team-card-actions .button {
-  min-height: 40px;
+  flex: 1 1 0;
+  justify-content: center;
+  min-height: 44px;
+  font-size: 14px;
+  border-radius: 10px;
 }
 
 .staff-form {
@@ -15080,6 +15219,52 @@ label .search-select-trigger {
   }
 }
 
+/* Tim Eastville: padding di desktop disamakan persis dengan Riwayat Transaksi & Laporan (lebar penuh, padding: 14px 14px 26px, margin: 0) */
+@media (min-width: 1025px) {
+  .workspace > .content.fit-page.team-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 14px 14px 26px !important;
+    gap: 14px !important;
+  }
+
+  .content.team-page .filters.team-filters {
+    margin-top: 0 !important;
+    gap: 14px !important;
+  }
+
+  .team-grid {
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .workspace > .content.team-page,
+  .workspace > .content.fit-page.team-page {
+    padding: 70px 16px 16px !important;
+    gap: 16px !important;
+  }
+
+  .content.team-page .filters.team-filters {
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 621px) {
+  .team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 620px) {
+  .team-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+}
+
 /* Tim Eastville (Owner): kartu rata dan simetris, tanpa hiasan kotak */
 .team-grid-owner {
   align-items: stretch;
@@ -15087,6 +15272,7 @@ label .search-select-trigger {
 
 .team-grid-owner .team-card {
   align-self: stretch;
+  border-radius: 12px;
 }
 
 .team-grid-owner .team-card::before,
@@ -15105,22 +15291,54 @@ label .search-select-trigger {
 .team-grid-owner .team-card-actions .button {
   flex: 1 1 0;
   justify-content: center;
+  border-radius: 10px;
 }
 
-/* Tim Eastville (Owner): sudut kartu lebih kotak, komisi kapster di samping peran */
-.team-grid-owner .team-card {
-  border-radius: 5px;
-}
-
-.team-grid-owner .team-card header > span,
-.team-grid-owner .team-card-actions .button {
-  border-radius: 5px;
+.team-grid-owner .team-card header > span {
+  border-radius: 10px;
 }
 
 .team-grid-owner .roles .role-komisi {
   color: var(--slate);
   background: var(--bone);
   border: 1px solid var(--line);
+}
+
+/* Modal Tambah/Ubah Tim Eastville: kartu di tengah di semua viewport */
+.modal-overlay.modal-centered .staff-form {
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgb(20 17 15 / 24%) !important;
+}
+
+.modal-overlay.modal-centered .staff-form .role-options {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.modal-overlay.modal-centered .staff-form .role-options .button {
+  width: 100% !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  border-radius: 10px !important;
+}
+
+.modal-overlay.modal-centered .staff-form > footer {
+  padding: 16px !important;
+  gap: 12px !important;
+  display: flex !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.modal-overlay.modal-centered .staff-form > footer .button {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  font-size: 14px !important;
+  border-radius: 10px !important;
 }
 
 /* Kasir: halaman Kasbon Kapster */
@@ -19316,6 +19534,7 @@ html:has(.manual-page),
 html:has(.od-page),
 html:has(.report-page),
 html:has(.catalog-page),
+html:has(.team-page),
 html:has(.kapster-dashboard),
 html:has(.my-salary-page),
 html:has(.kapster-product-commission),
@@ -19324,6 +19543,7 @@ html:has(.kapster-product-commission),
 .workspace:has(> .od-page),
 .workspace:has(> .report-page),
 .workspace:has(> .catalog-page),
+.workspace:has(> .team-page),
 .workspace:has(> .kapster-dashboard),
 .workspace:has(> .my-salary-page),
 .workspace:has(> .kapster-product-commission),
@@ -19340,6 +19560,7 @@ html:has(.manual-page)::-webkit-scrollbar,
 html:has(.od-page)::-webkit-scrollbar,
 html:has(.report-page)::-webkit-scrollbar,
 html:has(.catalog-page)::-webkit-scrollbar,
+html:has(.team-page)::-webkit-scrollbar,
 html:has(.kapster-dashboard)::-webkit-scrollbar,
 html:has(.my-salary-page)::-webkit-scrollbar,
 html:has(.kapster-product-commission)::-webkit-scrollbar,
@@ -19348,6 +19569,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 .workspace:has(> .od-page)::-webkit-scrollbar,
 .workspace:has(> .report-page)::-webkit-scrollbar,
 .workspace:has(> .catalog-page)::-webkit-scrollbar,
+.workspace:has(> .team-page)::-webkit-scrollbar,
 .workspace:has(> .kapster-dashboard)::-webkit-scrollbar,
 .workspace:has(> .my-salary-page)::-webkit-scrollbar,
 .workspace:has(> .kapster-product-commission)::-webkit-scrollbar,

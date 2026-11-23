@@ -132,7 +132,7 @@ export function TeamPage({ currentUser, role, title }: {
         apiTim.list(),
         apiPengaturan.get().catch(() => null as PengaturanKomisi | null),
       ])
-      setUsers(list)
+      setUsers(Array.isArray(list) ? list : [])
       if (peng && peng.kapster) {
         const km: Record<string, number> = {}
         peng.kapster.forEach((k) => {
@@ -253,7 +253,7 @@ export function TeamPage({ currentUser, role, title }: {
     loadData()
   }
 
-  const filtered = users.filter((u) => {
+  const filtered = (Array.isArray(users) ? users : []).filter((u) => {
     const matchSearch =
       u.nama.toLowerCase().includes(search.toLowerCase()) ||
       u.username.toLowerCase().includes(search.toLowerCase())
@@ -274,13 +274,8 @@ export function TeamPage({ currentUser, role, title }: {
   }
 
   return (
-    <div className="content fit-page">
-      <div className="fit-page-actions">
-        <Button className="primary-button" onClick={openCreate}>
-          <Icon name="plus" /> Tambah anggota
-        </Button>
-      </div>
-      <div className="filters">
+    <div className="content fit-page team-page">
+      <div className="filters team-filters">
         <div className="search">
           <Icon name="search" />
           <input
@@ -303,10 +298,14 @@ export function TeamPage({ currentUser, role, title }: {
               aria-pressed={roleFilter === value}
               onClick={() => setRoleFilter(value)}
             >
-              {label}
+              <span className="team-role-label-desktop">{label}</span>
+              <span className="team-role-label-mobile">{value === "Semua" ? "Semua" : label}</span>
             </button>
           ))}
         </div>
+        <Button className="primary-button team-add-btn" onClick={openCreate}>
+          <Icon name="plus" /> Tambah anggota
+        </Button>
       </div>
 
       {loading && (
@@ -387,7 +386,7 @@ export function TeamPage({ currentUser, role, title }: {
       </div>
 
       {formOpen && (
-        <div className="modal-overlay">
+        <div className="modal-overlay modal-centered">
           <form className="staff-form" onSubmit={handleSubmit}>
             <header>
               <div>
@@ -457,35 +456,6 @@ export function TeamPage({ currentUser, role, title }: {
                   </Button>
                 ))}
               </div>
-
-              {selectedRole === "Kapster" && (
-                <>
-                  <label>
-                    <span>Komisi pribadi</span>
-                    <div className="input-shell">
-                      <input
-                        onChange={(e) => setCommission(Number(e.target.value))}
-                        type="number"
-                        min={10}
-                        max={90}
-                        value={commission}
-                      />
-                      <b>%</b>
-                    </div>
-                  </label>
-                  <div className="info-banner">
-                    <Icon name="alert" /> Berlaku untuk transaksi setelahnya.
-                  </div>
-                  <label>
-                    <span>Alasan perubahan komisi</span>
-                    <textarea
-                      placeholder="Wajib jika komisi berubah dari default..."
-                      value={commissionReason}
-                      onChange={(e) => setCommissionReason(e.target.value)}
-                    />
-                  </label>
-                </>
-              )}
 
               <div
                 className="toggle-row"
