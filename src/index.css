@@ -23717,3 +23717,1212 @@ html:has(.manual-page .modal-overlay) {
   left: 50% !important;
   right: auto !important;
 }
+
+/* ===== Gaji & Kasbon (gj-*): memakai .report-page, .od-kpis, .lk-panel yang sudah final. Semua jarak 16px, kontrol 44px (HP 42px), radius 12/10/8 ===== */
+.gaji-page .od-kpi.is-static {
+  cursor: default;
+}
+
+.gaji-page .od-kpi.is-static:hover {
+  border-color: var(--line);
+}
+
+.gaji-page .gj-top {
+  display: flex;
+}
+
+.gaji-page .gj-tabs {
+  height: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 3px;
+  border-radius: 10px;
+}
+
+.gaji-page .gj-tabs .button {
+  min-height: 0;
+  height: 100%;
+  min-width: 120px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .gaji-page .gj-top,
+  .gaji-page .gj-tabs {
+    width: 100%;
+  }
+
+  .gaji-page .gj-tabs .button {
+    flex: 1 1 0;
+  }
+}
+
+.gaji-page .lk-head {
+  min-height: 24px;
+}
+
+.gaji-page .gj-count {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Kartu kapster: 3 per baris, baris terakhir yang ganjil melebar mengisi (3+3 / 3+2 / 2+2+1 tetap penuh) */
+.gaji-page .gj-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.gaji-page .gj-card {
+  flex: 1 1 calc((100% - 32px) / 3);
+  min-width: 260px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+
+.gaji-page .gj-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gaji-page .gj-card h4 {
+  margin: 0;
+  font: 700 16px / 1.2 var(--heading);
+}
+
+.gaji-page .gj-card header small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.gaji-page .gj-card dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+  border-block: 1px solid var(--line);
+}
+
+.gaji-page .gj-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.gaji-page .gj-card dt {
+  color: var(--slate);
+}
+
+.gaji-page .gj-card dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.gaji-page .gj-card .deduct dd {
+  color: var(--oxblood);
+}
+
+.gaji-page .gj-card .carry dt,
+.gaji-page .gj-card .carry dd {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gaji-page .gj-card > footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gaji-page .gj-card > footer span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gaji-page .gj-card > footer small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.gaji-page .gj-card > footer strong {
+  font: 700 20px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaji-page .gj-card > footer .button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Kartu ringkas kasbon per kapster (bisa di-tap untuk memfilter) */
+.gaji-page .gj-card.mini {
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.gaji-page .gj-card.mini:hover,
+.gaji-page .gj-card.mini.is-active {
+  border-color: var(--brass);
+}
+
+.gaji-page .gj-card.mini.is-active {
+  box-shadow: 0 0 0 1px var(--brass);
+}
+
+.gaji-page .gj-card.mini strong {
+  font: 700 20px / 1.2 var(--heading);
+  font-variant-numeric: tabular-nums;
+  color: var(--oxblood);
+}
+
+.gaji-page .gj-card.mini strong.zero {
+  color: var(--muted);
+}
+
+.gaji-page .gj-card.mini small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Filter: Cari | dropdown | dropdown | tombol, satu gaya dengan Layanan & Produk */
+.gaji-page .gj-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.gaji-page .gj-filters .search,
+.gaji-page .gj-filters .search-select,
+.gaji-page .gj-filters .search-select-trigger,
+.gaji-page .gj-add {
+  height: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
+  box-shadow: none !important;
+}
+
+.gaji-page .gj-filters .search input,
+.gaji-page .gj-filters .search-select-trigger,
+.gaji-page .gj-filters .search-select-trigger * {
+  font-size: 14px;
+}
+
+.gaji-page .gj-filters .search {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.gaji-page .gj-filters .search-select {
+  flex: 0 0 188px;
+  min-width: 0;
+}
+
+.gaji-page .gj-add {
+  flex: 0 0 auto;
+  padding: 0 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+  .gaji-page .gj-filters {
+    flex-wrap: wrap;
+  }
+
+  .gaji-page .gj-filters .search {
+    flex: 1 1 100%;
+  }
+
+  .gaji-page .gj-filters .search-select {
+    flex: 1 1 0;
+    min-width: 140px;
+  }
+
+  .gaji-page .gj-add {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .gaji-page .gj-tabs,
+  .gaji-page .gj-filters .search,
+  .gaji-page .gj-filters .search-select,
+  .gaji-page .gj-filters .search-select-trigger,
+  .gaji-page .gj-add {
+    height: 42px;
+    min-height: 42px;
+  }
+
+  .gaji-page .gj-filters .search-select {
+    flex: 1 1 100%;
+  }
+}
+
+/* Tabel riwayat: header krem, baris 56px, isi menggulir sendiri tanpa batang scroll */
+.gaji-page .gj-table {
+  max-height: 392px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gaji-page .gj-table::-webkit-scrollbar {
+  display: none;
+}
+
+.gaji-page .gj-head,
+.gaji-page .gj-row {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.gaji-page .gj-gaji .gj-head,
+.gaji-page .gj-gaji .gj-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 24px;
+}
+
+.gaji-page .gj-kasbon .gj-head,
+.gaji-page .gj-kasbon .gj-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr) 104px 208px;
+}
+
+.gaji-page .gj-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-height: 40px;
+  background: var(--bone);
+  border-bottom: 1px solid var(--line);
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gaji-page .gj-row {
+  min-height: 56px;
+  padding-block: 8px;
+  font-size: 14px;
+}
+
+.gaji-page .gj-item + .gj-item,
+.gaji-page .gj-head + .gj-item {
+  border-top: 1px solid var(--line);
+}
+
+.gaji-page .gj-item:first-of-type {
+  border-top: 0;
+}
+
+.gaji-page .gj-row > *,
+.gaji-page .gj-head > * {
+  min-width: 0;
+}
+
+.gaji-page .r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.gaji-page .gj-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.gaji-page .gj-note small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gaji-page .gj-gaji .gj-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.gaji-page .gj-gaji .gj-row:hover,
+.gaji-page .gj-gaji .gj-row:focus-visible {
+  background: var(--bone);
+  outline: 0;
+}
+
+.gaji-page .gj-chev {
+  display: grid;
+  place-items: center;
+  color: var(--slate);
+}
+
+.gaji-page .gj-chev .icon {
+  width: 14px;
+  height: 14px;
+  transform: rotate(90deg);
+  transition: transform 0.15s;
+}
+
+.gaji-page .gj-item.open .gj-chev .icon {
+  transform: rotate(-90deg);
+}
+
+.gaji-page .gj-aksi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gaji-page .gj-aksi .button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+.gaji-page .gj-dash {
+  color: var(--muted);
+}
+
+/* Rincian pembayaran gaji (dibuka dengan tap baris) */
+.gaji-page .gj-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: var(--bone);
+  border-top: 1px solid var(--line);
+}
+
+.gaji-page .gj-detail dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gaji-page .gj-detail dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.gaji-page .gj-detail dt {
+  color: var(--slate);
+}
+
+.gaji-page .gj-detail dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+
+.gaji-page .gj-detail-kasbon {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.gaji-page .gj-detail-kasbon p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--slate);
+}
+
+.gaji-page .gj-detail-kasbon b {
+  color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tablet kecil & HP (<=760px): baris jadi kartu, label di kiri nilai di kanan */
+@media (max-width: 760px) {
+  .gaji-page .gj-head {
+    display: none;
+  }
+
+  .gaji-page .gj-table {
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .gaji-page .gj-item {
+    border: 1px solid var(--line) !important;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--paper);
+  }
+
+  .gaji-page .gj-gaji .gj-row,
+  .gaji-page .gj-kasbon .gj-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 16px;
+    padding: 16px;
+    min-height: 0;
+  }
+
+  .gaji-page .gj-row > .gj-main {
+    grid-column: 1 / -1;
+    font-size: 16px;
+  }
+
+  .gaji-page .gj-row > [data-l] {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: right;
+  }
+
+  .gaji-page .gj-row > [data-l]::before {
+    content: attr(data-l);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    flex: 0 0 auto;
+  }
+
+  .gaji-page .gj-note {
+    align-items: flex-end;
+  }
+
+  .gaji-page .gj-chev {
+    display: none;
+  }
+
+  .gaji-page .gj-status,
+  .gaji-page .gj-aksi {
+    grid-column: 1 / -1;
+  }
+
+  .gaji-page .gj-aksi {
+    padding-top: 8px;
+  }
+
+  .gaji-page .gj-aksi .button {
+    min-height: 42px;
+  }
+
+  .gaji-page .gj-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Popup Bayar gaji & Catat kasbon: pola popup Tim Eastville (header + footer tetap, isi menggulir, X + satu tombol) */
+.gaji-page .modal-overlay.modal-centered {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+}
+
+.gaji-page .gj-modal {
+  width: min(460px, 100%);
+  max-height: calc(100svh - 32px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 0 16px 48px rgb(20 17 15 / 28%);
+}
+
+.gaji-page .gj-modal > header {
+  flex: none;
+  min-height: 68px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.gaji-page .gj-modal > header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.gaji-page .gj-modal > header .button {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.gaji-page .gj-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gaji-page .gj-modal-body::-webkit-scrollbar {
+  display: none;
+}
+
+.gaji-page .gj-modal > footer {
+  flex: none;
+  display: flex;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.gaji-page .gj-modal > footer .button {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 44px;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.gaji-page .gj-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.gaji-page .gj-label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gaji-page .gj-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gaji-page .gj-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--brass-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gaji-page .gj-hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.gaji-page .gj-input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  outline: none;
+}
+
+.gaji-page textarea.gj-input {
+  min-height: 88px;
+  padding: 12px;
+  resize: none;
+}
+
+.gaji-page .gj-modal .input-shell {
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+.gaji-page .gj-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bone);
+}
+
+.gaji-page .gj-sum > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.gaji-page .gj-sum span {
+  color: var(--slate);
+}
+
+.gaji-page .gj-sum b {
+  font-variant-numeric: tabular-nums;
+}
+
+.gaji-page .gj-sum > div:nth-child(2) b {
+  color: var(--oxblood);
+}
+
+.gaji-page .gj-sum .total {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.gaji-page .gj-sum .total span {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.gaji-page .gj-sum .total b {
+  font-size: 18px;
+}
+
+.gaji-page .gj-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gaji-page .gj-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.gaji-page .gj-check.on {
+  border-color: var(--brass);
+  background: rgb(200 150 62 / 8%);
+}
+
+.gaji-page .gj-check input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--brass);
+}
+
+.gaji-page .gj-check > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gaji-page .gj-check strong {
+  font-size: 14px;
+}
+
+.gaji-page .gj-check small {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gaji-page .gj-check b {
+  font-size: 14px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.gaji-page .gj-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gaji-page .gj-chips button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.gaji-page .gj-chips button.active {
+  border-color: var(--brass);
+  background: rgb(200 150 62 / 10%);
+  font-weight: 700;
+}
+
+.gaji-page .gj-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--oxblood-soft);
+  color: var(--oxblood);
+  font-size: 13px;
+}
+
+@media (max-width: 620px) {
+  .gaji-page .gj-modal > footer .button {
+    min-height: 42px;
+  }
+}
+
+/* Gaji & Kasbon: chip status tidak membungkus, panah rincian cukup besar */
+.gaji-page .gj-card > header > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.gaji-page .gj-card > header .chip {
+  flex: none;
+  white-space: nowrap;
+}
+
+.gaji-page .gj-chev .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Gaji & Kasbon: jarak kolom Jumlah ke Status, judul popup */
+.gaji-page .gj-kasbon .gj-head,
+.gaji-page .gj-kasbon .gj-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr) 112px 208px;
+}
+
+.gaji-page .gj-kasbon .gj-status,
+.gaji-page .gj-kasbon .gj-head > :nth-child(5) {
+  padding-left: 8px;
+}
+
+.gaji-page .gj-modal > header .eyebrow {
+  display: block;
+  margin: 0 0 4px;
+}
+
+.gaji-page .gj-modal > header h2 {
+  font-weight: 700;
+}
+
+.gaji-page .gj-card {
+  min-width: min(260px, 100%);
+}
+
+/* Gaji & Kasbon: tombol X sama dengan popup lain (40px, latar krem), catatan peregang, jendela tabel pas 6 baris */
+.gaji-page .gj-modal > header .button {
+  display: grid;
+  place-items: center;
+  color: var(--slate);
+  background: var(--bone);
+}
+
+.gaji-page .gj-chips {
+  gap: 16px;
+}
+
+.gaji-page .gj-chips button {
+  flex: 1 1 calc((100% - 32px) / 3);
+  min-width: 0;
+  min-height: 44px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .gaji-page .gj-chips button {
+    flex-basis: calc((100% - 16px) / 2);
+    min-height: 42px;
+  }
+}
+
+.gaji-page .gj-checks {
+  gap: 16px;
+}
+
+.gaji-page .gj-table {
+  max-height: 383px;
+}
+
+.gaji-page .gj-row {
+  height: 56px;
+  padding-block: 0;
+}
+
+.gaji-page .gj-note small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gaji-page .gj-detail {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  padding: 16px 0;
+}
+
+.gaji-page .gj-detail > * {
+  padding: 0 16px;
+}
+
+.gaji-page .gj-detail > * + * {
+  border-left: 1px solid var(--line);
+}
+
+@media (max-width: 760px) {
+  .gaji-page .gj-row {
+    height: auto;
+    padding-block: 16px;
+  }
+
+  .gaji-page .gj-detail {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .gaji-page .gj-detail > * + * {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+
+  .gaji-page .gj-table {
+    max-height: none;
+  }
+}
+
+/* Gaji & Kasbon: tab Kasbon punya 3 KPI status (tab Gaji tanpa KPI); di HP yang ketiga selebar baris */
+.gaji-page .od-kpis {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 620px) {
+  .gaji-page .od-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gaji-page .od-kpis > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Gaji & Kasbon HP/tablet kecil: kolom kartu menang atas kolom tabel laptop */
+@media (max-width: 760px) {
+  .gaji-page .gj-gaji .gj-row,
+  .gaji-page .gj-kasbon .gj-row {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  .gaji-page .gj-kasbon .gj-status {
+    padding-left: 0;
+  }
+
+  .gaji-page .gj-row > [data-l] > *,
+  .gaji-page .gj-note {
+    min-width: 0;
+  }
+
+  .gaji-page .gj-note small {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 760px) {
+  .gaji-page .gj-row > .gj-note {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 2px;
+    align-items: start;
+    text-align: right;
+  }
+
+  .gaji-page .gj-row > .gj-note small {
+    grid-column: 1 / -1;
+  }
+
+  .gaji-page .gj-aksi:has(.gj-dash) {
+    display: none;
+  }
+}
+
+/* ===== Gaji & Kasbon: setinggi layar, panel terakhir meregang, daftar menggulir sendiri (pola Riwayat) ===== */
+.workspace:has(> .gaji-page) {
+  height: 100svh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.workspace:has(> .gaji-page) > .desktop-page-head {
+  flex: 0 0 auto;
+}
+
+.workspace > .content.gaji-page {
+  flex: 1 1 0;
+  min-height: 640px;
+  opacity: 1 !important;
+}
+
+.gaji-page > .lk-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.gaji-page > .gj-top-panel {
+  flex: 0 1 auto;
+  min-height: 220px;
+}
+
+.gaji-page > .gj-fill {
+  flex: 1 1 0;
+  min-height: 300px;
+}
+
+.gaji-page .gj-top-panel .gj-cards {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: flex-start;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gaji-page .gj-top-panel .gj-cards::-webkit-scrollbar {
+  display: none;
+}
+
+.gaji-page .gj-fill .gj-table {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+}
+
+.gaji-page .lk-head,
+.gaji-page .gj-filters {
+  flex: none;
+}
+
+/* Cari + Catat satu baris; filter di bawahnya sejajar (laptop sebaris, HP 2 x 2) */
+.gaji-page .gj-filters {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.gaji-page .gj-search-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gaji-page .gj-search-row .search {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.gaji-page .gj-search-row .gj-add {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.gaji-page .gj-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: 16px;
+}
+
+.gaji-page .gj-filter-grid > * {
+  min-width: 0;
+  width: 100%;
+  flex: none;
+}
+
+.gaji-page .gj-filter-grid .calendar-picker-wrapper {
+  display: block;
+}
+
+.gaji-page .gj-filter-grid .calendar-picker-btn {
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
+  justify-content: flex-start;
+}
+
+@media (max-width: 620px) {
+  .gaji-page .gj-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+  }
+
+  .gaji-page .gj-filter-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .gaji-page .gj-filter-grid .calendar-picker-btn {
+    height: 42px;
+    min-height: 42px;
+  }
+}
+
+/* Kartu kapster: lebih ringkas */
+.gaji-page .gj-card {
+  gap: 12px;
+}
+
+.gaji-page .gj-card dl {
+  padding: 12px 0;
+  gap: 6px;
+}
+
+/* HP: kartu kasbon dengan status di kanan atas */
+@media (max-width: 760px) {
+  .gaji-page .gj-kasbon .gj-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 16px;
+  }
+
+  .gaji-page .gj-kasbon .gj-row > .gj-main {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .gaji-page .gj-kasbon .gj-row > .gj-status {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    padding: 0;
+  }
+
+  .gaji-page .gj-fill .gj-table {
+    overflow-y: auto;
+  }
+}
+
+/* HP: kartu kapster ringkas, daftar atas menampilkan 2 kartu lalu menggulir */
+@media (max-width: 760px) {
+  .gaji-page .gj-top-panel .gj-cards {
+    flex-wrap: nowrap;
+    flex-direction: column;
+    max-height: 396px;
+  }
+
+  .gaji-page .gj-top-panel .gj-card {
+    flex: none;
+    width: 100%;
+  }
+
+  .gaji-page > .gj-fill {
+    min-height: 420px;
+  }
+}
+
+/* Gaji & Kasbon: halaman tumbuh mengikuti isi (tidak melampaui kotak), panel riwayat minimal 4 baris */
+.workspace > .content.gaji-page {
+  flex: 1 0 auto;
+  min-height: 0;
+}
+
+.gaji-page > .gj-top-panel {
+  min-height: 0;
+}
+
+.gaji-page > .gj-fill {
+  min-height: 440px;
+}
+
+@media (max-width: 760px) {
+  .gaji-page > .gj-fill {
+    min-height: 0;
+  }
+
+  .gaji-page .gj-fill .gj-table {
+    flex: none;
+    max-height: 452px;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .gaji-page .gj-top-panel .gj-cards:has(.mini) {
+    max-height: 250px;
+  }
+
+  .gaji-page .gj-top-panel .gj-cards:not(:has(.mini)) {
+    max-height: 500px;
+  }
+}
