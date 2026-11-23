@@ -493,6 +493,8 @@ export interface KasbonRow {
   catatan: string
   dibuatOleh: string
   lunasWaktu?: string
+  /** id gaji yang melunasi kasbon ini (kosong bila dilunasi manual) */
+  gajiId?: string
 }
 
 export interface GajiRow {
@@ -546,6 +548,8 @@ export const apiGaji = {
     totalKasbon: number
     gajiBersih?: number
     catatan?: string
+    /** kasbon aktif yang dipotong dari gaji ini; tanpa ini semua kasbon aktif dipotong */
+    kasbonIds?: string[]
   }) =>
     api<{ id: string; gajiBersih: number; status: string }>("bayar-gaji", {
       ...p,

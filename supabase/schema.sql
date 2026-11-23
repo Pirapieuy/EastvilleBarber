@@ -314,6 +314,8 @@ grant execute on function buat_backup(text,integer), pulihkan_backup(text) to se
 alter table produk add column if not exists urut bigint generated always as identity;
 alter table kasbon add column if not exists urut bigint generated always as identity;
 alter table gaji add column if not exists urut bigint generated always as identity;
+-- Kasbon yang dilunasi lewat pembayaran gaji menyimpan id gaji-nya (rincian di Gaji & Kasbon).
+alter table kasbon add column if not exists gaji_id text;
 alter table kode_diskon add column if not exists urut bigint generated always as identity;
 
 -- Foto absensi disimpan di Storage (bucket publik 'absensi'); kolom absensi.foto_url hanya berisi alamatnya.
