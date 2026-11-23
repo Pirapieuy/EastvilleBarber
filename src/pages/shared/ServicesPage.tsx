@@ -216,7 +216,7 @@ export function ServicesPage({ embedded = false }: {
   // Ada token = data asli sedang dimuat: jangan tampilkan data dummy dulu.
   if (Boolean(getToken()) && !live && !liveError) {
     return (
-      <div className="content">
+      <div className={embedded ? "catalog-embedded-view" : "content"}>
         <LoadingState message="Memuat layanan..." />
       </div>
     )
@@ -226,21 +226,15 @@ export function ServicesPage({ embedded = false }: {
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
       {!embedded && <PageTitle eyebrow="Data master" title="Layanan & Harga" />}
-      <div className="services-status-bar">
-        <div className="master-summary">
-          <span>
-            <Icon name="cashier" />
-            <strong>{aktifCount} layanan aktif</strong>
-            <small>{rows.length - aktifCount} nonaktif</small>
-          </span>
-        </div>
-        <Button className="primary-button" onClick={() => openForm(null)}>
-          <Icon name="plus" /> Tambah layanan
-        </Button>
-      </div>
-
       <section className="panel service-list fit-fill">
         <div className="filters">
+          <div className="master-summary filters-summary">
+            <span>
+              <Icon name="cashier" />
+              <strong>{aktifCount} layanan aktif</strong>
+              <small>{rows.length - aktifCount} nonaktif</small>
+            </span>
+          </div>
           <div className="search">
             <Icon name="search" />
             <input
@@ -268,6 +262,12 @@ export function ServicesPage({ embedded = false }: {
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </SearchSelect>
+          <Button
+            className="primary-button filters-add"
+            onClick={() => openForm(null)}
+          >
+            <Icon name="plus" /> Tambah
+          </Button>
         </div>
         <div className="service-list-scroll">
         <div className="service-head">
@@ -357,6 +357,9 @@ export function ServicesPage({ embedded = false }: {
                 <p className="eyebrow">Data layanan</p>
                 <h2>{editing ? "Ubah layanan" : "Tambah layanan"}</h2>
               </div>
+              <Button type="button" aria-label="Tutup" onClick={() => setFormOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <label>
               <span>Nama layanan</span>
@@ -367,31 +370,33 @@ export function ServicesPage({ embedded = false }: {
                 onChange={(e) => setNama(e.target.value)}
               />
             </label>
+            <div className="modal-row-2">
             <label>
-              <span>Kategori</span>
-              <SearchSelect
-                value={kategori}
-                onChange={(e) => setKategori(e.target.value)}
-              >
-                {KATEGORI_LAYANAN.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </SearchSelect>
-            </label>
-            <label>
-              <span>Harga</span>
-              <div className="input-shell">
-                <b>Rp</b>
-                <input
-                  inputMode="numeric"
-                  required
-                  value={harga}
-                  onChange={(e) => setHarga(e.target.value.replace(/\D/g, ""))}
-                />
-              </div>
-            </label>
+                <span>Kategori</span>
+                <SearchSelect
+                  value={kategori}
+                  onChange={(e) => setKategori(e.target.value)}
+                >
+                  {KATEGORI_LAYANAN.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </SearchSelect>
+              </label>
+              <label>
+                <span>Harga</span>
+                <div className="input-shell">
+                  <b>Rp</b>
+                  <input
+                    inputMode="numeric"
+                    required
+                    value={harga}
+                    onChange={(e) => setHarga(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+              </label>
+            </div>
             <div
               className="toggle-row"
               style={{ cursor: "pointer" }}
@@ -410,13 +415,6 @@ export function ServicesPage({ embedded = false }: {
             {formError && <small className="pin-helper">{formError}</small>}
             <footer>
               <Button
-                className="secondary-button"
-                onClick={() => setFormOpen(false)}
-                type="button"
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={saving}
                 type="submit"
@@ -432,6 +430,7 @@ export function ServicesPage({ embedded = false }: {
           title={`Hapus Layanan "${deletingService.nama}"?`}
           eyebrow="Hapus Layanan"
           warning="Layanan yang dihapus tidak akan muncul lagi di Kasir. Riwayat transaksi lama tetap aman."
+          compact
           requireReason
           reasonLabel="Alasan Penghapusan"
           reasonPlaceholder="Contoh: Menu layanan sudah tidak disediakan..."

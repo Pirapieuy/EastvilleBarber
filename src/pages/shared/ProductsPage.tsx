@@ -288,35 +288,19 @@ export function ProductsPage({ embedded = false }: {
   return (
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
-      <div className="products-status-bar">
-        <div className="master-summary">
-          <span>
-            <Icon name="product" />
-            <strong>
-              {productsList.filter((product) => product.status === "Aktif").length} produk aktif
-            </strong>
-            <small>
-              {productsList.filter((product) => product.status !== "Aktif").length} nonaktif
-            </small>
-          </span>
-        </div>
-        <div className="page-actions">
-          <Button
-            className="secondary-button"
-            onClick={() => {
-              setStockError("")
-              setStockOpen(true)
-            }}
-          >
-            <Icon name="plus" /> Restok
-          </Button>
-          <Button className="primary-button" onClick={openCreate}>
-            <Icon name="plus" /> Tambah produk
-          </Button>
-        </div>
-      </div>
       <section className="panel product-admin-list fit-fill">
           <div className="filters">
+            <div className="master-summary filters-summary">
+              <span>
+                <Icon name="product" />
+                <strong>
+                  {productsList.filter((product) => product.status === "Aktif").length} produk aktif
+                </strong>
+                <small>
+                  {productsList.filter((product) => product.status !== "Aktif").length} nonaktif
+                </small>
+              </span>
+            </div>
             <div className="search">
               <Icon name="search" />
               <input
@@ -333,6 +317,18 @@ export function ProductsPage({ embedded = false }: {
               <option>Aktif</option>
               <option>Non-aktif</option>
             </SearchSelect>
+            <Button
+              className="secondary-button filters-restok"
+              onClick={() => {
+                setStockError("")
+                setStockOpen(true)
+              }}
+            >
+              <Icon name="plus" /> Restok
+            </Button>
+            <Button className="primary-button filters-add" onClick={openCreate}>
+              <Icon name="plus" /> Tambah
+            </Button>
           </div>
           <div className="product-admin-scroll">
           <div className="product-admin-head">
@@ -406,7 +402,7 @@ export function ProductsPage({ embedded = false }: {
                   className="secondary-button"
                   onClick={() => openEdit(product)}
                 >
-                  Ubah
+                  <Icon name="pencil" /> Ubah
                 </Button>
                 <Button
                   className="danger-button"
@@ -431,6 +427,9 @@ export function ProductsPage({ embedded = false }: {
                     : "Tambah Produk Baru"}
                 </h2>
               </div>
+              <Button type="button" aria-label="Tutup" onClick={() => setFormOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <div className="product-modal-body">
               <div className="form-grid">
@@ -455,7 +454,6 @@ export function ProductsPage({ embedded = false }: {
                     }
                     placeholder="Contoh: HP-FSD-01"
                   />
-                  <small className="valid-text">Kode unik produk</small>
                 </label>
                 <label>
                   <span>Nama pemasok (opsional)</span>
@@ -765,13 +763,6 @@ export function ProductsPage({ embedded = false }: {
             )}
             <footer>
               <Button
-                className="secondary-button"
-                onClick={() => setFormOpen(false)}
-                type="button"
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={
                   saving ||
@@ -827,6 +818,9 @@ export function ProductsPage({ embedded = false }: {
           >
             <header>
               <h2>Restok produk</h2>
+              <Button type="button" aria-label="Tutup" onClick={() => setStockOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <label>
               <span>Produk</span>
@@ -866,12 +860,6 @@ export function ProductsPage({ embedded = false }: {
             )}
             <footer>
               <Button
-                className="secondary-button"
-                onClick={() => setStockOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
                 className="primary-button"
                 disabled={saving}
                 type="submit"
@@ -884,6 +872,7 @@ export function ProductsPage({ embedded = false }: {
       )}
       {deletingProduct && (
         <ConfirmModal
+          compact
           title={`Hapus Produk "${deletingProduct.name}"?`}
           eyebrow="Hapus Produk"
           warning={`Produk (${deletingProduct.code}) tidak akan muncul lagi di Kasir. Riwayat penjualan lama tetap aman.`}

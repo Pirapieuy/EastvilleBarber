@@ -349,6 +349,7 @@ export function BackupPage() {
 
       {deletingBackup && (
         <ConfirmModal
+          compact
           title={`Hapus Backup "${deletingBackup}"?`}
           eyebrow="Hapus File Backup"
           warning="File backup yang dihapus tidak dapat dipulihkan kembali."

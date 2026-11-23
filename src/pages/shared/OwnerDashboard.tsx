@@ -43,7 +43,7 @@ interface DailyServiceItem {
   batal: boolean
 }
 
-type StatusKapster = "Tepat Waktu" | "Terlambat" | "Tidak Hadir"
+type StatusKapster = "Tepat Waktu" | "Terlambat" | "Tidak Hadir" | "Sakit"
 
 export function OwnerDashboard({ onNavigate, navigate }: {
   onNavigate?: (page: string) => void
@@ -124,9 +124,17 @@ export function OwnerDashboard({ onNavigate, navigate }: {
   const kapsterList = kapsterAll
     .map((k) => {
       const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
-      const masuk = rows.find((r) => r.status === "Hadir" || r.tipe === "Masuk")
+      const terbaru = [...rows].sort((a, b) => b.waktu.localeCompare(a.waktu))[0]
+      const sakit = terbaru?.status === "Sakit" ? terbaru : undefined
+      const masuk = sakit
+        ? undefined
+        : rows.find(
+            (r) => r.tipe === "Masuk" || (r.status === "Hadir" && r.tipe !== "Pulang"),
+          )
       let status: StatusKapster = "Tidak Hadir"
-      if (masuk) {
+      if (sakit) {
+        status = "Sakit"
+      } else if (masuk) {
         const terlambat =
           masuk.status?.toLowerCase().includes("terlambat") ||
           keMenit(masuk.jam ?? "") > BATAS_TERLAMBAT
@@ -137,6 +145,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
         nama: k.nama,
         jamMasuk: masuk?.jam ?? "",
         fotoUrl: masuk?.fotoUrl ?? "",
+        catatanSakit: sakit?.catatan ?? "",
         status,
         layananCount:
           liveData?.perKapster.find((p) => p.kapsterId === k.id)?.pelanggan ??
@@ -146,6 +155,8 @@ export function OwnerDashboard({ onNavigate, navigate }: {
     // yang sudah masuk di atas (paling awal dulu), yang belum di bawah
     .sort((a, b) => {
       if (!a.jamMasuk !== !b.jamMasuk) return a.jamMasuk ? -1 : 1
+      if (a.status === "Sakit" && b.status !== "Sakit") return -1
+      if (b.status === "Sakit" && a.status !== "Sakit") return 1
       return keMenit(a.jamMasuk) - keMenit(b.jamMasuk)
     })
 
@@ -319,11 +330,13 @@ export function OwnerDashboard({ onNavigate, navigate }: {
             <ul className="od-list">
               {kapsterList.map((k) => {
                 const tone =
-                  k.status === "Tepat Waktu"
-                    ? "ok"
-                    : k.status === "Terlambat"
-                      ? "late"
-                      : "off"
+                  k.status === "Sakit"
+                    ? "sick"
+                    : k.status === "Tepat Waktu"
+                      ? "ok"
+                      : k.status === "Terlambat"
+                        ? "late"
+                        : "off"
                 return (
                   <li key={k.id}>
                     <div className="od-row od-row-tim">
@@ -343,7 +356,9 @@ export function OwnerDashboard({ onNavigate, navigate }: {
                       <span className="od-main">
                         <strong>{k.nama}</strong>
                         <small>
-                          {k.jamMasuk
+                          {k.status === "Sakit"
+                            ? `Sakit${k.catatanSakit ? ` · ${k.catatanSakit}` : ""}`
+                            : k.jamMasuk
                             ? `Masuk ${k.jamMasuk} WIB, ${k.layananCount} layanan`
                             : "Belum absen masuk"}
                         </small>

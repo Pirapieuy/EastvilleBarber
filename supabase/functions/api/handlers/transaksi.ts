@@ -73,6 +73,8 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
     for (const r of abs ?? []) if (!terakhir.has(r.user_id)) terakhir.set(r.user_id, r.status)
     for (const id of ids) {
       const nama = kapsterMap.get(id)
+      if (nama && terakhir.get(id) === "Sakit")
+        return gagal(`Kapster ${nama} tercatat sakit hari ini. Transaksi baru tidak dapat dibuat.`)
       if (nama && terakhir.get(id) !== "Hadir")
         return gagal(`Kapster ${nama} belum absen hari ini. Lakukan absensi dulu, lalu bayar.`)
     }
