@@ -24965,3 +24965,18 @@ html:has(.manual-page .modal-overlay) {
     overflow-y: auto;
   }
 }
+
+/* Gaji & Kasbon: tab Gaji | Kasbon selebar halaman di semua lebar */
+.gaji-page .gj-top,
+.gaji-page .gj-tabs {
+  width: 100%;
+}
+
+.gaji-page .gj-tabs {
+  display: flex;
+}
+
+.gaji-page .gj-tabs .button {
+  flex: 1 1 0;
+  justify-content: center;
+}
