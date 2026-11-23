@@ -137,15 +137,32 @@ export function Kpi({
   tone,
   value,
   detail,
+  onClick,
 }: {
   icon: IconName
   label: string
   tone: string
   value: string
   detail: string
+  onClick?: () => void
 }) {
   return (
-    <article className="kpi">
+    <article
+      className="kpi"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onClick()
+              }
+            }
+          : undefined
+      }
+    >
       <span className={`kpi-icon ${tone}`}>
         <Icon name={icon} />
       </span>

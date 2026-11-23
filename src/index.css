@@ -1557,6 +1557,13 @@ textarea {
   border-radius: 8px;
   background: rgb(20 17 15 / 3%);
   border: 1px solid rgb(20 17 15 / 6%);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.recent-row:hover {
+  border-color: var(--brass);
+  background: rgb(200 150 62 / 4%);
 }
 
 .recent-icon {
@@ -1655,6 +1662,18 @@ textarea {
   min-width: 0;
   padding: 20px;
   overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.kapster-shift-panel:hover,
+.kapster-activity-panel:hover {
+  border-color: var(--brass);
+}
+
+.kapster-shift-panel:focus-visible,
+.kapster-activity-panel:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
 }
 
 .kapster-shift-panel > .page-title,
@@ -1693,6 +1712,12 @@ textarea {
   border-radius: 10px;
   background: var(--paper);
   border: 1px solid var(--line);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.shift-overview > div:hover {
+  border-color: var(--brass);
 }
 
 .shift-overview > div small {
@@ -2375,6 +2400,17 @@ textarea {
   border-radius: 12px;
   background: var(--paper);
   box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.kpi:hover {
+  border-color: var(--brass);
+}
+
+.kpi:focus-visible {
+  outline: 3px solid rgb(200 150 62 / 35%);
+  outline-offset: 2px;
 }
 
 .kpi-icon {
@@ -2405,8 +2441,8 @@ textarea {
 }
 
 .kpi-icon.dark {
-  color: var(--brass);
-  background: var(--ink);
+  color: #1e5f8a;
+  background: rgb(30 95 138 / 12%);
 }
 
 .kpi > small {
@@ -15886,6 +15922,13 @@ label .search-select-trigger {
   padding: 12px 14px;
   border-radius: 10px;
   background: var(--bone);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.kapster-sales-summary > div:hover {
+  border-color: var(--brass);
 }
 
 .kapster-sales-summary small {
@@ -16752,6 +16795,32 @@ label .search-select-trigger {
   .kapster-dashboard > .dashboard-grid > .kapster-shift-panel {
     align-self: stretch !important;
   }
+}
+
+/* Kapster: efek hover border brass untuk semua panel & kartu */
+.kapster-dashboard .panel,
+.app-shell-kapster .panel {
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.kapster-dashboard .panel:hover,
+.app-shell-kapster .panel:hover {
+  border-color: var(--brass) !important;
+}
+
+.kapster-activity-panel:hover .od-go {
+  color: var(--brass);
+}
+
+.app-shell-kapster .my-salary-hero {
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.app-shell-kapster .my-salary-hero:hover {
+  border-color: var(--brass) !important;
 }
 
 /* Judul halaman + isi muncul halus saat pindah halaman (tipis, dimatikan bila "kurangi gerakan") */

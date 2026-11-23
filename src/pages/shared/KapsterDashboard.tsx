@@ -122,6 +122,11 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
           tone="sage"
           value={`${jumlahPelanggan} orang`}
           detail={`Target shift 8 jam: ${targetShift} orang`}
+          onClick={() => {
+            document
+              .querySelector(".kapster-shift-panel")
+              ?.scrollIntoView({ behavior: "smooth" })
+          }}
         />
         <Kpi
           icon="wallet"
@@ -133,6 +138,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
               ? `${layananRows.length} pengerjaan layanan hari ini`
               : "40% dari 5 pengerjaan"
           }
+          onClick={() => nav("GajiKomisiSaya")}
         />
         <Kpi
           icon="product"
@@ -144,6 +150,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
               ? `${produkRows.reduce((n, r) => n + r.qty, 0)} produk terjual hari ini`
               : "3 produk terjual hari ini"
           }
+          onClick={() => nav("KomisiProdukSaya")}
         />
         <Kpi
           icon="check"
@@ -201,10 +208,20 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
           </div>
         </section>
 
-        <section className="panel kapster-activity-panel">
+        <section
+          className="panel kapster-activity-panel"
+          role="link"
+          tabIndex={0}
+          aria-label="Detail Penjualan Saya, buka Pendapatan Saya"
+          onClick={() => nav("GajiKomisiSaya")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") nav("GajiKomisiSaya")
+          }}
+        >
           <PageTitle
             eyebrow="Pengerjaan Anda hari ini"
             title="Detail Penjualan Saya"
+            action={<Icon name="chevron" className="od-turn-right od-go" />}
           />
           {live && (
             <div className="kapster-sales-summary">
