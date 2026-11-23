@@ -22740,3 +22740,11 @@ html:has(.manual-page .modal-overlay) {
     padding-inline: 16px !important;
   }
 }
+
+/* Tombol Tambah/Restok sama ukuran dengan dropdown: padding 12px, tinggi ikut kontrol */
+.catalog-page .filters .filters-add,
+.catalog-page .filters .filters-restok,
+.catalog-page .promo-discount-actions .filters-add {
+  padding-inline: 12px !important;
+  font-weight: 600;
+}
