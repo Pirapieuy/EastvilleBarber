@@ -24943,3 +24943,25 @@ html:has(.manual-page .modal-overlay) {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Gaji & Kasbon HP: kartu riwayat tidak boleh menyusut, panel tumbuh mengikuti isi (daftar menggulir di dalam tabel) */
+@media (max-width: 760px) {
+  .gaji-page .gj-table > .gj-item {
+    flex: none;
+  }
+
+  .gaji-page .gj-table > .lk-empty {
+    flex: none;
+  }
+
+  .gaji-page > .gj-fill {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .gaji-page .gj-fill .gj-table {
+    flex: none;
+    max-height: 452px;
+    overflow-y: auto;
+  }
+}
