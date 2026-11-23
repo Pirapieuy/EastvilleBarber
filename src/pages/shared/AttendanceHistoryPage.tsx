@@ -4,11 +4,7 @@ import { CalendarPicker, Button } from "../../components/common/UI"
 import { AbsensiRow, apiAbsensi, apiKasir } from "../../api"
 import { AbsensiStatus } from "../../types"
 import { SearchSelect } from "../../components/common/SearchSelect"
-
-function todayDate() {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
-}
+import { formatTanggal, labelPeriode, ModePeriode, rentangPeriode, TANGGAL_MAKS, TANGGAL_MULAI, tanggalIsoLokal } from "../../utils/tanggal"
 
 function statusChipClass(status: string): string {
   const s = status.toLowerCase()
@@ -35,98 +31,7 @@ interface DisplayRow {
   status: AbsensiStatus
   fotoUrl?: string
   catatan?: string
-  fullCatatan?: string
   fromRecord: boolean
-}
-
-/* ── Modal Detail Absensi ── */
-
-function DetailModal({ row, onClose }: { row: DisplayRow; onClose: () => void }) {
-  const koreksiList = (row.fullCatatan || "")
-    .split(" | ")
-    .filter((s) => s.startsWith("Koreksi:"))
-
-  return (
-    <div className="modal-overlay modal-centered" onClick={onClose}>
-      <section className="simple-modal" onClick={(e) => e.stopPropagation()}>
-        <header>
-          <h2>Detail Absensi</h2>
-        </header>
-
-        {row.fotoUrl && (
-          <div style={{ padding: "16px 18px 0", display: "flex", justifyContent: "center" }}>
-            <img
-              src={row.fotoUrl}
-              alt={`Foto absensi ${row.nama}`}
-              style={{
-                width: "100%",
-                maxWidth: 280,
-                borderRadius: 12,
-                objectFit: "cover",
-              }}
-            />
-          </div>
-        )}
-
-        <div style={{ padding: "16px 18px" }}>
-          <div style={{ display: "grid", gap: 12 }}>
-            <div>
-              <small style={{ color: "var(--muted)", fontSize: 11 }}>Nama</small>
-              <div style={{ fontWeight: 600 }}>{row.nama}</div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <small style={{ color: "var(--muted)", fontSize: 11 }}>Tanggal</small>
-                <div>{row.tanggal}</div>
-              </div>
-              <div>
-                <small style={{ color: "var(--muted)", fontSize: 11 }}>Jam</small>
-                <div>{row.jam || "-"}</div>
-              </div>
-            </div>
-            <div>
-              <small style={{ color: "var(--muted)", fontSize: 11 }}>Status</small>
-              <div style={{ marginTop: 4 }}>
-                <span className={statusChipClass(row.status)}>{row.status}</span>
-              </div>
-            </div>
-            {koreksiList.length > 0 && (
-              <div>
-                <small style={{ color: "var(--muted)", fontSize: 11 }}>Riwayat Koreksi</small>
-                <div style={{ marginTop: 4, display: "grid", gap: 4 }}>
-                  {koreksiList.map((k, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        padding: "6px 10px",
-                        borderRadius: 6,
-                        background: "var(--bone)",
-                        fontSize: 12,
-                      }}
-                    >
-                      {k.replace("Koreksi: ", "")}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {row.fullCatatan &&
-              !row.fullCatatan.split(" | ").every((s) => s.startsWith("Koreksi:")) && (
-                <div>
-                  <small style={{ color: "var(--muted)", fontSize: 11 }}>Catatan</small>
-                  <div style={{ fontSize: 13 }}>
-                    {row.fullCatatan
-                      .split(" | ")
-                      .filter((s) => !s.startsWith("Koreksi:"))
-                      .join(" · ")}
-                  </div>
-                </div>
-              )}
-          </div>
-        </div>
-      </section>
-    </div>
-  )
 }
 
 /* ── Modal Koreksi Absensi ── */
@@ -263,9 +168,9 @@ function KoreksiModal({
 /* ── Halaman Utama ── */
 
 export function AttendanceHistoryPage() {
-  const today = todayDate()
-  const [tanggal, setTanggal] = useState(today)
-  const [search, setSearch] = useState("")
+  const today = TANGGAL_MAKS()
+  const [tanggal, setTanggal] = useState("2026-11-01")
+  const [mode, setMode] = useState<ModePeriode>("Bulanan")
   const [filterStatus, setFilterStatus] = useState<AbsensiStatus | "">("")
   const [filterKapster, setFilterKapster] = useState("")
   const [rows, setRows] = useState<AbsensiRow[]>([])
@@ -273,7 +178,6 @@ export function AttendanceHistoryPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [koreksiRow, setKoreksiRow] = useState<DisplayRow | null>(null)
-  const [detailRow, setDetailRow] = useState<DisplayRow | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -288,7 +192,7 @@ export function AttendanceHistoryPage() {
     setLoading(true)
     setError("")
     apiAbsensi
-      .list({ tanggal: tanggal || undefined })
+      .list()
       .then((result) => {
         if (active) setRows(result)
       })
@@ -301,11 +205,18 @@ export function AttendanceHistoryPage() {
     return () => {
       active = false
     }
-  }, [tanggal, refreshKey])
+  }, [refreshKey])
+
+  const periode = useMemo(() => rentangPeriode(mode, tanggal), [mode, tanggal])
+  const rowsPeriode = useMemo(
+    () => rows.filter((row) => row.tanggal >= periode.dari && row.tanggal <= periode.sampai),
+    [rows, periode],
+  )
 
   const displayRows: DisplayRow[] = useMemo(() => {
     const latestByPerson = new Map<string, AbsensiRow>()
-    const terbaruDulu = [...rows].sort((a, b) => {
+    const latestByPersonPerDay = new Map<string, AbsensiRow>()
+    const terbaruDulu = [...rowsPeriode].sort((a, b) => {
       const waktuA = a.waktu || `${a.tanggal} ${a.jam || ""}`
       const waktuB = b.waktu || `${b.tanggal} ${b.jam || ""}`
       return waktuB.localeCompare(waktuA)
@@ -315,9 +226,14 @@ export function AttendanceHistoryPage() {
       const keyByNama = (row.nama || "").trim().toLowerCase()
       const key = keyById || keyByNama
       if (key && !latestByPerson.has(key)) latestByPerson.set(key, row)
+      const dayKey = `${row.tanggal}:${key}`
+      if (key && !latestByPersonPerDay.has(dayKey)) latestByPersonPerDay.set(dayKey, row)
     }
 
-    const recordRows: DisplayRow[] = [...latestByPerson.values()].map((row) => ({
+    const selectedRecords = mode === "Harian"
+      ? [...latestByPerson.values()]
+      : [...latestByPersonPerDay.values()]
+    const recordRows: DisplayRow[] = selectedRecords.map((row) => ({
       id: row.id,
       userId: row.userId,
       nama: row.nama,
@@ -329,56 +245,68 @@ export function AttendanceHistoryPage() {
       catatan: row.catatan
         ? row.catatan.split(" | ").filter(Boolean).pop() || row.catatan
         : undefined,
-      fullCatatan: row.catatan || undefined,
       fromRecord: true,
     }))
 
-    const recordedKeys = new Set<string>()
-    for (const row of latestByPerson.values()) {
-      recordedKeys.add(row.userId.trim().toLowerCase())
-      recordedKeys.add(row.nama.trim().toLowerCase())
+    const recordedByDay = new Map<string, Set<string>>()
+    for (const row of rowsPeriode) {
+      const keys = recordedByDay.get(row.tanggal) ?? new Set<string>()
+      if (row.userId.trim()) keys.add(row.userId.trim().toLowerCase())
+      if (row.nama.trim()) keys.add(row.nama.trim().toLowerCase())
+      recordedByDay.set(row.tanggal, keys)
     }
-    const missingRows: DisplayRow[] = kapsters
-      .filter((k) => !recordedKeys.has(k.id.trim().toLowerCase()) && !recordedKeys.has(k.nama.trim().toLowerCase()))
-      .map((k) => ({
-        id: `missing-${k.id}`,
-        userId: k.id,
-        nama: k.nama,
-        tanggal,
-        jam: "",
-        waktu: "",
-        status: "Tidak Hadir" as AbsensiStatus,
-        fromRecord: false,
-      }))
+
+    const missingRows: DisplayRow[] = []
+    const mulai = new Date(`${periode.dari}T12:00:00`)
+    const akhirPeriode = new Date(`${periode.sampai}T12:00:00`)
+    const hariIni = new Date(`${today}T12:00:00`)
+    const akhir = akhirPeriode > hariIni ? hariIni : akhirPeriode
+    for (const hari = new Date(mulai); hari <= akhir; hari.setDate(hari.getDate() + 1)) {
+      const tanggalHari = tanggalIsoLokal(hari)
+      const tercatatHariIni = recordedByDay.get(tanggalHari) ?? new Set<string>()
+      for (const kapster of kapsters) {
+        const id = kapster.id.trim().toLowerCase()
+        const nama = kapster.nama.trim().toLowerCase()
+        if (tercatatHariIni.has(id) || tercatatHariIni.has(nama)) continue
+        missingRows.push({
+          id: `missing-${kapster.id}-${tanggalHari}`,
+          userId: kapster.id,
+          nama: kapster.nama,
+          tanggal: tanggalHari,
+          jam: "",
+          waktu: "",
+          status: "Tidak Hadir" as AbsensiStatus,
+          fromRecord: false,
+        })
+      }
+    }
 
     return [...recordRows, ...missingRows]
-  }, [rows, kapsters, tanggal])
+  }, [rowsPeriode, kapsters, tanggal, today, periode, mode])
 
   const filteredRows = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("id-ID")
     return displayRows
       .filter((row) => {
         if (filterStatus && row.status !== filterStatus) return false
         if (filterKapster && row.userId !== filterKapster) return false
-        if (query) {
-          const text = `${row.nama} ${row.status} ${row.catatan ?? ""}`.toLocaleLowerCase("id-ID")
-          if (!text.includes(query)) return false
-        }
         return true
       })
       .sort((a, b) => {
-        if (!a.fromRecord && b.fromRecord) return 1
-        if (a.fromRecord && !b.fromRecord) return -1
-        return b.waktu.localeCompare(a.waktu)
+        const byDate = b.tanggal.localeCompare(a.tanggal)
+        if (byDate) return byDate
+        if (a.fromRecord !== b.fromRecord) return a.fromRecord ? -1 : 1
+        return b.waktu.localeCompare(a.waktu) || a.nama.localeCompare(b.nama)
       })
-  }, [displayRows, search, filterStatus, filterKapster])
+  }, [displayRows, filterStatus, filterKapster])
 
   const stats = useMemo(() => {
-    const counts = { Hadir: 0, "Tidak Hadir": 0, Sakit: 0 }
+    const counts = { Hadir: 0, "Tidak Hadir": 0, Sakit: 0, Cuti: 0, Izin: 0 }
     for (const row of displayRows) {
       if (row.status === "Hadir") counts.Hadir++
       else if (row.status === "Sakit") counts.Sakit++
       else if (row.status === "Tidak Hadir") counts["Tidak Hadir"]++
+      else if (row.status === "Cuti") counts.Cuti++
+      else if (row.status === "Izin") counts.Izin++
     }
     return counts
   }, [displayRows])
@@ -387,30 +315,25 @@ export function AttendanceHistoryPage() {
     { label: "Hadir", status: "Hadir", count: stats.Hadir },
     { label: "Tidak Hadir", status: "Tidak Hadir", count: stats["Tidak Hadir"] },
     { label: "Sakit", status: "Sakit", count: stats.Sakit },
+    { label: "Cuti", status: "Cuti", count: stats.Cuti },
+    { label: "Izin", status: "Izin", count: stats.Izin },
   ]
 
   return (
     <div className="mobile-content attendance-history-page fit-page">
-      <section className="panel fit-fill" style={{ padding: 18 }}>
-        {/* Statistik Harian */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+      <section className="panel fit-fill attendance-history-panel" style={{ padding: 0 }}>
+        {/* Ringkasan status untuk periode yang dipilih */}
+        <div className="attendance-summary-grid">
           {statItems.map((item) => (
             <button
               key={item.status}
               onClick={() => setFilterStatus(filterStatus === item.status ? "" : item.status)}
-              style={{
-                flex: "1 1 0",
-                minWidth: 60,
-                padding: "8px 4px",
-                borderRadius: 10,
-                border: filterStatus === item.status ? "2px solid var(--brass)" : "1.5px solid var(--slate)",
-                background: filterStatus === item.status ? "rgba(200,150,62,0.08)" : "var(--paper)",
-                cursor: "pointer",
-                textAlign: "center",
-              }}
+              className={`attendance-summary-card${filterStatus === item.status ? " selected" : ""}`}
+              data-status={item.status.toLowerCase().replace(" ", "-")}
+              aria-pressed={filterStatus === item.status}
             >
-              <div style={{ fontSize: 20, fontWeight: 700 }}>{item.count}</div>
-              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{item.label}</div>
+              <strong>{item.count}</strong>
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
@@ -419,7 +342,23 @@ export function AttendanceHistoryPage() {
         <div className="filters attendance-history-filters" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 10 }}>
           <CalendarPicker
             value={tanggal}
+            label={labelPeriode(mode, tanggal)}
+            bulanSaja={mode === "Bulanan"}
+            popupHeader={
+              <div className="segmented history-periode" role="group" aria-label="Periode absensi">
+                {(["Harian", "Mingguan", "Bulanan"] as const).map((period) => (
+                  <Button
+                    className={mode === period ? "active" : ""}
+                    key={period}
+                    onClick={() => setMode(period)}
+                  >
+                    {period}
+                  </Button>
+                ))}
+              </div>
+            }
             onChange={(value) => value <= today && setTanggal(value)}
+            min={TANGGAL_MULAI}
             max={today}
             showToday={false}
           />
@@ -434,82 +373,64 @@ export function AttendanceHistoryPage() {
               </option>
             ))}
           </SearchSelect>
-          <label className="search" style={{ flex: 1, minWidth: 180 }}>
-            <Icon name="search" />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Cari nama..."
-            />
-          </label>
         </div>
 
         {/* Content */}
-        {loading ? <p style={{ color: "var(--muted)" }}>Memuat riwayat absensi...</p> : null}
+        {loading ? <p className="attendance-state-message" role="status">Memuat riwayat absensi...</p> : null}
         {error ? (
-          <p role="alert" style={{ color: "#b91c1c" }}>
+          <p className="attendance-state-message" role="alert" style={{ color: "#b91c1c" }}>
             {error}
           </p>
         ) : null}
         {!loading && !error && filteredRows.length === 0 ? (
           <div style={{ padding: 30, textAlign: "center", color: "var(--muted)" }}>
             {filterStatus
-              ? `Tidak ada data dengan status "${filterStatus}" untuk tanggal ini.`
+              ? `Tidak ada data dengan status "${filterStatus}" untuk periode ini.`
               : "Tidak ada riwayat absensi untuk filter ini."}
           </div>
         ) : (
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="attendance-record-list">
             {filteredRows.map((row) => (
               <article
                 key={row.id}
-                className="panel"
-                style={{ display: "flex", alignItems: "center", gap: 14, padding: 12, cursor: "pointer" }}
-                onClick={() => row.fromRecord && setDetailRow(row)}
+                className="panel attendance-record-card"
+                data-status={row.status.toLowerCase().replace(" ", "-")}
+                style={{ display: "flex", alignItems: "center" }}
               >
                 {row.fotoUrl ? (
                   <img
                     src={row.fotoUrl}
                     alt={`Foto absensi ${row.nama}`}
-                    style={{ width: 56, height: 56, borderRadius: 10, objectFit: "cover" }}
+                    className="attendance-record-photo"
                   />
                 ) : (
-                  <span className="item-icon">
+                  <span className="item-icon attendance-record-icon">
                     <Icon name="calendar" />
                   </span>
                 )}
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <strong style={{ display: "block" }}>{row.nama}</strong>
-                  <small style={{ color: "var(--muted)" }}>
-                    {row.tanggal}
+                <div className="attendance-record-person" style={{ minWidth: 0, flex: 1 }}>
+                  <strong>{row.nama}</strong>
+                  <small className="attendance-record-date">
+                    {formatTanggal(row.tanggal)}
                     {row.jam ? ` · ${row.jam}` : ""}
                     {row.catatan ? ` · ${row.catatan}` : ""}
                   </small>
                 </div>
                 <span className={statusChipClass(row.status)}>{row.status}</span>
                 {row.fromRecord && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setKoreksiRow(row)
-                    }}
-                    title="Koreksi absensi"
-                    className="primary-button"
-                    style={{
-                      minHeight: 32,
-                      padding: "0 10px",
-                      fontSize: 12,
-                    }}
+                  <Button
+                    onClick={() => setKoreksiRow(row)}
+                    title="Ubah absensi"
+                    className="secondary-button attendance-edit-button"
                   >
-                    <Icon name="pencil" />
-                  </button>
+                    <Icon name="pencil" /> Ubah
+                  </Button>
                 )}
               </article>
             ))}
           </div>
         )}
       </section>
-
-      {detailRow && <DetailModal row={detailRow} onClose={() => setDetailRow(null)} />}
 
       {koreksiRow && (
         <KoreksiModal
