@@ -328,91 +328,92 @@ export function PromoDiscountsTab() {
               </Button>
             </header>
 
-            {error && (
-              <div
-                style={{
-                  padding: "8px 12px",
-                  margin: "16px 16px 0",
-                  borderRadius: 6,
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#991b1b",
-                  fontSize: 12,
-                }}
-              >
-                <Icon name="alert" /> {error}
-              </div>
-            )}
-
-            <label>
-              <span>Kode unik</span>
-              <input
-                autoCapitalize="characters"
-                autoComplete="off"
-                maxLength={20}
-                onChange={(e) => setKode(e.target.value.toUpperCase())}
-                placeholder="Contoh: JUMAT15"
-                value={kode}
-              />
-            </label>
-
-            <label>
-              <span>Nama promo</span>
-              <input
-                onChange={(e) => setNama(e.target.value)}
-                placeholder="Contoh: Promo Jumat Berkah"
-                value={nama}
-              />
-            </label>
-
-            <div className="modal-row-2">
-              <label>
-                <span>Jenis Diskon</span>
-                <SearchSelect
-                  value={jenis}
-                  onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
+            <div className="promo-modal-body">
+              {error && (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    margin: "16px 16px 0",
+                    borderRadius: 6,
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    color: "#991b1b",
+                    fontSize: 12,
+                  }}
                 >
-                  <option value="persen">Persentase (%)</option>
-                  <option value="nominal">Nominal (Rp)</option>
-                </SearchSelect>
+                  <Icon name="alert" /> {error}
+                </div>
+              )}
+
+              <label>
+                <span>Kode unik</span>
+                <input
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  maxLength={20}
+                  onChange={(e) => setKode(e.target.value.toUpperCase())}
+                  placeholder="Contoh: JUMAT15"
+                  value={kode}
+                />
               </label>
 
               <label>
-                <span>Jumlah Diskon ({jenis === "persen" ? "%" : "Rp"})</span>
-                <div className="input-shell">
-                  <b>{jenis === "persen" ? "%" : "Rp"}</b>
-                  <input
-                    max={jenis === "persen" ? 100 : undefined}
-                    min={1}
-                    required
-                    type="number"
-                    value={nilai}
-                    onChange={(e) => setNilai(Number(e.target.value))}
-                  />
-                </div>
+                <span>Nama promo</span>
+                <input
+                  onChange={(e) => setNama(e.target.value)}
+                  placeholder="Contoh: Promo Jumat Berkah"
+                  value={nama}
+                />
               </label>
+
+              <div className="modal-row-2">
+                <label>
+                  <span>Jenis Diskon</span>
+                  <SearchSelect
+                    value={jenis}
+                    onChange={(e) => setJenis(e.target.value as "persen" | "nominal")}
+                  >
+                    <option value="persen">Persentase (%)</option>
+                    <option value="nominal">Nominal (Rp)</option>
+                  </SearchSelect>
+                </label>
+
+                <label>
+                  <span>Jumlah Diskon ({jenis === "persen" ? "%" : "Rp"})</span>
+                  <div className="input-shell">
+                    <b>{jenis === "persen" ? "%" : "Rp"}</b>
+                    <input
+                      max={jenis === "persen" ? 100 : undefined}
+                      min={1}
+                      required
+                      type="number"
+                      value={nilai}
+                      onChange={(e) => setNilai(Number(e.target.value))}
+                    />
+                  </div>
+                </label>
+              </div>
+
+              <label>
+                <span>Masa Berlaku Sampai</span>
+                <CalendarPicker
+                  value={berlakuSampai}
+                  onChange={(d) => d && setBerlakuSampai(d)}
+                />
+              </label>
+
+              <div
+                className="toggle-row"
+                style={{ cursor: "pointer" }}
+                onClick={() => setStatus((s) => s === "Aktif" ? "Nonaktif" : "Aktif")}
+              >
+                <span>
+                  <strong>Status diskon: {status}</strong>
+                  <small>Diskon aktif dapat digunakan saat transaksi.</small>
+                </span>
+                <i className={`toggle ${status === "Aktif" ? "on" : ""}`}><b /></i>
+              </div>
             </div>
-
-            <label>
-              <span>Masa Berlaku Sampai</span>
-              <CalendarPicker
-                value={berlakuSampai}
-                onChange={(d) => d && setBerlakuSampai(d)}
-              />
-            </label>
-
-            <div
-              className="toggle-row"
-              style={{ cursor: "pointer" }}
-              onClick={() => setStatus((s) => s === "Aktif" ? "Nonaktif" : "Aktif")}
-            >
-              <span>
-                <strong>Status diskon: {status}</strong>
-                <small>Diskon aktif dapat digunakan saat transaksi.</small>
-              </span>
-              <i className={`toggle ${status === "Aktif" ? "on" : ""}`}><b /></i>
-            </div>
-
             <footer>
               <Button
                 className="primary-button"
