@@ -454,7 +454,6 @@ export function ProductsPage({ embedded = false }: {
                     }
                     placeholder="Contoh: HP-FSD-01"
                   />
-                  <small className="valid-text">Kode unik produk</small>
                 </label>
                 <label>
                   <span>Nama pemasok (opsional)</span>
