@@ -267,12 +267,6 @@ export function TeamPage({ currentUser, role, title }: {
         Number(a.status === "Nonaktif") - Number(b.status === "Nonaktif"),
     )
 
-  function getInitials(name: string) {
-    const parts = name.trim().split(" ")
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-    return name.slice(0, 2).toUpperCase()
-  }
-
   return (
     <div className="content fit-page team-page">
       <div className="filters team-filters">
@@ -304,7 +298,7 @@ export function TeamPage({ currentUser, role, title }: {
           ))}
         </div>
         <Button className="primary-button team-add-btn" onClick={openCreate}>
-          <Icon name="plus" /> Tambah anggota
+          <Icon name="plus" /> Tambah
         </Button>
       </div>
 
@@ -329,7 +323,10 @@ export function TeamPage({ currentUser, role, title }: {
             key={x.id}
           >
             <header>
-              <span>{getInitials(x.nama)}</span>
+              <div className="team-card-id">
+                <h3>{x.nama}</h3>
+                <small>@{x.username}</small>
+              </div>
               <i
                 className={x.status === "Aktif" ? "active" : ""}
                 style={{
@@ -347,8 +344,6 @@ export function TeamPage({ currentUser, role, title }: {
                 {x.status}
               </i>
             </header>
-            <h3>{x.nama}</h3>
-            <small>@{x.username}</small>
             <div className="roles">
               <i>{x.role}</i>
               {isOwner && x.role === "Kapster" && (
@@ -370,14 +365,14 @@ export function TeamPage({ currentUser, role, title }: {
                   className="secondary-button"
                   onClick={() => openEdit(x)}
                 >
-                  <Icon name="pencil" /> Ubah data
+                  <Icon name="pencil" /> Ubah
                 </Button>
                 {x.role !== "Owner" && (
                   <Button
                     className="danger-button"
                     onClick={() => setDeletingUser(x)}
                   >
-                    Hapus
+                    <Icon name="trash" /> Hapus
                   </Button>
                 )}
               </div>
@@ -393,6 +388,9 @@ export function TeamPage({ currentUser, role, title }: {
                 <p className="eyebrow">Anggota tim</p>
                 <h2>{editingId ? "Ubah Data Tim" : "Tambah Anggota Tim"}</h2>
               </div>
+              <Button type="button" aria-label="Tutup" onClick={() => setFormOpen(false)}>
+                <Icon name="close" />
+              </Button>
             </header>
             <div className="staff-form-body">
               <div className="form-grid">
@@ -495,15 +493,8 @@ export function TeamPage({ currentUser, role, title }: {
               </div>
             )}
             <footer>
-              <Button
-                className="secondary-button"
-                type="button"
-                onClick={() => setFormOpen(false)}
-              >
-                Batal
-              </Button>
               <Button className="primary-button" type="submit">
-                Simpan perubahan
+                {editingId ? "Simpan perubahan" : "Simpan anggota"}
               </Button>
             </footer>
           </form>
@@ -525,6 +516,7 @@ export function TeamPage({ currentUser, role, title }: {
             statusModalUser.status === "Aktif" ? "Nonaktif" : "Aktif"
           }`}
           confirmTone={statusModalUser.status === "Aktif" ? "danger" : "primary"}
+          compact
           onClose={() => setStatusModalUser(null)}
           onConfirm={handleConfirmToggleStatus}
         />
@@ -540,6 +532,7 @@ export function TeamPage({ currentUser, role, title }: {
           reasonPlaceholder="Contoh: Karyawan sudah resign / tidak lagi bekerja..."
           confirmText="Hapus Karyawan"
           confirmTone="danger"
+          compact
           onClose={() => setDeletingUser(null)}
           onConfirm={(alasan) =>
             handleConfirmDeleteUser(deletingUser, alasan)

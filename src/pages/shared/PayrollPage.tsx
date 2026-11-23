@@ -494,6 +494,7 @@ export function KasbonTab({ externalAdd, onExternalAddDone }: { externalAdd?: bo
 
       {confirmAction && (
         <ConfirmModal
+          compact
           title={
             confirmAction.type === "lunasi"
               ? `Tandai Lunas Kasbon ${confirmAction.item.nama}?`

@@ -7547,46 +7547,48 @@ textarea {
   display: none;
 }
 
-/* Filter toolbar Tim Eastville */
+/* Filter toolbar Tim Eastville: pola sama dengan Layanan & Produk (jarak 16px, kontrol 44px, radius 10px).
+   Laptop sebaris: Cari | Peran | Tambah. Tidak muat: Cari + Tambah di baris 1, Peran selebar penuh di baris 2. */
 .filters.team-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  flex-wrap: wrap;
   gap: 16px;
   margin-top: 0;
   width: 100%;
 }
 
-.team-filters .search {
-  flex: 1 1 200px;
-  min-width: 160px;
-}
-
-.content.team-page .filters.team-filters .search {
+.content.team-page .team-filters .search {
+  grid-column: 1;
   width: auto;
   max-width: none;
+  min-width: 0;
 }
 
 .team-filters .search input {
-  height: 42px;
+  height: 44px;
   border-radius: 10px;
 }
 
-.team-filters .team-add-btn {
-  flex: 0 0 auto;
-  margin-left: auto;
+.content.team-page .team-filters .team-add-btn {
+  grid-column: 3;
   min-height: 44px;
+  height: 44px;
+  padding-inline: 16px;
   font-size: 14px;
   border-radius: 10px;
   white-space: nowrap;
 }
 
 .team-role-filter {
-  flex: 0 0 auto;
+  grid-column: 2;
   min-width: 0;
+  height: 44px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px;
+  gap: 4px;
+  padding: 3px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
@@ -7599,7 +7601,7 @@ textarea {
 }
 
 .team-role-filter button {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-height: 36px;
   padding: 0 14px;
   border: 0;
@@ -7625,6 +7627,36 @@ textarea {
   display: inline;
 }
 
+@media (max-width: 1024px) {
+  .content.team-page .filters.team-filters {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 16px !important;
+  }
+
+  .content.team-page .team-filters .search {
+    grid-column: 1 !important;
+    grid-row: 1;
+    width: 100% !important;
+  }
+
+  .content.team-page .team-filters .team-add-btn {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .content.team-page .team-filters .team-role-filter {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .content.team-page .team-role-filter button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 8px;
+  }
+}
+
 @media (max-width: 620px) {
   .team-role-label-desktop {
     display: none;
@@ -7632,102 +7664,6 @@ textarea {
 
   .team-role-label-mobile {
     display: inline;
-  }
-}
-
-/* Tablet (621px–1024px): baris 1 Search + Tambah, baris 2 Filter Peran selebar layar */
-@media (max-width: 1024px) and (min-width: 621px) {
-  .content.team-page .filters.team-filters {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important;
-    gap: 12px 16px !important;
-    width: 100% !important;
-  }
-
-  .content.team-page .team-filters .search {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .content.team-page .team-filters .team-add-btn {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    margin-left: 0 !important;
-    min-height: 44px !important;
-    white-space: nowrap !important;
-  }
-
-  .content.team-page .content .filters .team-role-filter,
-  .content.team-page .team-filters .team-role-filter {
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
-    width: 100% !important;
-    display: flex !important;
-    gap: 6px !important;
-    padding: 4px !important;
-    box-sizing: border-box !important;
-  }
-
-  .content.team-page .team-role-filter button {
-    flex: 1 1 0 !important;
-    min-height: 38px !important;
-    justify-content: center !important;
-    text-align: center !important;
-    padding: 0 10px !important;
-  }
-}
-
-/* Mobile (≤620px): tersusun vertikal penuh, seimbang, tombol tidak tumpang tindih */
-@media (max-width: 620px) {
-  .content.team-page .filters.team-filters {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .content.team-page .team-filters .search {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: none !important;
-  }
-
-  .content.team-page .content .filters .team-role-filter,
-  .content.team-page .team-filters .team-role-filter {
-    width: 100% !important;
-    flex: none !important;
-    display: flex !important;
-    gap: 4px !important;
-    padding: 4px !important;
-    overflow-x: auto !important;
-    scrollbar-width: none !important;
-    box-sizing: border-box !important;
-  }
-
-  .content.team-page .team-role-filter button {
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-    min-height: 40px !important;
-    padding: 0 2px !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    justify-content: center !important;
-    text-align: center !important;
-    white-space: nowrap !important;
-  }
-
-  .content.team-page .team-filters .team-add-btn {
-    width: 100% !important;
-    flex: none !important;
-    margin-left: 0 !important;
-    min-height: 44px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
   }
 }
 
@@ -7743,156 +7679,45 @@ textarea {
   box-shadow: var(--shadow);
 }
 
-.team-card.role-owner {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #e8d6b6;
-  border-top: 3px solid #c9973f;
-  background: linear-gradient(135deg, var(--paper) 0%, #fffdf9 62%, #f8f0e1 100%);
-}
-
-.team-card.role-owner::before,
-.team-card.role-owner::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  transform: rotate(18deg);
-}
-
-.team-card.role-owner::before {
-  width: 72px;
-  height: 72px;
-  right: 24px;
-  bottom: 17px;
-  border: 2px solid rgba(183, 128, 36, 0.38);
-  border-radius: 16px;
-  background: rgba(201, 151, 63, 0.09);
-}
-
-.team-card.role-owner::after {
-  width: 38px;
-  height: 38px;
-  right: 77px;
-  bottom: 62px;
-  border: 2px solid rgba(183, 128, 36, 0.25);
-  border-radius: 10px;
-  background: rgba(201, 151, 63, 0.12);
-}
-
-.team-card.role-owner > * {
-  position: relative;
-  z-index: 1;
-}
-
-.team-card.role-manajer,
-.team-card.role-kasir,
-.team-card.role-kapster {
-  position: relative;
-  overflow: hidden;
-}
-
-.team-card.role-manajer {
-  border-top: 3px solid #1677a8;
-}
-
-.team-card.role-kasir {
-  border-top: 3px solid #13845d;
-}
-
-.team-card.role-kapster {
-  border-top: 3px solid #7b858d;
-}
-
-.team-card.role-manajer::before,
-.team-card.role-kasir::before,
-.team-card.role-kapster::before {
-  content: "";
-  position: absolute;
-  right: 24px;
-  bottom: 17px;
-  width: 72px;
-  height: 72px;
-  border: 2px solid currentColor;
-  border-radius: 16px;
-  transform: rotate(18deg);
-  pointer-events: none;
-}
-
-.team-card.role-manajer::before {
-  color: rgba(22, 119, 168, 0.38);
-  background: rgba(22, 119, 168, 0.13);
-}
-
-.team-card.role-kasir::before {
-  color: rgba(19, 132, 93, 0.4);
-  background: rgba(19, 132, 93, 0.13);
-}
-
-.team-card.role-kapster::before {
-  color: rgba(95, 107, 117, 0.4);
-  background: rgba(95, 107, 117, 0.13);
-}
-
-.team-card.role-manajer::after,
-.team-card.role-kasir::after,
-.team-card.role-kapster::after {
-  content: "";
-  position: absolute;
-  right: 77px;
-  bottom: 62px;
-  width: 38px;
-  height: 38px;
-  border: 2px solid currentColor;
-  border-radius: 10px;
-  transform: rotate(18deg);
-  pointer-events: none;
-}
-
-.team-card.role-manajer::after {
-  color: rgba(22, 119, 168, 0.32);
-  background: rgba(22, 119, 168, 0.06);
-}
-
-.team-card.role-kasir::after {
-  color: rgba(19, 132, 93, 0.34);
-  background: rgba(19, 132, 93, 0.06);
-}
-
-.team-card.role-kapster::after {
-  color: rgba(95, 107, 117, 0.34);
-  background: rgba(95, 107, 117, 0.07);
-}
-
-.team-card.role-manajer > *,
-.team-card.role-kasir > *,
-.team-card.role-kapster > * {
-  position: relative;
-  z-index: 1;
-}
-
 .team-card.inactive {
   opacity: 0.65;
+}
+
+.team-card {
+  gap: 16px;
 }
 
 .team-card header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.team-card header > span {
-  width: 40px;
-  height: 40px;
+.team-card-id {
+  min-width: 0;
   display: grid;
-  place-items: center;
-  border-radius: 10px;
-  color: var(--brass-dark);
-  background: var(--brass-soft);
-  font-size: 14px;
-  font-weight: 700;
+  gap: 4px;
+}
+
+.team-card h3 {
+  margin: 0;
+  overflow: hidden;
+  font: 600 15px/1.2 var(--heading);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-card-id > small {
+  overflow: hidden;
+  color: var(--slate);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .team-card header > i {
+  flex: none;
   padding: 4px 10px;
   border-radius: 8px;
   color: #9b463c;
@@ -7907,23 +7732,11 @@ textarea {
   background: #e5efe7;
 }
 
-.team-card h3 {
-  margin-top: 12px;
-  font: 600 15px/1.2 var(--heading);
-}
-
-.team-card > small {
-  display: block;
-  margin-top: 4px;
-  color: var(--slate);
-  font-size: 12px;
-}
-
 .roles {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 0;
 }
 
 .roles i {
@@ -7937,7 +7750,7 @@ textarea {
 }
 
 .team-card dl {
-  margin: 12px 0 0;
+  margin: 0;
   padding: 9px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -7983,12 +7796,17 @@ textarea {
   border-top: 1px solid var(--line);
 }
 
+/* Tombol Ubah + Hapus: ikon + teks, semi kotak, ukuran sama dengan Layanan & Produk */
 .team-card-actions .button {
   flex: 1 1 0;
+  min-width: 0;
   justify-content: center;
-  min-height: 44px;
+  min-height: 40px;
+  height: 40px;
+  padding-inline: 12px;
   font-size: 14px;
   border-radius: 10px;
+  white-space: nowrap;
 }
 
 .staff-form {
@@ -15219,49 +15037,42 @@ label .search-select-trigger {
   }
 }
 
-/* Tim Eastville: padding di desktop disamakan persis dengan Riwayat Transaksi & Laporan (lebar penuh, padding: 14px 14px 26px, margin: 0) */
-@media (min-width: 1025px) {
-  .workspace > .content.fit-page.team-page {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 14px 14px 26px !important;
-    gap: 14px !important;
-  }
-
-  .content.team-page .filters.team-filters {
-    margin-top: 0 !important;
-    gap: 14px !important;
-  }
-
-  .team-grid {
-    gap: 14px !important;
-  }
+/* Tim Eastville: jarak 16px semua sisi (atas 58px laptop / 70px HP), sama dengan Layanan & Laporan */
+.workspace > .content.fit-page.team-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  gap: 16px !important;
 }
 
 @media (max-width: 1024px) {
   .workspace > .content.team-page,
   .workspace > .content.fit-page.team-page {
     padding: 70px 16px 16px !important;
-    gap: 16px !important;
   }
+}
 
-  .content.team-page .filters.team-filters {
-    gap: 16px !important;
-  }
+.team-grid {
+  gap: 16px !important;
+  margin-top: 0 !important;
+  grid-auto-rows: max-content;
+  align-content: start;
+}
+
+.team-card {
+  min-height: max-content;
 }
 
 @media (max-width: 1024px) and (min-width: 621px) {
   .team-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px;
   }
 }
 
 @media (max-width: 620px) {
   .team-grid {
     grid-template-columns: 1fr !important;
-    gap: 16px;
   }
 }
 
@@ -15288,57 +15099,174 @@ label .search-select-trigger {
   width: 100%;
 }
 
-.team-grid-owner .team-card-actions .button {
-  flex: 1 1 0;
-  justify-content: center;
-  border-radius: 10px;
-}
-
-.team-grid-owner .team-card header > span {
-  border-radius: 10px;
-}
-
 .team-grid-owner .roles .role-komisi {
   color: var(--slate);
   background: var(--bone);
   border: 1px solid var(--line);
 }
 
-/* Modal Tambah/Ubah Tim Eastville: kartu di tengah di semua viewport */
-.modal-overlay.modal-centered .staff-form {
-  border-radius: 16px !important;
-  box-shadow: 0 16px 48px rgb(20 17 15 / 24%) !important;
+/* ===== Popup konfirmasi (.confirm-custom-modal, semua halaman) + popup form Tim Eastville =====
+   Header + footer tetap, hanya isi yang menggulir (batang scroll tersembunyi). Silang menggantikan Batal,
+   tombol utama selebar popup satu baris. Semua jarak 16px, kontrol 44px, radius 10px. */
+.team-page .modal-overlay.modal-centered {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
 }
 
-.modal-overlay.modal-centered .staff-form .role-options {
+.team-page .modal-overlay.modal-centered .staff-form,
+.modal-overlay.modal-centered .confirm-custom-modal {
+  width: min(460px, 100%) !important;
+  max-width: 460px !important;
+  max-height: calc(100svh - 32px) !important;
+  margin: auto !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgb(20 17 15 / 28%) !important;
+}
+
+.confirm-custom-modal {
+  padding: 0 !important;
+}
+
+.confirm-custom-modal > header {
+  margin: 0 !important;
+  padding: 16px !important;
+}
+
+.confirm-custom-modal > div {
+  display: flex;
+  flex-direction: column;
+  gap: 16px !important;
+}
+
+.confirm-custom-modal > div label {
+  margin: 0;
+  gap: 6px !important;
+}
+
+.team-page .staff-form > header,
+.confirm-custom-modal > header {
+  flex: none;
+  min-height: 68px;
+  box-sizing: border-box;
+  padding: 16px !important;
+  gap: 16px;
+  align-items: center !important;
+}
+
+.team-page .staff-form > header .button,
+.confirm-custom-modal > header .button {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  flex: none;
+  padding: 0 !important;
+  border-radius: 10px;
+}
+
+.team-page .staff-form-body,
+.confirm-custom-modal > div {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.team-page .staff-form-body::-webkit-scrollbar,
+.confirm-custom-modal > div::-webkit-scrollbar {
+  display: none;
+}
+
+.team-page .staff-form-body {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.team-page .staff-form .form-grid {
+  gap: 16px;
+}
+
+.team-page .staff-form .form-grid > label {
+  min-width: 0;
+}
+
+.team-page .staff-form label > span,
+.team-page .staff-form .form-label {
+  margin: 0 0 6px;
+}
+
+.team-page .staff-form .form-label {
+  display: block;
+  margin-bottom: -10px;
+}
+
+.team-page .staff-form .form-grid input {
+  height: 44px;
+  border-radius: 10px;
+}
+
+.team-page .staff-form .role-options {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-  width: 100% !important;
+  gap: 16px !important;
+  margin: 0;
 }
 
-.modal-overlay.modal-centered .staff-form .role-options .button {
+.team-page .staff-form .role-options .button {
   width: 100% !important;
-  justify-content: center !important;
   min-height: 44px !important;
+  justify-content: center !important;
   border-radius: 10px !important;
 }
 
-.modal-overlay.modal-centered .staff-form > footer {
-  padding: 16px !important;
-  gap: 12px !important;
+.team-page .staff-form .toggle-row {
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.team-page .staff-form > .info-banner {
+  flex: none;
+  margin: 0 16px 16px !important;
+}
+
+.team-page .staff-form > footer,
+.confirm-custom-modal > footer {
+  flex: none;
   display: flex !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  gap: 16px !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
-.modal-overlay.modal-centered .staff-form > footer .button {
+.team-page .staff-form > footer .button,
+.confirm-custom-modal > footer .button {
   flex: 1 1 0 !important;
   width: 100% !important;
-  justify-content: center !important;
   min-height: 44px !important;
+  justify-content: center !important;
   font-size: 14px !important;
   border-radius: 10px !important;
+}
+
+@media (max-width: 620px) {
+  .team-page .staff-form .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .team-page .staff-form > footer .button,
+  .confirm-custom-modal > footer .button {
+    min-height: 42px !important;
+  }
 }
 
 /* Kasir: halaman Kasbon Kapster */
