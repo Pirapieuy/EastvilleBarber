@@ -15179,6 +15179,7 @@ label .search-select-trigger {
 
 .attendance-record-list {
   display: grid;
+  align-content: start;
   gap: 6px;
   margin: 0 16px 16px;
 }
@@ -15193,6 +15194,13 @@ label .search-select-trigger {
   background: #fff;
   box-shadow: 0 2px 6px rgba(53, 46, 37, 0.045);
   transition: box-shadow 160ms ease;
+}
+
+.attendance-record-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
 }
 
 .attendance-record-card:hover {
@@ -15297,8 +15305,33 @@ label .search-select-trigger {
 }
 
 @media (max-width: 560px) {
+  .attendance-summary-grid {
+    gap: 10px;
+    margin: 12px 12px 14px;
+  }
+
+  .attendance-summary-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .attendance-summary-card {
+    min-height: 72px;
+    padding: 9px 6px;
+    gap: 3px;
+  }
+
+  .attendance-summary-card strong {
+    font-size: 20px;
+  }
+
+  .attendance-summary-card span {
+    font-size: 12px;
+  }
+
   .mobile-content.attendance-history-page .attendance-history-filters {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) !important;
+    gap: 8px !important;
+    margin: 12px !important;
   }
 
   .mobile-content.attendance-history-page .attendance-history-filters > .search-select {
@@ -15314,24 +15347,65 @@ label .search-select-trigger {
     min-width: 0 !important;
     gap: 8px !important;
     padding-inline: 8px !important;
+    font-size: 12px !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-btn {
+    min-width: 0 !important;
+    gap: 6px !important;
+    padding-inline: 8px !important;
+    font-size: 12px !important;
   }
 
   .attendance-record-card {
-    gap: 8px;
-    padding: 8px;
+    gap: 7px;
+    height: auto;
+    min-height: 92px;
+    padding: 10px 8px;
   }
 
   .attendance-record-icon,
   .attendance-record-photo {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .attendance-record-person > strong {
+    font-size: 14px;
+  }
+
+  .attendance-record-date {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .attendance-record-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .attendance-record-actions > .chip {
+    flex: none;
+    align-self: center;
+    padding: 4px 7px;
+    font-size: 11px;
   }
 
   .attendance-edit-button {
-    min-width: 76px;
-    gap: 5px;
-    padding-inline: 8px;
-    font-size: 12px;
+    box-sizing: border-box;
+    width: 68px !important;
+    min-width: 68px !important;
+    min-height: 40px !important;
+    gap: 4px !important;
+    padding: 0 5px !important;
+    font-size: 11px !important;
+  }
+
+  .attendance-edit-button svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
@@ -15406,13 +15480,29 @@ label .search-select-trigger {
 
 @media (max-width: 900px) {
   .attendance-summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .attendance-summary-card:nth-child(-n + 3) {
+    grid-column: span 2;
+  }
+
+  .attendance-summary-card:nth-last-child(-n + 2) {
+    grid-column: span 3;
   }
 }
 
 @media (max-width: 560px) {
   .attendance-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-summary-card {
+    grid-column: auto !important;
+  }
+
+  .attendance-summary-card:last-child {
+    grid-column: 1 / -1 !important;
   }
 }
 
@@ -19963,6 +20053,396 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
   display: none;
   width: 0;
   height: 0;
+}
+
+/* Koreksi absensi: pilihan status dan alasan memenuhi lebar modal. */
+.modal-overlay.modal-centered .attendance-correction-modal {
+  width: min(560px, calc(100% - 16px)) !important;
+  max-width: 560px !important;
+}
+
+.attendance-correction-modal > label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-correction-modal > .attendance-correction-field {
+  display: block;
+  margin: 16px 18px 0;
+}
+
+.attendance-correction-field > span,
+.attendance-reason-heading > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-correction-field > span {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.attendance-reason-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  margin-bottom: 6px;
+}
+
+.attendance-correction-modal > label > span > span:first-child {
+  margin: 0;
+}
+
+.attendance-status-dropdown {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.attendance-correction-modal > label > input,
+.attendance-correction-modal .attendance-status-trigger {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.attendance-status-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.attendance-status-trigger svg {
+  width: 18px;
+  height: 18px;
+  color: var(--brass);
+  transition: transform 140ms ease;
+}
+
+.attendance-status-trigger:hover {
+  border-color: var(--brass);
+}
+
+.attendance-status-dropdown.is-open .attendance-status-trigger {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(200, 150, 62, 0.14);
+}
+
+.attendance-status-dropdown.is-open .attendance-status-trigger svg {
+  transform: rotate(180deg);
+}
+
+.attendance-status-menu {
+  position: absolute;
+  z-index: 30;
+  inset: calc(100% + 6px) 0 auto;
+  display: grid;
+  gap: 3px;
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 0 8px 20px rgba(35, 29, 20, 0.1);
+}
+
+.attendance-status-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attendance-status-menu button.selected {
+  background: #f3e9d8;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .attendance-status-menu button:hover {
+    background: #f3e9d8;
+  }
+}
+
+.attendance-status-menu button.selected {
+  color: #765111;
+  font-weight: 650;
+}
+
+.attendance-correction-modal {
+  overflow: visible;
+}
+
+.attendance-correction-modal > header {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  padding-right: 62px;
+}
+
+.attendance-correction-modal .attendance-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bone);
+  color: var(--slate);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.attendance-correction-modal .attendance-modal-close:hover {
+  border-color: #d7c9b5;
+  background: #f3e9d8;
+  color: var(--ink);
+}
+
+.attendance-correction-modal .attendance-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.attendance-correction-modal > footer {
+  display: block;
+  padding: 14px 18px 16px !important;
+}
+
+.attendance-correction-modal > footer .attendance-save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+}
+
+.attendance-status-menu button svg {
+  width: 16px;
+  height: 16px;
+  color: var(--brass);
+}
+
+.attendance-correction-modal .attendance-reason-toggle {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--brass);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--brass);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.attendance-correction-modal .attendance-reason-toggle:hover {
+  background: rgba(200, 150, 62, 0.09);
+}
+
+.attendance-reason-options,
+.attendance-custom-reason {
+  margin: 0 18px 16px;
+}
+
+.attendance-reason-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+}
+
+.attendance-reason-options button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.attendance-reason-options button:last-child {
+  grid-column: 1 / -1;
+}
+
+.attendance-reason-options button:hover,
+.attendance-reason-options button.selected {
+  border-color: var(--brass);
+  background: rgba(200, 150, 62, 0.1);
+}
+
+.attendance-reason-options button.selected {
+  font-weight: 650;
+}
+
+.attendance-correction-modal .attendance-custom-reason textarea {
+  box-sizing: border-box;
+  min-height: 96px;
+  padding: 10px 12px;
+}
+
+.attendance-correction-modal > .info-banner {
+  margin: 0 18px 16px;
+}
+
+.attendance-detail-content {
+  padding: 18px;
+}
+
+.attendance-detail-photo {
+  display: block;
+  width: 100%;
+  height: min(38svh, 260px);
+  max-height: min(38svh, 260px);
+  margin-bottom: 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  object-fit: cover;
+  object-position: center;
+}
+
+.attendance-detail-name {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 16px;
+}
+
+.attendance-detail-content dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.attendance-detail-content dl > div {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.attendance-detail-content dl > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.attendance-detail-content dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.attendance-detail-content dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .attendance-record-card {
+    cursor: pointer;
+  }
+
+  .attendance-record-card:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .modal-overlay.modal-centered .attendance-correction-modal {
+    width: min(440px, calc(100% - 8px)) !important;
+    max-width: 440px !important;
+  }
+
+  .attendance-correction-modal > label,
+  .attendance-correction-modal > .attendance-correction-field,
+  .attendance-correction-modal > .attendance-reason-options,
+  .attendance-correction-modal > .attendance-custom-reason {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  .attendance-correction-modal > label > span {
+    font-size: 12px;
+  }
+
+  .attendance-correction-field > span,
+  .attendance-reason-heading > span {
+    font-size: 12px;
+  }
+
+  .attendance-status-trigger {
+    min-height: 42px;
+    padding-inline: 11px;
+    font-size: 13px;
+  }
+
+  .attendance-status-menu button {
+    min-height: 36px;
+    font-size: 13px;
+  }
+
+  .attendance-reason-options button {
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .attendance-correction-modal .attendance-reason-toggle {
+    min-height: 32px;
+    padding-inline: 9px;
+    font-size: 12px;
+  }
+
+  .attendance-reason-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-reason-options button:last-child {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Izin Kapster: tombol Simpan sama di semua lebar layar */

@@ -45,7 +45,8 @@ function KoreksiModal({
   onClose: () => void
   onSuccess: () => void
 }) {
-  const statusBaru = row.status === "Hadir" ? "Tidak Hadir" : "Hadir"
+  const [statusBaru, setStatusBaru] = useState<AbsensiStatus>(row.status)
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false)
   const [alasan, setAlasan] = useState("")
   const [customMode, setCustomMode] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -61,9 +62,12 @@ function KoreksiModal({
 
   return (
     <div className="modal-overlay modal-centered" onClick={onClose}>
-      <section className="simple-modal" onClick={(e) => e.stopPropagation()}>
+      <section className="simple-modal attendance-correction-modal" onClick={(e) => e.stopPropagation()}>
         <header>
           <h2>Koreksi Absensi</h2>
+          <button type="button" className="attendance-modal-close" onClick={onClose} aria-label="Tutup koreksi absensi">
+            <Icon name="close" />
+          </button>
         </header>
         <label>
           <span>Nama</span>
@@ -73,55 +77,73 @@ function KoreksiModal({
           <span>Status saat ini</span>
           <input value={row.status} disabled style={{ background: "var(--bone)", color: "var(--slate)" }} />
         </label>
-        <label>
+        <div className="attendance-correction-field">
           <span>Status baru</span>
-          <input value={statusBaru} disabled style={{ background: "var(--bone)", color: "var(--slate)" }} />
-        </label>
-        <label>
-          <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>
-              Alasan koreksi <span style={{ color: "#b91c1c" }}>*</span>
-            </span>
-            <span
+          <div className={`attendance-status-dropdown${statusMenuOpen ? " is-open" : ""}`}>
+            <button
+              type="button"
+              className="attendance-status-trigger"
+              aria-haspopup="listbox"
+              aria-expanded={statusMenuOpen}
+              onClick={() => setStatusMenuOpen(!statusMenuOpen)}
+            >
+              <span>{statusBaru}</span>
+              <Icon name="chevron" />
+            </button>
+            {statusMenuOpen && (
+              <div className="attendance-status-menu" role="listbox" aria-label="Pilih status baru">
+                {["Hadir", "Tidak Hadir", "Sakit", "Cuti", "Izin"].map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    role="option"
+                    aria-selected={statusBaru === status}
+                    className={statusBaru === status ? "selected" : ""}
+                    onClick={() => {
+                      setStatusBaru(status as AbsensiStatus)
+                      setStatusMenuOpen(false)
+                    }}
+                  >
+                    <span>{status}</span>
+                    {statusBaru === status ? <Icon name="check" /> : null}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="attendance-correction-field attendance-reason-field">
+          <div className="attendance-reason-heading">
+            <span>Alasan <span style={{ color: "#b91c1c" }}>*</span></span>
+            <button
+              type="button"
+              className="attendance-reason-toggle"
+              aria-pressed={customMode}
               onClick={() => {
-                setCustomMode(!customMode)
+                setCustomMode((current) => !current)
                 setAlasan("")
-              }}
-              style={{
-                color: "var(--brass)",
-                fontSize: 12,
-                cursor: "pointer",
-                fontWeight: 600,
               }}
             >
               {customMode ? "Pilih alasan" : "Alasan lainnya"}
-            </span>
-          </span>
-        </label>
+            </button>
+          </div>
+        </div>
         {customMode ? (
-          <label style={{ padding: "0 18px 16px" }}>
+          <label className="attendance-custom-reason">
             <textarea
               value={alasan}
               onChange={(e) => setAlasan(e.target.value)}
-              placeholder="Tuliskan alasan koreksi..."
+              placeholder="Tuliskan alasan..."
             />
           </label>
         ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0 18px 16px" }}>
+          <div className="attendance-reason-options">
             {pilihanAlasan.map((a) => (
               <button
                 key={a}
                 type="button"
+                className={alasan === a ? "selected" : ""}
                 onClick={() => setAlasan(alasan === a ? "" : a)}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  border: alasan === a ? "2px solid var(--brass)" : "1.5px solid var(--slate)",
-                  background: alasan === a ? "rgba(200,150,62,0.1)" : "var(--paper)",
-                  fontWeight: alasan === a ? 700 : 400,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
               >
                 {a}
               </button>
@@ -129,11 +151,8 @@ function KoreksiModal({
           </div>
         )}
         <footer>
-          <Button className="secondary-button" onClick={onClose}>
-            Batal
-          </Button>
           <Button
-            className="primary-button"
+            className="primary-button attendance-save-button"
             disabled={!alasan.trim() || busy}
             onClick={async () => {
               setError("")
@@ -165,6 +184,33 @@ function KoreksiModal({
   )
 }
 
+function AttendanceDetailModal({ row, onClose }: { row: DisplayRow; onClose: () => void }) {
+  return (
+    <div className="modal-overlay modal-centered" onClick={onClose}>
+      <section className="simple-modal attendance-detail-modal" onClick={(event) => event.stopPropagation()}>
+        <header>
+          <h2>Detail Absensi</h2>
+          <button type="button" className="attendance-modal-close" onClick={onClose} aria-label="Tutup detail absensi">
+            <Icon name="close" />
+          </button>
+        </header>
+        <div className="attendance-detail-content">
+          {row.fotoUrl ? (
+            <img className="attendance-detail-photo" src={row.fotoUrl} alt={`Foto absensi ${row.nama}`} />
+          ) : null}
+          <strong className="attendance-detail-name">{row.nama}</strong>
+          <dl>
+            <div><dt>Tanggal</dt><dd>{formatTanggal(row.tanggal)}</dd></div>
+            {row.jam ? <div><dt>Jam</dt><dd>{row.jam}</dd></div> : null}
+            <div><dt>Status</dt><dd><span className={statusChipClass(row.status)}>{row.status}</span></dd></div>
+            <div><dt>Catatan</dt><dd>{row.catatan?.trim() || "Tidak ada catatan."}</dd></div>
+          </dl>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 /* ── Halaman Utama ── */
 
 export function AttendanceHistoryPage() {
@@ -178,6 +224,7 @@ export function AttendanceHistoryPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [koreksiRow, setKoreksiRow] = useState<DisplayRow | null>(null)
+  const [detailRow, setDetailRow] = useState<DisplayRow | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -396,6 +443,15 @@ export function AttendanceHistoryPage() {
                 className="panel attendance-record-card"
                 data-status={row.status.toLowerCase().replace(" ", "-")}
                 style={{ display: "flex", alignItems: "center" }}
+                onClick={(event) => {
+                  if (
+                    window.matchMedia("(max-width: 560px)").matches &&
+                    !(event.target as HTMLElement).closest("button")
+                  ) {
+                    setDetailRow(row)
+                  }
+                }}
+                aria-label={`Lihat detail absensi ${row.nama}`}
               >
                 {row.fotoUrl ? (
                   <img
@@ -416,16 +472,18 @@ export function AttendanceHistoryPage() {
                     {row.catatan ? ` · ${row.catatan}` : ""}
                   </small>
                 </div>
-                <span className={statusChipClass(row.status)}>{row.status}</span>
-                {row.fromRecord && (
-                  <Button
-                    onClick={() => setKoreksiRow(row)}
-                    title="Ubah absensi"
-                    className="secondary-button attendance-edit-button"
-                  >
-                    <Icon name="pencil" /> Ubah
-                  </Button>
-                )}
+                <div className="attendance-record-actions">
+                  <span className={statusChipClass(row.status)}>{row.status}</span>
+                  {row.fromRecord && (
+                    <Button
+                      onClick={() => setKoreksiRow(row)}
+                      title="Ubah absensi"
+                      className="secondary-button attendance-edit-button"
+                    >
+                      <Icon name="pencil" /> Ubah
+                    </Button>
+                  )}
+                </div>
               </article>
             ))}
           </div>
@@ -442,6 +500,7 @@ export function AttendanceHistoryPage() {
           }}
         />
       )}
+      {detailRow && <AttendanceDetailModal row={detailRow} onClose={() => setDetailRow(null)} />}
     </div>
   )
 }
