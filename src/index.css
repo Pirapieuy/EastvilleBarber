@@ -11800,7 +11800,7 @@ textarea {
 /* Kasir attendance: tablet workspace and history controls */
 .mobile-content.absensi-kasir {
   width: min(840px, 100%);
-  padding: 24px 20px 40px;
+  padding: 24px 14px 40px;
 }
 
 .absensi-history-filters {
@@ -15426,7 +15426,7 @@ label .search-select-trigger {
     min-height: 0;
     box-sizing: border-box;
     overflow: hidden;
-    padding: 70px 16px 12px !important;
+    padding: 70px 14px 12px !important;
   }
 
   .mobile-content.attendance-history-page > .attendance-history-panel {
