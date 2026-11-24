@@ -113,7 +113,7 @@ export function ConfirmModal({
           </Button>
         </header>
 
-        <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
           {warning && (
             <div
               className="info-banner"
@@ -201,7 +201,7 @@ export function ConfirmModal({
             justifyContent: "flex-end",
             alignItems: "center",
             gap: 10,
-            padding: "12px 20px 16px",
+            padding: "12px 20px 14px",
             borderTop: "1px solid var(--line)",
             background: "var(--paper)",
           }}

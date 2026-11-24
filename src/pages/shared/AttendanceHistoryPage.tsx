@@ -386,7 +386,7 @@ export function AttendanceHistoryPage() {
         </div>
 
         {/* Filter */}
-        <div className="filters attendance-history-filters" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 10 }}>
+        <div className="filters attendance-history-filters" style={{ marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 10 }}>
           <CalendarPicker
             value={tanggal}
             label={labelPeriode(mode, tanggal)}

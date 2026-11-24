@@ -1200,7 +1200,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               style={{
                 color: "var(--slate)",
                 gridColumn: "1 / -1",
-                padding: "16px 0",
+                padding: "14px 0",
               }}
             >
               Tidak ada {tab.toLowerCase()} yang cocok.

@@ -647,7 +647,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                   </div>
                 ))}
                 {lunas && daftar.length === 0 && (
-                  <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                  <p style={{ color: "var(--slate)", margin: "14px 0 0" }}>
                     Belum ada penjualan produk pada periode ini.
                   </p>
                 )}

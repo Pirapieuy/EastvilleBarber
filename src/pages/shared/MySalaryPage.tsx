@@ -227,8 +227,8 @@ export function MySalaryPage() {
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: 16,
-            marginBottom: 16,
+            gap: 14,
+            marginBottom: 14,
             padding: "10px 14px",
             background: "rgb(20 17 15 / 3%)",
             borderRadius: 8,
@@ -257,7 +257,7 @@ export function MySalaryPage() {
             Belum ada pengerjaan layanan/produk pada tanggal ini.
           </p>
         ) : (
-          <div className="recent-list" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="recent-list" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {aktivitas.map((row, idx) => (
               <div key={idx} className="recent-row">
                 <div className="recent-icon">

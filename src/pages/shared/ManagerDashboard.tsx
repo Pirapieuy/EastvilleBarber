@@ -210,8 +210,8 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 1fr)",
-          gap: 16,
-          marginTop: 16,
+          gap: 14,
+          marginTop: 14,
         }}
       >
         <div className="dashboard-lower-grid">
