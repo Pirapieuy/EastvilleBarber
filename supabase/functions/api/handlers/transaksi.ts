@@ -102,8 +102,10 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
       const l = layananMap.get(String(it.refId))
       if (!l || l.status !== "Aktif") return gagal("Layanan tidak tersedia.")
       const hargaL = Number(l.harga) * qty
-      const persenNormal = override[it.kapsterId] !== undefined ? override[it.kapsterId] : peng.komisi_default
-      const persenL = lembur ? peng.komisi_lembur : persenNormal
+      // Pilihan eksplisit kasir mengikuti angka di tombolnya (Normal 40% / OT 50%); tanpa pilihan: jam kerja + pengaturan Owner.
+      const persenL = pilihan ? (pilihan === "OT" ? 50 : 40)
+        : lembur ? peng.komisi_lembur
+        : override[it.kapsterId] !== undefined ? override[it.kapsterId] : peng.komisi_default
       const kom = Math.round((hargaL * persenL) / 100)
       subtotal += hargaL; komisiTotal += kom
       lines.push({ tipe: "Layanan", ref_id: String(l.id), nama: l.nama, qty, harga: Number(l.harga),

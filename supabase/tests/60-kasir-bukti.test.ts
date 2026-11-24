@@ -46,12 +46,12 @@ Deno.test("K4 transaksi Gabungan: tunai+qris harus pas total, tidak boleh QRIS 0
   assert.deepEqual([Number(t.rows[0].t), Number(t.rows[0].q)], [20000, 30000])
 })
 
-Deno.test("K5 kasir tidak boleh mengatur komisi OT/Normal lewat komisiLayanan di luar hak (nilai persen tetap dari pengaturan)", async () => {
+Deno.test("K5 pilihan komisi kasir mengikuti tombol (OT 50%), bukan pengaturan Owner; detailnya di 95-komisi-pilihan.test.ts", async () => {
   await dasar()
   await pg.exec(`update pengaturan set value='35' where key='komisi_default'; update pengaturan set value='60' where key='komisi_lembur'`)
   const r = await bayar({ komisiLayanan: "OT" })
   const k = await pg.query<{ komisi: number }>(`select komisi from transaksi_item`)
-  assert.equal(r.success, true); assert.equal(Number(k.rows[0].komisi), 30000, "OT harus memakai komisi_lembur 60% dari pengaturan, bukan angka 50 tertanam")
+  assert.equal(r.success, true); assert.equal(Number(k.rows[0].komisi), 25000, "OT = 50% dari Rp50.000")
 })
 
 Deno.test("K6 kapster nonaktif/dihapus tidak boleh dipakai di transaksi baru", async () => {
