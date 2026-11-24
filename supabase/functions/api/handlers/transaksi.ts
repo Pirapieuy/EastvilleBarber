@@ -64,7 +64,7 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
 
   const [{ data: lay }, { data: prod }, peng, override, { data: kap }] = await Promise.all([
     db.from("layanan").select("*"), db.from("produk").select("*"), getPengaturan(), komisiOverride(),
-    db.from("users").select("id,nama").eq("role", "Kapster"),
+    db.from("users").select("id,nama").eq("role", "Kapster").eq("status", "Aktif"),
   ])
   const layananMap = new Map((lay ?? []).map((l) => [String(l.id), l]))
   const produkMap = new Map((prod ?? []).map((p) => [String(p.kode), p]))

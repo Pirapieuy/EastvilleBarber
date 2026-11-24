@@ -65,7 +65,10 @@ class Q {
   ilike(c: string, v: string) { this.where.push(`${id(c)} ilike ${lit(v)}`); return this }
   in(c: string, a: unknown[]) { this.where.push(a.length ? `${id(c)} in (${a.map(lit).join(",")})` : "false"); return this }
   is(c: string, v: unknown) { this.where.push(`${id(c)} is ${v === null ? "null" : lit(v)}`); return this }
-  not(c: string, op: string, v: unknown) { this.where.push(`${id(c)} is not ${v === null ? "null" : lit(v)}`); void op; return this }
+  not(c: string, op: string, v: unknown) {
+    const sql: Record<string, string> = { is: "is not", like: "not like", ilike: "not ilike", eq: "<>", in: "not in" }
+    this.where.push(`${id(c)} ${sql[op] ?? "is not"} ${op === "is" && v === null ? "null" : lit(v)}`); return this
+  }
   or(s: string) {
     this.where.push("(" + s.split(",").map((p) => {
       const [c, op, ...v] = p.split("."); return `${id(c)} ${op === "eq" ? "=" : op} ${lit(v.join("."))}`

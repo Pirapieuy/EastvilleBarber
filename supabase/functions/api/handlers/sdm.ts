@@ -41,15 +41,17 @@ export async function createKasbon(body: B) {
   const tanggal = body.tanggal || tanggalIso()
   if (user.role === "Kapster" && userId !== user.id)
     throw forbidden("Kapster hanya dapat mengajukan kasbon untuk dirinya sendiri.")
-  if (isNaN(jumlah) || jumlah <= 0) return gagal("Jumlah kasbon harus angka lebih dari 0.")
+  if (!/^\d+$/.test(String(body.jumlah ?? "").trim()) || isNaN(jumlah) || jumlah <= 0) return gagal("Jumlah kasbon harus angka bulat lebih dari 0.")
+  if (jumlah > 100_000_000) return gagal("Jumlah kasbon terlalu besar (maksimal Rp 100.000.000).")
+  if (!tanggalValid(tanggal)) return gagal("Tanggal kasbon tidak valid.")
+  if (tanggal > tanggalIso()) return gagal("Tanggal kasbon tidak boleh di masa depan.")
 
+  // Penerima selalu dicek di database (nama/peran dari browser tidak dipercaya). Kapster mengajukan untuk dirinya.
+  const { data: k } = await db.from("users").select("nama,role,status").eq("id", userId).maybeSingle()
+  if (!k || k.role !== "Kapster" || k.status !== "Aktif") return gagal("Kapster tidak ditemukan atau tidak aktif.")
+  nama = k.nama; role = "Kapster"
   let status = "Aktif"
-  if (user.role === "Kasir") {
-    status = "Menunggu"
-    const { data: k } = await db.from("users").select("nama,role,status").eq("id", userId).maybeSingle()
-    if (!k || k.role !== "Kapster" || k.status !== "Aktif") return gagal("Kapster tidak ditemukan atau tidak aktif.")
-    nama = k.nama; role = "Kapster"
-  }
+  if (user.role === "Kasir") status = "Menunggu"
   const id = ID("ksb")
   const { error } = await db.from("kasbon").insert({
     id, tanggal, user_id: userId, nama, role, jumlah, status, catatan, dibuat_oleh: user.nama,
@@ -238,6 +240,12 @@ export async function catatAbsensi(body: B) {
   const fotoUrl = String(body.fotoUrl ?? "").trim()
   const catatan = String(body.catatan ?? "").trim()
   const now = new Date(), tgl = tanggalIso(now), jam = jamHhmm(now)
+  // Satu "Masuk" dan satu "Pulang" per hari; klik ganda atau kirim ulang tidak membuat catatan kembar.
+  // Laporan kendala (tombol "Lapor Kendala", catatan berawalan "Kendala:") boleh lebih dari sekali.
+  const kendala = catatan.startsWith("Kendala:")
+  const { data: sudah } = await db.from("absensi").select("tipe,jam,catatan").eq("user_id", user.id).eq("tanggal", tgl).eq("tipe", tipe)
+    .not("catatan", "like", "Kendala:%").limit(1)
+  if (!kendala && sudah?.length) return gagal(`Absensi ${tipe} hari ini sudah tercatat pukul ${sudah[0].jam}.`)
   const id = ID("abs")
   const foto = await simpanFoto(fotoUrl, user.id)
   const { error } = await db.from("absensi").insert({

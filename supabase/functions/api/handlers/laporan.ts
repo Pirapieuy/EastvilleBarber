@@ -1,7 +1,7 @@
 // Padanan laporanKeuangan_, aktivitasKapster_, laporanProduk_, hitungShift_, rekapKasir_,
 // tutupKasir_, listTutupKasir_ di Bisnis.js.
 import {
-  ambilSemua, db, fmtJamTitik, fmtTglJam, fmtTglPanjang, gagal, ok, potong, tanggalIso, tulisAudit, type Pengguna,
+  ambilSemua, db, denganKunci, fmtJamTitik, fmtTglJam, fmtTglPanjang, gagal, ok, potong, tanggalIso, tulisAudit, type Pengguna,
 } from "../util.ts"
 
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
@@ -153,23 +153,27 @@ export async function tutupKasir(body: B, user: Pengguna) {
   if (body.uangFisik === "" || body.uangFisik === null || body.uangFisik === undefined || isNaN(mentah) || mentah < 0)
     return gagal("Isi jumlah uang tunai di laci (angka, tidak boleh negatif).")
   const fisik = toInt(mentah)
-  const h = await hitungShift(user)
-  if (h.jumlahTrx === 0) return gagal("Belum ada transaksi sejak tutup kasir terakhir.")
-  const selisih = fisik - h.tunaiSistem
   const catatan = String(body.catatan ?? "").trim()
-  if (selisih !== 0 && !catatan) return gagal("Uang di laci tidak sama dengan catatan sistem. Isi catatan penyebab selisih.")
-  const p = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Jakarta", year: "2-digit", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(h.sampai)
-  const id = "TK-" + p.replace(/[-: ]/g, (c) => (c === " " ? "-" : "")) // yyMMdd-HHmmss
-  const { error } = await db.from("tutup_kasir").insert({
-    id, waktu: h.sampai.toISOString(), tanggal: h.tanggal, kasir_id: user.id, kasir: user.nama,
-    dari_waktu: h.dari.toISOString(), jumlah_trx: h.jumlahTrx, penjualan: h.penjualan, diskon: h.diskon,
-    tunai_sistem: h.tunaiSistem, qris_sistem: h.qrisSistem, uang_fisik: fisik, selisih, catatan,
+  // Dikunci per kasir: dua klik bersamaan menghitung shift yang sama dan akan tercatat dobel.
+  const k = await denganKunci("tutup_" + user.id, 30, async () => {
+    const h = await hitungShift(user)
+    if (h.jumlahTrx === 0) return gagal("Belum ada transaksi sejak tutup kasir terakhir.")
+    const selisih = fisik - h.tunaiSistem
+    if (selisih !== 0 && !catatan) return gagal("Uang di laci tidak sama dengan catatan sistem. Isi catatan penyebab selisih.")
+    const p = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Jakarta", year: "2-digit", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(h.sampai)
+    const id = "TK-" + p.replace(/[-: ]/g, (c) => (c === " " ? "-" : "")) + "-" + user.id.slice(-4) // yyMMdd-HHmmss-kasir
+    const { error } = await db.from("tutup_kasir").insert({
+      id, waktu: h.sampai.toISOString(), tanggal: h.tanggal, kasir_id: user.id, kasir: user.nama,
+      dari_waktu: h.dari.toISOString(), jumlah_trx: h.jumlahTrx, penjualan: h.penjualan, diskon: h.diskon,
+      tunai_sistem: h.tunaiSistem, qris_sistem: h.qrisSistem, uang_fisik: fisik, selisih, catatan,
+    })
+    if (error) throw new Error(error.message)
+    await tulisAudit(user.id, user.nama, "TUTUP_KASIR",
+      `${id} tunai sistem ${h.tunaiSistem}, fisik ${fisik}, selisih ${selisih}${catatan ? " · " + catatan : ""}`)
+    return ok({ id, selisih, tunaiSistem: h.tunaiSistem, uangFisik: fisik })
   })
-  if (error) throw new Error(error.message)
-  await tulisAudit(user.id, user.nama, "TUTUP_KASIR",
-    `${id} tunai sistem ${h.tunaiSistem}, fisik ${fisik}, selisih ${selisih}${catatan ? " · " + catatan : ""}`)
-  return ok({ id, selisih, tunaiSistem: h.tunaiSistem, uangFisik: fisik })
+  return k ? k.hasil : gagal("Tutup kasir sedang diproses. Tunggu sebentar lalu muat ulang.")
 }
 
 export async function listTutupKasir(body: B, user: Pengguna) {
