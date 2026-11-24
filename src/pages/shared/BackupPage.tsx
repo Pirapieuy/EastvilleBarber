@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { apiBackup, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
-import { Button, LoadingState, PageTitle,
+import { Button, LoadingState,
   ErrorState,
 } from "../../components/common/UI"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
@@ -24,7 +24,6 @@ const demoBackups: BackupRow[] = [
 ]
 
 export function BackupPage() {
-  const [showBackupHelp, setShowBackupHelp] = useState(false)
   const [backups, setBackups] = useState<BackupRow[]>(
     getToken() ? [] : demoBackups,
   )
@@ -173,77 +172,51 @@ export function BackupPage() {
     )
   }
 
-  const terakhir = backups[0]
-
   return (
     <div className="content fit-page">
       <DemoNotice live={live} error={liveError} />
-      <section className="backup-status-grid">
-        <article className="backup-hero">
-          <span className="backup-icon">
-            <Icon name="restore" />
-          </span>
-          <div>
-            <small>Cara kerja</small>
-            <h2>Backup manual</h2>
-            <p>
-              Cadangan tersimpan aman secara otomatis di sistem; 5 arsip data
-              terakhir dipertahankan.
-            </p>
-          </div>
-        </article>
-        <article className="panel last-backup">
-          <small>Backup terakhir</small>
-          <strong>{terakhir ? terakhir.dibuat : "Belum ada"}</strong>
-          {terakhir && (
-            <span>
-              <Icon name="check" /> {terakhir.sheet} sheet · {terakhir.baris}{" "}
-              baris
-            </span>
-          )}
-        </article>
-      </section>
-      <section className="panel backup-actions-card">
+      <article className="backup-hero">
+        <span className="backup-icon">
+          <Icon name="restore" />
+        </span>
         <div>
-          <p className="eyebrow">Backup manual</p>
-          <h2 className="backup-title-with-tip">
-            Backup data
-            <button
-              className="backup-help-tip"
-              type="button"
-              aria-label="Informasi backup data"
-              aria-expanded={showBackupHelp}
-              onClick={() => setShowBackupHelp((shown) => !shown)}
-            >
-              <Icon name="alert" />
-              {showBackupHelp && (
-                <span role="tooltip">
-                  Backup mencakup data layanan, produk, transaksi, pengeluaran,
-                  stok, dan pengaturan komisi. Data akun tidak ikut dicadangkan.
-                </span>
-              )}
-            </button>
-          </h2>
-          {message && <small>{message}</small>}
+          <small>Cara kerja</small>
+          <h2>Backup manual</h2>
+          <p>
+            Cadangan tersimpan aman secara otomatis di sistem; 5 arsip data
+            terakhir dipertahankan.
+          </p>
+          {message && <p className="backup-hero-message">{message}</p>}
         </div>
         <Button
-          className="primary-button"
+          className="primary-button backup-now-btn"
           onClick={startBackup}
           disabled={backingUp}
         >
           <Icon name={backingUp ? "clock" : "plus"} />
           {backingUp ? "Membuat backup..." : "Backup sekarang"}
         </Button>
-      </section>
+      </article>
       <section className="panel backup-list fit-fill">
-        <PageTitle eyebrow="Arsip tersimpan" title="Daftar backup" />
+        <div className="backup-list-header">
+          <h2>Daftar backup</h2>
+          <div className="backup-banner">
+            <Icon name="alert" />
+            <span>
+              Pulihkan mengganti data layanan, produk, transaksi, pengeluaran,
+              stok, dan pengaturan komisi dengan isi backup. Sebelumnya sistem
+              otomatis membuat backup baru dari kondisi saat ini sebagai
+              pengaman. Data akun tidak ikut.
+            </span>
+          </div>
+        </div>
         <div className="backup-table-scroll">
           <div className="backup-head">
             <span>Nama backup</span>
             <span className="desktop-col">Dibuat</span>
             <span className="desktop-col">Isi</span>
             <span className="desktop-col">Status</span>
-            <span style={{ textAlign: "right" }}>Aksi</span>
+            <span className="backup-action-head">Aksi</span>
           </div>
           {backups.map((row) => (
             <article className="backup-row" key={row.nama}>
@@ -270,7 +243,7 @@ export function BackupPage() {
                   {busyNama === row.nama ? "..." : "Unduh"}
                 </Button>
                 <Button
-                  className="restore-danger-button"
+                  className="backup-restore-btn"
                   disabled={busyNama === row.nama || restoring}
                   onClick={() => {
                     setTarget(row.nama)
@@ -304,12 +277,6 @@ export function BackupPage() {
           )}
         </div>
       </section>
-      <div className="info-banner">
-        <Icon name="alert" /> Pulihkan mengganti data layanan, produk,
-        transaksi, pengeluaran, stok, dan pengaturan komisi dengan isi backup.
-        Sebelumnya sistem otomatis membuat backup baru dari kondisi saat ini
-        sebagai pengaman. Data akun tidak ikut.
-      </div>
       {restore > 0 && (
         <div className="modal-overlay">
           <section className="restore-confirm">
