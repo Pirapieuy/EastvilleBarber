@@ -10,36 +10,17 @@ async function adaOwnerLain(id: string) {
 }
 const enam = (s: string) => /^\d{6}$/.test(s)
 
-export async function forgotPin(body: Record<string, string>) {
-  const email = (body.email || "").trim().toLowerCase()
-  if (!email || !email.includes("@")) return gagal("Email tidak valid.")
-  const { data: u } = await db.from("users").select("id,nama,email").ilike("email", email).maybeSingle()
-  if (!u) return gagal("Email tidak terdaftar di sistem Eastville.")
-  const resetToken = "rst-" + crypto.randomUUID().replace(/-/g, "").slice(0, 16)
-  await db.from("reset_pin").insert({
-    token: resetToken, email: u.email.toLowerCase(),
-    kadaluarsa: new Date(Date.now() + 900_000).toISOString(),
-  })
-  await tulisAudit(u.id, u.nama, "FORGOT_PIN", "Permintaan reset PIN via email: " + email)
-  return ok({ resetToken, email: u.email }, "Tautan reset PIN telah dibuat (berlaku 15 menit).")
+// Reset PIN lewat email DIMATIKAN: dulu token reset dikirim langsung ke browser, sehingga siapa pun yang tahu
+// email seorang user bisa mengganti PIN-nya tanpa membuka kotak masuk. PIN yang lupa diganti Owner dari menu Tim
+// (update-user dengan newPin). Pesan ini tampil apa adanya di layar "Lupa PIN".
+const PESAN_RESET = "Reset PIN lewat email belum diaktifkan. Minta Owner mengganti PIN Anda di menu Tim."
+
+export async function forgotPin(_body: Record<string, string>) {
+  return gagal(PESAN_RESET)
 }
 
-export async function resetPin(body: Record<string, string>) {
-  const email = (body.email || "").trim().toLowerCase()
-  const newPin = (body.newPin || "").trim()
-  const resetToken = (body.resetToken || "").trim()
-  if (!email) return gagal("Email wajib diisi.")
-  if (!resetToken) return gagal("Token reset PIN wajib diisi.")
-  if (!enam(newPin)) return gagal("PIN baru harus 6 digit angka.")
-  const { data: t } = await db.from("reset_pin").select("*").eq("token", resetToken).maybeSingle()
-  if (!t || t.email.toLowerCase() !== email || new Date(t.kadaluarsa) < new Date())
-    return gagal("Token reset PIN tidak valid atau sudah kadaluarsa (berlaku 15 menit).")
-  const { data: u } = await db.from("users").select("id,nama").ilike("email", email).maybeSingle()
-  if (!u) return gagal("User dengan email tersebut tidak ditemukan.")
-  await db.from("users").update({ pin_hash: await hashPin(newPin) }).eq("id", u.id)
-  await db.from("reset_pin").delete().eq("token", resetToken)
-  await tulisAudit(u.id, u.nama, "RESET_PIN", "PIN berhasil diubah via token reset untuk email: " + email)
-  return ok(undefined, "PIN berhasil diubah! Silakan login dengan PIN baru.")
+export async function resetPin(_body: Record<string, string>) {
+  return gagal(PESAN_RESET)
 }
 
 export async function listUsers(body: Record<string, string>) {
