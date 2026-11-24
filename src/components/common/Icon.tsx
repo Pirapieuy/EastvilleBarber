@@ -4,8 +4,8 @@ import { IconName } from "../../types"
 const iconPaths: Record<IconName, ReactNode> = {
   alert: (
     <>
-      <path d="M12 8v4.5M12 16.3v.2" />
       <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4M12 16h.01" />
     </>
   ),
   arrow: <path d="M5 12h14M14 7l5 5-5 5" />,
