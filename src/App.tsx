@@ -148,7 +148,7 @@ export function App() {
         )
       }
       if (activePage === "GajiKomisiSaya" || activePage === "my-salary") {
-        return <GajiKomisiSaya />
+        return <GajiKomisiSaya currentUser={currentUser} />
       }
       if (
         activePage === "KomisiProdukSaya" ||

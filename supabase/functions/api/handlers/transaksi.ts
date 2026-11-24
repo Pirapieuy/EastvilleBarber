@@ -223,45 +223,6 @@ export async function listTransaksi(body: B, user: Pengguna) {
   return ok((trx ?? []).map((t) => bentukTransaksi(t, per[t.id] ?? [])))
 }
 
-/** Riwayat transaksi kapster hanya berisi item yang dikerjakan akun aktif. */
-export async function riwayatTransaksiKapster(body: B, user: Pengguna) {
-  let q = db.from("transaksi").select("*").order("waktu", { ascending: false })
-  if (body.dari) q = q.gte("tanggal", body.dari)
-  if (body.sampai) q = q.lte("tanggal", body.sampai)
-  const { data: transactions } = await q.limit(5000)
-  const ids = (transactions ?? []).map((t) => t.id)
-  if (!ids.length) return ok([])
-
-  const ownItems: B[] = []
-  for (let i = 0; i < ids.length; i += 200) {
-    const { data } = await db.from("transaksi_item").select("*")
-      .in("trx_id", ids.slice(i, i + 200)).eq("kapster_id", user.id).order("id")
-    ownItems.push(...(data ?? []))
-  }
-  const itemsByTrx: Record<string, B[]> = {}
-  for (const item of ownItems) (itemsByTrx[item.trx_id] ??= []).push(item)
-  return ok((transactions ?? []).filter((t) => itemsByTrx[t.id]?.length).map((t) => {
-    const w = new Date(t.waktu)
-    return {
-      id: t.id,
-      date: fmtTglPanjang(w),
-      time: fmtJamTitik(w),
-      items: itemsByTrx[t.id].map((item) => ({
-        name: item.nama,
-        qty: Number(item.qty),
-        price: Number(item.harga),
-        type: item.tipe,
-      })),
-      barber: user.nama,
-      method: t.metode,
-      total: Number(t.total),
-      subtotal: Number(t.subtotal),
-      discount: Number(t.diskon),
-      status: t.status === "Lunas" && t.manual === "Ya" ? "Manual" : t.status,
-    }
-  }))
-}
-
 export async function listKomisi(body: B, user: Pengguna) {
   const kapsterId = user.role === "Kapster" ? user.id : body.kapsterId || ""
   let q = db.from("transaksi").select("id,lembur").eq("status", "Lunas")

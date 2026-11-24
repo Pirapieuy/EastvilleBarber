@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import {
   CalendarPicker,
@@ -8,7 +8,13 @@ import {
   ErrorState,
   Button,
 } from "../../components/common/UI"
-import { apiTransaksi, apiGaji, getToken, HitungGajiResult } from "../../api"
+import {
+  AktivitasKapster,
+  apiKapster,
+  apiGaji,
+  getToken,
+  HitungGajiResult,
+} from "../../api"
 import {
   formatTanggal,
   labelPeriode,
@@ -17,7 +23,7 @@ import {
   TANGGAL_MAKS,
   TANGGAL_MULAI,
 } from "../../utils/tanggal"
-import { SearchSelect } from "../../components/common/SearchSelect"
+import { AppUser } from "../../types"
 
 interface KapsterTransaction {
   id: string
@@ -25,8 +31,8 @@ interface KapsterTransaction {
   time: string
   items: { name: string; qty: number; price: number; type: "Layanan" | "Produk" }[]
   barber: string
-  method: "Tunai" | "QRIS" | "Gabungan"
-  total: number
+  method?: "Tunai" | "QRIS" | "Gabungan"
+  total?: number
   subtotal?: number
   discount?: number
   status: "Lunas" | "BATAL" | "Manual"
@@ -89,20 +95,28 @@ function KapsterTransactionDetail({
       )}
       <div className="detail-total-bar">
         <span>Total Akhir</span>
-        <strong>{rupiah(transaction.total)}</strong>
+        <strong>
+          {rupiah(
+            transaction.total ??
+              transaction.items.reduce(
+                (sum, item) => sum + item.price * item.qty,
+                0,
+              ),
+          )}
+        </strong>
       </div>
     </>
   )
 }
 
-function KapsterTransactionHistory() {
+function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
+  const listRef = useRef<HTMLElement | null>(null)
   const [transactions, setTransactions] = useState<KapsterTransaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [modePeriode, setModePeriode] = useState<ModePeriode>("Harian")
   const [search, setSearch] = useState("")
-  const [barberFilter, setBarberFilter] = useState("Semua kapster")
   const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
     "Semua",
   )
@@ -113,11 +127,33 @@ function KapsterTransactionHistory() {
     setLoading(true)
     setError("")
     setSelected(null)
-    apiTransaksi
-      .listKapster(dateFilter ? rentangPeriode(modePeriode, dateFilter) : {})
+    apiKapster
+      .aktivitas(dateFilter ? rentangPeriode(modePeriode, dateFilter) : {})
       .then((rows) => {
         if (stale) return
-        setTransactions(rows as KapsterTransaction[])
+        const grouped = new Map<string, KapsterTransaction>()
+        for (const row of rows as AktivitasKapster[]) {
+          const tx = grouped.get(row.trx) ?? {
+            id: row.trx,
+            date: row.tanggal ? formatTanggal(row.tanggal) : "",
+            time: row.time,
+            items: [],
+            barber: row.barber || namaKapster,
+            method: row.method,
+            total: row.total,
+            subtotal: row.subtotal,
+            discount: row.discount,
+            status: row.status || "Lunas",
+          }
+          tx.items.push({
+            name: row.item,
+            qty: row.qty,
+            price: row.qty ? row.fee / row.qty : row.fee,
+            type: row.type,
+          })
+          grouped.set(row.trx, tx)
+        }
+        setTransactions(Array.from(grouped.values()))
       })
       .catch((reason: unknown) => {
         if (!stale)
@@ -133,17 +169,12 @@ function KapsterTransactionHistory() {
     return () => {
       stale = true
     }
-  }, [dateFilter, modePeriode])
+  }, [dateFilter, modePeriode, namaKapster])
 
-  const barbers = useMemo(
-    () =>
-      Array.from(new Set(transactions.map((tx) => tx.barber).filter(Boolean))),
-    [transactions],
-  )
-  const activeBarber =
-    barbers.includes(barberFilter) || barberFilter === "Semua kapster"
-      ? barberFilter
-      : "Semua kapster"
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = 0
+  }, [transactions])
+
   const visibleTransactions = useMemo(() => {
     const query = search.trim().toLowerCase()
     return transactions.filter(
@@ -161,12 +192,12 @@ function KapsterTransactionHistory() {
             .join(" ")
             .toLowerCase()
             .includes(query)) &&
-        (activeBarber === "Semua kapster" || tx.barber === activeBarber) &&
         (methodFilter === "Semua" ||
+          !tx.method ||
           tx.method === methodFilter ||
           tx.method === "Gabungan"),
     )
-  }, [transactions, search, activeBarber, methodFilter])
+  }, [transactions, search, methodFilter])
 
   useEffect(() => {
     if (selected && !visibleTransactions.some((tx) => tx.id === selected.id)) {
@@ -182,7 +213,7 @@ function KapsterTransactionHistory() {
       />
       <div className="history-page-content history-no-scrollbar kapster-history-content">
         <div className="filters">
-          <div className="search">
+          <div className="search kapster-transaction-search">
             <Icon name="search" />
             <input
               aria-label="Cari transaksi"
@@ -191,48 +222,38 @@ function KapsterTransactionHistory() {
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <CalendarPicker
-            value={dateFilter}
-            label={labelPeriode(modePeriode, dateFilter)}
-            bulanSaja={modePeriode === "Bulanan"}
-            popupHeader={
-              <div
-                className="segmented history-periode"
-                role="group"
-                aria-label="Periode"
-              >
-                {(["Harian", "Mingguan", "Bulanan"] as const).map((mode) => (
-                  <Button
-                    className={modePeriode === mode ? "active" : ""}
-                    key={mode}
-                    type="button"
-                    onClick={() => setModePeriode(mode)}
-                  >
-                    {mode}
-                  </Button>
-                ))}
-              </div>
-            }
-            onChange={setDateFilter}
-            allowClear
-            clearLabel="Semua Tanggal"
-            placeholder="Semua Tanggal"
-            max={TANGGAL_MAKS()}
-            min={TANGGAL_MULAI}
-          />
-          <SearchSelect
-            aria-label="Filter kapster"
-            className="history-kapster-select"
-            value={activeBarber}
-            onChange={(event) => setBarberFilter(event.target.value)}
-          >
-            <option value="Semua kapster">Semua kapster</option>
-            {barbers.map((barber) => (
-              <option key={barber} value={barber}>
-                {barber}
-              </option>
-            ))}
-          </SearchSelect>
+          <div className="kapster-transaction-date">
+            <CalendarPicker
+              value={dateFilter}
+              label={labelPeriode(modePeriode, dateFilter)}
+              bulanSaja={modePeriode === "Bulanan"}
+              popupHeader={
+                <div
+                  className="segmented history-periode"
+                  role="group"
+                  aria-label="Periode"
+                >
+                  {(["Harian", "Mingguan", "Bulanan"] as const).map((mode) => (
+                    <Button
+                      className={modePeriode === mode ? "active" : ""}
+                      key={mode}
+                      type="button"
+                      onClick={() => setModePeriode(mode)}
+                    >
+                      {mode}
+                    </Button>
+                  ))}
+                </div>
+              }
+              onChange={setDateFilter}
+              allowClear
+              clearLabel="Semua Tanggal"
+              placeholder="Semua Tanggal"
+              max={TANGGAL_MAKS()}
+              min={TANGGAL_MULAI}
+              style={{ width: "100%" }}
+            />
+          </div>
           <div
             className="segmented history-method-filter"
             role="group"
@@ -250,7 +271,7 @@ function KapsterTransactionHistory() {
           </div>
         </div>
         <div className="master-detail">
-          <section className="panel transaction-list">
+          <section ref={listRef} className="panel transaction-list">
             <div className="table-head">
               <span>Nota</span>
               <span>Kapster</span>
@@ -352,7 +373,7 @@ function KapsterTransactionHistory() {
   )
 }
 
-export function MySalaryPage() {
+export function MySalaryPage({ currentUser }: { currentUser: AppUser }) {
   const [infoTerbuka, setInfoTerbuka] = useState(false)
   const punyaToken = Boolean(getToken())
   const [data, setData] = useState<HitungGajiResult | null>(null)
@@ -490,7 +511,7 @@ export function MySalaryPage() {
         </section>
       )}
 
-      <KapsterTransactionHistory />
+      <KapsterTransactionHistory namaKapster={currentUser.name} />
     </div>
   )
 }

@@ -26225,7 +26225,18 @@ html:has(.manual-page .modal-overlay) {
 .kapster-history-content .transaction-list {
   min-height: 0;
   max-height: none;
+  padding: 0 !important;
   overscroll-behavior: contain;
+  overflow-anchor: none;
+  isolation: isolate;
+}
+
+.kapster-history-content .table-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bone);
+  border-radius: 11px 11px 0 0;
 }
 
 .kapster-history-content .transaction-row {
@@ -26289,12 +26300,89 @@ html:has(.manual-page .modal-overlay) {
 }
 
 @media (max-width: 620px) {
+  .app-shell-kapster .kapster-transaction-history {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: stretch;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content,
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .master-detail {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
   .kapster-history-content .filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .app-shell-kapster .kapster-history-content .table-head,
+  .app-shell-kapster .kapster-history-content .transaction-row {
+    grid-template-columns: minmax(120px, 1.45fr) minmax(44px, 0.55fr) minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding-inline: 10px !important;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-col-nota {
+    min-width: 0;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-nota {
+    display: block;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .transaction-list {
+    flex: 0 0 260px !important;
+    height: 260px !important;
+    max-height: 260px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .transaction-row {
+    min-height: 72px !important;
+  }
+
   .kapster-transaction-modal .transaction-modal-box {
     width: min(520px, calc(100% - 28px));
+  }
+}
+
+@media (max-width: 400px) {
+  .app-shell-kapster .kapster-history-content .table-head,
+  .app-shell-kapster .kapster-history-content .transaction-row {
+    grid-template-columns: minmax(124px, 1.5fr) minmax(44px, 0.55fr) minmax(0, 0.95fr) !important;
+    gap: 14px !important;
+  }
+
+  .app-shell-kapster .kapster-history-content .table-head {
+    font-size: 9px;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-nota {
+    font-size: 10px;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-time,
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-kapster,
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-items {
+    font-size: 10px !important;
+    line-height: 1.25;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .history-method-filter .button {
+    font-size: 11px !important;
+    font-style: normal;
+    line-height: 1;
+    transform: none;
   }
 }
 
@@ -26306,4 +26394,49 @@ html:has(.manual-page .modal-overlay) {
   .kapster-history-content .master-detail {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
+}
+
+/* Empat kontrol Riwayat Kapster: dua kolom penuh di setiap breakpoint. */
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: 100%;
+  gap: 14px;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .search,
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .kapster-transaction-date,
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .history-method-filter {
+  grid-column: auto !important;
+  width: 100% !important;
+  min-width: 0;
+  margin: 0;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .kapster-transaction-search {
+  grid-column: 1 / -1 !important;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .kapster-transaction-date .calendar-picker-wrapper {
+  width: 100%;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .history-method-filter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: 44px;
+  min-height: 44px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .history-method-filter .button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 6px;
+  border-radius: 0;
 }
