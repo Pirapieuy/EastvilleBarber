@@ -246,10 +246,13 @@ export function BackupPage() {
           {backups.map((row) => (
             <article className="backup-row" key={row.nama}>
               <div className="backup-info-cell">
-                <span className="backup-file-name">
-                  <Icon name="file" />
-                  <strong>{row.nama}</strong>
-                </span>
+                <div className="backup-file-name">
+                  <span className="backup-file-title">
+                    <Icon name="file" />
+                    <strong>{row.nama}</strong>
+                  </span>
+                  <i className="chip lunas mobile-status-chip">Siap</i>
+                </div>
                 <small className="backup-date-sub">
                   {row.dibuat} · {row.baris} baris
                 </small>
