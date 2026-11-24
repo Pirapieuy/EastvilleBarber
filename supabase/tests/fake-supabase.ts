@@ -130,7 +130,7 @@ export function createClient() {
         const res = await pg.query<Record<string, unknown>>(`select ${fn}(${a}) as r`)
         const v = (res.rows[0] as { r: unknown }).r
         return { data: v, error: null }
-      } catch (e) { return { data: null, error: { message: (e as Error).message } } }
+      } catch (e) { const x = e as { message: string; code?: string }; return { data: null, error: { message: x.message, code: x.code } } }
     },
     storage: { from: () => ({ upload: async () => ({ error: null }), getPublicUrl: () => ({ data: { publicUrl: "http://x/foto.jpg" } }) }) },
   }

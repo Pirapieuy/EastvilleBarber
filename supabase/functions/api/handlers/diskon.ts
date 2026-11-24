@@ -1,5 +1,5 @@
 // Padanan KODE DISKON dan PIN otorisasi di Bisnis.js.
-import { db, gagal, ok, tanggalIso, tulisAudit, verifyPin, type Pengguna } from "../util.ts"
+import { db, gagal, ok, tanggalIso, tanggalValid, tulisAudit, verifyPin, type Pengguna } from "../util.ts"
 
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
 const toInt = (v: unknown) => { const n = Math.round(Number(v)); return isNaN(n) ? 0 : n }
@@ -50,7 +50,9 @@ export async function simpanKodeDiskon(body: B, user: Pengguna) {
   const kode = normalKode(d.kode)
   const nama = String(d.nama ?? "").trim()
   const jenis = d.jenis === "nominal" ? "nominal" : "persen"
-  const nilai = toInt(d.nilai === undefined ? d.persen : d.nilai)
+  const nilaiMentah = Number(d.nilai === undefined ? d.persen : d.nilai)
+  if (!Number.isInteger(nilaiMentah)) return gagal("Nilai diskon harus angka bulat.")
+  const nilai = nilaiMentah
   const persen = jenis === "persen" ? nilai : 0
   const sampai = String(d.berlakuSampai ?? "").trim()
   const status = d.status === "Nonaktif" ? "Nonaktif" : "Aktif"
@@ -58,7 +60,8 @@ export async function simpanKodeDiskon(body: B, user: Pengguna) {
   if (!nama) return gagal("Nama promo wajib diisi.")
   if (nilai < 1 || (jenis === "persen" && nilai > 100))
     return gagal(jenis === "persen" ? "Persen diskon harus 1-100." : "Nominal diskon minimal Rp1.")
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(sampai)) return gagal("Tanggal berlaku sampai tidak valid.")
+  if (!tanggalValid(sampai)) return gagal("Tanggal berlaku sampai tidak valid.")
+  if (jenis === "nominal" && nilai > 100_000_000) return gagal("Nominal diskon terlalu besar.")
 
   const { data: semua } = await db.from("kode_diskon").select("id,kode")
   if ((semua ?? []).some((r) => normalKode(r.kode) === kode && String(r.id) !== String(d.id)))

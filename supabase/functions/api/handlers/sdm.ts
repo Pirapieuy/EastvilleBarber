@@ -1,6 +1,6 @@
 // Padanan KASBON, GAJI, RINGKASAN LAPORAN, ABSENSI, AUDIT di Kode.js.
 import {
-  ambilSemua, ApiError, db, denganKunci, gagal, jamHhmm, ok, penggunaDariToken, potong, simpanFoto, tanggalIso, tanggalValid, tulisAudit, verifyPin, wajibRole, type Pengguna,
+  ambilSemua, ApiError, db, denganKunci, gagal, jamHhmm, ok, penggunaDariToken, simpanFoto, tanggalIso, tanggalValid, tulisAudit, verifyPin, wajibRole, type Pengguna,
 } from "../util.ts"
 
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
@@ -157,17 +157,13 @@ export async function bayarGaji(body: B) {
 
     const id = ID("gji")
     const now = new Date().toISOString()
-    const { error } = await db.from("gaji").insert({
-      id, periode, user_id: target, nama, role, total_komisi: totalKomisi, total_kasbon: totalKasbon,
-      gaji_bersih: gajiBersih, status: "Dibayar", tanggal_bayar: now, dibayar_oleh: user.nama, catatan,
+    // Gaji + penandaan komisi + pelunasan kasbon dalam satu transaksi database (bayar_gaji_atomik).
+    const { error } = await db.rpc("bayar_gaji_atomik", {
+      p_gaji: { id, periode, user_id: target, nama, role, total_komisi: totalKomisi, total_kasbon: totalKasbon,
+        gaji_bersih: gajiBersih, status: "Dibayar", tanggal_bayar: now, dibayar_oleh: user.nama, catatan },
+      p_item_ids: ids, p_kasbon_ids: dipilih.map((x) => x.id),
     })
     if (error) throw new Error(error.message)
-    // tandai persis baris komisi yang dihitung tadi; yang masuk setelah itu tetap untuk gaji berikutnya
-    for (const bag of potong(ids, 200))
-      await db.from("transaksi_item").update({ gaji_id: id }).in("id", bag).is("gaji_id", null)
-    if (dipilih.length)
-      await db.from("kasbon").update({ status: "Lunas", lunas_waktu: now, gaji_id: id })
-        .in("id", dipilih.map((x) => x.id)).eq("user_id", target).eq("status", "Aktif")
     await tulisAudit(user.id, user.nama, "BAYAR_GAJI",
       `Membayar gaji periode ${periode} untuk ${nama} sebesar Rp ${gajiBersih} (komisi Rp ${totalKomisi}, kasbon Rp ${totalKasbon})`)
     return ok({ id, gajiBersih, status: "Dibayar" }, `Pembayaran gaji untuk ${nama} berhasil dicatat.`)

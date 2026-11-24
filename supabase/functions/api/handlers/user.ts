@@ -133,6 +133,13 @@ export async function deleteUser(body: Record<string, string>) {
   if (!target || target.status === "Dihapus") return gagal("Anggota tidak ditemukan.")
   if (target.role === "Owner") return gagal("Akun Owner tidak dapat dihapus.")
 
+  if (target.role === "Kapster") {
+    const { data: ks } = await db.from("kasbon").select("id").eq("user_id", id).in("status", ["Aktif", "Menunggu"]).limit(1)
+    if (ks?.length) return gagal("Masih ada kasbon yang belum selesai. Lunasi atau tolak dulu sebelum menghapus anggota ini.")
+    const { data: km } = await db.rpc("komisi_belum_dibayar", { p_user: id })
+    if (Number((km as { total: number } | null)?.total) > 0)
+      return gagal("Masih ada komisi yang belum dibayarkan. Bayar gaji dulu sebelum menghapus anggota ini.")
+  }
   const { error } = await db.from("users").update({ status: "Dihapus" }).eq("id", id)
   if (error) throw new ApiError(error.message)
   await db.from("sessions").update({ status: "Nonaktif" }).eq("user_id", id)

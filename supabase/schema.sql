@@ -403,3 +403,90 @@ grant execute on function kunci_ambil(text,integer), kunci_lepas(text) to servic
 -- Pengenal permintaan dari kasir (anti dobel-klik, tahan restart server; menggantikan memori sementara).
 alter table transaksi add column if not exists req_id text;
 create unique index if not exists transaksi_req_id_uniq on transaksi(req_id) where req_id is not null;
+
+-- ===== Penulisan atomik (satu transaksi database: semua berhasil atau tidak ada yang berubah) =====
+-- Edge Function menghitung dan memvalidasi; fungsi di bawah hanya MENULIS. Bila satu langkah gagal
+-- (mis. stok kurang karena kasir lain), seluruh perubahan dibatalkan otomatis oleh Postgres.
+
+create or replace function simpan_transaksi(p_trx jsonb, p_items jsonb, p_stok jsonb, p_oleh text)
+returns text language plpgsql security definer set search_path = public as $$
+declare r transaksi; s jsonb;
+begin
+  r := jsonb_populate_record(null::transaksi, p_trx);
+  insert into transaksi(id, waktu, tanggal, jam, metode, subtotal, diskon, total, bayar_tunai, bayar_qris, komisi_total,
+    status, dibuat_oleh_id, dibuat_oleh, lembur, manual, nota_buku, gratis, req_id)
+  values (r.id, r.waktu, r.tanggal, r.jam, r.metode, r.subtotal, r.diskon, r.total, r.bayar_tunai, r.bayar_qris, r.komisi_total,
+    r.status, r.dibuat_oleh_id, r.dibuat_oleh, r.lembur, r.manual, r.nota_buku, r.gratis, r.req_id);
+  insert into transaksi_item(trx_id, tipe, ref_id, nama, qty, harga, kapster_id, kapster, komisi, komisi_persen)
+    select r.id, i.tipe, i.ref_id, i.nama, i.qty, i.harga, i.kapster_id, i.kapster, i.komisi, i.komisi_persen
+    from jsonb_populate_recordset(null::transaksi_item, p_items) i;
+  for s in select * from jsonb_array_elements(p_stok) loop
+    perform mutasi_stok(s->>'kode', (s->>'delta')::integer, s->>'alasan', r.id, p_oleh);
+  end loop;
+  return r.id;
+end $$;
+
+create or replace function ubah_transaksi(p_id text, p_trx jsonb, p_items jsonb, p_stok jsonb, p_oleh text)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare s jsonb;
+begin
+  perform 1 from transaksi where id = p_id and status <> 'BATAL' for update;
+  if not found then return false; end if;
+  delete from transaksi_item where trx_id = p_id;
+  insert into transaksi_item(trx_id, tipe, ref_id, nama, qty, harga, kapster_id, kapster, komisi, komisi_persen)
+    select p_id, i.tipe, i.ref_id, i.nama, i.qty, i.harga, i.kapster_id, i.kapster, i.komisi, i.komisi_persen
+    from jsonb_populate_recordset(null::transaksi_item, p_items) i;
+  update transaksi set subtotal = (p_trx->>'subtotal')::numeric, diskon = (p_trx->>'diskon')::numeric,
+    total = (p_trx->>'total')::numeric, bayar_tunai = (p_trx->>'bayar_tunai')::numeric, bayar_qris = (p_trx->>'bayar_qris')::numeric,
+    komisi_total = (p_trx->>'komisi_total')::numeric, metode = p_trx->>'metode' where id = p_id;
+  for s in select * from jsonb_array_elements(p_stok) loop
+    perform mutasi_stok(s->>'kode', (s->>'delta')::integer, s->>'alasan', p_id, p_oleh);
+  end loop;
+  return true;
+end $$;
+
+create or replace function batal_transaksi(p_id text, p_alasan text, p_oleh text)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare i record;
+begin
+  update transaksi set status = 'BATAL', void_alasan = p_alasan, void_oleh = p_oleh, void_waktu = now()
+    where id = p_id and status <> 'BATAL';
+  if not found then return false; end if;
+  for i in select ref_id, qty from transaksi_item where trx_id = p_id and tipe = 'Produk' loop
+    perform mutasi_stok(i.ref_id, i.qty, 'Batal ' || p_id, p_id, p_oleh);
+  end loop;
+  return true;
+end $$;
+
+create or replace function pulihkan_transaksi(p_id text, p_oleh text)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare i record;
+begin
+  update transaksi set status = 'Lunas', void_alasan = '', void_oleh = '', void_waktu = null where id = p_id and status = 'BATAL';
+  if not found then return false; end if;
+  for i in select ref_id, qty from transaksi_item where trx_id = p_id and tipe = 'Produk' loop
+    perform mutasi_stok(i.ref_id, -i.qty, 'Pulihkan ' || p_id, p_id, p_oleh);
+  end loop;
+  return true;
+end $$;
+
+-- Bayar gaji: catat gaji, tandai baris komisi, lunasi kasbon terpilih. Mengembalikan jumlah komisi yang benar-benar ditandai.
+create or replace function bayar_gaji_atomik(p_gaji jsonb, p_item_ids jsonb, p_kasbon_ids jsonb)
+returns integer language plpgsql security definer set search_path = public as $$
+declare g gaji; n integer;
+begin
+  g := jsonb_populate_record(null::gaji, p_gaji);
+  insert into gaji(id, periode, user_id, nama, role, total_komisi, total_kasbon, gaji_bersih, status, tanggal_bayar, dibayar_oleh, catatan)
+    values (g.id, g.periode, g.user_id, g.nama, g.role, g.total_komisi, g.total_kasbon, g.gaji_bersih, g.status, g.tanggal_bayar, g.dibayar_oleh, g.catatan);
+  update transaksi_item set gaji_id = g.id
+    where gaji_id is null and kapster_id = g.user_id and id in (select (x)::bigint from jsonb_array_elements_text(p_item_ids) x);
+  get diagnostics n = row_count;
+  update kasbon set status = 'Lunas', lunas_waktu = g.tanggal_bayar, gaji_id = g.id
+    where user_id = g.user_id and status = 'Aktif' and id in (select x from jsonb_array_elements_text(p_kasbon_ids) x);
+  return n;
+end $$;
+
+revoke all on function simpan_transaksi(jsonb,jsonb,jsonb,text), ubah_transaksi(text,jsonb,jsonb,jsonb,text),
+  batal_transaksi(text,text,text), pulihkan_transaksi(text,text), bayar_gaji_atomik(jsonb,jsonb,jsonb) from public, anon, authenticated;
+grant execute on function simpan_transaksi(jsonb,jsonb,jsonb,text), ubah_transaksi(text,jsonb,jsonb,jsonb,text),
+  batal_transaksi(text,text,text), pulihkan_transaksi(text,text), bayar_gaji_atomik(jsonb,jsonb,jsonb) to service_role;

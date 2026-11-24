@@ -6,32 +6,16 @@ import {
 } from "../util.ts"
 import { getPengaturan, isLembur, komisiOverride, parseHhmm, PENGATURAN_DEFAULT } from "../pengaturan.ts"
 import { catatPemakaianKode, cekKodeDiskon, cekPinOtorisasi } from "./diskon.ts"
-import { mutasiStok } from "./produk.ts"
 
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
 const toInt = (v: unknown) => { const n = Math.round(Number(v)); return isNaN(n) ? 0 : n }
 const oleh = (u: Pengguna) => `${u.nama} · ${u.role}`
 const KATEGORI_PENGELUARAN = ["Perlengkapan", "Listrik", "Air", "Sewa", "Lain-lain"]
 
-/**
- * Terapkan perubahan stok satu per satu. Bila salah satu gagal (mis. dua kasir menjual stok terakhir bersamaan),
- * perubahan yang sudah masuk dibalikkan dan pesan kesalahan dikembalikan ("" = berhasil).
- */
-async function terapkanStok(perubahan: { kode: string; delta: number; alasan: string }[], trxId: string, user: Pengguna) {
-  const sudah: { kode: string; delta: number }[] = []
-  for (const p of perubahan) {
-    if (!p.delta) continue
-    try {
-      await mutasiStok(p.kode, p.delta, p.alasan, trxId, user)
-      sudah.push(p)
-    } catch (e) {
-      for (const u of sudah.reverse()) await mutasiStok(u.kode, -u.delta, "Batal otomatis " + trxId, trxId, user).catch(() => {})
-      const m = (e as Error).message
-      if (m.includes("STOK_KURANG")) return `Stok ${p.kode} tidak cukup (baru saja dipakai transaksi lain). Muat ulang lalu coba lagi.`
-      throw e
-    }
-  }
-  return ""
+/** Ubah error SQL "STOK_KURANG:<kode>" dari fungsi atomik menjadi pesan untuk kasir. */
+const pesanStok = (m: string) => {
+  const k = /STOK_KURANG:([^\s"]+)/.exec(m)
+  return k ? `Stok ${k[1]} tidak cukup (baru saja dipakai transaksi lain). Muat ulang lalu coba lagi.` : ""
 }
 
 /** Nomor invoice: INV-DDMMYY-NNNN, urut per hari. */
@@ -172,25 +156,28 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
   if (tunai + qris < total) return gagal(`Pembayaran kurang Rp ${total - tunai - qris}.`)
 
   // Nomor invoice: ulangi bila bentrok dengan transaksi lain yang masuk bersamaan.
+  // Transaksi + item + stok ditulis dalam SATU transaksi database (fungsi simpan_transaksi): gagal di tengah = tidak ada yang tersimpan.
   let id = manual ? notaBuku : ""
+  const stokPerubahan = Object.keys(stokBaru).map((kode) => ({
+    kode, delta: stokBaru[kode] - Number(produkMap.get(kode)!.stok), alasan: "Penjualan" }))
   for (let coba = 0; coba < 6; coba++) {
     if (!manual) id = await nextInvoiceId(now)
-    const { error } = await db.from("transaksi").insert({
-      id, waktu: now.toISOString(), tanggal: tanggalIso(now), jam: fmtJamTitik(now), metode: body.metode,
-      subtotal, diskon, total, bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, status: "Lunas",
-      dibuat_oleh_id: user.id, dibuat_oleh: oleh(user), lembur: lembur ? "Ya" : "Tidak",
-      manual: manual ? "Ya" : "", nota_buku: notaBuku, gratis: gratis ? alasanGratis : "", req_id: reqKey || null,
+    const { error } = await db.rpc("simpan_transaksi", {
+      p_trx: {
+        id, waktu: now.toISOString(), tanggal: tanggalIso(now), jam: fmtJamTitik(now), metode: body.metode,
+        subtotal, diskon, total, bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, status: "Lunas",
+        dibuat_oleh_id: user.id, dibuat_oleh: oleh(user), lembur: lembur ? "Ya" : "Tidak",
+        manual: manual ? "Ya" : "", nota_buku: notaBuku, gratis: gratis ? alasanGratis : "", req_id: reqKey || null,
+      },
+      p_items: lines, p_stok: stokPerubahan, p_oleh: oleh(user),
     })
     if (!error) break
-    if (error.code === "23505" && error.message.includes("transaksi_req_id_uniq")) return buatTransaksi(body, user, manual)
+    const m = error.message ?? ""
+    if (pesanStok(m)) return gagal(pesanStok(m))
+    if (error.code === "23505" && m.includes("transaksi_req_id_uniq")) return buatTransaksi(body, user, manual)
     if (error.code === "23505" && manual) return gagal("Nomor nota sudah dipakai.")
-    if (error.code !== "23505" || coba === 5) throw new Error(error.message)
+    if (error.code !== "23505" || coba === 5) throw new Error(m)
   }
-  const { error: eItem } = await db.from("transaksi_item").insert(lines.map((ln) => ({ ...ln, trx_id: id })))
-  if (eItem) { await db.from("transaksi").delete().eq("id", id); throw new Error(eItem.message) }
-  const salahStok = await terapkanStok(
-    Object.keys(stokBaru).map((kode) => ({ kode, delta: stokBaru[kode] - Number(produkMap.get(kode)!.stok), alasan: "Penjualan" })), id, user)
-  if (salahStok) { await db.from("transaksi").delete().eq("id", id); return gagal(salahStok) }
 
   await tulisAudit(user.id, user.nama, manual ? "REKAP_MANUAL" : "TRANSAKSI",
     `${id} total ${total}${gratis ? " GRATIS: " + alasanGratis : ""}`)
@@ -285,14 +272,11 @@ export async function batalkanTransaksi(body: B, user: Pengguna) {
   if (!t) return gagal("Transaksi tidak ditemukan.")
   if (t.status === "BATAL") return gagal("Transaksi sudah dibatalkan.")
   if (user.role === "Kasir" && t.dibuat_oleh_id !== user.id) return gagal("Kasir hanya boleh membatalkan transaksinya sendiri.")
-  // Klaim dulu lewat UPDATE bersyarat: dua klik bersamaan tidak mengembalikan stok dua kali.
-  const { data: klaim } = await db.from("transaksi").update({
-    status: "BATAL", void_alasan: alasan, void_oleh: oleh(user), void_waktu: new Date().toISOString(),
-  }).eq("id", t.id).neq("status", "BATAL").select("id")
-  if (!klaim?.length) return gagal("Transaksi sudah dibatalkan.")
-  const { data: its } = await db.from("transaksi_item").select("tipe,ref_id,qty,gaji_id").eq("trx_id", t.id)
-  for (const i of (its ?? []).filter((x) => x.tipe === "Produk"))
-    await mutasiStok(i.ref_id, Number(i.qty), "Batal " + t.id, t.id, user)
+  // Status + pengembalian stok dalam satu transaksi database; dua klik bersamaan: hanya satu yang berhasil.
+  const { data: berhasil, error: eB } = await db.rpc("batal_transaksi", { p_id: t.id, p_alasan: alasan, p_oleh: oleh(user) })
+  if (eB) throw new Error(eB.message)
+  if (!berhasil) return gagal("Transaksi sudah dibatalkan.")
+  const { data: its } = await db.from("transaksi_item").select("gaji_id").eq("trx_id", t.id)
   const sudahGaji = (its ?? []).some((i) => i.gaji_id)
   await tulisAudit(user.id, user.nama, "VOID_TRANSAKSI",
     `${t.id} — ${alasan}${sudahGaji ? " (PERHATIAN: komisinya sudah dibayarkan lewat gaji)" : ""}`)
@@ -311,14 +295,9 @@ export async function pulihkanTransaksi(body: B, user: Pengguna) {
   for (const i of its ?? []) {
     if ((stok.get(i.ref_id) ?? -1) < Number(i.qty)) return gagal(`Stok ${i.nama} tidak cukup untuk memulihkan transaksi.`)
   }
-  const { data: klaim } = await db.from("transaksi").update({ status: "Lunas", void_alasan: "", void_oleh: "", void_waktu: null })
-    .eq("id", t.id).eq("status", "BATAL").select("id")
-  if (!klaim?.length) return gagal("Transaksi sudah dipulihkan.")
-  const salah = await terapkanStok((its ?? []).map((i) => ({ kode: i.ref_id, delta: -Number(i.qty), alasan: "Pulihkan " + t.id })), t.id, user)
-  if (salah) {
-    await db.from("transaksi").update({ status: "BATAL", void_alasan: alasan, void_oleh: oleh(user), void_waktu: new Date().toISOString() }).eq("id", t.id)
-    return gagal(salah)
-  }
+  const { data: berhasil, error: eP } = await db.rpc("pulihkan_transaksi", { p_id: t.id, p_oleh: oleh(user) })
+  if (eP) { if (pesanStok(eP.message)) return gagal(pesanStok(eP.message)); throw new Error(eP.message) }
+  if (!berhasil) return gagal("Transaksi sudah dipulihkan.")
   await tulisAudit(user.id, user.nama, "PULIHKAN_TRANSAKSI", `${t.id} — ${alasan}`)
   return ok({ id: t.id, status: "Lunas" })
 }
@@ -394,13 +373,11 @@ export async function updateTransaksi(body: B, user: Pengguna) {
     } else return gagal("Tipe item tidak dikenal.")
   }
 
-  // Semua validasi lolos: baru stok disesuaikan (selisih bersih per produk, satu mutasi per produk).
-  const kodeSemua = new Set([...Object.keys(qtyLama), ...Object.keys(stokBaru)])
   // stokBaru[kode] = sisa stok setelah transaksi hasil edit; produk yang dibuang dari transaksi dikembalikan penuh.
-  const salahStok = await terapkanStok([...kodeSemua].map((kode) => ({
+  const kodeSemua = new Set([...Object.keys(qtyLama), ...Object.keys(stokBaru)])
+  const stokPerubahan = [...kodeSemua].map((kode) => ({
     kode, delta: stokBaru[kode] !== undefined ? stokBaru[kode] - stokSekarang(kode) : (qtyLama[kode] || 0),
-    alasan: "Edit Penjualan " + t.id })), t.id, user)
-  if (salahStok) return gagal(salahStok)
+    alasan: "Edit Penjualan " + t.id }))
 
   const diskon = Math.min(Number(t.diskon) || 0, subtotal)
   const total = subtotal - diskon
@@ -418,15 +395,13 @@ export async function updateTransaksi(body: B, user: Pengguna) {
     tunai = total - qris
   }
 
-  // 3. Simpan baris item baru
-  await db.from("transaksi_item").delete().eq("trx_id", t.id)
-  const { error: eIns } = await db.from("transaksi_item").insert(lines.map((ln) => ({ ...ln, trx_id: t.id })))
-  if (eIns) throw new Error(eIns.message)
-
-  // 4. Update transaksi
-  await db.from("transaksi").update({
-    subtotal, diskon, total, bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, metode,
-  }).eq("id", t.id)
+  // Item, total, dan stok diubah dalam satu transaksi database (fungsi ubah_transaksi).
+  const { data: berhasil, error: eU } = await db.rpc("ubah_transaksi", {
+    p_id: t.id, p_items: lines, p_stok: stokPerubahan, p_oleh: oleh(user),
+    p_trx: { subtotal, diskon, total, bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, metode },
+  })
+  if (eU) { if (pesanStok(eU.message)) return gagal(pesanStok(eU.message)); throw new Error(eU.message) }
+  if (!berhasil) return gagal("Transaksi tidak dapat diedit (sudah dibatalkan).")
 
   await tulisAudit(user.id, user.nama, "EDIT_TRANSAKSI", `${t.id} — ${alasanEdit} (Total baru: ${total})`)
 

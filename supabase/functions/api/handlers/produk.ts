@@ -6,6 +6,13 @@ const toInt = (v: unknown) => {
   const n = Math.round(Number(v))
   return isNaN(n) ? 0 : n
 }
+/** Bilangan bulat dari input; null bila bukan angka bulat ("abc", 1.5, kosong). */
+const bulat = (v: unknown): number | null => {
+  if (v === null || v === undefined || String(v).trim() === "") return null
+  const n = Number(v)
+  return Number.isInteger(n) ? n : null
+}
+const BATAS_RUPIAH = 1_000_000_000
 const oleh = (u: Pengguna) => `${u.nama} · ${u.role}`
 
 /** Stok atomik lewat fungsi SQL mutasi_stok. Mengembalikan stok akhir (null = produk tak ada). */
@@ -20,7 +27,14 @@ export async function mutasiStok(kode: string, delta: number, alasan: string, tr
 export async function simpanProduk(body: B, user: Pengguna) {
   const p = body.produk || {}
   const alasan = String(body.alasan ?? "").trim()
+  p.kode = String(p.kode ?? "").trim(); p.nama = String(p.nama ?? "").trim()
   if (!p.kode || !p.nama) return gagal("Kode dan nama produk wajib diisi.")
+  if (!/^[A-Za-z0-9._-]{1,30}$/.test(p.kode)) return gagal("Kode produk hanya boleh huruf, angka, titik, minus, garis bawah (maks 30).")
+  const harga = bulat(p.harga), modal = bulat(p.hargaModal ?? 0)
+  if (harga === null || harga <= 0 || harga > BATAS_RUPIAH) return gagal("Harga jual harus angka bulat lebih dari 0.")
+  if (modal === null || modal < 0 || modal > BATAS_RUPIAH) return gagal("Harga modal harus angka bulat, tidak boleh negatif.")
+  const stokAwal = p.stok === undefined ? 0 : bulat(p.stok)
+  if (stokAwal === null || stokAwal < 0 || stokAwal > 1_000_000) return gagal("Stok harus angka bulat, tidak boleh negatif.")
   if (!["Persentase", "Nominal tetap"].includes(p.skema)) return gagal("Skema tidak valid.")
   const s = p.shares || {}, n = p.nominalShares || {}
   if (p.skema === "Persentase" && Math.abs(Number(s.barber) + Number(s.seller) + Number(s.eastville) - 100) > 0.5)
@@ -56,6 +70,7 @@ export async function simpanProduk(body: B, user: Pengguna) {
     return ok({ kode: ada.kode })
   }
   const stok = Math.max(0, toInt(p.stok))
+  if (stok === 0) baris.status = "Nonaktif" // stok kosong tidak boleh tampil di Kasir; restok pertama mengaktifkannya
   const { error } = await db.from("produk").insert({ ...baris, stok })
   if (error) throw new Error(error.message)
   if (stok > 0)
@@ -78,9 +93,11 @@ export async function hapusProduk(body: B, user: Pengguna) {
 }
 
 export async function adjustStok(body: B, user: Pengguna) {
-  const delta = toInt(body.delta)
+  const delta = bulat(body.delta)
   const alasan = String(body.alasan ?? "").trim()
-  if (!delta) return gagal("Perubahan stok tidak boleh 0.")
+  if (delta === null) return gagal("Jumlah stok harus angka bulat.")
+  if (delta === 0) return gagal("Perubahan stok tidak boleh 0.")
+  if (Math.abs(delta) > 1_000_000) return gagal("Jumlah perubahan stok terlalu besar.")
   if (!alasan) return gagal("Alasan wajib diisi.")
   const { data: p } = await db.from("produk").select("kode,stok").eq("kode", body.kode).maybeSingle()
   if (!p) return gagal("Produk tidak ditemukan.")
