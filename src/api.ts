@@ -241,6 +241,9 @@ export const apiTutupKasir = {
 export const apiTransaksi = {
   list: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("list-transaksi", range),
+  /** Riwayat aman khusus kapster: hanya item yang dikerjakan akun aktif. */
+  listKapster: (range: { dari?: string; sampai?: string } = {}) =>
+    api<unknown[]>("riwayat-transaksi-kapster", range),
   /** Rekap manual: transaksi susulan dari buku. Nomor nota = nomor buku. */
   manual: (
     p: CheckoutPayload & { tanggal: string; nomorNota: string; jam?: string },

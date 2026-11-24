@@ -26190,3 +26190,120 @@ html:has(.manual-page .modal-overlay) {
   max-width: none !important;
   margin: 0 !important;
 }
+
+/* Riwayat transaksi pribadi kapster mengikuti pola daftar dan detail Owner. */
+.kapster-transaction-history {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kapster-transaction-history > .page-title {
+  flex: 0 0 auto;
+}
+
+.kapster-history-content {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kapster-history-content .filters {
+  flex: 0 0 auto;
+}
+
+.kapster-history-content .master-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.kapster-history-content .transaction-list {
+  min-height: 0;
+  max-height: none;
+  overscroll-behavior: contain;
+}
+
+.kapster-history-content .transaction-row {
+  min-height: 72px;
+  font-size: 14px;
+}
+
+.kapster-history-content .tx-cell-nota {
+  font-size: 14px;
+}
+
+.kapster-history-content .tx-cell-time,
+.kapster-history-content .tx-cell-kapster,
+.kapster-history-content .tx-cell-items {
+  font-size: 14px;
+}
+
+.kapster-transaction-modal .transaction-modal-box {
+  width: min(568px, calc(100% - 28px));
+  max-height: calc(100svh - 32px);
+}
+
+.kapster-transaction-modal {
+  display: flex !important;
+}
+
+.kapster-transaction-modal .transaction-modal-header {
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.kapster-transaction-modal .modal-close-icon-btn {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  flex: 0 0 44px;
+}
+
+.kapster-transaction-modal .transaction-modal-body {
+  padding: 16px 18px 20px;
+}
+
+@media (max-width: 1024px) {
+  .kapster-history-content {
+    overflow: visible;
+  }
+
+  .kapster-history-content .master-detail {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .kapster-history-content .transaction-list {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .kapster-history-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .kapster-history-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kapster-transaction-modal .transaction-modal-box {
+    width: min(520px, calc(100% - 28px));
+  }
+}
+
+@media (min-width: 1025px) {
+  .kapster-history-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kapster-history-content .master-detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
