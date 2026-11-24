@@ -77,6 +77,53 @@ export async function verifyPin(pin: string, tersimpan: string) {
   return (await sha256Hex(pin)) === s // hash lama tanpa salt
 }
 
+/**
+ * Ambil SEMUA baris sebuah query. PostgREST memotong hasil di `max_rows` (1000) tanpa pesan apa pun,
+ * jadi `.limit(5000)` tetap hanya mengembalikan 1000 baris. `buat` harus memberi query BARU tiap dipanggil
+ * dan wajib memakai `.order(...)` yang unik supaya halaman tidak tumpang tindih.
+ */
+const HALAMAN = 1000
+// deno-lint-ignore no-explicit-any
+export async function ambilSemua<T = Record<string, any>>(buat: () => any, maks = 100_000): Promise<T[]> {
+  const hasil: T[] = []
+  for (let dari = 0; dari < maks; dari += HALAMAN) {
+    const { data, error } = await buat().range(dari, dari + HALAMAN - 1)
+    if (error) throw new Error(error.message)
+    hasil.push(...(data ?? []))
+    if ((data?.length ?? 0) < HALAMAN) break
+  }
+  return hasil
+}
+
+/** Bagi daftar jadi potongan kecil supaya `.in(...)` tidak membuat alamat permintaan terlalu panjang. */
+export function potong<T>(daftar: T[], n = 200): T[][] {
+  const hasil: T[][] = []
+  for (let i = 0; i < daftar.length; i += n) hasil.push(daftar.slice(i, i + n))
+  return hasil
+}
+
+/** true hanya untuk tanggal kalender yang nyata ("2026-02-31" ditolak). */
+export function tanggalValid(s: unknown): s is string {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false
+  const d = new Date(s + "T00:00:00Z")
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s
+}
+
+/**
+ * Jalankan `fn` dengan kunci bernama (mutex di database, berlaku `detik` detik bila proses mati).
+ * Mengembalikan null bila kunci sedang dipegang proses lain.
+ */
+export async function denganKunci<T>(nama: string, detik: number, fn: () => Promise<T>): Promise<{ hasil: T } | null> {
+  const { data, error } = await db.rpc("kunci_ambil", { p_nama: nama, p_detik: detik })
+  if (error) throw new Error(error.message)
+  if (!data) return null
+  try {
+    return { hasil: await fn() }
+  } finally {
+    await db.rpc("kunci_lepas", { p_nama: nama })
+  }
+}
+
 export const buatToken = () => crypto.randomUUID() + "-" + crypto.randomUUID()
 
 export async function tulisAudit(

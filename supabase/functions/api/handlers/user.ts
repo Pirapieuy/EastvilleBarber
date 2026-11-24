@@ -3,6 +3,11 @@
 import { ApiError, db, gagal, hashPin, ok, tanggalIso, tulisAudit, wajibRole } from "../util.ts"
 
 const ROLE_VALID = ["Owner", "Kasir", "Kapster"]
+/** true bila setelah `id` berhenti jadi Owner aktif masih ada Owner aktif lain. */
+async function adaOwnerLain(id: string) {
+  const { data } = await db.from("users").select("id").eq("role", "Owner").eq("status", "Aktif").neq("id", id).limit(1)
+  return !!data?.length
+}
 const enam = (s: string) => /^\d{6}$/.test(s)
 
 export async function forgotPin(body: Record<string, string>) {
@@ -104,6 +109,10 @@ export async function updateUser(body: Record<string, string>) {
     if ((r.email || "").toLowerCase() === email) return gagal(`Email '${email}' sudah dipakai akun lain.`)
   }
   if (!ada) return gagal("User tidak ditemukan.")
+  const { data: lama } = await db.from("users").select("role").eq("id", id).maybeSingle()
+  if (lama?.role === "Owner" && role !== "Owner" && !(await adaOwnerLain(id)))
+    return gagal("Tidak bisa mengubah peran: ini satu-satunya Owner aktif.")
+  if (id === admin.id && role !== lama?.role) return gagal("Anda tidak dapat mengubah peran akun Anda sendiri.")
   const ubah: Record<string, string> = { nama, username, role, cabang, email }
   if (newPin) ubah.pin_hash = await hashPin(newPin)
   await db.from("users").update(ubah).eq("id", id)
@@ -117,9 +126,12 @@ export async function toggleUserStatus(body: Record<string, string>) {
   const status = body.status === "Aktif" ? "Aktif" : "Nonaktif"
   if (!id) return gagal("ID user wajib diisi.")
   if (id === admin.id && status === "Nonaktif") return gagal("Anda tidak dapat menonaktifkan akun Anda sendiri.")
-  const { data: t } = await db.from("users").select("nama").eq("id", id).maybeSingle()
-  if (!t) return gagal("User tidak ditemukan.")
+  const { data: t } = await db.from("users").select("nama,role,status").eq("id", id).maybeSingle()
+  if (!t || t.status === "Dihapus") return gagal("User tidak ditemukan.")
+  if (status === "Nonaktif" && t.role === "Owner" && !(await adaOwnerLain(id)))
+    return gagal("Tidak bisa menonaktifkan satu-satunya Owner aktif.")
   await db.from("users").update({ status }).eq("id", id)
+  if (status === "Nonaktif") await db.from("sessions").update({ status: "Nonaktif" }).eq("user_id", id).eq("status", "Aktif")
   await tulisAudit(admin.id, admin.nama, "TOGGLE_USER_STATUS", `Status user ${t.nama} diubah jadi: ${status}`)
   return ok(undefined, `Status ${t.nama} berhasil diubah menjadi ${status}.`)
 }

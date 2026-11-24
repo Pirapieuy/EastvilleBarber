@@ -1,6 +1,6 @@
 // Padanan KASBON, GAJI, RINGKASAN LAPORAN, ABSENSI, AUDIT di Kode.js.
 import {
-  ApiError, db, gagal, jamHhmm, ok, penggunaDariToken, simpanFoto, tanggalIso, tulisAudit, verifyPin, wajibRole, type Pengguna,
+  ambilSemua, ApiError, db, denganKunci, gagal, jamHhmm, ok, penggunaDariToken, potong, simpanFoto, tanggalIso, tanggalValid, tulisAudit, verifyPin, wajibRole, type Pengguna,
 } from "../util.ts"
 
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
@@ -17,11 +17,13 @@ const forbidden = (m = "Akses ditolak.") => new ApiError(m, "FORBIDDEN")
 // ================= KASBON =================
 export async function listKasbon(body: B) {
   const user = await wajibLogin(body.token)
-  let q = db.from("kasbon").select("*")
-  if (user.role === "Kapster") q = q.eq("user_id", user.id)
-  if (user.role === "Kasir") q = q.eq("dibuat_oleh", user.nama)
-  const { data } = await q.order("urut", { ascending: false }) // terbaru dulu, seperti GAS
-  return ok((data ?? []).map((r) => ({
+  const data = await ambilSemua(() => {
+    let q = db.from("kasbon").select("*")
+    if (user.role === "Kapster") q = q.eq("user_id", user.id)
+    if (user.role === "Kasir") q = q.eq("dibuat_oleh", user.nama)
+    return q.order("urut", { ascending: false }) // terbaru dulu, seperti GAS
+  })
+  return ok(data.map((r) => ({
     id: r.id, tanggal: r.tanggal || "", userId: r.user_id, nama: r.nama, role: r.role,
     jumlah: toInt(r.jumlah) || 0, status: r.status, catatan: r.catatan || "", dibuatOleh: r.dibuat_oleh || "",
     lunasWaktu: r.lunas_waktu ? tanggalIso(new Date(r.lunas_waktu)) : "",
@@ -61,9 +63,14 @@ export async function createKasbon(body: B) {
 export async function lunasiKasbon(body: B) {
   const user = await wajibRole(body.token, ["Owner"])
   const id = String(body.id ?? "").trim()
-  const { data } = await db.from("kasbon").update({ status: "Lunas", lunas_waktu: new Date().toISOString() }).eq("id", id).select("id")
-  if (!data?.length) return gagal("Kasbon tidak ditemukan.")
-  await tulisAudit(user.id, user.nama, "LUNASI_KASBON", "Melunasi kasbon ID " + id)
+  const { data: r } = await db.from("kasbon").select("status,nama,jumlah").eq("id", id).maybeSingle()
+  if (!r) return gagal("Kasbon tidak ditemukan.")
+  if (r.status !== "Aktif") return gagal(`Hanya kasbon berstatus Aktif yang bisa dilunasi (status sekarang: ${r.status}).`)
+  // syarat status ikut di UPDATE: dua klik bersamaan tidak melunasi dua kali
+  const { data } = await db.from("kasbon").update({ status: "Lunas", lunas_waktu: new Date().toISOString() })
+    .eq("id", id).eq("status", "Aktif").select("id")
+  if (!data?.length) return gagal("Kasbon sudah berubah status. Muat ulang halaman.")
+  await tulisAudit(user.id, user.nama, "LUNASI_KASBON", `Melunasi kasbon ${r.nama} Rp ${r.jumlah} (${id})`)
   return ok(undefined, "Kasbon berhasil dilunasi.")
 }
 
@@ -73,40 +80,35 @@ export async function keputusanKasbon(body: B, keputusan: "Aktif" | "Ditolak") {
   const { data: r } = await db.from("kasbon").select("*").eq("id", id).maybeSingle()
   if (!r) return gagal("Kasbon tidak ditemukan.")
   if (r.status !== "Menunggu") return gagal("Hanya pengajuan berstatus Menunggu yang bisa diputuskan.")
-  await db.from("kasbon").update({ status: keputusan }).eq("id", id)
+  const { data: u } = await db.from("kasbon").update({ status: keputusan }).eq("id", id).eq("status", "Menunggu").select("id")
+  if (!u?.length) return gagal("Pengajuan sudah diputuskan. Muat ulang halaman.")
   await tulisAudit(user.id, user.nama, keputusan === "Aktif" ? "SETUJUI_KASBON" : "TOLAK_KASBON",
     `Kasbon ${r.nama} Rp ${r.jumlah} (${id})`)
   return ok(undefined, keputusan === "Aktif" ? "Kasbon disetujui." : "Pengajuan kasbon ditolak.")
 }
 
 // ================= GAJI =================
-/** Komisi kapster sejak gaji terakhir dibayar (yang sudah dibayar tidak terhitung lagi). */
+/**
+ * Komisi kapster yang belum dibayar = item transaksi Lunas yang `gaji_id`-nya masih kosong.
+ * Penanda ada di tiap baris, jadi transaksi manual bertanggal mundur atau hasil edit tetap terbayar,
+ * dan angka yang ditampilkan sama persis dengan baris yang nanti ditandai lunas.
+ */
 async function komisiBerjalan(target: string) {
-  const { data: dibayar } = await db.from("gaji").select("tanggal_bayar").eq("user_id", target).eq("status", "Dibayar")
-    .not("tanggal_bayar", "is", null).order("tanggal_bayar", { ascending: false }).limit(1)
-  const sejak = dibayar?.[0]?.tanggal_bayar ?? null
-
-  let qt = db.from("transaksi").select("id").in("status", ["Lunas", "Selesai"])
-  if (sejak) qt = qt.gt("waktu", sejak)
-  const { data: trx } = await qt.limit(50000)
-  const ok_ = new Set((trx ?? []).map((t) => t.id))
-  let totalKomisi = 0, countTrx = 0
-  const { data: items } = await db.from("transaksi_item").select("trx_id,nama,komisi").eq("kapster_id", target).limit(50000)
-  for (const i of items ?? []) {
-    if (!ok_.has(i.trx_id)) continue
-    totalKomisi += parseInt(i.komisi, 10) || 0; countTrx++
-  }
-  return { totalKomisi, countTrx }
+  const { data, error } = await db.rpc("komisi_belum_dibayar", { p_user: target })
+  if (error) throw new Error(error.message)
+  const d = data as { total: number; jumlah: number; ids: number[] }
+  return { totalKomisi: Math.round(Number(d.total)) || 0, countTrx: Number(d.jumlah) || 0, ids: d.ids ?? [] }
 }
 
 async function kasbonAktifUser(target: string) {
   const { data: kas } = await db.from("kasbon").select("id,tanggal,jumlah,catatan").eq("user_id", target).eq("status", "Aktif")
-    .order("tanggal", { ascending: true })
+    .order("tanggal", { ascending: true }).order("urut", { ascending: true })
   return (kas ?? []).map((k) => ({ id: k.id as string, tanggal: k.tanggal as string, jumlah: toInt(k.jumlah) || 0, catatan: (k.catatan as string) || "" }))
 }
 
 export async function hitungGaji(body: B) {
   const user = await wajibLogin(body.token)
+  if (user.role === "Kasir") throw forbidden("Kasir tidak dapat melihat data gaji.")
   const target = String(body.userId || user.id).trim()
   if (user.role === "Kapster" && target !== user.id) throw forbidden()
 
@@ -123,50 +125,62 @@ export async function hitungGaji(body: B) {
  * Bayar gaji. Komisi dihitung ulang di server (angka dari browser tidak dipercaya).
  * `kasbonIds` = kasbon aktif yang dipotong dari gaji ini; tanpa `kasbonIds` semua kasbon aktif dipotong (perilaku lama).
  * Kasbon yang tidak dipilih tetap Aktif dan terbawa ke gaji berikutnya. Potongan tidak boleh melebihi komisi.
+ * Dikunci per kapster: dua klik/dua Owner bersamaan tidak membayar komisi yang sama dua kali.
  */
 export async function bayarGaji(body: B) {
   const user = await wajibRole(body.token, ["Owner"])
   const target = String(body.userId ?? "").trim()
-  const nama = String(body.nama ?? "").trim()
-  const role = String(body.role || "Kapster").trim()
   const periode = String(body.periode || tanggalIso().slice(0, 7)).trim()
   const catatan = String(body.catatan ?? "").trim()
-  if (!target || !nama) return gagal("User penerima gaji wajib diisi.")
+  if (!target) return gagal("User penerima gaji wajib diisi.")
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(periode)) return gagal("Periode harus berformat yyyy-MM.")
+  // nama & peran diambil dari database, bukan dari browser
+  const { data: pen } = await db.from("users").select("nama,role,status").eq("id", target).maybeSingle()
+  if (!pen || pen.status === "Dihapus") return gagal("Penerima gaji tidak ditemukan.")
+  if (pen.role !== "Kapster") return gagal("Gaji hanya dibayarkan ke Kapster.")
+  const nama = pen.nama as string, role = pen.role as string
 
-  const { totalKomisi } = await komisiBerjalan(target)
-  if (totalKomisi <= 0) return gagal("Belum ada komisi yang bisa dibayarkan.")
-  const aktif = await kasbonAktifUser(target)
-  const dipilih = Array.isArray(body.kasbonIds)
-    ? aktif.filter((k) => (body.kasbonIds as unknown[]).map(String).includes(k.id))
-    : aktif
-  if (aktif.some((k) => k.jumlah <= totalKomisi) && dipilih.length === 0)
-    return gagal("Pilih kasbon yang dipotong dari gaji ini.")
-  const totalKasbon = dipilih.reduce((a, k) => a + k.jumlah, 0)
-  if (totalKasbon > totalKomisi) return gagal("Potongan kasbon melebihi komisi. Kurangi kasbon yang dipotong.")
-  const gajiBersih = totalKomisi - totalKasbon
+  const k = await denganKunci("gaji_" + target, 60, async () => {
+    const { totalKomisi, ids } = await komisiBerjalan(target)
+    if (totalKomisi <= 0) return gagal("Belum ada komisi yang bisa dibayarkan.")
+    const aktif = await kasbonAktifUser(target)
+    const dipilih = Array.isArray(body.kasbonIds)
+      ? aktif.filter((x) => (body.kasbonIds as unknown[]).map(String).includes(x.id))
+      : aktif
+    if (aktif.some((x) => x.jumlah <= totalKomisi) && dipilih.length === 0)
+      return gagal("Pilih kasbon yang dipotong dari gaji ini.")
+    const totalKasbon = dipilih.reduce((a, x) => a + x.jumlah, 0)
+    if (totalKasbon > totalKomisi) return gagal("Potongan kasbon melebihi komisi. Kurangi kasbon yang dipotong.")
+    const gajiBersih = totalKomisi - totalKasbon
 
-  const id = ID("gji")
-  const now = new Date().toISOString()
-  const { error } = await db.from("gaji").insert({
-    id, periode, user_id: target, nama, role, total_komisi: totalKomisi, total_kasbon: totalKasbon,
-    gaji_bersih: gajiBersih, status: "Dibayar", tanggal_bayar: now, dibayar_oleh: user.nama, catatan,
+    const id = ID("gji")
+    const now = new Date().toISOString()
+    const { error } = await db.from("gaji").insert({
+      id, periode, user_id: target, nama, role, total_komisi: totalKomisi, total_kasbon: totalKasbon,
+      gaji_bersih: gajiBersih, status: "Dibayar", tanggal_bayar: now, dibayar_oleh: user.nama, catatan,
+    })
+    if (error) throw new Error(error.message)
+    // tandai persis baris komisi yang dihitung tadi; yang masuk setelah itu tetap untuk gaji berikutnya
+    for (const bag of potong(ids, 200))
+      await db.from("transaksi_item").update({ gaji_id: id }).in("id", bag).is("gaji_id", null)
+    if (dipilih.length)
+      await db.from("kasbon").update({ status: "Lunas", lunas_waktu: now, gaji_id: id })
+        .in("id", dipilih.map((x) => x.id)).eq("user_id", target).eq("status", "Aktif")
+    await tulisAudit(user.id, user.nama, "BAYAR_GAJI",
+      `Membayar gaji periode ${periode} untuk ${nama} sebesar Rp ${gajiBersih} (komisi Rp ${totalKomisi}, kasbon Rp ${totalKasbon})`)
+    return ok({ id, gajiBersih, status: "Dibayar" }, `Pembayaran gaji untuk ${nama} berhasil dicatat.`)
   })
-  if (error) throw new Error(error.message)
-  if (dipilih.length) {
-    await db.from("kasbon").update({ status: "Lunas", lunas_waktu: now, gaji_id: id })
-      .in("id", dipilih.map((k) => k.id)).eq("user_id", target).eq("status", "Aktif")
-  }
-  await tulisAudit(user.id, user.nama, "BAYAR_GAJI",
-    `Membayar gaji periode ${periode} untuk ${nama} sebesar Rp ${gajiBersih} (komisi Rp ${totalKomisi}, kasbon Rp ${totalKasbon})`)
-  return ok({ id, gajiBersih, status: "Dibayar" }, `Pembayaran gaji untuk ${nama} berhasil dicatat.`)
+  return k ? k.hasil : gagal("Pembayaran gaji untuk kapster ini sedang diproses. Tunggu sebentar lalu muat ulang.")
 }
 
 export async function listGaji(body: B) {
   const user = await wajibLogin(body.token)
-  let q = db.from("gaji").select("*").order("urut", { ascending: false })
-  if (user.role === "Kapster") q = q.eq("user_id", user.id)
-  const { data } = await q
-  return ok((data ?? []).map((r) => ({
+  if (user.role === "Kasir") throw forbidden("Kasir tidak dapat melihat data gaji.")
+  const data = await ambilSemua(() => {
+    const q = db.from("gaji").select("*").order("urut", { ascending: false })
+    return user.role === "Kapster" ? q.eq("user_id", user.id) : q
+  })
+  return ok(data.map((r) => ({
     id: r.id, periode: r.periode, userId: r.user_id, nama: r.nama, role: r.role,
     totalKomisi: toInt(r.total_komisi) || 0, totalKasbon: toInt(r.total_kasbon) || 0, gajiBersih: toInt(r.gaji_bersih) || 0,
     status: r.status, tanggalBayar: r.tanggal_bayar ? tanggalIso(new Date(r.tanggal_bayar)) : "",
@@ -178,32 +192,36 @@ export async function listGaji(body: B) {
 export async function ringkasanLaporan(body: B) {
   await wajibRole(body.token, ["Owner"])
   const dari = String(body.dari ?? "").trim(), sampai = String(body.sampai ?? "").trim()
-  let qt = db.from("transaksi").select("tanggal,total,diskon,bayar_tunai,bayar_qris,komisi_total").in("status", ["Lunas", "Selesai"])
-  if (dari) qt = qt.gte("tanggal", dari)
-  if (sampai) qt = qt.lte("tanggal", sampai)
-  const { data: trx } = await qt.limit(20000)
+  const trx = await ambilSemua(() => {
+    let qt = db.from("transaksi").select("id,tanggal,total,diskon,bayar_tunai,bayar_qris,komisi_total").in("status", ["Lunas", "Selesai"]).order("id")
+    if (dari) qt = qt.gte("tanggal", dari)
+    if (sampai) qt = qt.lte("tanggal", sampai)
+    return qt
+  })
   let totalOmset = 0, totalDiskon = 0, totalBayarTunai = 0, totalBayarQris = 0, totalKomisi = 0
   const daily: Record<string, B> = {}
-  for (const t of trx ?? []) {
+  for (const t of trx) {
     const total = parseInt(t.total, 10) || 0, tunai = parseInt(t.bayar_tunai, 10) || 0, qris = parseInt(t.bayar_qris, 10) || 0
     totalOmset += total; totalDiskon += parseInt(t.diskon, 10) || 0
     totalBayarTunai += tunai; totalBayarQris += qris; totalKomisi += parseInt(t.komisi_total, 10) || 0
     const d = (daily[t.tanggal] ??= { tanggal: t.tanggal, omset: 0, tunai: 0, qris: 0, count: 0 })
     d.omset += total; d.tunai += tunai; d.qris += qris; d.count++
   }
-  let qe = db.from("pengeluaran").select("tanggal,kategori,jumlah").eq("status", "Aktif")
-  if (dari) qe = qe.gte("tanggal", dari)
-  if (sampai) qe = qe.lte("tanggal", sampai)
-  const { data: peng } = await qe
+  const peng = await ambilSemua(() => {
+    let qe = db.from("pengeluaran").select("id,tanggal,kategori,jumlah").eq("status", "Aktif").order("id")
+    if (dari) qe = qe.gte("tanggal", dari)
+    if (sampai) qe = qe.lte("tanggal", sampai)
+    return qe
+  })
   let totalPengeluaran = 0
   const pengeluaranKategori: Record<string, number> = {}
-  for (const e of peng ?? []) {
+  for (const e of peng) {
     const j = parseInt(e.jumlah, 10) || 0, k = e.kategori || "Lain-lain"
     totalPengeluaran += j; pengeluaranKategori[k] = (pengeluaranKategori[k] || 0) + j
   }
   return ok({
     totalOmset, totalDiskon, totalBayarTunai, totalBayarQris, totalKomisi, totalPengeluaran,
-    sisaOwner: totalOmset - totalPengeluaran - totalKomisi, jumlahTransaksi: (trx ?? []).length,
+    sisaOwner: totalOmset - totalPengeluaran - totalKomisi, jumlahTransaksi: trx.length,
     pengeluaranKategori, harian: Object.values(daily),
   })
 }
@@ -233,20 +251,22 @@ export async function catatAbsensi(body: B) {
 
 export async function listAbsensi(body: B) {
   const user = await wajibLogin(body.token)
-  let q = db.from("absensi").select("*").order("waktu", { ascending: false })
-  if (user.role === "Kapster") q = q.eq("user_id", user.id)
   const uid = String(body.userId ?? "").trim(), tgl = String(body.tanggal ?? "").trim()
-  if (uid) q = q.eq("user_id", uid)
-  if (tgl) q = q.eq("tanggal", tgl)
-  const { data } = await q.limit(5000)
-  return ok((data ?? []).map(bentukAbsensi))
+  const data = await ambilSemua(() => {
+    let q = db.from("absensi").select("*").order("waktu", { ascending: false }).order("id")
+    if (user.role === "Kapster") q = q.eq("user_id", user.id)
+    if (uid) q = q.eq("user_id", uid)
+    if (tgl) q = q.eq("tanggal", tgl)
+    return q
+  }, 20_000)
+  return ok(data.map(bentukAbsensi))
 }
 
 export async function koreksiAbsensi(body: B) {
   const user = await wajibRole(body.token, ["Owner"])
   const id = String(body.id ?? "").trim(), status = String(body.status ?? "").trim(), catatan = String(body.catatan ?? "").trim()
   if (!id) return gagal("ID absensi wajib disertakan.")
-  if (!status) return gagal("Status koreksi wajib diisi.")
+  if (!["Hadir", "Tidak Hadir", "Sakit", "Cuti", "Izin"].includes(status)) return gagal("Status koreksi tidak valid.")
   const { data: r } = await db.from("absensi").select("nama,catatan").eq("id", id).maybeSingle()
   if (!r) return gagal("Data absensi dengan ID tersebut tidak ditemukan.")
   const ubah: B = { status }
@@ -334,14 +354,20 @@ export async function listAudit(body: B) {
   const tgl = String(body.tanggal ?? "").trim()
   const aksi = String(body.aksi ?? "").trim().toUpperCase()
   const pengguna = String(body.userId || body.user || "").trim().toLowerCase()
-  let q = db.from("audit_log").select("*").order("id", { ascending: false }).limit(3000)
-  if (aksi && aksi !== "SEMUA") q = q.ilike("aksi", aksi)
-  const { data } = await q
-  const hasil = (data ?? []).map((r) => {
+  // Tanggal disaring DI DATABASE (rentang waktu WIB). Dulu 3000 baris terbaru diambil dulu baru disaring,
+  // sehingga tanggal lama tampil kosong padahal ada datanya.
+  const data = await ambilSemua(() => {
+    let q = db.from("audit_log").select("*").order("id", { ascending: false })
+    if (aksi && aksi !== "SEMUA") q = q.ilike("aksi", aksi)
+    if (tgl && tanggalValid(tgl)) {
+      q = q.gte("waktu", new Date(tgl + "T00:00:00+07:00").toISOString()).lt("waktu", new Date(tgl + "T24:00:00+07:00").toISOString())
+    }
+    return q
+  }, 20_000)
+  const hasil = data.map((r) => {
     const w = new Date(r.waktu)
     return { waktu: w.toISOString(), tanggal: tanggalIso(w), jam: jamHhmm(w), userId: r.user_id || "",
       namaUser: r.nama_user || "", aksi: r.aksi || "", detail: r.detail || "", alasan: r.alasan || "" }
-  }).filter((r) => (!tgl || r.tanggal === tgl) &&
-    (!pengguna || pengguna === "semua" || r.userId.toLowerCase() === pengguna || r.namaUser.toLowerCase() === pengguna))
+  }).filter((r) => !pengguna || pengguna === "semua" || r.userId.toLowerCase() === pengguna || r.namaUser.toLowerCase() === pengguna)
   return ok(hasil)
 }

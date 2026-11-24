@@ -246,6 +246,7 @@ begin
   select stok, status into lama, st from produk where kode = p_kode for update;
   if not found then return null; end if;
   akhir := lama + p_delta;
+  if akhir < 0 then raise exception 'STOK_KURANG:%', p_kode; end if;
   update produk set stok = akhir,
     status = case
       when akhir <= 0 and st = 'Aktif' then 'Nonaktif'
@@ -275,7 +276,8 @@ returns jsonb language plpgsql security definer set search_path = public as $$
 declare t text; d jsonb := '{}'::jsonb; j jsonb; n integer; total integer := 0; jml integer := 0;
 begin
   foreach t in array array['layanan','produk','transaksi','transaksi_item','pengeluaran','stok_mutasi',
-                           'produk_log','pengaturan','komisi_kapster','tutup_kasir'] loop
+                           'produk_log','pengaturan','komisi_kapster','tutup_kasir',
+                           'kasbon','gaji','absensi','kode_diskon'] loop
     execute format('select coalesce(jsonb_agg(to_jsonb(x)), ''[]''::jsonb), count(*) from %I x', t) into j, n;
     d := d || jsonb_build_object(t, j); total := total + n; jml := jml + 1;
   end loop;
@@ -284,28 +286,36 @@ begin
   return jsonb_build_object('nama', p_nama, 'baris', total);
 end $$;
 
+-- Pulihkan snapshot. Hanya tabel yang ADA di snapshot yang dihapus lalu diisi ulang (snapshot lama tanpa
+-- kasbon/gaji/absensi/kode_diskon tidak menghapus data itu). Akun (users/sessions) tidak disentuh.
 create or replace function pulihkan_backup(p_nama text)
 returns integer language plpgsql security definer set search_path = public as $$
-declare t text; d jsonb; jml integer := 0; seq text;
+declare t text; c text; d jsonb; jml integer := 0; seq text;
 begin
   select data into d from backup where nama = p_nama;
   if d is null then return null; end if;
-  -- urutan penting: transaksi dihapus dulu (item ikut terhapus), lalu dimasukkan lagi sebelum item
+  -- urutan penting: anak dihapus dulu (item sebelum transaksi)
   foreach t in array array['transaksi_item','transaksi','layanan','produk','pengeluaran','stok_mutasi',
-                           'produk_log','pengaturan','komisi_kapster','tutup_kasir'] loop
-    execute format('delete from %I where true', t);
+                           'produk_log','pengaturan','komisi_kapster','tutup_kasir',
+                           'kasbon','gaji','absensi','kode_diskon'] loop
+    if d ? t then execute format('delete from %I where true', t); end if;
   end loop;
   foreach t in array array['pengaturan','layanan','produk','transaksi','transaksi_item','pengeluaran',
-                           'stok_mutasi','produk_log','komisi_kapster','tutup_kasir'] loop
+                           'stok_mutasi','produk_log','komisi_kapster','tutup_kasir',
+                           'kasbon','gaji','absensi','kode_diskon'] loop
     if d ? t then
       execute format('insert into %I overriding system value select * from jsonb_populate_recordset(null::%I, $1)', t, t) using d->t;
       jml := jml + 1;
-    end if;
-    if exists (select 1 from information_schema.columns where table_schema='public' and table_name=t and column_name='id' and is_identity='YES') then
-      seq := pg_get_serial_sequence(t, 'id');
-      execute format('select setval(%L, greatest((select coalesce(max(id),0) from %I),1))', seq, t);
+      foreach c in array array['id','urut'] loop
+        if exists (select 1 from information_schema.columns where table_schema='public' and table_name=t and column_name=c and is_identity='YES') then
+          seq := pg_get_serial_sequence(t, c);
+          execute format('select setval(%L, greatest((select coalesce(max(%I),0) from %I),1))', seq, c, t);
+        end if;
+      end loop;
     end if;
   end loop;
+  -- Snapshot lama belum mengenal penanda gaji: komisi yang waktunya sebelum gaji terakhir dianggap sudah dibayar.
+  perform tandai_komisi_lama();
   return jml;
 end $$;
 revoke all on function buat_backup(text,integer), pulihkan_backup(text) from public, anon, authenticated;
@@ -323,3 +333,73 @@ alter table kode_diskon add column if not exists urut bigint generated always as
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('absensi','absensi', true, 200000, array['image/jpeg'])
 on conflict (id) do update set public=true, file_size_limit=200000, allowed_mime_types=array['image/jpeg'];
+
+-- Komisi yang sudah dibayarkan ditandai di barisnya sendiri (transaksi_item.gaji_id), bukan dari tanggal gaji terakhir.
+-- Dengan penanda per baris, transaksi manual bertanggal mundur atau hasil edit tidak ikut hilang dari gaji berikutnya.
+-- Urutan: kolom dulu, fungsi, baru pindahan data lama (sekali, hanya saat kolom baru dibuat).
+do $$
+begin
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='transaksi_item' and column_name='gaji_id') then
+    alter table transaksi_item add column gaji_id text;
+  end if;
+end $$;
+create index if not exists transaksi_item_belum_gaji_idx on transaksi_item(kapster_id) where gaji_id is null;
+
+-- Tandai komisi lama: item milik kapster dengan waktu transaksi <= pembayaran gaji terakhirnya dianggap sudah dibayar.
+create or replace function tandai_komisi_lama() returns integer language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  update transaksi_item i set gaji_id = (
+    select g.id from gaji g, transaksi t
+    where t.id = i.trx_id and g.user_id = i.kapster_id and g.status = 'Dibayar'
+      and g.tanggal_bayar is not null and t.waktu <= g.tanggal_bayar
+    order by g.tanggal_bayar desc limit 1)
+  where i.gaji_id is null and exists (
+    select 1 from gaji g, transaksi t
+    where t.id = i.trx_id and g.user_id = i.kapster_id and g.status = 'Dibayar'
+      and g.tanggal_bayar is not null and t.waktu <= g.tanggal_bayar);
+  get diagnostics n = row_count;
+  return n;
+end $$;
+revoke all on function tandai_komisi_lama() from public, anon, authenticated;
+grant execute on function tandai_komisi_lama() to service_role;
+-- Pindahan data lama: hanya sekali, selama belum ada item bertanda dan sudah ada gaji dibayar.
+do $$
+begin
+  if not exists (select 1 from transaksi_item where gaji_id is not null) then perform tandai_komisi_lama(); end if;
+end $$;
+
+-- Komisi kapster yang belum dibayar: total, jumlah baris, dan id barisnya (agar yang dibayar = yang dihitung).
+create or replace function komisi_belum_dibayar(p_user text) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object(
+    'total', coalesce(sum(i.komisi), 0),
+    'jumlah', count(distinct i.trx_id),
+    'ids', coalesce(jsonb_agg(i.id order by i.id), '[]'::jsonb))
+  from transaksi_item i join transaksi t on t.id = i.trx_id
+  where i.kapster_id = p_user and i.gaji_id is null and t.status in ('Lunas','Selesai');
+$$;
+revoke all on function komisi_belum_dibayar(text) from public, anon, authenticated;
+grant execute on function komisi_belum_dibayar(text) to service_role;
+
+-- Kunci bernama (mutex) untuk aksi yang tidak boleh jalan dobel, mis. bayar gaji. Kedaluwarsa otomatis.
+create table if not exists kunci (nama text primary key, sampai timestamptz not null);
+alter table kunci enable row level security;
+grant all on kunci to service_role;
+create or replace function kunci_ambil(p_nama text, p_detik integer) returns boolean
+language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  insert into kunci(nama, sampai) values (p_nama, now() + make_interval(secs => p_detik))
+  on conflict (nama) do update set sampai = excluded.sampai where kunci.sampai < now();
+  get diagnostics n = row_count;
+  return n > 0;
+end $$;
+create or replace function kunci_lepas(p_nama text) returns void
+language sql security definer set search_path = public as $$ delete from kunci where nama = p_nama; $$;
+revoke all on function kunci_ambil(text,integer), kunci_lepas(text) from public, anon, authenticated;
+grant execute on function kunci_ambil(text,integer), kunci_lepas(text) to service_role;
+
+-- Pengenal permintaan dari kasir (anti dobel-klik, tahan restart server; menggantikan memori sementara).
+alter table transaksi add column if not exists req_id text;
+create unique index if not exists transaksi_req_id_uniq on transaksi(req_id) where req_id is not null;
