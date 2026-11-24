@@ -8161,7 +8161,6 @@ textarea {
 .product-admin-list,
 .change-log,
 .audit-list,
-.backup-list,
 .transaction-list,
 .expense-table-scroll,
 .commission-table-scroll,
@@ -9468,7 +9467,10 @@ textarea {
 }
 
 .backup-list {
+  display: flex;
+  flex-direction: column;
   padding-top: 15px;
+  overflow: hidden;
 }
 
 .backup-list-header {
@@ -9539,6 +9541,15 @@ textarea {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.backup-table-scroll::-webkit-scrollbar,
+.backup-list::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .backup-head,
@@ -10542,7 +10553,6 @@ textarea {
   .product-admin-list,
   .change-log,
   .audit-list,
-  .backup-list,
   .expense-table-scroll,
   .commission-table-scroll,
   .product-tx-table-wrap {
@@ -11037,8 +11047,9 @@ textarea {
   }
 
   .restore-confirm {
-    width: 100%;
-    border-radius: 17px 17px 0 0;
+    width: min(400px, calc(100% - 32px)) !important;
+    border-radius: 16px !important;
+    margin: auto !important;
   }
 
   .kpi-grid,
@@ -17677,6 +17688,59 @@ label .search-select-trigger {
     overflow: visible !important;
     text-overflow: clip !important;
     overflow-wrap: anywhere;
+  }
+
+  .workspace:has(> .backup-page) {
+    height: 100svh;
+    min-height: 100svh;
+    overflow: hidden;
+  }
+
+  .workspace > .content.backup-page {
+    height: 100svh;
+    min-height: 100svh;
+    padding: 70px 14px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    gap: 12px;
+  }
+
+  .backup-page > .backup-hero {
+    flex: 0 0 auto;
+  }
+
+  .backup-page > .backup-list {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+  }
+
+  .backup-page .backup-list-header {
+    flex: 0 0 auto;
+  }
+
+  .backup-page .backup-table-scroll {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .backup-page .backup-table-scroll::-webkit-scrollbar,
+  .backup-page .backup-list::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 }
 
