@@ -4477,6 +4477,24 @@ textarea {
   flex: 0 1 184px;
 }
 
+/* Dua filter pilihan berbagi lebar kosong secara seimbang pada desktop dan
+   tetap memenuhi kolom grid yang sama besar pada layar kecil. */
+.audit-list > .filters > .audit-filter {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.audit-list > .filters > .calendar-picker-wrapper {
+  flex: 0 0 auto;
+}
+
+.audit-list > .filters .calendar-picker-btn {
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
 .audit-filter.open {
   z-index: 20;
 }
@@ -4537,6 +4555,14 @@ textarea {
   border-radius: 13px;
   background: var(--paper);
   box-shadow: 0 16px 36px rgb(35 27 18 / 18%);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.audit-filter-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .audit-filter-option {
@@ -9248,6 +9274,18 @@ textarea {
   box-sizing: border-box;
 }
 
+/* Jejak Audit tetap dapat digulir tanpa menampilkan rel scrollbar. */
+.audit-page-content .audit-table-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.audit-page-content .audit-table-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .audit-head,
 .audit-row {
   display: grid;
@@ -9281,12 +9319,17 @@ textarea {
 }
 
 .audit-action {
+  display: inline-block;
   width: fit-content;
+  max-width: 100%;
   padding: 4px 6px;
   border-radius: 5px;
   color: var(--brass-dark);
   background: var(--brass-soft);
   font-weight: 700;
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: normal;
 }
 
 /* Backup */
@@ -17646,6 +17689,97 @@ label .search-select-trigger {
     overflow: visible !important;
     text-overflow: clip !important;
     overflow-wrap: anywhere;
+  }
+}
+
+/* Jejak Audit di HP: panel mengisi ruang layar di bawah navbar; hanya daftar
+   kartu yang menggulir. Kartu membungkus semua isinya tanpa scroll samping. */
+@media (max-width: 820px) {
+  .workspace:has(> .audit-page-content) {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.audit-page-content {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .audit-page-content > .audit-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    padding-bottom: 0;
+  }
+
+  .audit-page-content > .audit-list > .filters {
+    flex: 0 0 auto;
+  }
+
+  .audit-page-content .audit-table-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  .audit-page-content .audit-table-scroll > .audit-row {
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 10px 12px !important;
+    flex: 0 0 auto;
+  }
+}
+
+/* Jejak Audit tablet dan HP: sisakan 16px di bawah panel, kunci halaman pada
+   viewport, dan arahkan scroll vertikal hanya ke isi daftar. */
+@media (max-width: 1024px) {
+  .workspace:has(> .audit-page-content) {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.audit-page-content {
+    height: 100%;
+    min-height: 0;
+    padding-bottom: 16px !important;
+    overflow: hidden;
+  }
+
+  .audit-page-content > .audit-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    overflow: hidden !important;
+  }
+
+  .audit-page-content > .audit-list > .filters {
+    flex: 0 0 auto;
+  }
+
+  .audit-page-content .audit-table-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
   }
 }
 
