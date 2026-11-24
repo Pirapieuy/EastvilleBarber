@@ -21,9 +21,34 @@ const demoBackups: BackupRow[] = [
     sheet: 9,
     baris: 480,
   },
+  {
+    nama: "BAK_20261028_0200",
+    dibuat: "28/10/2026 · 02.00",
+    sheet: 9,
+    baris: 476,
+  },
+  {
+    nama: "BAK_20261027_0200",
+    dibuat: "27/10/2026 · 02.00",
+    sheet: 9,
+    baris: 470,
+  },
+  {
+    nama: "BAK_20261026_0200",
+    dibuat: "26/10/2026 · 02.00",
+    sheet: 9,
+    baris: 465,
+  },
+  {
+    nama: "BAK_20261025_0200",
+    dibuat: "25/10/2026 · 02.00",
+    sheet: 9,
+    baris: 460,
+  },
 ]
 
 export function BackupPage() {
+  const [confirmBackup, setConfirmBackup] = useState(false)
   const [backups, setBackups] = useState<BackupRow[]>(
     getToken() ? [] : demoBackups,
   )
@@ -173,7 +198,7 @@ export function BackupPage() {
   }
 
   return (
-    <div className="content fit-page">
+    <div className="content fit-page backup-page">
       <DemoNotice live={live} error={liveError} />
       <article className="backup-hero">
         <span className="backup-icon">
@@ -190,7 +215,7 @@ export function BackupPage() {
         </div>
         <Button
           className="primary-button backup-now-btn"
-          onClick={startBackup}
+          onClick={() => setConfirmBackup(true)}
           disabled={backingUp}
         >
           <Icon name={backingUp ? "clock" : "plus"} />
@@ -277,6 +302,46 @@ export function BackupPage() {
           )}
         </div>
       </section>
+      {confirmBackup && (
+        <div
+          className="modal-overlay"
+          onClick={() => !backingUp && setConfirmBackup(false)}
+        >
+          <section
+            className="restore-confirm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="restore-danger-icon">
+              <Icon name="alert" />
+            </span>
+            <h2>Buat backup sekarang?</h2>
+            <p>
+              Sistem akan mencadangkan seluruh data layanan, produk, transaksi,
+              pengeluaran, stok, dan pengaturan komisi saat ini.
+            </p>
+            <div>
+              <Button
+                className="secondary-button"
+                disabled={backingUp}
+                onClick={() => setConfirmBackup(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                className="restore-danger-button"
+                disabled={backingUp}
+                onClick={async () => {
+                  setConfirmBackup(false)
+                  await startBackup()
+                }}
+              >
+                {backingUp ? "Membuat..." : "Lanjutkan"}
+              </Button>
+            </div>
+          </section>
+        </div>
+      )}
+
       {restore > 0 && (
         <div className="modal-overlay">
           <section className="restore-confirm">
