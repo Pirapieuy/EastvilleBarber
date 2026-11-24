@@ -61,11 +61,11 @@ export async function laporanKeuangan(body: B) {
 }
 
 export async function aktivitasKapster(body: B, user: Pengguna) {
+  // Tanpa tanggal = seluruh riwayat kapster ini (dipakai halaman Kapster); dibaca berhalaman.
   const trx = await ambilSemua(() => {
-    let qt = db.from("transaksi").select("id,waktu,lembur,tanggal").eq("status", "Lunas").order("id")
+    let qt = db.from("transaksi").select("id,waktu,lembur,tanggal,metode,total,subtotal,diskon,status,manual").eq("status", "Lunas").order("id")
     if (body.dari && body.sampai) qt = qt.gte("tanggal", body.dari).lte("tanggal", body.sampai)
     else if (body.tanggal) qt = qt.eq("tanggal", body.tanggal)
-    else qt = qt.eq("tanggal", tanggalIso())
     return qt
   })
   const peta = new Map(trx.map((t) => [t.id, t]))
@@ -75,6 +75,8 @@ export async function aktivitasKapster(body: B, user: Pengguna) {
       item: i.nama, qty: Number(i.qty), type: i.tipe, time: fmtJamTitik(new Date(t.waktu)),
       tanggal: t.tanggal, waktu: new Date(t.waktu).getTime(), fee: Number(i.harga) * Number(i.qty),
       comm: Number(i.komisi) || 0, trx: i.trx_id, lembur: t.lembur === "Ya",
+      barber: user.nama, method: t.metode, total: Number(t.total), subtotal: Number(t.subtotal),
+      discount: Number(t.diskon), status: t.status === "Lunas" && t.manual === "Ya" ? "Manual" : t.status,
     }
   })
   rows.sort((a, b) => b.waktu - a.waktu)
