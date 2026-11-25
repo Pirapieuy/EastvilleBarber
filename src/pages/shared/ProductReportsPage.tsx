@@ -6,7 +6,7 @@ import {
   TANGGAL_MULAI,
 } from "../../utils/tanggal"
 import { ReactNode, useEffect, useMemo, useState } from "react"
-import { apiLaporan, getToken } from "../../api"
+import { apiKapster, apiLaporan, AktivitasKapster, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { Icon } from "../../components/common/Icon"
 import {
@@ -285,6 +285,8 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
   const [fetching, setFetching] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [komisiInfoTerbuka, setKomisiInfoTerbuka] = useState(false)
+  const [layananInfoTerbuka, setLayananInfoTerbuka] = useState(false)
+  const [layananList, setLayananList] = useState<AktivitasKapster[]>([])
   const isKapsterView =
     role === "Kapster" ||
     forcedRole === "Kapster" ||
@@ -292,7 +294,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
 
   const rentang = rentangPeriode(mode, tanggal)
 
-  // Tampilan Owner memakai data backend; tampilan Kapster (komisi pribadi) belum tersambung.
   useEffect(() => {
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")
@@ -300,28 +301,64 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
     }
     let batal = false
     setFetching(true)
-    apiLaporan
-      .produk({ dari: rentang.dari, sampai: rentang.sampai })
-      .then((rows) => {
-        if (batal) return
-        setTxList(rows as ProductTransactionRecord[])
-        setLive(true)
-        setLiveError("")
-      })
-      .catch((e) => {
-        console.error("Gagal memuat laporan produk:", e)
-        if (!batal) {
-          // Jangan biarkan data periode sebelumnya/demo tampil sebagai data periode ini
-          setLive(false)
-          setTxList([])
-          setLiveError(e instanceof Error ? e.message : "gagal memuat data")
-        }
-      })
-      .finally(() => !batal && setFetching(false))
+
+    if (isKapsterView) {
+      Promise.allSettled([
+        apiLaporan.produk({ dari: rentang.dari, sampai: rentang.sampai }),
+        apiKapster.aktivitas({ dari: rentang.dari, sampai: rentang.sampai }),
+      ])
+        .then(([prodRes, actRes]) => {
+          if (batal) return
+          let hasLive = false
+          if (prodRes.status === "fulfilled") {
+            setTxList(prodRes.value as ProductTransactionRecord[])
+            hasLive = true
+          }
+          if (actRes.status === "fulfilled") {
+            setLayananList(actRes.value.filter((r) => r.type === "Layanan"))
+            hasLive = true
+          }
+          if (hasLive) {
+            setLive(true)
+            setLiveError("")
+          } else {
+            setLive(false)
+            setTxList([])
+            setLayananList([])
+            const err =
+              prodRes.status === "rejected"
+                ? prodRes.reason
+                : actRes.status === "rejected"
+                  ? actRes.reason
+                  : null
+            setLiveError(err instanceof Error ? err.message : "gagal memuat data")
+          }
+        })
+        .finally(() => !batal && setFetching(false))
+    } else {
+      apiLaporan
+        .produk({ dari: rentang.dari, sampai: rentang.sampai })
+        .then((rows) => {
+          if (batal) return
+          setTxList(rows as ProductTransactionRecord[])
+          setLive(true)
+          setLiveError("")
+        })
+        .catch((e) => {
+          console.error("Gagal memuat laporan produk:", e)
+          if (!batal) {
+            setLive(false)
+            setTxList([])
+            setLiveError(e instanceof Error ? e.message : "gagal memuat data")
+          }
+        })
+        .finally(() => !batal && setFetching(false))
+    }
+
     return () => {
       batal = true
     }
-  }, [rentang.dari, rentang.sampai, reloadKey])
+  }, [rentang.dari, rentang.sampai, reloadKey, isKapsterView])
 
   const ringkas = (kunci: (tx: ProductTransactionRecord) => string) => {
     const per: Record<string, { unit: number; omzet: number }> = {}
@@ -539,36 +576,34 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
         )}
         <DemoNotice live={live} error={liveError} />
         <PageTitle eyebrow="Pendapatan pribadi" title="Komisi Produk Saya" />
-        <div className="segmented full">
-          {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
-            <Button
-              className={mode === m ? "active" : ""}
-              key={m}
-              onClick={() => setMode(m)}
-            >
-              {m}
-            </Button>
-          ))}
+        <div className="kapster-date-toolbar">
+          <CalendarPicker
+            max={TANGGAL_MAKS()}
+            min={TANGGAL_MULAI}
+            value={tanggal}
+            label={labelPeriode(mode, tanggal)}
+            bulanSaja={mode === "Bulanan"}
+            popupHeader={
+              <div
+                className="segmented history-periode"
+                role="group"
+                aria-label="Periode"
+              >
+                {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
+                  <Button
+                    className={mode === m ? "active" : ""}
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                  >
+                    {m}
+                  </Button>
+                ))}
+              </div>
+            }
+            onChange={(d) => d && setTanggal(d)}
+          />
         </div>
-        {mode === "Bulanan" ? (
-          <div className="commission-month-shell">
-            <MonthPicker
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
-              value={bulan}
-              onChange={(b) => b && setTanggal(`${b}-01`)}
-            />
-          </div>
-        ) : (
-          <div className="commission-month-shell">
-            <CalendarPicker
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
-              value={tanggal}
-              onChange={(d) => d && setTanggal(d)}
-            />
-          </div>
-        )}
         {(() => {
           const lunas = live ? txList.filter((t) => t.status === "Lunas") : null
           const perProduk: Record<string, number> = {}
@@ -577,7 +612,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
               (perProduk[t.product] =
                 (perProduk[t.product] ?? 0) + t.barberShare),
           )
-          const daftar: [string, number][] = lunas
+          const daftarProduk: [string, number][] = lunas
             ? Object.entries(perProduk).sort((x, y) => y[1] - x[1])
             : [
                 ["Free Style Dust", 10000],
@@ -585,19 +620,48 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                 ["Water Based Pomade", 10000],
                 ["Miracle Treatment", 10000],
               ]
+
+          const perLayanan: Record<string, number> = {}
+          if (live) {
+            layananList.forEach((r) => {
+              perLayanan[r.item] = (perLayanan[r.item] ?? 0) + (r.comm || 0)
+            })
+          }
+          const daftarLayanan: [string, number][] = live
+            ? Object.entries(perLayanan).sort((x, y) => y[1] - x[1])
+            : [
+                ["Haircut Classic", 180000],
+                ["Haircut + Wash + Tonic", 140000],
+                ["Gentlemen Grooming", 90000],
+                ["Beard Trim & Shape", 60000],
+              ]
+
+          const totalProdukComm = lunas
+            ? lunas.reduce((n, t) => n + t.barberShare, 0)
+            : 50000
+          const totalLayananComm = live
+            ? layananList.reduce((n, r) => n + (r.comm || 0), 0)
+            : 470000
+          const totalKomisi = totalProdukComm + totalLayananComm
+
+          const totalUnit =
+            (lunas ? lunas.reduce((n, t) => n + t.qty, 0) : 10) +
+            (live ? layananList.reduce((n, r) => n + r.qty, 0) : 34)
+          const totalTrxCount =
+            lunas && live
+              ? new Set([
+                  ...lunas.map((t) => t.id),
+                  ...layananList.map((r) => r.trx),
+                ]).size
+              : 18
+
           return (
             <>
               <article className="my-salary-hero">
                 <span>Komisi</span>
-                <strong>
-                  {lunas
-                    ? rupiah(lunas.reduce((n, t) => n + t.barberShare, 0))
-                    : "Rp 520.000"}
-                </strong>
+                <strong>{rupiah(totalKomisi)}</strong>
                 <p>
-                  {lunas
-                    ? `${lunas.reduce((n, t) => n + t.qty, 0)} unit · ${new Set(lunas.map((t) => t.id)).size} transaksi`
-                    : "44 unit · 18 transaksi"}
+                  {totalUnit} unit · {totalTrxCount} transaksi
                 </p>
                 <i>
                   <b />
@@ -610,48 +674,100 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       : "Data contoh · belum terhubung ke server"}
                 </small>
               </article>
-              <section className="panel customer-list">
-                <PageTitle
-                  eyebrow="Penjualan pribadi"
-                  title={
-                    <span className="product-commission-title">
-                      <span>Komisi per produk</span>
-                      <span className="product-commission-info-anchor">
-                        <button
-                          type="button"
-                          className="product-commission-info-button"
-                          aria-label="Informasi komisi per produk"
-                          aria-expanded={komisiInfoTerbuka}
-                          onClick={() =>
-                            setKomisiInfoTerbuka((open) => !open)
-                          }
-                        >
-                          <Icon name="alert" />
-                        </button>
-                        {komisiInfoTerbuka && (
-                          <span className="product-commission-info-popover" role="status">
-                            Bagian seller dan Eastville tidak ditampilkan.
-                          </span>
-                        )}
+
+              <div className="kapster-commission-cards-grid">
+                <section className="panel customer-list kapster-commission-card">
+                  <PageTitle
+                    eyebrow="Penjualan pribadi"
+                    title={
+                      <span className="product-commission-title">
+                        <span>Komisi per produk</span>
+                        <span className="product-commission-info-anchor">
+                          <button
+                            type="button"
+                            className="product-commission-info-button"
+                            aria-label="Informasi komisi per produk"
+                            aria-expanded={komisiInfoTerbuka}
+                            onClick={() =>
+                              setKomisiInfoTerbuka((open) => !open)
+                            }
+                          >
+                            <Icon name="alert" />
+                          </button>
+                          {komisiInfoTerbuka && (
+                            <span
+                              className="product-commission-info-popover"
+                              role="status"
+                            >
+                              Bagian seller dan Eastville tidak ditampilkan.
+                            </span>
+                          )}
+                        </span>
                       </span>
-                    </span>
-                  }
-                />
-                {daftar.map((x) => (
-                  <div key={x[0]}>
-                    <i>
-                      <Icon name="product" />
-                    </i>
-                    <strong>{x[0]}</strong>
-                    <b>+{rupiah(x[1])}</b>
-                  </div>
-                ))}
-                {lunas && daftar.length === 0 && (
-                  <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
-                    Belum ada penjualan produk pada periode ini.
-                  </p>
-                )}
-              </section>
+                    }
+                  />
+                  {daftarProduk.map((x) => (
+                    <div key={x[0]}>
+                      <i>
+                        <Icon name="product" />
+                      </i>
+                      <strong>{x[0]}</strong>
+                      <b>+{rupiah(x[1])}</b>
+                    </div>
+                  ))}
+                  {lunas && daftarProduk.length === 0 && (
+                    <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                      Belum ada penjualan produk pada periode ini.
+                    </p>
+                  )}
+                </section>
+
+                <section className="panel customer-list kapster-commission-card">
+                  <PageTitle
+                    eyebrow="Layanan pribadi"
+                    title={
+                      <span className="product-commission-title">
+                        <span>Komisi per layanan</span>
+                        <span className="product-commission-info-anchor">
+                          <button
+                            type="button"
+                            className="product-commission-info-button"
+                            aria-label="Informasi komisi per layanan"
+                            aria-expanded={layananInfoTerbuka}
+                            onClick={() =>
+                              setLayananInfoTerbuka((open) => !open)
+                            }
+                          >
+                            <Icon name="alert" />
+                          </button>
+                          {layananInfoTerbuka && (
+                            <span
+                              className="product-commission-info-popover"
+                              role="status"
+                            >
+                              Dihitung dari komisi transaksi layanan yang selesai.
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                    }
+                  />
+                  {daftarLayanan.map((x) => (
+                    <div key={x[0]}>
+                      <i className="service-icon-box">
+                        <Icon name="cashier" />
+                      </i>
+                      <strong>{x[0]}</strong>
+                      <b>+{rupiah(x[1])}</b>
+                    </div>
+                  ))}
+                  {live && daftarLayanan.length === 0 && (
+                    <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                      Belum ada pengerjaan layanan pada periode ini.
+                    </p>
+                  )}
+                </section>
+              </div>
             </>
           )
         })()}

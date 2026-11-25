@@ -12387,6 +12387,65 @@ textarea {
   }
 }
 
+.kapster-date-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.kapster-date-toolbar .calendar-picker-wrapper {
+  width: auto;
+  min-width: 200px;
+}
+
+.kapster-date-toolbar .calendar-picker-btn {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgb(20 17 15 / 4%);
+}
+
+.kapster-commission-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.app-shell-kapster .customer-list > div > i.service-icon-box {
+  color: var(--brass-dark) !important;
+  background: var(--brass-soft) !important;
+}
+
+@media (max-width: 767px) {
+  .kapster-date-toolbar,
+  .kapster-date-toolbar .calendar-picker-wrapper,
+  .kapster-date-toolbar .calendar-picker-btn {
+    width: 100% !important;
+  }
+
+  .kapster-commission-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
 @media (max-width: 700px) {
   .kapster-dashboard .progress-meta {
     align-items: center;
@@ -12397,12 +12456,10 @@ textarea {
 
 @media (max-width: 1024px) {
   .app-shell-kapster .kapster-product-commission > .calendar-picker-wrapper,
-  .app-shell-kapster .kapster-product-commission > .commission-month-shell,
-  .app-shell-kapster .kapster-product-commission .commission-month-shell .calendar-picker-wrapper,
+  .app-shell-kapster .kapster-product-commission > .kapster-date-toolbar,
+  .app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-wrapper,
   .app-shell-kapster .kapster-product-commission > .calendar-picker-wrapper > .calendar-picker-btn,
-  .app-shell-kapster .kapster-product-commission .commission-month-shell .calendar-picker-btn {
-    width: 100%;
-    max-width: none;
+  .app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-btn {
     box-sizing: border-box;
   }
 }
@@ -16772,36 +16829,65 @@ label .search-select-trigger {
     overflow: visible;
   }
 
-  /* Komisi Produk Saya: Harian/Mingguan/Bulanan + tanggal dalam 1 baris */
+  /* Komisi Produk & Layanan Kapster: layout laptop */
   .app-shell-kapster .kapster-product-commission {
-    display: grid;
-    grid-template-columns: 420px 300px minmax(0, 1fr);
-    justify-content: start;
-    column-gap: 16px;
-    row-gap: 16px;
-    gap: 16px;
-    align-content: start;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    gap: 16px !important;
+    padding: 16px 14px 16px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > * {
-    grid-column: 1 / -1;
-    margin: 0;
+    margin: 0 !important;
   }
 
-  .app-shell-kapster .kapster-product-commission > .segmented {
-    grid-column: 1;
+  .app-shell-kapster .kapster-product-commission > .kapster-date-toolbar {
+    flex: 0 0 auto !important;
   }
 
-  .app-shell-kapster .kapster-product-commission > .commission-month-shell {
-    grid-column: 2;
+  .app-shell-kapster .kapster-product-commission > .my-salary-hero {
+    flex: 0 0 auto !important;
   }
 
-  .app-shell-kapster .kapster-product-commission > .commission-month-shell .calendar-picker-wrapper,
-  .app-shell-kapster .kapster-product-commission > .commission-month-shell .calendar-picker-btn {
-    width: 100%;
-    height: 100%;
-    min-height: 44px;
-    justify-content: center;
+  .app-shell-kapster .kapster-product-commission > .kapster-commission-cards-grid {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+  }
+
+  .app-shell-kapster .kapster-commission-cards-grid > .customer-list {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .app-shell-kapster .kapster-commission-cards-grid > .customer-list::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .app-shell-kapster .kapster-commission-cards-grid > .customer-list > .page-title {
+    position: sticky !important;
+    top: 0 !important;
+    background: var(--paper) !important;
+    z-index: 3 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 0 !important;
   }
 }
 
@@ -16882,25 +16968,6 @@ label .search-select-trigger {
     min-height: 100svh;
     display: flex;
     flex-direction: column;
-  }
-
-  .app-shell-kapster .kapster-product-commission {
-    flex: 1 1 auto;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    grid-template-rows: auto auto auto 1fr;
-    justify-content: stretch;
-  }
-
-  .app-shell-kapster .kapster-product-commission > .segmented,
-  .app-shell-kapster .kapster-product-commission > .commission-month-shell {
-    align-self: stretch;
-  }
-
-  .app-shell-kapster .kapster-product-commission > .panel {
-    align-self: stretch;
   }
 
   .app-shell-kapster .my-salary-page {
@@ -17046,10 +17113,6 @@ label .search-select-trigger {
 }
 
 @media (min-width: 1025px) {
-  .app-shell-kapster .kapster-product-commission {
-    grid-template-rows: auto auto 1fr;
-  }
-
   .app-shell-kapster .my-salary-page {
     grid-template-rows: auto auto 1fr;
     align-content: stretch;
