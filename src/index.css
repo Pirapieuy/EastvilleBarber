@@ -27271,7 +27271,54 @@ html:has(.manual-page .modal-overlay) {
   }
 }
 
-/* Responsive Pendapatan Kapster: halaman dan riwayat mengalir natural di mobile/tablet */
+/* Responsive Pendapatan Kapster: batasi tinggi kartu riwayat dan gulir baris di dalamnya. */
+@media (min-width: 1025px) and (max-width: 1199px) {
+  /* Keep the compact laptop layout in normal document flow so the page can scroll. */
+  .workspace:has(> .mobile-content.my-salary-page) {
+    height: auto !important;
+    min-height: 100svh;
+    overflow: visible !important;
+  }
+
+  .workspace > .mobile-content.my-salary-page {
+    flex: 0 0 auto !important;
+    grid-template-rows: none !important;
+    align-content: start;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-transaction-history {
+    display: flex;
+    flex-direction: column;
+    height: clamp(300px, calc(100svh - 120px), 620px) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-transaction-history .kapster-history-content,
+  .app-shell-kapster .my-salary-page > .kapster-transaction-history .kapster-history-content .master-detail {
+    flex: 1 1 0% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-transaction-history .kapster-history-content .master-detail {
+    display: flex !important;
+    flex-direction: column !important;
+    margin-top: 8px !important;
+  }
+
+  .app-shell-kapster .my-salary-page > .kapster-transaction-history .transaction-list {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 @media (max-width: 1024px) {
   .workspace:has(> .mobile-content.my-salary-page) {
     height: auto !important;
@@ -27290,25 +27337,32 @@ html:has(.manual-page .modal-overlay) {
 
   .app-shell-kapster .my-salary-page > .kapster-transaction-history {
     flex: 0 0 auto !important;
-    height: auto !important;
-    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    height: clamp(260px, calc(100svh - 68px), 620px) !important;
+    min-height: 0 !important;
     align-self: stretch;
-    overflow: visible !important;
+    overflow: hidden !important;
   }
 
   .app-shell-kapster .my-salary-page > .kapster-transaction-history .kapster-history-content,
-  .app-shell-kapster .my-salary-page > .kapster-transaction-history .master-detail {
-    flex: 0 0 auto !important;
-    height: auto !important;
-    min-height: 0;
-    overflow: visible !important;
+  .app-shell-kapster .my-salary-page > .kapster-transaction-history .kapster-history-content .master-detail {
+    flex: 1 1 0% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
   .app-shell-kapster .my-salary-page > .kapster-transaction-history .transaction-list {
-    flex: 0 0 auto !important;
+    flex: 1 1 0% !important;
     height: auto !important;
     max-height: none !important;
-    overflow: visible !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 }
 
