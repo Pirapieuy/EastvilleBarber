@@ -7005,7 +7005,7 @@ textarea {
 }
 
 .absensi-body {
-  padding-bottom: 24px;
+  padding-bottom: 14px;
 }
 
 .absensi-tab {
@@ -7084,7 +7084,7 @@ textarea {
 }
 
 .absensi-history-empty {
-  padding: 24px;
+  padding: 14px;
   color: var(--muted);
   text-align: center;
 }
@@ -9415,7 +9415,7 @@ textarea {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 14px 20px;
+  padding: 14px;
   border-radius: 12px;
   color: var(--paper);
   background:
@@ -9564,12 +9564,12 @@ textarea {
 .backup-list {
   display: flex;
   flex-direction: column;
-  padding-top: 15px;
+  padding-top: 14px;
   overflow: hidden;
 }
 
 .backup-list-header {
-  padding: 0 15px 14px;
+  padding: 0 14px 14px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -11838,7 +11838,7 @@ textarea {
 /* Kasir attendance: tablet workspace and history controls */
 .mobile-content.absensi-kasir {
   width: min(840px, 100%);
-  padding: 24px 14px 40px;
+  padding: 14px;
 }
 
 .absensi-history-filters {
@@ -11902,7 +11902,7 @@ textarea {
 
 @media (max-width: 820px) {
   .mobile-content.absensi-kasir {
-    padding: 68px 14px 28px !important;
+    padding: 68px 14px 14px !important;
   }
 }
 
@@ -13441,7 +13441,7 @@ summary,
 
 .history-empty {
   margin: 0;
-  padding: 24px 14px;
+  padding: 14px;
   color: var(--slate);
   font-size: 13px;
   text-align: center;
@@ -15526,7 +15526,7 @@ label .search-select-trigger {
     min-height: 0;
     box-sizing: border-box;
     overflow: hidden;
-    padding: 68px 14px 12px !important;
+    padding: 68px 14px 14px !important;
   }
 
   .mobile-content.attendance-history-page > .attendance-history-panel {
@@ -16138,7 +16138,7 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-history {
-  padding: 18px;
+  padding: 14px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
@@ -16521,7 +16521,7 @@ label .search-select-trigger {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    padding-bottom: 22px !important;
+    padding-bottom: 14px !important;
   }
 
   .kasbon-kapster-page > .panel,
@@ -17919,12 +17919,12 @@ label .search-select-trigger {
   .workspace > .content.backup-page {
     height: 100svh;
     min-height: 100svh;
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
     display: flex !important;
     flex-direction: column !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-    gap: 12px;
+    gap: 14px;
   }
 
   .backup-page > .backup-hero {
@@ -18246,14 +18246,14 @@ label .search-select-trigger {
 }
 
 /* ===== HP/tablet: satu ritme jarak untuk semua halaman =====
-   samping 14px, atas 14px di bawah navbar (54px), antar blok 12px, bawah 20px */
+   samping 14px, atas 14px di bawah navbar (54px), antar blok 14px, bawah 14px */
 @media (max-width: 1024px) {
   .workspace > .content,
   .workspace > .mobile-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 68px 14px 20px !important;
+    gap: 14px;
+    padding: 68px 14px 14px !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -18268,7 +18268,7 @@ label .search-select-trigger {
 
   .workspace > .content > .kpi-grid,
   .workspace > .mobile-content > .kpi-grid {
-    gap: 12px;
+    gap: 14px;
   }
 
   /* kartu KPI: isi tidak menempel ke tepi kartu */
@@ -20424,7 +20424,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .kasbon-kapster-history {
-  padding: 18px;
+  padding: 14px;
 }
 
 .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
@@ -21058,7 +21058,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 /* Izin Kapster: padding kartu dan jarak antar kartu sama di semua lebar */
 .izin-kapster-page > .panel {
-  padding: 18px;
+  padding: 14px;
 }
 
 .izin-kapster-page > .panel + .panel {
@@ -21106,7 +21106,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 /* Kasbon Kapster: padding kartu, jarak antar kartu, padding bawah dan tombol sama di semua lebar (sama seperti Izin Kapster) */
 .kasbon-kapster-page > .panel {
-  padding: 18px;
+  padding: 14px;
 }
 
 .kasbon-kapster-page > .panel + .panel,
@@ -21396,12 +21396,12 @@ html:has(.manual-page .modal-overlay) {
 }
 
 /* Kasir POS: semua jarak 16px (kecuali label ke isian), sama di semua lebar layar */
-.cashier-page .catalog-sticky { gap: 16px !important; padding-bottom: 16px !important; margin-bottom: 16px !important; }
-.cashier-page .catalog-grid { gap: 16px !important; }
-.cashier-page .barber-picker { padding: 10px 16px !important; gap: 16px !important; }
-.cashier-page .catalog-item { padding: 16px !important; }
-.cashier-page .cart-lines { padding: 16px !important; }
-.cashier-page .cart-total { padding: 16px !important; gap: 16px !important; }
+.cashier-page .catalog-sticky { gap: 14px !important; padding-bottom: 14px !important; margin-bottom: 14px !important; }
+.cashier-page .catalog-grid { gap: 14px !important; }
+.cashier-page .barber-picker { padding: 10px 14px !important; gap: 14px !important; }
+.cashier-page .catalog-item { padding: 14px !important; }
+.cashier-page .cart-lines { padding: 14px !important; }
+.cashier-page .cart-total { padding: 14px !important; gap: 14px !important; }
 .cashier-page .cart-discount-panel { padding: 16px !important; }
 .cashier-page .cart-payment { padding-top: 0 !important; gap: 16px !important; }
 .cashier-page .cart-payment .method-grid { gap: 16px !important; }
