@@ -1682,6 +1682,7 @@ textarea {
 .kapster-activity-panel > .page-title {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
 }
 
 .shift-badges {
