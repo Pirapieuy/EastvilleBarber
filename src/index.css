@@ -1121,6 +1121,7 @@ textarea {
   gap: 10px;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 .user-avatar-circle {
@@ -1145,6 +1146,9 @@ textarea {
 }
 
 .user-info-text strong {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -1470,6 +1474,7 @@ textarea {
 }
 
 .sidebar-account-row .logout-button {
+  flex-shrink: 0;
   width: 36px;
   min-width: 36px;
   min-height: 36px;
