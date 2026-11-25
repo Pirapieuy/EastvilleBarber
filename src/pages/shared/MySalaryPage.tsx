@@ -132,13 +132,13 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
       .aktivitas(dateFilter ? rentangPeriode(modePeriode, dateFilter) : {})
       .then((rows) => {
         if (stale) return
-        const anyRow = (rows as AktivitasKapster[])[0] as any
-        const hasCommField = anyRow && "comm" in anyRow
-        // Fallback: edge function lama tidak mengembalikan 'comm'; hitung 40% dari fee layanan
+        // Pakai comm dari backend; fallback 40% fee layanan bila comm = 0 (data lama / edge function belum deploy)
         const hitungComm = (row: AktivitasKapster): number => {
-          const fromBackend = Number((row as any).comm)
+          const r = row as any
+          const fromBackend = Number(r.comm ?? r.komisi ?? r.commission)
           if (Number.isFinite(fromBackend) && fromBackend > 0) return fromBackend
-          if (!hasCommField && row.type === "Layanan") return Math.round(row.fee * 0.4)
+          // comm 0 + layanan berbayar → estimasi 40% (default komisi barbershop)
+          if (row.type === "Layanan" && row.fee > 0) return Math.round(row.fee * 0.4)
           return 0
         }
         const grouped = new Map<string, KapsterTransaction>()

@@ -624,7 +624,8 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
           const perLayanan: Record<string, number> = {}
           if (live) {
             layananList.forEach((r) => {
-              perLayanan[r.item] = (perLayanan[r.item] ?? 0) + (r.comm || 0)
+              const comm = Number(r.comm) > 0 ? Number(r.comm) : (r.fee > 0 ? Math.round(r.fee * 0.4) : 0)
+              perLayanan[r.item] = (perLayanan[r.item] ?? 0) + comm
             })
           }
           const daftarLayanan: [string, number][] = live
@@ -640,7 +641,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
             ? lunas.reduce((n, t) => n + t.barberShare, 0)
             : 50000
           const totalLayananComm = live
-            ? layananList.reduce((n, r) => n + (r.comm || 0), 0)
+            ? layananList.reduce((n, r) => n + (Number(r.comm) > 0 ? Number(r.comm) : (r.fee > 0 ? Math.round(r.fee * 0.4) : 0)), 0)
             : 470000
           const totalKomisi = totalProdukComm + totalLayananComm
 

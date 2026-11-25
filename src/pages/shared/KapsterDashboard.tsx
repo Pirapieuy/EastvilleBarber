@@ -104,7 +104,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
         item: r.item,
         time: r.time,
         fee: r.fee,
-        comm: r.comm,
+        comm: (Number(r.comm) > 0 ? Number(r.comm) : (r.type === "Layanan" && r.fee > 0 ? Math.round(r.fee * 0.4) : 0)),
         type: r.type,
         qty: r.qty,
         trx: r.trx,
