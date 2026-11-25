@@ -29,7 +29,8 @@ interface KapsterTransaction {
   id: string
   date: string
   time: string
-  items: { name: string; qty: number; price: number; type: "Layanan" | "Produk" }[]
+  items: { name: string; qty: number; price: number; comm: number; type: "Layanan" | "Produk" }[]
+  komisi: number
   barber: string
   method?: "Tunai" | "QRIS" | "Gabungan"
   total?: number
@@ -138,6 +139,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             date: row.tanggal ? formatTanggal(row.tanggal) : "",
             time: row.time,
             items: [],
+            komisi: 0,
             barber: row.barber || namaKapster,
             method: row.method,
             total: row.total,
@@ -145,10 +147,13 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             discount: row.discount,
             status: row.status || "Lunas",
           }
+          const itemComm = row.comm ?? 0
+          tx.komisi += itemComm
           tx.items.push({
             name: row.item,
             qty: row.qty,
             price: row.qty ? row.fee / row.qty : row.fee,
+            comm: itemComm,
             type: row.type,
           })
           grouped.set(row.trx, tx)
@@ -272,7 +277,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
           <section ref={listRef} className="panel transaction-list">
             <div className="table-head">
               <span>Nota</span>
-              <span>Kapster</span>
+              <span>Komisi</span>
               <span>Item</span>
             </div>
             {!loading && visibleTransactions.length === 0 && (
@@ -300,7 +305,9 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
                       {tx.date} · {tx.time}
                     </small>
                   </div>
-                  <span className="tx-cell-kapster">{tx.barber}</span>
+                  <span className="tx-cell-komisi">
+                    <strong>+{rupiah(tx.komisi)}</strong>
+                  </span>
                   <span
                     className="tx-cell-items"
                     title={tx.items

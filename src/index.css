@@ -26534,8 +26534,15 @@ html:has(.manual-page .modal-overlay) {
 
 .kapster-history-content .tx-cell-time,
 .kapster-history-content .tx-cell-kapster,
+.kapster-history-content .tx-cell-komisi,
 .kapster-history-content .tx-cell-items {
   font-size: 14px;
+}
+
+.kapster-history-content .tx-cell-komisi strong {
+  color: var(--sage);
+  font-weight: 700;
+  font-size: 13.5px;
 }
 
 .kapster-transaction-modal .transaction-modal-box {
@@ -26657,6 +26664,7 @@ html:has(.manual-page .modal-overlay) {
 
   .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-time,
   .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-kapster,
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-komisi,
   .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-items {
     font-size: 10px !important;
     line-height: 1.25;
