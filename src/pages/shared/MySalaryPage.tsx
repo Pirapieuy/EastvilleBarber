@@ -298,6 +298,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             <div className="table-head">
               <span>Nota</span>
               <span>Komisi</span>
+              <span>Pembayaran</span>
               <span>Item</span>
             </div>
             {!loading && visibleTransactions.length === 0 && (
@@ -327,6 +328,9 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
                   </div>
                   <span className="tx-cell-komisi">
                     <strong>+{rupiah(Number.isFinite(tx.komisi) ? tx.komisi : 0)}</strong>
+                  </span>
+                  <span className="tx-cell-method">
+                    {tx.method || "–"}
                   </span>
                   <span
                     className="tx-cell-items"
