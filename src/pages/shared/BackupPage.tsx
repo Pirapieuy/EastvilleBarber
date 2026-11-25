@@ -228,10 +228,8 @@ export function BackupPage() {
           <div className="backup-banner">
             <Icon name="alert" />
             <span>
-              Pulihkan mengganti data layanan, produk, transaksi, pengeluaran,
-              stok, dan pengaturan komisi dengan isi backup. Sebelumnya sistem
-              otomatis membuat backup baru dari kondisi saat ini sebagai
-              pengaman. Data akun tidak ikut.
+              Pulihkan mengganti data bisnis dengan isi backup. Sistem otomatis
+              membuat backup pengaman dulu. Data akun tidak ikut.
             </span>
           </div>
         </div>
