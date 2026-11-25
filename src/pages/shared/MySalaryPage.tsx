@@ -463,7 +463,7 @@ export function MySalaryPage({ currentUser }: { currentUser: AppUser }) {
         <strong>{rupiah(data.totalKomisi)}</strong>
         <p>{data.transaksiSelesai} transaksi selesai</p>
         <i>
-          <b />
+          <b /><b /><b />
         </i>
         <small>
           {loading
