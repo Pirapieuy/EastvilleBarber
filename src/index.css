@@ -1166,27 +1166,6 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   width: max-content;
-}
-
-.role-chip.role-owner {
-  background: rgb(200 150 62 / 22%);
-  color: var(--brass);
-  border: 1px solid rgb(200 150 62 / 45%);
-}
-
-.role-chip.role-manajer {
-  background: rgb(82 148 116 / 22%);
-  color: #72cf9f;
-  border: 1px solid rgb(82 148 116 / 45%);
-}
-
-.role-chip.role-kasir {
-  background: rgb(212 138 46 / 22%);
-  color: #f1a94e;
-  border: 1px solid rgb(212 138 46 / 45%);
-}
-
-.role-chip.role-kapster {
   background: rgb(140 140 140 / 22%);
   color: #e2e2e2;
   border: 1px solid rgb(140 140 140 / 45%);
