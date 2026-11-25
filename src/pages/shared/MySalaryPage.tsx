@@ -117,7 +117,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
   const [dateFilter, setDateFilter] = useState("")
   const [modePeriode, setModePeriode] = useState<ModePeriode>("Harian")
   const [search, setSearch] = useState("")
-  const [methodFilter, setMethodFilter] = useState<"Semua" | "Tunai" | "QRIS">(
+  const [typeFilter, setTypeFilter] = useState<"Semua" | "Layanan" | "Produk">(
     "Semua",
   )
   const [selected, setSelected] = useState<KapsterTransaction | null>(null)
@@ -192,12 +192,10 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             .join(" ")
             .toLowerCase()
             .includes(query)) &&
-        (methodFilter === "Semua" ||
-          !tx.method ||
-          tx.method === methodFilter ||
-          tx.method === "Gabungan"),
+        (typeFilter === "Semua" ||
+          tx.items.some((item) => item.type === typeFilter)),
     )
-  }, [transactions, search, methodFilter])
+  }, [transactions, search, typeFilter])
 
   useEffect(() => {
     if (selected && !visibleTransactions.some((tx) => tx.id === selected.id)) {
@@ -257,15 +255,15 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
           <div
             className="segmented history-method-filter"
             role="group"
-            aria-label="Filter metode pembayaran"
+            aria-label="Filter tipe transaksi"
           >
-            {(["Semua", "Tunai", "QRIS"] as const).map((method) => (
+            {(["Semua", "Layanan", "Produk"] as const).map((type) => (
               <Button
-                className={methodFilter === method ? "active" : ""}
-                key={method}
-                onClick={() => setMethodFilter(method)}
+                className={typeFilter === type ? "active" : ""}
+                key={type}
+                onClick={() => setTypeFilter(type)}
               >
-                {method}
+                {type}
               </Button>
             ))}
           </div>
