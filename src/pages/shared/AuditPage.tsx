@@ -239,12 +239,16 @@ function parseAuditRow(row: AuditLogRow): string[] {
   ]
 }
 
+const PAGE_SIZE = 50
+
 export function AuditPage() {
   const [realLogs, setRealLogs] = useState<AuditLogRow[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [filterDate, setFilterDate] = useState("")
   const [filterAksi, setFilterAksi] = useState("Semua jenis aksi")
   const [filterUser, setFilterUser] = useState("Semua pengguna")
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!getToken()) return
@@ -298,6 +302,30 @@ export function AuditPage() {
       })
       .map(parseAuditRow)
   }, [realLogs, filterDate, filterAksi, filterUser])
+
+  const visibleRows = rowsToDisplay.slice(0, visibleCount)
+  const hasMore = visibleCount < rowsToDisplay.length
+
+  // Reset ke halaman pertama saat filter berubah
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [filterDate, filterAksi, filterUser])
+
+  // Lazy load: tambah baris saat sentinel terlihat
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + PAGE_SIZE)
+        }
+      },
+      { threshold: 0.1 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasMore])
 
   return (
     <div className="content audit-page-content fit-page">
@@ -362,24 +390,34 @@ export function AuditPage() {
               Tidak ada jejak audit yang cocok dengan filter.
             </div>
           ) : (
-            rowsToDisplay.map((row, idx) => (
-              <article className="audit-row" key={`${row[0]}-${row[1]}-${idx}`}>
-                {row.map((value, index) => (
-                  <span
-                    data-label={
-                      ["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][
-                        index
-                      ]
-                    }
-                    key={`${value}-${index}`}
-                  >
-                    <span className={index === 2 ? "audit-action" : undefined}>
-                      {value}
+            <>
+              {visibleRows.map((row, idx) => (
+                <article className="audit-row" key={`${row[0]}-${row[1]}-${idx}`}>
+                  {row.map((value, index) => (
+                    <span
+                      data-label={
+                        ["Waktu", "Pengguna", "Aksi", "Objek", "Detail", "Alasan"][
+                          index
+                        ]
+                      }
+                      key={`${value}-${index}`}
+                    >
+                      <span className={index === 2 ? "audit-action" : undefined}>
+                        {value}
+                      </span>
                     </span>
-                  </span>
-                ))}
-              </article>
-            ))
+                  ))}
+                </article>
+              ))}
+              {hasMore && (
+                <div
+                  ref={sentinelRef}
+                  style={{ padding: "14px", textAlign: "center", color: "var(--slate)", fontSize: 12 }}
+                >
+                  Memuat lebih banyak...
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
