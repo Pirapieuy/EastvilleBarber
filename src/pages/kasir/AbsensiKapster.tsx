@@ -396,7 +396,7 @@ export function AbsensiKapster({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
+    padding: 14,
   }
 
   const modalPanelStyle: CSSProperties = {
@@ -465,7 +465,7 @@ export function AbsensiKapster({
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 60,
-            padding: "10px 16px",
+            padding: "10px 14px",
             borderRadius: 10,
             color: "#fff",
             fontSize: 13,
@@ -513,7 +513,7 @@ export function AbsensiKapster({
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
               <CalendarPicker
@@ -578,7 +578,7 @@ export function AbsensiKapster({
                       key={k.id}
                       className="panel absensi-row"
                       style={{
-                        padding: "14px 16px",
+                        padding: "14px 14px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -732,9 +732,9 @@ export function AbsensiKapster({
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
-                paddingBottom: 16,
+                paddingBottom: 14,
                 borderBottom: "1px solid var(--line)",
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
               <span className="absensi-modal-icon">
@@ -840,7 +840,7 @@ export function AbsensiKapster({
                 <button
                   type="button"
                   className="secondary-button"
-                  style={{ padding: "8px 16px" }}
+                  style={{ padding: "8px 14px" }}
                   onClick={() => {
                     setPhotoError("")
                     setCameraReady(false)

@@ -354,6 +354,12 @@ export interface AktivitasKapster {
   trx: string
   /** transaksi di luar jam kerja (komisi lembur) */
   lembur?: boolean
+  barber?: string
+  method?: "Tunai" | "QRIS" | "Gabungan"
+  total?: number
+  subtotal?: number
+  discount?: number
+  status?: "Lunas" | "BATAL" | "Manual"
 }
 
 export const apiKapster = {

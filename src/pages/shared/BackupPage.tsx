@@ -295,7 +295,7 @@ export function BackupPage() {
           {backups.length === 0 && (
             <div
               style={{
-                padding: "24px 16px",
+                padding: "24px 14px",
                 textAlign: "center",
                 color: "var(--slate)",
               }}

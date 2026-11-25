@@ -3,38 +3,24 @@
 import { ApiError, db, gagal, hashPin, ok, tanggalIso, tulisAudit, wajibRole } from "../util.ts"
 
 const ROLE_VALID = ["Owner", "Kasir", "Kapster"]
+/** true bila setelah `id` berhenti jadi Owner aktif masih ada Owner aktif lain. */
+async function adaOwnerLain(id: string) {
+  const { data } = await db.from("users").select("id").eq("role", "Owner").eq("status", "Aktif").neq("id", id).limit(1)
+  return !!data?.length
+}
 const enam = (s: string) => /^\d{6}$/.test(s)
 
-export async function forgotPin(body: Record<string, string>) {
-  const email = (body.email || "").trim().toLowerCase()
-  if (!email || !email.includes("@")) return gagal("Email tidak valid.")
-  const { data: u } = await db.from("users").select("id,nama,email").ilike("email", email).maybeSingle()
-  if (!u) return gagal("Email tidak terdaftar di sistem Eastville.")
-  const resetToken = "rst-" + crypto.randomUUID().replace(/-/g, "").slice(0, 16)
-  await db.from("reset_pin").insert({
-    token: resetToken, email: u.email.toLowerCase(),
-    kadaluarsa: new Date(Date.now() + 900_000).toISOString(),
-  })
-  await tulisAudit(u.id, u.nama, "FORGOT_PIN", "Permintaan reset PIN via email: " + email)
-  return ok({ resetToken, email: u.email }, "Tautan reset PIN telah dibuat (berlaku 15 menit).")
+// Reset PIN lewat email DIMATIKAN: dulu token reset dikirim langsung ke browser, sehingga siapa pun yang tahu
+// email seorang user bisa mengganti PIN-nya tanpa membuka kotak masuk. PIN yang lupa diganti Owner dari menu Tim
+// (update-user dengan newPin). Pesan ini tampil apa adanya di layar "Lupa PIN".
+const PESAN_RESET = "Reset PIN lewat email belum diaktifkan. Minta Owner mengganti PIN Anda di menu Tim."
+
+export async function forgotPin(_body: Record<string, string>) {
+  return gagal(PESAN_RESET)
 }
 
-export async function resetPin(body: Record<string, string>) {
-  const email = (body.email || "").trim().toLowerCase()
-  const newPin = (body.newPin || "").trim()
-  const resetToken = (body.resetToken || "").trim()
-  if (!email) return gagal("Email wajib diisi.")
-  if (!resetToken) return gagal("Token reset PIN wajib diisi.")
-  if (!enam(newPin)) return gagal("PIN baru harus 6 digit angka.")
-  const { data: t } = await db.from("reset_pin").select("*").eq("token", resetToken).maybeSingle()
-  if (!t || t.email.toLowerCase() !== email || new Date(t.kadaluarsa) < new Date())
-    return gagal("Token reset PIN tidak valid atau sudah kadaluarsa (berlaku 15 menit).")
-  const { data: u } = await db.from("users").select("id,nama").ilike("email", email).maybeSingle()
-  if (!u) return gagal("User dengan email tersebut tidak ditemukan.")
-  await db.from("users").update({ pin_hash: await hashPin(newPin) }).eq("id", u.id)
-  await db.from("reset_pin").delete().eq("token", resetToken)
-  await tulisAudit(u.id, u.nama, "RESET_PIN", "PIN berhasil diubah via token reset untuk email: " + email)
-  return ok(undefined, "PIN berhasil diubah! Silakan login dengan PIN baru.")
+export async function resetPin(_body: Record<string, string>) {
+  return gagal(PESAN_RESET)
 }
 
 export async function listUsers(body: Record<string, string>) {
@@ -104,6 +90,10 @@ export async function updateUser(body: Record<string, string>) {
     if ((r.email || "").toLowerCase() === email) return gagal(`Email '${email}' sudah dipakai akun lain.`)
   }
   if (!ada) return gagal("User tidak ditemukan.")
+  const { data: lama } = await db.from("users").select("role").eq("id", id).maybeSingle()
+  if (lama?.role === "Owner" && role !== "Owner" && !(await adaOwnerLain(id)))
+    return gagal("Tidak bisa mengubah peran: ini satu-satunya Owner aktif.")
+  if (id === admin.id && role !== lama?.role) return gagal("Anda tidak dapat mengubah peran akun Anda sendiri.")
   const ubah: Record<string, string> = { nama, username, role, cabang, email }
   if (newPin) ubah.pin_hash = await hashPin(newPin)
   await db.from("users").update(ubah).eq("id", id)
@@ -117,9 +107,12 @@ export async function toggleUserStatus(body: Record<string, string>) {
   const status = body.status === "Aktif" ? "Aktif" : "Nonaktif"
   if (!id) return gagal("ID user wajib diisi.")
   if (id === admin.id && status === "Nonaktif") return gagal("Anda tidak dapat menonaktifkan akun Anda sendiri.")
-  const { data: t } = await db.from("users").select("nama").eq("id", id).maybeSingle()
-  if (!t) return gagal("User tidak ditemukan.")
+  const { data: t } = await db.from("users").select("nama,role,status").eq("id", id).maybeSingle()
+  if (!t || t.status === "Dihapus") return gagal("User tidak ditemukan.")
+  if (status === "Nonaktif" && t.role === "Owner" && !(await adaOwnerLain(id)))
+    return gagal("Tidak bisa menonaktifkan satu-satunya Owner aktif.")
   await db.from("users").update({ status }).eq("id", id)
+  if (status === "Nonaktif") await db.from("sessions").update({ status: "Nonaktif" }).eq("user_id", id).eq("status", "Aktif")
   await tulisAudit(admin.id, admin.nama, "TOGGLE_USER_STATUS", `Status user ${t.nama} diubah jadi: ${status}`)
   return ok(undefined, `Status ${t.nama} berhasil diubah menjadi ${status}.`)
 }
@@ -140,6 +133,13 @@ export async function deleteUser(body: Record<string, string>) {
   if (!target || target.status === "Dihapus") return gagal("Anggota tidak ditemukan.")
   if (target.role === "Owner") return gagal("Akun Owner tidak dapat dihapus.")
 
+  if (target.role === "Kapster") {
+    const { data: ks } = await db.from("kasbon").select("id").eq("user_id", id).in("status", ["Aktif", "Menunggu"]).limit(1)
+    if (ks?.length) return gagal("Masih ada kasbon yang belum selesai. Lunasi atau tolak dulu sebelum menghapus anggota ini.")
+    const { data: km } = await db.rpc("komisi_belum_dibayar", { p_user: id })
+    if (Number((km as { total: number } | null)?.total) > 0)
+      return gagal("Masih ada komisi yang belum dibayarkan. Bayar gaji dulu sebelum menghapus anggota ini.")
+  }
   const { error } = await db.from("users").update({ status: "Dihapus" }).eq("id", id)
   if (error) throw new ApiError(error.message)
   await db.from("sessions").update({ status: "Nonaktif" }).eq("user_id", id)

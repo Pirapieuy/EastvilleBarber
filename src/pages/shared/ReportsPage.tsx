@@ -615,7 +615,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
 
       {/* SUB-VIEW 2: TAB PENGELUARAN (INTEGRASI PENGELUARAN.TSX) */}
       <div id="laporan-pengeluaran" className="report-section">
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <section className="panel lk-panel report-pengeluaran">
             <div className="lk-head">
               <h3>Pengeluaran</h3>
@@ -694,7 +694,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
 
       {/* SUB-VIEW 3: TAB TOTAL KOMISI */}
       <div id="laporan-komisi" className="report-section">
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <section className="panel lk-panel report-komisi">
             <div className="lk-head">
               <h3>Komisi kapster</h3>

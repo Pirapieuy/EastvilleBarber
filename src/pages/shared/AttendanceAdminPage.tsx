@@ -337,7 +337,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
 
       {/* TAB 1: JADWAL & JAM KERJA */}
       {tab === "Jadwal" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <section className="panel" style={{ padding: 18 }}>
             <div
               style={{
@@ -346,7 +346,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                 alignItems: "center",
                 flexWrap: "wrap",
                 gap: 12,
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
               <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>
@@ -394,7 +394,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "12px 16px",
+                    padding: "12px 14px",
                     borderRadius: 8,
                     border: "1px solid var(--line)",
                     background: row.leave ? "var(--bg)" : "var(--paper)",
@@ -597,7 +597,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
               display: "flex",
               flexDirection: "column",
               gap: 18,
-              marginTop: 16,
+              marginTop: 14,
             }}
           >
             <div>
@@ -624,7 +624,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
               </div>
             </div>
 
-            <div style={{ borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+            <div style={{ borderTop: "1px solid var(--line)", paddingTop: 14 }}>
               <h4 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 10px" }}>
                 Skema Komisi
               </h4>

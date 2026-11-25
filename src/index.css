@@ -160,7 +160,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-radius: 9px;
   font-size: 13px;
   font-weight: 600;
@@ -336,7 +336,7 @@ textarea {
 }
 
 .login-title {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   font: 700 28px/1.15 var(--heading);
   letter-spacing: -0.025em;
   color: var(--ink);
@@ -347,7 +347,7 @@ textarea {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: clamp(36px, 5vw, 70px);
+  padding: clamp(36px, 5vw, 68px);
   color: var(--paper);
   background:
     radial-gradient(circle at 15% 86%, rgb(200 150 62 / 17%), transparent 30%),
@@ -683,7 +683,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 11px 14px;
   border: 1px solid rgb(79 122 90 / 25%);
   border-radius: 10px;
@@ -697,7 +697,7 @@ textarea {
 }
 
 .report-subnav-row {
-  margin-top: 16px;
+  margin-top: 14px;
   display: flex;
   justify-content: flex-start;
 }
@@ -712,7 +712,7 @@ textarea {
 
 .report-subnav-row .segmented .button {
   min-height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-radius: 7px;
   font-size: 13px;
   font-weight: 600;
@@ -763,7 +763,7 @@ textarea {
 }
 
 .product-tx-panel {
-  margin-top: 16px;
+  margin-top: 14px;
   overflow: hidden;
 }
 
@@ -772,8 +772,8 @@ textarea {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -800,9 +800,9 @@ textarea {
   display: grid;
   grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr);
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   background: var(--bone);
   color: var(--slate);
   font-size: 11px;
@@ -820,9 +820,9 @@ textarea {
   display: grid;
   grid-template-columns: 125px minmax(160px, 1.3fr) 105px 140px minmax(120px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(145px, 1.05fr);
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-height: 59px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-top: 1px solid var(--line);
   font-size: 12px;
   color: var(--slate);
@@ -881,7 +881,7 @@ textarea {
 }
 
 .correction-panel {
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 18px;
 }
 
@@ -893,7 +893,7 @@ textarea {
 }
 
 .correction-table {
-  margin-top: 16px;
+  margin-top: 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
   overflow-x: auto;
@@ -1361,7 +1361,7 @@ textarea {
 .logout-card-header {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
 }
 
 .logout-icon-shell {
@@ -1400,7 +1400,7 @@ textarea {
 
 .logout-card-actions .button {
   min-height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   font-size: 11px;
   font-weight: 700;
 }
@@ -1493,7 +1493,7 @@ textarea {
 
 /* Kapster & Manager Dashboard widgets */
 .protection-card {
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
   background: rgb(20 17 15 / 3%);
   border: 1px solid rgb(20 17 15 / 8%);
@@ -1653,7 +1653,7 @@ textarea {
 @media (max-width: 700px) {
   .kapster-dashboard .kpi-grid {
     gap: 8px;
-    margin-top: 16px;
+    margin-top: 14px;
   }
 }
 
@@ -1678,7 +1678,7 @@ textarea {
 
 .kapster-shift-panel > .page-title,
 .kapster-activity-panel > .page-title {
-  padding-bottom: 16px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -1695,9 +1695,9 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 16px;
-  margin-top: 16px;
-  padding: 16px;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 14px;
   border-radius: 12px;
   background: var(--bone);
 }
@@ -1749,7 +1749,7 @@ textarea {
 }
 
 .shift-progress {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .kapster-dashboard .progress-meta {
@@ -1819,7 +1819,7 @@ textarea {
 }
 
 .staff-panel-header {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .staff-panel-top {
@@ -1865,7 +1865,7 @@ textarea {
     "title title";
   align-items: center;
   gap: 6px 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .staff-duty-panel .page-title > div {
@@ -1969,7 +1969,7 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .role-denied-box h3 {
@@ -2008,7 +2008,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   box-sizing: border-box;
 }
 
@@ -2158,7 +2158,7 @@ textarea {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 16px 14px 26px;
+  padding: 14px 14px 26px;
   box-sizing: border-box;
 }
 
@@ -2229,7 +2229,7 @@ textarea {
 .desktop-page-head {
   width: 100%;
   margin: 0;
-  padding: 16px 14px 0 !important;
+  padding: 14px 14px 0 !important;
   box-sizing: border-box;
 }
 
@@ -2252,7 +2252,7 @@ textarea {
     left: 0;
     z-index: 10;
     width: calc((100% - max(340px, 25%)));
-    padding: 16px 16px 0;
+    padding: 14px 14px 0;
     pointer-events: none;
   }
 
@@ -2261,18 +2261,18 @@ textarea {
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog {
-    padding: 0 10px 16px 16px;
+    padding: 0 10px 14px 14px;
   }
 
   .workspace:has(> .cashier-page) > .cashier-page .catalog-sticky {
-    padding-top: 58px;
+    padding-top: 56px;
   }
 }
 
 @media (min-width: 1025px) {
   .desktop-page-head + .content,
   .desktop-page-head + .mobile-content {
-    padding-top: 16px !important;
+    padding-top: 14px !important;
   }
 }
 
@@ -2371,7 +2371,7 @@ textarea {
 }
 
 .expense-page-description {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   color: var(--slate);
   font-size: 13px;
   line-height: 1.35;
@@ -2392,7 +2392,7 @@ textarea {
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
   margin-top: 22px;
 }
 
@@ -2402,7 +2402,7 @@ textarea {
 
 .kpi {
   min-width: 0;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -2478,8 +2478,8 @@ textarea {
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
-  gap: 16px;
-  margin-top: 16px;
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .chart-panel,
@@ -2840,7 +2840,7 @@ textarea {
 .absensi-loading-heading {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   text-align: left;
 }
 
@@ -2864,7 +2864,7 @@ textarea {
 .absensi-loading-status {
   display: flex;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: 14px;
   color: var(--ink);
   font-weight: 700;
 }
@@ -2995,8 +2995,8 @@ textarea {
 }
 
 .catalog-locked-card {
-  margin-top: 16px;
-  padding: 16px 16px;
+  margin-top: 14px;
+  padding: 14px 14px;
   background: #fffbeb;
   border: 1.5px dashed #f59e0b;
   border-radius: 12px;
@@ -3209,7 +3209,7 @@ textarea {
   justify-content: space-between;
   gap: 8px;
   margin: -10px -12px 0;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
@@ -3501,7 +3501,7 @@ textarea {
   max-height: none;
   flex: 0 0 auto;
   overflow-y: visible;
-  padding: 16px 16px 16px;
+  padding: 14px 14px 14px;
   border-top: 1px solid var(--line);
   background: var(--paper);
   scrollbar-gutter: stable;
@@ -3664,7 +3664,7 @@ textarea {
 }
 
 .commission-choice {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .commission-choice > span {
@@ -3729,7 +3729,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 14px;
   background: rgb(20 17 15 / 62%);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -3754,7 +3754,7 @@ textarea {
 .modal-overlay.modal-centered {
   align-items: center !important;
   justify-content: center !important;
-  padding: 16px !important;
+  padding: 14px !important;
 }
 
 .modal-overlay.modal-centered .simple-modal,
@@ -3771,7 +3771,7 @@ textarea {
 }
 
 .modal-overlay.modal-centered .simple-modal > footer {
-  padding: 14px 18px 16px !important;
+  padding: 14px 18px 14px !important;
   gap: 10px !important;
 }
 
@@ -3780,7 +3780,7 @@ textarea {
 }
 
 .promo-discount-modal > .toggle-row {
-  margin: 16px 18px 16px;
+  margin: 14px 18px 14px;
 }
 
 .promo-discount-actions {
@@ -3794,7 +3794,7 @@ textarea {
 .promo-discount-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: 16px;
+  gap: 14px;
   max-height: 520px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -3962,7 +3962,7 @@ textarea {
 
 .payment-body aside .secondary-button {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .payment-body > main {
@@ -4016,7 +4016,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .money-fields label:only-child {
@@ -4153,7 +4153,7 @@ textarea {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin: 16px 0;
+  margin: 14px 0;
 }
 
 .pin-dots i {
@@ -4202,15 +4202,15 @@ textarea {
 .simple-modal > .pay-preview,
 .simple-modal > pre {
   display: block;
-  margin: 16px 18px 0;
+  margin: 14px 18px 0;
 }
 
 .stock-modal > label:last-of-type {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .stock-modal > .info-banner {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .simple-modal label > input,
@@ -4257,7 +4257,7 @@ textarea {
 }
 
 .reason-dialog {
-  padding: 0 18px 16px;
+  padding: 0 18px 14px;
 }
 
 .reason-dialog > header {
@@ -4270,7 +4270,7 @@ textarea {
 }
 
 .reason-dialog > footer {
-  margin: 16px -18px -16px;
+  margin: 14px -18px -14px;
 }
 
 /* Success / receipt */
@@ -4445,7 +4445,7 @@ textarea {
 .filters {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .filters .input-shell,
@@ -4475,6 +4475,24 @@ textarea {
   z-index: 1;
   width: 184px;
   flex: 0 1 184px;
+}
+
+/* Dua filter pilihan berbagi lebar kosong secara seimbang pada desktop dan
+   tetap memenuhi kolom grid yang sama besar pada layar kecil. */
+.audit-list > .filters > .audit-filter {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.audit-list > .filters > .calendar-picker-wrapper {
+  flex: 0 0 auto;
+}
+
+.audit-list > .filters .calendar-picker-btn {
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .audit-filter.open {
@@ -4537,6 +4555,14 @@ textarea {
   border-radius: 13px;
   background: var(--paper);
   box-shadow: 0 16px 36px rgb(35 27 18 / 18%);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.audit-filter-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .audit-filter-option {
@@ -4583,8 +4609,8 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(360px, 420px);
   align-items: start;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .transaction-list {
@@ -4603,7 +4629,7 @@ textarea {
 
 .table-head {
   min-height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   color: var(--slate);
   background: var(--bone);
   font-size: 11px;
@@ -4617,7 +4643,7 @@ textarea {
   position: relative;
   width: 100%;
   min-height: 59px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--line);
   color: var(--slate);
   background: var(--paper);
@@ -4765,7 +4791,7 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 20px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
@@ -4790,7 +4816,7 @@ textarea {
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   overflow-y: auto;
   overscroll-behavior: none;
 }
@@ -4847,7 +4873,7 @@ textarea {
   .mobile-only-modal .transaction-modal-body {
     max-height: calc(86svh - 75px) !important;
     overflow-y: auto !important;
-    padding: 14px 16px 16px !important;
+    padding: 14px 14px 14px !important;
   }
 }
 
@@ -5106,14 +5132,14 @@ textarea {
   gap: 12px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 16px;
+  padding-bottom: 14px;
 }
 
 .detail {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
   align-self: start;
   height: fit-content;
@@ -5125,7 +5151,7 @@ textarea {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 16px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -5547,7 +5573,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .manual-info-grid {
@@ -5649,7 +5675,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
   flex-wrap: wrap;
 }
 
@@ -5800,7 +5826,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
 }
@@ -5824,7 +5850,7 @@ textarea {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px;
+  padding: 14px;
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(270px, 0.85fr);
   grid-template-areas:
@@ -5832,7 +5858,7 @@ textarea {
     "left details";
   align-content: start;
   align-items: start;
-  gap: 16px;
+  gap: 14px;
   scrollbar-width: none;
 }
 
@@ -5848,7 +5874,7 @@ textarea {
   grid-area: left;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -5864,7 +5890,7 @@ textarea {
   grid-area: details;
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -6159,7 +6185,7 @@ textarea {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   background: var(--paper);
 }
@@ -6326,7 +6352,7 @@ textarea {
 }
 
 .expense-page-title + .expense-toolbar {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .owner-profit-panel > .page-title {
@@ -6574,7 +6600,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 9px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .kasbon-history-panel {
@@ -6834,7 +6860,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   row-gap: 10px;
-  column-gap: 16px;
+  column-gap: 14px;
   margin-top: 10px;
 }
 
@@ -6923,7 +6949,7 @@ textarea {
   flex-direction: column;
   justify-content: flex-start;
   gap: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   text-align: left;
 }
 
@@ -6931,7 +6957,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -7156,7 +7182,7 @@ textarea {
 
 @media (max-width: 480px) {
   .absensi-modal {
-    padding: 16px !important;
+    padding: 14px !important;
   }
 
   .absensi-photo-picker {
@@ -7188,7 +7214,7 @@ textarea {
 }
 
 .my-salary-hero {
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 21px;
   border-radius: 14px;
   color: var(--paper);
@@ -7397,7 +7423,7 @@ textarea {
 }
 
 .report-table > .page-title {
-  padding: 0 0 16px;
+  padding: 0 0 14px;
 }
 
 .report-head,
@@ -7616,8 +7642,8 @@ textarea {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   align-content: start;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 14px;
+  margin-top: 14px;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -7632,7 +7658,7 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   margin-top: 0;
   width: 100%;
 }
@@ -7653,7 +7679,7 @@ textarea {
   grid-column: 3;
   min-height: 44px;
   height: 44px;
-  padding-inline: 16px;
+  padding-inline: 14px;
   font-size: 14px;
   border-radius: 10px;
   white-space: nowrap;
@@ -7710,7 +7736,7 @@ textarea {
   .content.team-page .filters.team-filters {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
-    gap: 16px !important;
+    gap: 14px !important;
   }
 
   .content.team-page .team-filters .search {
@@ -7751,7 +7777,7 @@ textarea {
   align-self: start;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -7763,14 +7789,14 @@ textarea {
 }
 
 .team-card {
-  gap: 16px;
+  gap: 14px;
 }
 
 .team-card header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
 }
 
 .team-card-id {
@@ -7869,9 +7895,9 @@ textarea {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
 }
 
@@ -7895,7 +7921,7 @@ textarea {
 .staff-form-body {
   max-height: calc(100svh - 160px);
   overflow-y: auto;
-  padding: 16px 18px;
+  padding: 14px 18px;
 }
 
 .staff-form .form-grid {
@@ -8097,7 +8123,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .services-status-bar .master-summary {
@@ -8109,7 +8135,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
 }
 
 .products-status-bar .master-summary {
@@ -8132,7 +8158,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .master-summary > span {
@@ -8309,7 +8335,7 @@ textarea {
 .service-commission-values {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .service-commission-values > span {
@@ -8392,7 +8418,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 16px 18px 0;
+  margin: 14px 18px 0;
 }
 
 .branch-price-grid label {
@@ -8414,7 +8440,7 @@ textarea {
 }
 
 .service-modal > .info-banner {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* Product management */
@@ -8570,7 +8596,7 @@ textarea {
 }
 
 .change-log-table th {
-  padding: 10px 16px;
+  padding: 10px 14px;
   color: var(--slate);
   background: var(--bone);
   font-size: 11px;
@@ -8581,7 +8607,7 @@ textarea {
 }
 
 .change-log-table td {
-  padding: 14px 16px;
+  padding: 14px 14px;
   border-top: 1px solid var(--line);
   white-space: nowrap;
 }
@@ -8593,12 +8619,12 @@ textarea {
 }
 
 .change-log-head {
-  padding: 0 16px;
+  padding: 0 14px;
 }
 
 .change-log article {
   min-height: 56px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-top: 1px solid var(--line);
   color: var(--slate);
   font-size: 12px;
@@ -8673,7 +8699,7 @@ textarea {
 
 .product-modal-body {
   overflow-y: auto;
-  padding: 16px 18px;
+  padding: 14px 18px;
 }
 
 .product-modal .form-grid {
@@ -8796,8 +8822,8 @@ textarea {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 12px;
-  margin-top: 16px;
-  padding: 16px;
+  margin-top: 14px;
+  padding: 14px;
   border-radius: 12px;
   color: var(--paper);
   background: var(--ink);
@@ -9172,7 +9198,7 @@ textarea {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
-  margin: 16px 18px 0;
+  margin: 14px 18px 0;
 }
 
 .old-new > span {
@@ -9242,7 +9268,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 9px 11px;
   border-radius: 8px;
   color: var(--sage);
@@ -9275,6 +9301,18 @@ textarea {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+/* Jejak Audit tetap dapat digulir tanpa menampilkan rel scrollbar. */
+.audit-page-content .audit-table-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.audit-page-content .audit-table-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .audit-head,
@@ -9310,12 +9348,17 @@ textarea {
 }
 
 .audit-action {
+  display: inline-block;
   width: fit-content;
+  max-width: 100%;
   padding: 4px 6px;
   border-radius: 5px;
   color: var(--brass-dark);
   background: var(--brass-soft);
   font-weight: 700;
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: normal;
 }
 
 /* Backup */
@@ -9323,7 +9366,7 @@ textarea {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 14px;
   align-items: stretch;
 }
 
@@ -9331,8 +9374,8 @@ textarea {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 14px;
+  padding: 14px 20px;
   border-radius: 12px;
   color: var(--paper);
   background:
@@ -9397,8 +9440,8 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 14px;
+  padding: 14px 20px;
   border-radius: 12px;
   box-sizing: border-box;
 }
@@ -9489,7 +9532,7 @@ textarea {
   padding: 0 15px 14px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -9665,7 +9708,7 @@ textarea {
 
 .restore-confirm label {
   display: block;
-  margin-top: 16px;
+  margin-top: 14px;
   text-align: left;
 }
 
@@ -9734,7 +9777,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
+    padding: 24px 14px;
     background: transparent;
   }
 
@@ -9952,12 +9995,12 @@ textarea {
   }
 
   .app-header-inner {
-    padding: 10px 16px;
+    padding: 10px 14px;
     gap: 10px;
   }
 
   .content {
-    padding: 18px 16px 30px;
+    padding: 18px 14px 30px;
   }
 
   .kpi-grid {
@@ -9979,7 +10022,7 @@ textarea {
 
   .catalog {
     overflow: visible;
-    padding: 18px 16px 96px;
+    padding: 18px 14px 96px;
   }
 
   .cashier-page .cart {
@@ -10047,7 +10090,7 @@ textarea {
     flex: 1 1 auto !important;
     display: flex !important;
     flex-direction: column !important;
-    margin-inline: -16px !important;
+    margin-inline: -14px !important;
     margin-bottom: 0 !important;
     min-height: 0 !important;
   }
@@ -10188,7 +10231,7 @@ textarea {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px 16px;
+    gap: 9px 14px;
     padding: 3px 0 1px;
   }
 
@@ -10205,7 +10248,7 @@ textarea {
   .service-commission-values {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
   }
 
   .service-commission-values > span > small {
@@ -10230,7 +10273,7 @@ textarea {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 16px;
+    gap: 10px 14px;
     padding: 4px 0 2px;
   }
 
@@ -10513,7 +10556,7 @@ textarea {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 10px !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 14px !important;
     padding-bottom: 10px !important;
   }
 
@@ -10568,7 +10611,7 @@ textarea {
   .report-section > div > .panel {
     box-sizing: border-box;
     width: 100%;
-    padding: 16px !important;
+    padding: 14px !important;
   }
 
   .expense-toolbar {
@@ -10716,7 +10759,7 @@ textarea {
     grid-row: 2 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    gap: 9px 16px !important;
+    gap: 9px 14px !important;
     padding: 3px 0 1px !important;
   }
 
@@ -10880,8 +10923,8 @@ textarea {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 4px;
-    margin-inline: -16px;
-    padding-inline: 16px;
+    margin-inline: -14px;
+    padding-inline: 14px;
   }
 
   .report-subnav-row .segmented {
@@ -11011,7 +11054,7 @@ textarea {
     align-items: stretch;
     flex-direction: column;
     gap: 14px;
-    padding: 14px 16px;
+    padding: 14px 14px;
   }
 
   .backup-now-btn {
@@ -11473,7 +11516,7 @@ textarea {
   .content .page-title > .page-actions,
   .mobile-content .page-title > .button,
   .mobile-content .page-title > .page-actions {
-    margin-top: 16px;
+    margin-top: 14px;
   }
 
   .content .page-actions,
@@ -11543,7 +11586,7 @@ textarea {
   }
 
   .mobile-content {
-    padding-inline: 16px;
+    padding-inline: 14px;
   }
 
   .mobile-content .my-salary-hero > strong {
@@ -11675,7 +11718,7 @@ textarea {
 
   .kapster-shift-panel,
   .kapster-activity-panel {
-    padding: 16px;
+    padding: 14px;
   }
 
   .kapster-shift-panel > .page-title,
@@ -11749,7 +11792,7 @@ textarea {
 /* Kasir attendance: tablet workspace and history controls */
 .mobile-content.absensi-kasir {
   width: min(840px, 100%);
-  padding: 24px 20px 40px;
+  padding: 24px 14px 40px;
 }
 
 .absensi-history-filters {
@@ -11813,7 +11856,7 @@ textarea {
 
 @media (max-width: 820px) {
   .mobile-content.absensi-kasir {
-    padding: 70px 14px 28px !important;
+    padding: 68px 14px 28px !important;
   }
 }
 
@@ -11850,13 +11893,13 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: 16px;
+  gap: 14px;
 }
 
 .attendance-setting-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 @media (max-width: 1024px) {
@@ -12057,7 +12100,7 @@ textarea {
     align-items: center;
     gap: 12px;
     height: 54px;
-    padding: 0 16px;
+    padding: 0 14px;
     background: var(--paper);
     border-bottom: 1px solid var(--line);
     box-shadow: 0 2px 8px rgb(20 17 15 / 5%);
@@ -12128,7 +12171,7 @@ textarea {
 
   .content,
   .mobile-content {
-    padding-top: 70px;
+    padding-top: 68px;
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -12160,11 +12203,11 @@ textarea {
   }
 
   .change-log-head {
-    padding: 0 16px !important;
+    padding: 0 14px !important;
   }
 
   .change-log article {
-    padding: 10px 16px !important;
+    padding: 10px 14px !important;
   }
 
   /* Keep commission history as a table on phones, sizing all columns to the
@@ -12234,7 +12277,7 @@ textarea {
   }
 
   .catalog {
-    padding-top: 70px;
+    padding-top: 68px;
   }
 }
 
@@ -12487,7 +12530,7 @@ textarea {
   .content.narrow,
   .mobile-content {
     width: 100%;
-    padding: 70px 14px 28px;
+    padding: 68px 14px 28px;
   }
 
   .content.history-page-content {
@@ -12495,7 +12538,7 @@ textarea {
   }
 
   .form-panel {
-    padding: 16px;
+    padding: 14px;
   }
 
   .app-header-inner {
@@ -12511,7 +12554,7 @@ textarea {
   }
 
   .catalog {
-    padding: 70px 14px 18px;
+    padding: 68px 14px 18px;
   }
 
   .barber-picker {
@@ -12816,7 +12859,7 @@ summary,
     flex-direction: initial !important;
     align-items: start !important;
     gap: 12px 8px !important;
-    padding: 16px !important;
+    padding: 14px !important;
     text-align: left;
   }
 
@@ -12886,7 +12929,7 @@ summary,
   .logout-modal-overlay {
     align-items: center !important;
     justify-content: center !important;
-    padding: 16px !important;
+    padding: 14px !important;
   }
 }
 
@@ -12894,7 +12937,7 @@ summary,
 .absensi-actions {
   display: grid;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .absensi-actions .button {
@@ -12945,7 +12988,7 @@ summary,
 .nota-catalog-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .nota-group {
@@ -13111,7 +13154,7 @@ summary,
 .nota-summary {
   display: grid;
   gap: 8px;
-  margin: 16px 0 0;
+  margin: 14px 0 0;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
@@ -13139,7 +13182,7 @@ summary,
   display: grid;
   grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.4fr);
   align-items: start;
-  gap: 16px;
+  gap: 14px;
   margin-top: 11px;
 }
 
@@ -13172,7 +13215,7 @@ summary,
   grid-row: 2;
   width: fit-content;
   max-width: 100%;
-  gap: 16px;
+  gap: 14px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -13323,7 +13366,7 @@ summary,
   .manual-payment-panel > .nota-summary {
     grid-column: auto;
     grid-row: auto;
-    margin-top: 16px;
+    margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid var(--line);
   }
@@ -13352,7 +13395,7 @@ summary,
 
 .history-empty {
   margin: 0;
-  padding: 24px 16px;
+  padding: 24px 14px;
   color: var(--slate);
   font-size: 13px;
   text-align: center;
@@ -13371,7 +13414,7 @@ summary,
     align-items: center !important;
     justify-content: stretch !important;
     gap: 6px 12px !important;
-    padding: 16px 16px !important;
+    padding: 14px 14px !important;
   }
 
   .expense-row:not(.expense-table-compact > *) > .exp-cat {
@@ -13752,7 +13795,7 @@ summary,
   .audit-row {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    gap: 0 16px !important;
+    gap: 0 14px !important;
     min-height: 0 !important;
     margin: 10px 12px !important;
     padding: 10px 12px !important;
@@ -13887,7 +13930,7 @@ summary,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .owner-recent-head h3 {
@@ -13984,7 +14027,7 @@ summary,
 
 @media (max-width: 620px) {
   .owner-recent-panel {
-    padding: 16px 16px 24px !important;
+    padding: 14px 14px 24px !important;
   }
 
   .owner-recent-head {
@@ -14011,7 +14054,7 @@ summary,
     grid-template-columns: minmax(0, 1fr);
     align-items: start;
     gap: 6px;
-    padding: 16px 12px;
+    padding: 14px 12px;
     min-height: 88px;
     border-radius: 10px;
   }
@@ -14159,7 +14202,7 @@ summary,
 
 @media (max-width: 820px) {
   .cashier-page .catalog {
-    padding-top: 16px;
+    padding-top: 14px;
   }
 }
 
@@ -14233,7 +14276,7 @@ summary,
     border: 1px solid var(--line) !important;
     border-radius: 12px !important;
     box-shadow: var(--shadow) !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 14px !important;
   }
 
   .content.history-page-content {
@@ -14256,7 +14299,7 @@ summary,
   .history-page-content .transaction-row {
     grid-template-columns: minmax(120px, 1.3fr) minmax(0, 1fr) minmax(0, 1.4fr) !important;
     gap: 12px !important;
-    padding-inline: 16px !important;
+    padding-inline: 14px !important;
   }
 
   .history-page-content .transaction-row {
@@ -14467,7 +14510,7 @@ summary,
 
 @media (max-width: 620px) {
   .content.history-page-content {
-    padding-bottom: 16px !important;
+    padding-bottom: 14px !important;
   }
 }
 
@@ -14562,7 +14605,7 @@ summary,
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .history-page-content .filters .search-select.history-kapster-select {
@@ -14642,7 +14685,7 @@ summary,
 
   /* Panel detail: padding & jarak antar bagian sama dengan popup HP/tablet (14px samping, 12px antar bagian) */
   .history-page-content .desktop-only-detail {
-    padding: 16px 16px 16px;
+    padding: 14px 14px 14px;
     gap: 12px;
   }
 
@@ -14711,8 +14754,8 @@ summary,
     height: 100svh;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding-bottom: 16px !important;
+    gap: 14px;
+    padding-bottom: 14px !important;
     overflow: hidden;
   }
 
@@ -14759,15 +14802,15 @@ summary,
   }
 
   .cashier-page .catalog-sticky {
-    padding-top: 16px;
+    padding-top: 14px;
   }
 }
 
 /* Kasir: jarak + garis pemisah di bawah bagian yang menempel */
 .cashier-page .catalog-sticky {
-  padding-bottom: 16px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   /* latar melebar ke samping agar bayangan kartu yang menggulir tidak tembus di sisi kapster */
   box-shadow: -14px 0 0 var(--bone), 10px 0 0 var(--bone);
 }
@@ -14850,7 +14893,7 @@ summary,
 
 .manual-page .manual-discount-panel .manual-info-grid {
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .manual-payment-panel {
@@ -14868,7 +14911,7 @@ summary,
 
 .manual-page .manual-payment-panel > .form-grid {
   grid-template-columns: 1fr;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .manual-page .manual-payment-panel > .form-grid label > span {
@@ -14876,7 +14919,7 @@ summary,
 }
 
 .manual-page .manual-payment-panel > .nota-summary {
-  margin-top: 16px;
+  margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
@@ -14887,7 +14930,7 @@ summary,
 }
 
 .content.narrow.manual-page:has(.sticky-submit) {
-  padding-bottom: 16px;
+  padding-bottom: 14px;
 }
 
 @media (max-width: 820px) {
@@ -14921,13 +14964,13 @@ summary,
 .manual-date-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 16px;
+  gap: 12px 14px;
   grid-column: 1 / -1;
 }
 
 /* Input Manual: jarak antarkolom sama di semua kartu, uang cepat melebar penuh */
 .manual-page .manual-info-grid {
-  gap: 12px 16px;
+  gap: 12px 14px;
 }
 
 .manual-page .manual-quick-cash {
@@ -15160,7 +15203,7 @@ label .search-select-trigger {
 }
 
 .history-page-content .history-empty {
-  padding: 40px 16px;
+  padding: 40px 14px;
   text-align: center;
 }
 
@@ -15182,7 +15225,7 @@ label .search-select-trigger {
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
-    padding-bottom: 16px;
+    padding-bottom: 14px;
     overflow: hidden;
   }
 
@@ -15233,7 +15276,7 @@ label .search-select-trigger {
 /* Detail transaksi di ponsel tampil sebagai dialog di tengah, seperti tablet. */
 @media (max-width: 620px) {
   .modal-overlay.mobile-only-modal {
-    padding: 16px !important;
+    padding: 14px !important;
     align-items: center !important;
     justify-content: center !important;
   }
@@ -15253,7 +15296,7 @@ label .search-select-trigger {
   .mobile-only-modal .transaction-modal-body {
     max-height: calc(100svh - 140px) !important;
     overflow-y: auto !important;
-    padding: 14px 16px 16px !important;
+    padding: 14px 14px 14px !important;
   }
 }
 
@@ -15284,7 +15327,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .content:not(.kapster-dashboard):not(.history-page-content):not(.manual-page),
   .mobile-content.attendance-history-page {
-    padding: 16px 14px 16px !important;
+    padding: 14px 14px 14px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     box-sizing: border-box !important;
@@ -15314,8 +15357,8 @@ label .search-select-trigger {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
-  padding: 16px 14px !important;
-  gap: 16px !important;
+  padding: 14px 14px !important;
+  gap: 14px !important;
   box-sizing: border-box !important;
 }
 
@@ -15323,8 +15366,8 @@ label .search-select-trigger {
 .attendance-summary-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
-  margin: 16px 16px 16px;
+  gap: 14px;
+  margin: 14px 14px 14px;
 }
 
 .attendance-history-filters {
@@ -15332,17 +15375,18 @@ label .search-select-trigger {
   grid-template-columns: max-content minmax(0, 1fr);
   width: auto !important;
   box-sizing: border-box;
-  gap: 16px !important;
-  margin-top: 16px !important;
-  margin-bottom: 16px !important;
-  margin-right: 16px;
-  margin-left: 16px;
+  gap: 14px !important;
+  margin-top: 14px !important;
+  margin-bottom: 14px !important;
+  margin-right: 14px;
+  margin-left: 14px;
 }
 
 .attendance-record-list {
   display: grid;
+  align-content: start;
   gap: 6px;
-  margin: 0 16px 16px;
+  margin: 0 14px 14px;
 }
 
 .attendance-record-card {
@@ -15355,6 +15399,13 @@ label .search-select-trigger {
   background: #fff;
   box-shadow: 0 2px 6px rgba(53, 46, 37, 0.045);
   transition: box-shadow 160ms ease;
+}
+
+.attendance-record-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
 }
 
 .attendance-record-card:hover {
@@ -15382,7 +15433,7 @@ label .search-select-trigger {
 }
 
 .attendance-state-message {
-  margin: 0 16px 12px;
+  margin: 0 14px 12px;
   padding: 4px 0;
   color: var(--muted);
 }
@@ -15424,7 +15475,7 @@ label .search-select-trigger {
     min-height: 0;
     box-sizing: border-box;
     overflow: hidden;
-    padding: 70px 16px 12px !important;
+    padding: 68px 14px 12px !important;
   }
 
   .mobile-content.attendance-history-page > .attendance-history-panel {
@@ -15459,8 +15510,33 @@ label .search-select-trigger {
 }
 
 @media (max-width: 560px) {
+  .attendance-summary-grid {
+    gap: 10px;
+    margin: 12px 12px 14px;
+  }
+
+  .attendance-summary-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .attendance-summary-card {
+    min-height: 72px;
+    padding: 9px 6px;
+    gap: 3px;
+  }
+
+  .attendance-summary-card strong {
+    font-size: 20px;
+  }
+
+  .attendance-summary-card span {
+    font-size: 12px;
+  }
+
   .mobile-content.attendance-history-page .attendance-history-filters {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) !important;
+    gap: 8px !important;
+    margin: 12px !important;
   }
 
   .mobile-content.attendance-history-page .attendance-history-filters > .search-select {
@@ -15476,24 +15552,65 @@ label .search-select-trigger {
     min-width: 0 !important;
     gap: 8px !important;
     padding-inline: 8px !important;
+    font-size: 12px !important;
+  }
+
+  .mobile-content.attendance-history-page .attendance-history-filters .calendar-picker-btn {
+    min-width: 0 !important;
+    gap: 6px !important;
+    padding-inline: 8px !important;
+    font-size: 12px !important;
   }
 
   .attendance-record-card {
-    gap: 8px;
-    padding: 8px;
+    gap: 7px;
+    height: auto;
+    min-height: 92px;
+    padding: 10px 8px;
   }
 
   .attendance-record-icon,
   .attendance-record-photo {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .attendance-record-person > strong {
+    font-size: 14px;
+  }
+
+  .attendance-record-date {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .attendance-record-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .attendance-record-actions > .chip {
+    flex: none;
+    align-self: center;
+    padding: 4px 7px;
+    font-size: 11px;
   }
 
   .attendance-edit-button {
-    min-width: 76px;
-    gap: 5px;
-    padding-inline: 8px;
-    font-size: 12px;
+    box-sizing: border-box;
+    width: 68px !important;
+    min-width: 68px !important;
+    min-height: 40px !important;
+    gap: 4px !important;
+    padding: 0 5px !important;
+    font-size: 11px !important;
+  }
+
+  .attendance-edit-button svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
@@ -15568,13 +15685,29 @@ label .search-select-trigger {
 
 @media (max-width: 900px) {
   .attendance-summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .attendance-summary-card:nth-child(-n + 3) {
+    grid-column: span 2;
+  }
+
+  .attendance-summary-card:nth-last-child(-n + 2) {
+    grid-column: span 3;
   }
 }
 
 @media (max-width: 560px) {
   .attendance-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-summary-card {
+    grid-column: auto !important;
+  }
+
+  .attendance-summary-card:last-child {
+    grid-column: 1 / -1 !important;
   }
 }
 
@@ -15587,12 +15720,12 @@ label .search-select-trigger {
 @media (max-width: 1024px) {
   .workspace > .content.team-page,
   .workspace > .content.fit-page.team-page {
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
   }
 }
 
 .team-grid {
-  gap: 16px !important;
+  gap: 14px !important;
   margin-top: 0 !important;
   grid-auto-rows: max-content;
   align-content: start;
@@ -15649,7 +15782,7 @@ label .search-select-trigger {
 .team-page .modal-overlay.modal-centered {
   align-items: center !important;
   justify-content: center !important;
-  padding: 16px !important;
+  padding: 14px !important;
 }
 
 .team-page .modal-overlay.modal-centered .staff-form,
@@ -15671,13 +15804,13 @@ label .search-select-trigger {
 
 .confirm-custom-modal > header {
   margin: 0 !important;
-  padding: 16px !important;
+  padding: 14px !important;
 }
 
 .confirm-custom-modal > div {
   display: flex;
   flex-direction: column;
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .confirm-custom-modal > div label {
@@ -15690,8 +15823,8 @@ label .search-select-trigger {
   flex: none;
   min-height: 68px;
   box-sizing: border-box;
-  padding: 16px !important;
-  gap: 16px;
+  padding: 14px !important;
+  gap: 14px;
   align-items: center !important;
 }
 
@@ -15710,7 +15843,7 @@ label .search-select-trigger {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px !important;
+  padding: 14px !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -15722,12 +15855,12 @@ label .search-select-trigger {
 
 .team-page .staff-form-body {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   align-content: start;
 }
 
 .team-page .staff-form .form-grid {
-  gap: 16px;
+  gap: 14px;
 }
 
 .team-page .staff-form .form-grid > label {
@@ -15752,7 +15885,7 @@ label .search-select-trigger {
 .team-page .staff-form .role-options {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 16px !important;
+  gap: 14px !important;
   margin: 0;
 }
 
@@ -15765,13 +15898,13 @@ label .search-select-trigger {
 
 .team-page .staff-form .toggle-row {
   margin: 0;
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
 }
 
 .team-page .staff-form > .info-banner {
   flex: none;
-  margin: 0 16px 16px !important;
+  margin: 0 14px 14px !important;
 }
 
 .team-page .staff-form > footer,
@@ -15780,8 +15913,8 @@ label .search-select-trigger {
   display: flex !important;
   min-height: 0 !important;
   margin: 0 !important;
-  padding: 16px !important;
-  gap: 16px !important;
+  padding: 14px !important;
+  gap: 14px !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -15817,8 +15950,8 @@ label .search-select-trigger {
 
 .kasbon-kapster-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
-  margin-top: 16px;
+  gap: 12px 14px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-grid .kasbon-kapster-note {
@@ -15828,7 +15961,7 @@ label .search-select-trigger {
 .kasbon-kapster-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-success {
@@ -15848,7 +15981,7 @@ label .search-select-trigger {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -15910,8 +16043,8 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-grid {
-  gap: 12px 16px;
-  margin-top: 16px;
+  gap: 12px 14px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-page .input-shell input,
@@ -15935,7 +16068,7 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-actions {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-actions .button {
@@ -15950,7 +16083,7 @@ label .search-select-trigger {
 
 /* Kasbon Kapster: jarak antara kartu Ajukan dan Pengajuan tim */
 .kasbon-kapster-page > .panel + .panel {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-history {
@@ -15958,7 +16091,7 @@ label .search-select-trigger {
 }
 
 .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 /* Kasir POS: seluruh kotak item dapat diklik untuk menambah ke keranjang */
@@ -16157,7 +16290,7 @@ label .search-select-trigger {
   margin: 0;
 }
 .izin-kapster-page > .panel + .panel {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 .izin-layout {
   display: grid;
@@ -16176,7 +16309,7 @@ label .search-select-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .izin-cal-head strong {
   font-size: 18px;
@@ -16257,9 +16390,9 @@ label .search-select-trigger {
 .izin-pilihan {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin: 0 0 16px;
-  padding: 12px 16px;
+  gap: 14px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--bone);
@@ -16401,7 +16534,7 @@ label .search-select-trigger {
     min-height: 0;
     width: 100%;
     margin: 0;
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -16435,7 +16568,7 @@ label .search-select-trigger {
   .workspace > .content.izin-kapster-page {
     width: 100%;
     margin: 0;
-    padding: 70px 14px 30px !important;
+    padding: 68px 14px 30px !important;
     overflow: visible;
   }
 
@@ -16487,7 +16620,7 @@ label .search-select-trigger {
     min-height: 80px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 10px 16px 12px;
+    padding: 10px 14px 12px;
   }
 
   .cashier-page .cart-total {
@@ -16495,7 +16628,7 @@ label .search-select-trigger {
     max-height: calc(100% - 80px);
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 12px 16px 16px;
+    padding: 12px 14px 14px;
     border-top: 1px solid var(--line);
   }
 }
@@ -16521,7 +16654,7 @@ label .search-select-trigger {
   .cashier-page .cart-total {
     gap: 0;
     font-size: 13px;
-    padding: 10px 16px 16px;
+    padding: 10px 14px 14px;
   }
 
   .cashier-page .cart-total .grand strong {
@@ -16564,9 +16697,9 @@ label .search-select-trigger {
 .kapster-sales-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-top: 14px;
+  margin-bottom: 14px;
 }
 
 .kapster-sales-summary > div {
@@ -16620,12 +16753,12 @@ label .search-select-trigger {
     margin: 0 !important;
     display: flex;
     flex-direction: column;
-    padding: 16px 14px 16px !important;
+    padding: 14px 14px 14px !important;
   }
 
   .kapster-dashboard > .kpi-grid {
     flex: 0 0 auto;
-    margin-top: 16px;
+    margin-top: 14px;
   }
 
   .kapster-dashboard > .dashboard-grid {
@@ -16685,10 +16818,10 @@ label .search-select-trigger {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 16px 14px 28px !important;
+    padding: 14px 14px 28px !important;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    gap: 16px;
+    gap: 14px;
     align-items: start;
   }
 
@@ -16716,7 +16849,7 @@ label .search-select-trigger {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 16px 14px 28px !important;
+    padding: 14px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -16801,7 +16934,7 @@ label .search-select-trigger {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 16px 14px 28px !important;
+    padding: 14px 14px 28px !important;
   }
 
   .app-shell-kapster .kapster-dashboard > .page-title,
@@ -16809,7 +16942,7 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-product-commission > .page-title {
     min-height: 48px;
     align-items: center;
-    margin: 0 0 16px;
+    margin: 0 0 14px;
     padding: 0;
   }
 
@@ -17012,7 +17145,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page > .page-title,
   .app-shell-kapster .kapster-product-commission > .page-title {
     height: 48px;
-    margin: 0 0 16px !important;
+    margin: 0 0 14px !important;
   }
 
   .app-shell-kapster .kapster-dashboard > .kpi-grid,
@@ -17024,23 +17157,23 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    gap: 16px;
-    row-gap: 16px;
-    column-gap: 16px;
+    gap: 14px;
+    row-gap: 14px;
+    column-gap: 14px;
   }
 
   .app-shell-kapster .kapster-dashboard > .dashboard-grid {
-    margin-top: 16px !important;
-    gap: 16px;
+    margin-top: 14px !important;
+    gap: 14px;
   }
 
   .app-shell-kapster .kapster-dashboard > .kpi-grid {
-    gap: 16px;
+    gap: 14px;
   }
 
   /* kartu hero (gelap) dan panel punya radius 12px & padding 16px */
   .app-shell-kapster .my-salary-hero {
-    padding: 16px;
+    padding: 14px;
     border-radius: 12px;
   }
 
@@ -17048,7 +17181,7 @@ label .search-select-trigger {
   .app-shell-kapster .my-salary-page .panel,
   .app-shell-kapster .kapster-product-commission .panel {
     border-radius: 12px;
-    padding: 16px;
+    padding: 14px;
   }
 }
 
@@ -17074,7 +17207,7 @@ label .search-select-trigger {
 
   .app-shell-kapster .my-salary-page,
   .app-shell-kapster .kapster-product-commission {
-    padding: 16px 14px 16px !important;
+    padding: 14px 14px 14px !important;
   }
 
   .app-shell-kapster .kapster-product-commission > .page-title {
@@ -17097,8 +17230,8 @@ label .search-select-trigger {
   }
 
   .app-shell-kapster .my-salary-page {
-    row-gap: 16px;
-    gap: 16px;
+    row-gap: 14px;
+    gap: 14px;
   }
 
   .app-shell-kapster .my-salary-page > .kapster-activity-panel {
@@ -17139,7 +17272,7 @@ label .search-select-trigger {
   .modal-overlay.mobile-only-modal {
     align-items: center !important;
     justify-content: center !important;
-    padding: 16px !important;
+    padding: 14px !important;
   }
 
   .simple-modal,
@@ -17166,7 +17299,7 @@ label .search-select-trigger {
     flex: 1 1 auto;
     min-height: 0;
     max-height: none !important;
-    padding: 14px 16px 16px !important;
+    padding: 14px 14px 14px !important;
     gap: 12px;
   }
 }
@@ -17221,7 +17354,7 @@ label .search-select-trigger {
   .cashier-page .cart {
     height: 100%;
     min-height: 0;
-    padding: 16px 20px 16px 16px;
+    padding: 14px 20px 14px 14px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -17253,7 +17386,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   /* Margin desktop mengikuti acuan Riwayat Transaksi: 27px kanan, 16px bawah, 14px celah kolom, sejajar header */
   .cashier-page .cart {
-    padding: 58px 16px 16px 10px;
+    padding: 56px 14px 14px 10px;
     transform: none !important;
   }
 }
@@ -17286,14 +17419,14 @@ label .search-select-trigger {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 16px 14px 16px !important;
+    padding: 14px 14px 14px !important;
     overflow: hidden;
   }
 
   .app-shell-kapster .kapster-dashboard {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
   .kapster-dashboard-actions {
@@ -17312,7 +17445,7 @@ label .search-select-trigger {
     min-height: 0;
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
+    gap: 14px !important;
   }
 
   .app-shell-kapster .my-salary-page > .customer-list,
@@ -17328,21 +17461,21 @@ label .search-select-trigger {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 70px 14px 16px !important;
-    gap: 16px !important;
+    padding: 68px 14px 14px !important;
+    gap: 14px !important;
     box-sizing: border-box !important;
   }
 
   .app-shell-kapster .content > .kpi-grid,
   .app-shell-kapster .mobile-content > .kpi-grid {
-    gap: 16px !important;
+    gap: 14px !important;
   }
 
   .app-shell-kapster .panel,
   .app-shell-kapster .my-salary-hero,
   .app-shell-kapster .kpi {
     border-radius: 12px !important;
-    padding: 16px !important;
+    padding: 14px !important;
   }
 
   .app-shell-kapster .content > .page-title:not(:has(.page-actions)):not(:has(.button)),
@@ -17361,7 +17494,7 @@ label .search-select-trigger {
   .app-shell-kapster .kapster-dashboard > .dashboard-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
+    gap: 14px !important;
     margin-top: 0 !important;
   }
 }
@@ -17409,13 +17542,13 @@ label .search-select-trigger {
 }
 
 .app-shell-kapster .recent-list {
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .app-shell-kapster .customer-list > div:not(.page-title) {
   display: flex !important;
   align-items: center !important;
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .app-shell-kapster .customer-list > div:not(.page-title) > b {
@@ -17423,7 +17556,7 @@ label .search-select-trigger {
 }
 
 .app-shell-kapster .salary-breakdown > div:not(.page-title) {
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .app-shell-kapster .content,
@@ -17437,8 +17570,8 @@ label .search-select-trigger {
 
 .app-shell-kapster .recent-row {
   border-radius: 10px !important;
-  padding: 12px 16px !important;
-  gap: 16px !important;
+  padding: 12px 14px !important;
+  gap: 14px !important;
 }
 
 @media (min-width: 1025px) {
@@ -17455,7 +17588,7 @@ label .search-select-trigger {
   }
 
   .app-shell-kapster .kapster-dashboard {
-    padding-top: 16px !important;
+    padding-top: 14px !important;
   }
 
   /* panel Progres meregang setinggi panel Detail Penjualan */
@@ -17556,12 +17689,12 @@ label .search-select-trigger {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 16px 14px 16px !important;
+    padding: 14px 14px 14px !important;
     box-sizing: border-box !important;
     overflow: visible;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
   .fit-page > .kpi-grid,
@@ -17605,7 +17738,7 @@ label .search-select-trigger {
     min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
   .catalog-embedded-view > .fit-fill {
@@ -17770,6 +17903,97 @@ label .search-select-trigger {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+  }
+}
+
+/* Jejak Audit di HP: panel mengisi ruang layar di bawah navbar; hanya daftar
+   kartu yang menggulir. Kartu membungkus semua isinya tanpa scroll samping. */
+@media (max-width: 820px) {
+  .workspace:has(> .audit-page-content) {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.audit-page-content {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .audit-page-content > .audit-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    padding-bottom: 0;
+  }
+
+  .audit-page-content > .audit-list > .filters {
+    flex: 0 0 auto;
+  }
+
+  .audit-page-content .audit-table-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  .audit-page-content .audit-table-scroll > .audit-row {
+    box-sizing: border-box !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 10px 12px !important;
+    flex: 0 0 auto;
+  }
+}
+
+/* Jejak Audit tablet dan HP: sisakan 16px di bawah panel, kunci halaman pada
+   viewport, dan arahkan scroll vertikal hanya ke isi daftar. */
+@media (max-width: 1024px) {
+  .workspace:has(> .audit-page-content) {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .workspace > .content.audit-page-content {
+    height: 100%;
+    min-height: 0;
+    padding-bottom: 14px !important;
+    overflow: hidden;
+  }
+
+  .audit-page-content > .audit-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    overflow: hidden !important;
+  }
+
+  .audit-page-content > .audit-list > .filters {
+    flex: 0 0 auto;
+  }
+
+  .audit-page-content .audit-table-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
   }
 }
 
@@ -17972,7 +18196,7 @@ label .search-select-trigger {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 70px 14px 20px !important;
+    padding: 68px 14px 20px !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -17992,7 +18216,7 @@ label .search-select-trigger {
 
   /* kartu KPI: isi tidak menempel ke tepi kartu */
   .kpi {
-    padding: 16px 16px;
+    padding: 14px 14px;
   }
 
   .panel {
@@ -18154,14 +18378,14 @@ label .search-select-trigger {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 0 16px;
+    padding: 0 14px;
     border-right: 0;
   }
 
   .cashier-page .catalog-sticky {
     position: static;
     flex: 0 0 auto;
-    padding-top: 16px;
+    padding-top: 14px;
   }
 
   .cashier-page .catalog-tools {
@@ -18263,7 +18487,7 @@ label .search-select-trigger {
     height: 100%;
     min-height: 0;
     overflow-y: auto;
-    padding: 16px 8px 16px 16px;
+    padding: 14px 8px 14px 14px;
     overscroll-behavior: contain;
     border-right: 0;
   }
@@ -18273,8 +18497,8 @@ label .search-select-trigger {
     top: 0;
     z-index: 5;
     padding-top: 0;
-    padding-bottom: 16px;
-    margin-bottom: 16px;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
     border-bottom: 1px solid var(--line);
     background: var(--bone);
   }
@@ -18282,7 +18506,7 @@ label .search-select-trigger {
   .cashier-page .cart {
     height: 100%;
     min-height: 0;
-    padding: 16px 16px 16px 8px;
+    padding: 14px 14px 14px 8px;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
@@ -18414,9 +18638,9 @@ label .search-select-trigger {
 
 .cashier-page .catalog-sticky {
   display: grid;
-  gap: 16px;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
 }
 
 .cashier-page .catalog-sticky > .barber-picker,
@@ -18442,7 +18666,7 @@ label .search-select-trigger {
 
 .cashier-page .catalog-locked-card {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .cashier-page .catalog-tools .search {
@@ -18498,11 +18722,11 @@ label .search-select-trigger {
 /* Kasir POS: blok kapster tidak menempel ke navbar atas */
 @media (max-width: 1024px) {
   .cashier-page .catalog-sticky {
-    padding-top: 16px;
+    padding-top: 14px;
   }
 
   .cashier-page .cart {
-    padding-top: 16px;
+    padding-top: 14px;
   }
 }
 
@@ -18510,7 +18734,7 @@ label .search-select-trigger {
 .cashier-page .cart-total {
   display: grid;
   gap: 8px;
-  padding: 10px 16px 12px;
+  padding: 10px 14px 12px;
   font-size: 13px;
 }
 
@@ -18706,7 +18930,7 @@ label .search-select-trigger {
 }
 
 .cashier-page .catalog-locked-card {
-  padding: 12px 16px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-left: 3px solid var(--brass);
   border-radius: 10px;
@@ -18766,7 +18990,7 @@ label .search-select-trigger {
 /* Input Manual: satu skala ukuran dan jarak (panel 16px, jarak 14px, kontrol 44px, huruf 14px/12px) */
 .manual-page {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   align-content: start;
 }
 
@@ -18776,11 +19000,11 @@ label .search-select-trigger {
 }
 
 .manual-page .manual-checkout-grid {
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .form-panel {
-  padding: 16px;
+  padding: 14px;
 }
 
 .manual-page .form-panel > h3,
@@ -18803,7 +19027,7 @@ label .search-select-trigger {
 }
 
 .manual-page .manual-info-grid {
-  gap: 12px 16px;
+  gap: 12px 14px;
 }
 
 .manual-page .form-grid-field > span,
@@ -18844,7 +19068,7 @@ label .search-select-trigger {
 }
 
 .manual-page .nota-catalog-columns {
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .nota-group {
@@ -19089,7 +19313,7 @@ label .search-select-trigger {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 0 16px;
+  padding: 0 0 14px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--paper);
@@ -19102,7 +19326,7 @@ label .search-select-trigger {
   align-items: center;
   justify-content: space-between;
   min-height: 54px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -19134,7 +19358,7 @@ label .search-select-trigger {
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 0 16px;
+  padding: 0 14px;
   scrollbar-width: none;
 }
 
@@ -19185,12 +19409,12 @@ label .search-select-trigger {
 }
 
 .manual-ringkas .nota-summary {
-  margin: 0 16px;
+  margin: 0 14px;
   padding-top: 12px;
 }
 
 .manual-ringkas > .primary-button {
-  margin: 0 16px;
+  margin: 0 14px;
   min-height: 44px;
 }
 
@@ -19217,8 +19441,8 @@ label .search-select-trigger {
 /* Input Manual: bar total menempel penuh di dasar seperti bar keranjang Kasir (latar solid, tidak tembus) */
 .manual-page .sticky-submit {
   bottom: 0;
-  margin: 16px -16px 0;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 14px -14px 0;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
@@ -19232,8 +19456,8 @@ label .search-select-trigger {
 
 @media (max-width: 1024px) {
   .manual-page .sticky-submit {
-    margin: 16px -16px 0;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    margin: 14px -14px 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -19331,8 +19555,8 @@ label .search-select-trigger {
 /* Input Manual: bar bawah berbentuk pil gelap seperti bar "Pesanan saat ini" di Kasir */
 .manual-page .sticky-submit {
   display: block;
-  margin: 16px -16px 0;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 14px -14px 0;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
@@ -19344,7 +19568,7 @@ label .search-select-trigger {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 8px 8px 16px;
+  padding: 8px 8px 8px 14px;
   border-radius: 12px;
   background: var(--ink);
   box-shadow: 0 2px 8px rgb(20 17 15 / 18%);
@@ -19438,15 +19662,15 @@ label .search-select-trigger {
 
 @media (max-width: 1024px) {
   .manual-page .sticky-submit {
-    margin: 16px -16px 0;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    margin: 14px -14px 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (max-width: 560px) {
   .manual-page .manual-bar {
     flex-wrap: wrap;
-    padding: 12px 12px 12px 16px;
+    padding: 12px 12px 12px 14px;
   }
 
   .manual-page .manual-total-button {
@@ -19475,7 +19699,7 @@ label .search-select-trigger {
 }
 
 .manual-page .manual-bar {
-  padding: 8px 8px 8px 16px;
+  padding: 8px 8px 8px 14px;
   min-height: 56px;
 }
 
@@ -19488,7 +19712,7 @@ label .search-select-trigger {
 }
 
 .manual-ringkas-note {
-  margin: 0 16px;
+  margin: 0 14px;
 }
 
 .manual-page .sticky-submit {
@@ -19502,11 +19726,11 @@ label .search-select-trigger {
 
 .manual-page > section:last-of-type,
 .manual-page > .manual-checkout-grid {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .manual-ringkas .manual-ringkas-note {
-  margin: 0 16px;
+  margin: 0 14px;
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 13px;
@@ -19534,7 +19758,7 @@ label .search-select-trigger {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 8px;
-  padding: 12px 16px 16px;
+  padding: 12px 14px 14px;
   border-top: 1px solid var(--line);
   border-bottom: 0;
 }
@@ -19593,7 +19817,7 @@ label .search-select-trigger {
   order: 1;
   min-height: 0;
   flex: 1 1 auto;
-  padding: 16px;
+  padding: 14px;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -19644,7 +19868,7 @@ label .search-select-trigger {
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--line);
   font-size: 13px;
   font-weight: 600;
@@ -19671,7 +19895,7 @@ label .search-select-trigger {
 
 .receipt-popup .receipt-stage {
   background: var(--paper);
-  padding: 16px;
+  padding: 14px;
 }
 
 .receipt-popup .thermal-receipt {
@@ -19719,7 +19943,7 @@ label .search-select-trigger {
 .receipt-popup .receipt-layout .receipt-stage {
   order: 0;
   min-height: 0;
-  padding: 16px;
+  padding: 14px;
   overflow-y: auto;
   border-right: 1px solid var(--line);
 }
@@ -19749,7 +19973,7 @@ label .search-select-trigger {
   flex-direction: column;
   align-content: stretch;
   gap: 8px;
-  padding: 16px;
+  padding: 14px;
   border-top: 0;
 }
 
@@ -19804,14 +20028,14 @@ label .search-select-trigger {
   .receipt-popup .receipt-aksi .receipt-status {
     order: 0;
     min-height: 0;
-    padding: 8px 16px;
+    padding: 8px 14px;
     font-size: 12px;
   }
 
   .receipt-popup .receipt-aksi .flow-toolbar {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    padding: 12px 16px 16px;
+    padding: 12px 14px 14px;
   }
 
   .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
@@ -19869,19 +20093,19 @@ label .search-select-trigger {
 }
 
 .receipt-popup .receipt-layout .receipt-stage {
-  padding: 16px;
+  padding: 14px;
   place-items: start center;
 }
 
 .receipt-popup .receipt-aksi .receipt-status {
-  padding: 12px 16px;
+  padding: 12px 14px;
   min-height: 0;
   gap: 10px;
 }
 
 .receipt-popup .receipt-aksi .flow-toolbar {
   gap: 12px;
-  padding: 16px;
+  padding: 14px;
 }
 
 .receipt-popup .receipt-aksi .flow-toolbar > .segmented {
@@ -19895,7 +20119,7 @@ label .search-select-trigger {
 @media (max-width: 640px) {
   .receipt-popup .receipt-aksi .flow-toolbar {
     gap: 8px;
-    padding: 12px 16px 16px;
+    padding: 12px 14px 14px;
   }
 }
 
@@ -20016,7 +20240,7 @@ label .search-select-trigger {
 /* Kapster dan jumlah kasbon selalu sebaris; keperluan di bawahnya; jarak isian seragam 14px */
 .kasbon-kapster-page .kasbon-kapster-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
@@ -20038,7 +20262,7 @@ label .search-select-trigger {
     min-height: 0;
     width: 100%;
     margin: 0;
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -20069,7 +20293,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .kasbon-kapster-page {
     overflow: hidden;
-    padding-bottom: 16px !important;
+    padding-bottom: 14px !important;
   }
 }
 
@@ -20088,7 +20312,7 @@ label .search-select-trigger {
 .izin-kapster-page .izin-cal {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 14px;
 }
 
 .izin-kapster-page .izin-cal-head {
@@ -20121,8 +20345,8 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .izin-pilihan {
-  margin-bottom: 16px;
-  padding: 10px 16px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
 }
 
 .izin-kapster-page .izin-pilihan strong {
@@ -20139,7 +20363,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .kasbon-kapster-actions {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .izin-kapster-page .kasbon-kapster-history {
@@ -20147,12 +20371,12 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
-  margin-top: 16px;
+  margin-top: 14px;
   padding-right: 0;
 }
 
 .izin-kapster-page > .panel + .panel {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 /* Laptop & tablet lebar: halaman tidak menggulir, hanya daftar riwayat */
@@ -20170,7 +20394,7 @@ label .search-select-trigger {
     min-height: 0;
     width: 100%;
     margin: 0;
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -20201,7 +20425,7 @@ label .search-select-trigger {
 @media (min-width: 1025px) {
   .izin-kapster-page {
     overflow: hidden;
-    padding-bottom: 16px !important;
+    padding-bottom: 14px !important;
   }
 
   .izin-kapster-page > .kasbon-kapster-history {
@@ -20236,7 +20460,7 @@ label .search-select-trigger {
 
 .izin-kapster-page .izin-layout-form .kasbon-kapster-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
+  gap: 12px 14px;
 }
 
 .izin-kapster-page .izin-layout-form .kasbon-kapster-note {
@@ -20244,7 +20468,7 @@ label .search-select-trigger {
 }
 
 .izin-kapster-page .izin-cal {
-  padding: 16px;
+  padding: 14px;
 }
 
 .izin-kapster-page .izin-cal-head {
@@ -20370,6 +20594,396 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
   height: 0;
 }
 
+/* Koreksi absensi: pilihan status dan alasan memenuhi lebar modal. */
+.modal-overlay.modal-centered .attendance-correction-modal {
+  width: min(560px, calc(100% - 16px)) !important;
+  max-width: 560px !important;
+}
+
+.attendance-correction-modal > label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-correction-modal > .attendance-correction-field {
+  display: block;
+  margin: 14px 18px 0;
+}
+
+.attendance-correction-field > span,
+.attendance-reason-heading > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-correction-field > span {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.attendance-reason-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  margin-bottom: 6px;
+}
+
+.attendance-correction-modal > label > span > span:first-child {
+  margin: 0;
+}
+
+.attendance-status-dropdown {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.attendance-correction-modal > label > input,
+.attendance-correction-modal .attendance-status-trigger {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.attendance-status-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.attendance-status-trigger svg {
+  width: 18px;
+  height: 18px;
+  color: var(--brass);
+  transition: transform 140ms ease;
+}
+
+.attendance-status-trigger:hover {
+  border-color: var(--brass);
+}
+
+.attendance-status-dropdown.is-open .attendance-status-trigger {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(200, 150, 62, 0.14);
+}
+
+.attendance-status-dropdown.is-open .attendance-status-trigger svg {
+  transform: rotate(180deg);
+}
+
+.attendance-status-menu {
+  position: absolute;
+  z-index: 30;
+  inset: calc(100% + 6px) 0 auto;
+  display: grid;
+  gap: 3px;
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 0 8px 20px rgba(35, 29, 20, 0.1);
+}
+
+.attendance-status-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attendance-status-menu button.selected {
+  background: #f3e9d8;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .attendance-status-menu button:hover {
+    background: #f3e9d8;
+  }
+}
+
+.attendance-status-menu button.selected {
+  color: #765111;
+  font-weight: 650;
+}
+
+.attendance-correction-modal {
+  overflow: visible;
+}
+
+.attendance-correction-modal > header {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  padding-right: 62px;
+}
+
+.attendance-correction-modal .attendance-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bone);
+  color: var(--slate);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.attendance-correction-modal .attendance-modal-close:hover {
+  border-color: #d7c9b5;
+  background: #f3e9d8;
+  color: var(--ink);
+}
+
+.attendance-correction-modal .attendance-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.attendance-correction-modal > footer {
+  display: block;
+  padding: 14px 18px 14px !important;
+}
+
+.attendance-correction-modal > footer .attendance-save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+}
+
+.attendance-status-menu button svg {
+  width: 16px;
+  height: 16px;
+  color: var(--brass);
+}
+
+.attendance-correction-modal .attendance-reason-toggle {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--brass);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--brass);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.attendance-correction-modal .attendance-reason-toggle:hover {
+  background: rgba(200, 150, 62, 0.09);
+}
+
+.attendance-reason-options,
+.attendance-custom-reason {
+  margin: 0 18px 14px;
+}
+
+.attendance-reason-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+}
+
+.attendance-reason-options button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.attendance-reason-options button:last-child {
+  grid-column: 1 / -1;
+}
+
+.attendance-reason-options button:hover,
+.attendance-reason-options button.selected {
+  border-color: var(--brass);
+  background: rgba(200, 150, 62, 0.1);
+}
+
+.attendance-reason-options button.selected {
+  font-weight: 650;
+}
+
+.attendance-correction-modal .attendance-custom-reason textarea {
+  box-sizing: border-box;
+  min-height: 96px;
+  padding: 10px 12px;
+}
+
+.attendance-correction-modal > .info-banner {
+  margin: 0 18px 14px;
+}
+
+.attendance-detail-content {
+  padding: 18px;
+}
+
+.attendance-detail-photo {
+  display: block;
+  width: 100%;
+  height: min(38svh, 260px);
+  max-height: min(38svh, 260px);
+  margin-bottom: 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  object-fit: cover;
+  object-position: center;
+}
+
+.attendance-detail-name {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 16px;
+}
+
+.attendance-detail-content dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.attendance-detail-content dl > div {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.attendance-detail-content dl > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.attendance-detail-content dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.attendance-detail-content dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .attendance-record-card {
+    cursor: pointer;
+  }
+
+  .attendance-record-card:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .modal-overlay.modal-centered .attendance-correction-modal {
+    width: min(440px, calc(100% - 8px)) !important;
+    max-width: 440px !important;
+  }
+
+  .attendance-correction-modal > label,
+  .attendance-correction-modal > .attendance-correction-field,
+  .attendance-correction-modal > .attendance-reason-options,
+  .attendance-correction-modal > .attendance-custom-reason {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  .attendance-correction-modal > label > span {
+    font-size: 12px;
+  }
+
+  .attendance-correction-field > span,
+  .attendance-reason-heading > span {
+    font-size: 12px;
+  }
+
+  .attendance-status-trigger {
+    min-height: 42px;
+    padding-inline: 11px;
+    font-size: 13px;
+  }
+
+  .attendance-status-menu button {
+    min-height: 36px;
+    font-size: 13px;
+  }
+
+  .attendance-reason-options button {
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .attendance-correction-modal .attendance-reason-toggle {
+    min-height: 32px;
+    padding-inline: 9px;
+    font-size: 12px;
+  }
+
+  .attendance-reason-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-reason-options button:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Izin Kapster: tombol Simpan sama di semua lebar layar */
 .izin-kapster-page .kasbon-kapster-actions .button {
   width: auto;
@@ -20392,7 +21006,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 }
 
 .izin-kapster-page > .panel + .panel {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 /* Bertumpuk (<=600px): halaman menggulir, riwayat tampil 3 baris lalu digulir */
@@ -20408,12 +21022,12 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 }
 
 .izin-kapster-page > .kasbon-kapster-history {
-  margin-top: 16px !important;
+  margin-top: 14px !important;
 }
 
 @media (max-width: 1024px) {
   .workspace > .content.izin-kapster-page {
-    padding-bottom: 16px !important;
+    padding-bottom: 14px !important;
   }
 }
 
@@ -20441,7 +21055,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 .kasbon-kapster-page > .panel + .panel,
 .kasbon-kapster-page > .kasbon-kapster-history {
-  margin-top: 16px !important;
+  margin-top: 14px !important;
 }
 
 .workspace > .content.kasbon-kapster-page {
@@ -20459,13 +21073,13 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 @media (max-width: 1024px) {
   .workspace > .content.kasbon-kapster-page {
-    padding-bottom: 16px !important;
+    padding-bottom: 14px !important;
   }
 }
 
 /* Izin Kapster: jarak kalender ke form 16px (sama dengan jarak antar kartu); tombol Simpan selebar form */
 .izin-kapster-page .izin-layout {
-  gap: 16px;
+  gap: 14px;
 }
 
 .izin-kapster-page .kasbon-kapster-actions .button {
@@ -20474,12 +21088,12 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 /* Kasbon Kapster: semua jarak di dalam form 16px; tombol Ajukan selebar form */
 .kasbon-kapster-page .kasbon-kapster-grid {
-  gap: 16px;
-  margin-top: 16px;
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-actions {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .kasbon-kapster-page .kasbon-kapster-actions .button {
@@ -20489,16 +21103,16 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 /* Input Manual: jarak 16px di semua tempat; Terapkan dan Rp/% simetris (lebar, tinggi, jarak sama) */
 .manual-page .manual-info-grid,
 .manual-page .manual-discount-panel > .manual-info-grid {
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .manual-checkout-grid {
-  gap: 16px;
+  gap: 14px;
 }
 
 /* jarak antar kartu hanya dari gap halaman */
 .workspace > .content.manual-page {
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page > section:last-of-type,
@@ -20508,12 +21122,12 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 .manual-page .form-panel > h3,
 .manual-page .section-title {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .manual-page .manual-discount-panel .cart-discount-panel {
   grid-template-columns: minmax(0, 1fr) 104px;
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .manual-discount-panel .cart-discount-panel > .primary-button {
@@ -20523,7 +21137,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 .manual-page .manual-discount-manual {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 104px;
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .manual-discount-manual .segmented.manual-discount-type {
@@ -20542,7 +21156,7 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 .manual-page .manual-payment-panel > .nota-summary,
 .manual-page .manual-qris-notice,
 .manual-page .manual-payment-warning {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .manual-page .manual-payment-panel .manual-info-grid .manual-quick-cash {
@@ -20551,28 +21165,28 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
 
 /* Input Manual: jarak di dalam kartu juga 16px (daftar layanan/produk, metode bayar, komisi, uang cepat) */
 .manual-page .nota-search {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .manual-page .nota-catalog-columns {
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .nota-group {
-  padding: 16px;
+  padding: 14px;
 }
 
 .manual-page .nota-group h4 {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .manual-page .nota-items {
-  gap: 16px;
+  gap: 14px;
 }
 
 .manual-page .manual-payment-panel .manual-method-grid,
 .manual-page .manual-quick-cash {
-  gap: 16px;
+  gap: 14px;
 }
 
 /* Input Manual: popup ringkasan, gulir daftar tidak menggeser halaman di belakangnya (seperti popup Riwayat) */
@@ -20590,7 +21204,7 @@ html:has(.manual-page .modal-overlay) {
 
 /* Input Manual: jarak tombol Normal/OT sama dengan metode bayar (16px) */
 .manual-page .manual-payment-panel .manual-komisi-grid {
-  gap: 16px;
+  gap: 14px;
 }
 
 /* Input Manual popup: Hapus Semua tidak menempel di tepi, peringatan segaris dengan isi popup, jarak antar bagian 16px */
@@ -20600,14 +21214,14 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .manual-ringkas .manual-ringkas-note {
-  margin: 0 16px;
+  margin: 0 14px;
   padding: 0;
   background: transparent;
   border: 0;
 }
 
 .manual-ringkas {
-  gap: 16px;
+  gap: 14px;
 }
 
 /* Input Manual: tinggi baris label = ukuran font supaya jarak terlihat ke tulisan sama dengan jarak samping (16px) */
@@ -20624,11 +21238,11 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .manual-ringkas .manual-ringkas-line {
-  padding: 16px 0;
+  padding: 14px 0;
 }
 
 .manual-ringkas .nota-summary {
-  padding-top: 16px;
+  padding-top: 14px;
 }
 
 .manual-ringkas .manual-ringkas-lines .cart-clear-button,
@@ -20644,7 +21258,7 @@ html:has(.manual-page .modal-overlay) {
 .manual-ringkas > .nota-summary,
 .manual-ringkas > .manual-ringkas-note,
 .manual-ringkas > .primary-button {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .manual-ringkas .manual-ringkas-lines .cart-clear-row {
@@ -20662,46 +21276,46 @@ html:has(.manual-page .modal-overlay) {
 .edit-trx-payment,
 .edit-trx-payment-fields,
 .edit-trx-method-grid {
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .edit-trx-items-list {
-  gap: 16px;
+  gap: 14px;
 }
 
 .edit-trx-item-row {
-  padding: 16px;
-  gap: 4px 16px;
+  padding: 14px;
+  gap: 4px 14px;
 }
 
 .edit-trx-body .section-title {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .edit-trx-modal .nota-search {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .edit-trx-modal .nota-catalog-columns {
-  gap: 16px;
+  gap: 14px;
 }
 
 .edit-trx-modal .nota-group {
-  padding: 16px;
+  padding: 14px;
 }
 
 .edit-trx-modal .nota-group h4 {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .edit-trx-modal .nota-items {
-  gap: 16px;
+  gap: 14px;
 }
 
 .edit-trx-modal .nota-item {
   min-height: 56px;
   padding: 8px 10px;
-  gap: 16px;
+  gap: 14px;
 }
 
 .edit-trx-modal .nota-add {
@@ -20715,8 +21329,8 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .edit-trx-modal form > footer {
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
 }
 
 .edit-trx-modal form > footer .button {
@@ -20825,7 +21439,7 @@ html:has(.manual-page .modal-overlay) {
 .od-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .od-turn-right {
@@ -20835,13 +21449,13 @@ html:has(.manual-page .modal-overlay) {
 .od-kpis {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
   transition: opacity 0.15s;
 }
 
 .od-kpi {
   min-width: 0;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   color: var(--ink);
@@ -20880,7 +21494,7 @@ html:has(.manual-page .modal-overlay) {
 .od-kpi-label {
   grid-column: 1 / -1;
   grid-row: 2;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .od-kpi-value {
@@ -20933,7 +21547,7 @@ html:has(.manual-page .modal-overlay) {
 .od-lower {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
 
 .od-panel {
@@ -20942,7 +21556,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -20953,8 +21567,8 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
+  gap: 14px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -20990,7 +21604,7 @@ html:has(.manual-page .modal-overlay) {
   min-height: 56px;
   display: grid;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 8px;
   border: 0;
   border-radius: 10px;
@@ -21170,8 +21784,8 @@ html:has(.manual-page .modal-overlay) {
 .workspace > .content.od-page {
   flex: 1 1 0;
   min-height: auto;
-  gap: 16px;
-  padding: 70px 14px 16px !important;
+  gap: 14px;
+  padding: 68px 14px 14px !important;
 }
 
 .od-page > .od-kpis {
@@ -21238,7 +21852,7 @@ html:has(.manual-page .modal-overlay) {
 
   .od-kpi-value {
     grid-row: 2;
-    margin-top: 16px;
+    margin-top: 14px;
     font-size: clamp(11px, 11.5cqi, 20px);
   }
 
@@ -21283,7 +21897,7 @@ html:has(.manual-page .modal-overlay) {
   }
 
   .workspace > .content.od-page {
-    padding: 16px 14px 16px !important;
+    padding: 14px 14px 14px !important;
   }
 
   .od-kpi-label {
@@ -21316,7 +21930,7 @@ html:has(.manual-page .modal-overlay) {
 .report-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .report-page .report-section + .report-section {
@@ -21334,7 +21948,7 @@ html:has(.manual-page .modal-overlay) {
 
 .lk-panel {
   min-width: 0;
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
 }
 
@@ -21342,8 +21956,8 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
+  gap: 14px;
+  padding-bottom: 14px;
 }
 
 .lk-head h3 {
@@ -21355,15 +21969,15 @@ html:has(.manual-page .modal-overlay) {
 .lk-pay {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .lk-pay-card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -21432,8 +22046,8 @@ html:has(.manual-page .modal-overlay) {
 .lk-exp-body {
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   align-items: stretch;
 }
 
@@ -21445,7 +22059,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   height: 100%;
   flex-direction: column;
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
 }
 
@@ -21474,7 +22088,7 @@ html:has(.manual-page .modal-overlay) {
 .lk-exp-fields {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -21494,7 +22108,7 @@ html:has(.manual-page .modal-overlay) {
 
 .lk-exp-actions {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   margin-top: auto;
 }
 
@@ -21505,7 +22119,7 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .simple-modal.lk-exp-form > header {
-  padding: 0 16px;
+  padding: 0 14px;
 }
 
 @media (max-width: 620px) {
@@ -21549,7 +22163,7 @@ html:has(.manual-page .modal-overlay) {
 .report-page .expense-head,
 .report-page .report-head {
   min-height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   background: var(--bone);
   border-bottom: 1px solid var(--line);
   font-size: 11px;
@@ -21560,7 +22174,7 @@ html:has(.manual-page .modal-overlay) {
 .report-page .expense-table-compact > .expense-row {
   grid-template-columns: 90px minmax(0, 1fr) 130px 110px;
   min-width: 520px;
-  gap: 16px;
+  gap: 14px;
 }
 
 .report-page .expense-table-compact > .expense-head > *,
@@ -21576,7 +22190,7 @@ html:has(.manual-page .modal-overlay) {
 .report-page .expense-row,
 .report-page .report-row {
   min-height: 52px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-top: 0;
   border-bottom: 1px solid var(--line);
   font-size: 13px;
@@ -21609,14 +22223,14 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .lk-empty {
-  padding: 32px 16px;
+  padding: 32px 14px;
   color: var(--slate);
   text-align: center;
 }
 
 .report-page .expense-toolbar {
-  margin: 0 0 16px;
-  gap: 16px;
+  margin: 0 0 14px;
+  gap: 14px;
 }
 
 .report-page .expense-toolbar .search {
@@ -21662,9 +22276,9 @@ html:has(.manual-page .modal-overlay) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-height: 52px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-bottom: 1px solid var(--line);
   font-size: 14px;
 }
@@ -21697,24 +22311,24 @@ html:has(.manual-page .modal-overlay) {
 
 /* Laporan Keuangan: jarak 16px di semua lebar (mengalahkan gap 12px .content di HP) */
 .workspace > .content.report-page {
-  gap: 16px;
-  padding-bottom: 16px !important;
+  gap: 14px;
+  padding-bottom: 14px !important;
 }
 
 @media (max-width: 1024px) {
   .workspace > .content.report-page {
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
   }
 }
 
 .report-page .report-toolbar {
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   border-radius: 12px;
 }
 
 .report-page .report-filter-row {
-  gap: 16px;
+  gap: 14px;
 }
 
 /* Laporan Keuangan: bar atas sama dengan bar filter Riwayat (kartu putih sendiri-sendiri, aktif krem), tanpa kotak pembungkus */
@@ -21722,7 +22336,7 @@ html:has(.manual-page .modal-overlay) {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: 16px !important;
+  gap: 14px !important;
   padding: 0 !important;
   border: 0;
   background: transparent;
@@ -21790,7 +22404,7 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .report-page .report-export-buttons .button {
-  padding: 0 16px;
+  padding: 0 14px;
   justify-content: center;
 }
 
@@ -21842,7 +22456,7 @@ html:has(.manual-page .modal-overlay) {
 .report-page .commission-table-scroll > .report-head,
 .report-page .commission-table-scroll > .report-row {
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) !important;
-  gap: 16px;
+  gap: 14px;
 }
 
 .report-page .commission-table-scroll > .report-head > :last-child,
@@ -21986,7 +22600,7 @@ html:has(.manual-page .modal-overlay) {
   }
 
   .lk-exp-cal .izin-cal {
-    padding: 12px 16px;
+    padding: 12px 14px;
   }
 
   .lk-exp-cal .izin-cal-head {
@@ -22022,7 +22636,7 @@ html:has(.manual-page .modal-overlay) {
   }
 
   .lk-exp-cal .izin-cal {
-    padding: 12px 16px;
+    padding: 12px 14px;
   }
 
   .lk-exp-cal .izin-cal-head,
@@ -22062,7 +22676,7 @@ html:has(.manual-page .modal-overlay) {
   display: grid !important;
   grid-template-columns: 64px minmax(0, 1fr) auto var(--lk-aksi) !important;
   align-items: center;
-  gap: 16px !important;
+  gap: 14px !important;
   min-width: 0 !important;
   width: 100% !important;
   margin: 0 !important;
@@ -22071,7 +22685,7 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .report-page .expense-table-compact > .expense-row {
-  padding: 8px 16px !important;
+  padding: 8px 14px !important;
   border-width: 0 0 1px !important;
 }
 
@@ -22103,9 +22717,9 @@ html:has(.manual-page .modal-overlay) {
 .report-page .commission-table-scroll > .report-row {
   display: grid !important;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) !important;
-  gap: 16px !important;
+  gap: 14px !important;
   margin: 0 !important;
-  padding-inline: 16px !important;
+  padding-inline: 14px !important;
   border-radius: 0 !important;
   box-sizing: border-box;
 }
@@ -22129,7 +22743,7 @@ html:has(.manual-page .modal-overlay) {
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   align-items: center;
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .report-page .expense-toolbar .search,
@@ -22157,7 +22771,7 @@ html:has(.manual-page .modal-overlay) {
 .report-page .expense-toolbar .expense-add-button {
   flex: 0 0 auto;
   width: auto;
-  padding: 0 16px;
+  padding: 0 14px;
   white-space: nowrap;
 }
 
@@ -22171,7 +22785,7 @@ html:has(.manual-page .modal-overlay) {
   .report-page .expense-table-compact > .expense-head,
   .report-page .expense-table-compact > .expense-row {
     grid-template-columns: minmax(0, 1fr) auto var(--lk-aksi) !important;
-    column-gap: 16px !important;
+    column-gap: 14px !important;
     row-gap: 2px !important;
   }
 
@@ -22272,7 +22886,7 @@ html:has(.manual-page .modal-overlay) {
   .report-page .expense-table-compact > .expense-row {
     grid-template-columns: minmax(0, 1fr) auto var(--lk-aksi) !important;
     column-gap: 8px !important;
-    padding-inline: 16px !important;
+    padding-inline: 14px !important;
   }
 
   .report-page .expense-table-compact > .expense-row > :nth-child(3) {
@@ -22293,7 +22907,7 @@ html:has(.manual-page .modal-overlay) {
    jarak terlihat kiri = kanan = 16px dan jarak ikon ke teks = 8px */
 .report-page .expense-add-button {
   gap: 0;
-  padding-inline: 16px;
+  padding-inline: 14px;
 }
 
 .report-page .expense-add-button .icon {
@@ -22328,8 +22942,8 @@ html:has(.manual-page .modal-overlay) {
 .lp-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .lp-stat {
@@ -22337,7 +22951,7 @@ html:has(.manual-page .modal-overlay) {
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -22388,9 +23002,9 @@ html:has(.manual-page .modal-overlay) {
   z-index: 2;
   display: grid;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-height: 40px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-bottom: 1px solid var(--line);
   background: var(--bone);
   color: var(--slate);
@@ -22404,9 +23018,9 @@ html:has(.manual-page .modal-overlay) {
 .lp-row {
   display: grid;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-height: 56px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-bottom: 1px solid var(--line);
   color: var(--slate);
   font-size: 13px;
@@ -22526,8 +23140,8 @@ html:has(.manual-page .modal-overlay) {
 .lp-detail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   border-top: 1px solid var(--line);
   background: var(--bone);
 }
@@ -22556,7 +23170,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 10px;
   background: var(--oxblood-soft);
   color: var(--oxblood);
@@ -22680,8 +23294,8 @@ html:has(.manual-page .modal-overlay) {
 /* ===== Layanan & Produk (Owner): semua jarak 16px, ukuran komponen sama dengan Laporan Keuangan =====
    Dicakup .catalog-page saja supaya halaman lain (terkunci) tidak bergeser. */
 .catalog-page {
-  gap: 16px;
-  padding-bottom: 16px;
+  gap: 14px;
+  padding-bottom: 14px;
 }
 
 .catalog-page *,
@@ -22697,9 +23311,9 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .catalog-page .catalog-tab-header {
-  gap: 16px !important;
+  gap: 14px !important;
   margin-bottom: 0 !important;
-  padding-bottom: 16px !important;
+  padding-bottom: 14px !important;
 }
 
 .catalog-page .catalog-segmented {
@@ -22719,25 +23333,25 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .catalog-embedded-view {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
 .catalog-page .services-status-bar,
 .catalog-page .products-status-bar {
-  gap: 16px;
+  gap: 14px;
   margin: 0;
 }
 
 .catalog-page .products-status-bar .page-actions {
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .services-status-bar .master-summary > span,
 .catalog-page .products-status-bar .master-summary > span {
   min-height: 44px;
   box-sizing: border-box;
-  padding: 0 16px;
+  padding: 0 14px;
   gap: 8px;
   border-radius: 10px;
 }
@@ -22747,7 +23361,7 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .promo-discount-actions > .primary-button {
   min-height: 44px;
   height: 44px;
-  padding-inline: 16px;
+  padding-inline: 14px;
   border-radius: 10px;
 }
 
@@ -22757,23 +23371,23 @@ html:has(.manual-page .modal-overlay) {
 
 .catalog-page .service-list > .filters,
 .catalog-page .product-admin-list > .filters {
-  padding: 16px;
-  gap: 16px;
+  padding: 14px;
+  gap: 14px;
 }
 
 .catalog-page .service-head,
 .catalog-page .product-admin-head {
-  padding: 0 16px;
+  padding: 0 14px;
 }
 
 .catalog-page .service-row,
 .catalog-page .product-admin-row {
-  padding: 8px 16px;
-  gap: 16px;
+  padding: 8px 14px;
+  gap: 14px;
 }
 
 .catalog-page .catalog-row-actions {
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .catalog-row-actions .button {
@@ -22791,24 +23405,24 @@ html:has(.manual-page .modal-overlay) {
 
 /* Daftar kartu Diskon Event: tanpa batang scroll dan tanpa celah di kanan */
 .catalog-page .promo-discounts-tab {
-  gap: 16px !important;
+  gap: 14px !important;
   min-width: 0;
 }
 
 .catalog-page .promo-discount-actions {
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .promo-discount-list {
-  gap: 16px;
+  gap: 14px;
   max-height: none;
   scrollbar-gutter: auto;
 }
 
 .catalog-page .promo-discount-list > article {
   border-radius: 12px !important;
-  padding: 16px !important;
-  gap: 16px !important;
+  padding: 14px !important;
+  gap: 14px !important;
 }
 
 @media (min-width: 1025px) {
@@ -22841,7 +23455,7 @@ html:has(.manual-page .modal-overlay) {
     height: 100svh;
     min-height: 560px;
     box-sizing: border-box;
-    padding: 70px 14px 16px !important;
+    padding: 68px 14px 14px !important;
     display: flex;
     flex-direction: column;
   }
@@ -22866,7 +23480,7 @@ html:has(.manual-page .modal-overlay) {
     flex: 1 1 0;
     min-height: 0;
     overflow-y: auto !important;
-    padding: 16px !important;
+    padding: 14px !important;
   }
 
   .catalog-page .promo-discount-list {
@@ -22891,13 +23505,13 @@ html:has(.manual-page .modal-overlay) {
 
 @media (min-width: 1025px) {
   .workspace > .content.catalog-page {
-    padding: 16px 16px 16px !important;
+    padding: 14px 14px 14px !important;
   }
 }
 
 /* Layanan & Produk: aturan HP/tablet lama (gap 12px, padding bawah 20px, margin atas panel 11px) kalah oleh spesifisitas ini */
 .content.catalog-page {
-  gap: 16px;
+  gap: 14px;
 }
 
 .content.catalog-page > .catalog-embedded-view > .fit-fill,
@@ -22907,8 +23521,8 @@ html:has(.manual-page .modal-overlay) {
 
 @media (max-width: 1024px) {
   .content.catalog-page {
-    padding: 70px 14px 16px !important;
-    gap: 16px !important;
+    padding: 68px 14px 14px !important;
+    gap: 14px !important;
   }
 }
 
@@ -22960,8 +23574,8 @@ html:has(.manual-page .modal-overlay) {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
-    column-gap: 16px;
-    row-gap: 16px;
+    column-gap: 14px;
+    row-gap: 14px;
   }
 
   .catalog-page .catalog-tab-header {
@@ -23023,14 +23637,14 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .simple-modal > header,
 .catalog-page .product-modal > header {
   min-height: 68px;
-  padding: 0 16px !important;
-  gap: 16px;
+  padding: 0 14px !important;
+  gap: 14px;
 }
 
 .catalog-page .confirm-custom-modal > header {
   min-height: 68px;
-  padding: 16px !important;
-  gap: 16px;
+  padding: 14px !important;
+  gap: 14px;
   align-items: center !important;
 }
 
@@ -23050,13 +23664,13 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .simple-modal > .info-banner,
 .catalog-page .simple-modal > .pin-helper,
 .catalog-page .simple-modal > div[role="alert"] {
-  margin: 16px 16px 0;
+  margin: 14px 14px 0;
 }
 
 .catalog-page .simple-modal > .modal-row-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .simple-modal > .modal-row-2 > label {
@@ -23090,11 +23704,11 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .catalog-page .product-modal-body {
-  padding: 16px;
+  padding: 14px;
 }
 
 .catalog-page .product-modal .form-grid {
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .simple-modal > .toggle-row,
@@ -23106,7 +23720,7 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .service-modal > .toggle-row,
 .catalog-page .service-modal > .info-banner,
 .catalog-page .promo-discount-modal > .toggle-row {
-  margin: 16px 16px 0;
+  margin: 14px 14px 0;
 }
 
 .catalog-page .stock-modal > label:last-of-type,
@@ -23120,9 +23734,9 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .confirm-custom-modal > footer {
   display: flex !important;
   min-height: 0;
-  margin: 16px 0 0;
-  padding: 16px !important;
-  gap: 16px !important;
+  margin: 14px 0 0;
+  padding: 14px !important;
+  gap: 14px !important;
 }
 
 .catalog-page .simple-modal > footer .button,
@@ -23135,7 +23749,7 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .catalog-page .product-modal > .info-banner {
-  margin: 0 16px 16px;
+  margin: 0 14px 14px;
 }
 
 /* Popup Hapus: isi 16px */
@@ -23144,8 +23758,8 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .catalog-page .confirm-custom-modal > div {
-  padding: 16px !important;
-  gap: 16px !important;
+  padding: 14px !important;
+  gap: 14px !important;
 }
 
 @media (max-width: 620px) {
@@ -23206,7 +23820,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex !important;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .filters .search {
@@ -23225,7 +23839,7 @@ html:has(.manual-page .modal-overlay) {
   flex: none;
   min-height: 44px;
   height: 44px;
-  padding-inline: 16px;
+  padding-inline: 14px;
   border-radius: 10px;
   white-space: nowrap;
 }
@@ -23235,7 +23849,7 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .product-admin-list > .filters {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-    gap: 16px;
+    gap: 14px;
   }
 
   .catalog-page .filters .search {
@@ -23309,7 +23923,7 @@ html:has(.manual-page .modal-overlay) {
   min-height: 44px;
   height: 44px;
   box-sizing: border-box;
-  padding: 0 16px;
+  padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
@@ -23356,16 +23970,16 @@ html:has(.manual-page .modal-overlay) {
 @media (max-width: 760px) {
   .catalog-page .service-list-scroll .service-row,
   .catalog-page .product-admin-scroll .product-admin-row {
-    margin-bottom: 16px !important;
-    padding: 16px !important;
-    row-gap: 16px !important;
-    column-gap: 16px !important;
+    margin-bottom: 14px !important;
+    padding: 14px !important;
+    row-gap: 14px !important;
+    column-gap: 14px !important;
     border-radius: 12px;
   }
 
   .catalog-page .service-row .catalog-row-actions {
     margin-top: 0;
-    padding-top: 16px;
+    padding-top: 14px;
   }
 
   .catalog-page .service-list > .filters,
@@ -23385,8 +23999,8 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .product-admin-scroll .product-admin-row {
     display: grid !important;
     margin-bottom: 0 !important;
-    padding: 8px 16px !important;
-    gap: 16px !important;
+    padding: 8px 14px !important;
+    gap: 14px !important;
     min-height: 56px;
     border: 0 !important;
     border-top: 1px solid var(--line) !important;
@@ -23397,7 +24011,7 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .service-head,
   .catalog-page .product-admin-head {
     display: grid !important;
-    padding: 0 16px;
+    padding: 0 14px;
   }
 
   .catalog-page .service-list-scroll,
@@ -23503,7 +24117,7 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .promo-discount-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 0;
   border: 0;
 }
@@ -23519,7 +24133,7 @@ html:has(.manual-page .modal-overlay) {
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 0 16px;
+  padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
@@ -23534,7 +24148,7 @@ html:has(.manual-page .modal-overlay) {
   flex: none;
   min-height: 44px;
   height: 44px;
-  padding-inline: 16px;
+  padding-inline: 14px;
   white-space: nowrap;
 }
 
@@ -23592,7 +24206,7 @@ html:has(.manual-page .modal-overlay) {
 
 @media (max-width: 760px) {
   .catalog-page {
-    gap: 16px;
+    gap: 14px;
   }
 }
 
@@ -23609,7 +24223,7 @@ html:has(.manual-page .modal-overlay) {
   grid-template-rows: minmax(0, 1fr);
   place-items: center;
   height: 100svh;
-  padding: 16px !important;
+  padding: 14px !important;
 }
 
 .workspace > .content.catalog-page:has(> .catalog-embedded-view > .loading-state:only-child) > .catalog-embedded-view,
@@ -23783,7 +24397,7 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .service-commission-values {
     display: flex !important;
     flex-direction: row;
-    gap: 16px;
+    gap: 14px;
   }
 
   .catalog-page .service-commission-values > span {
@@ -23842,12 +24456,12 @@ html:has(.manual-page .modal-overlay) {
 
 /* Diskon Event: tombol di kartu mengikuti tombol kecil 40px */
 .catalog-page .promo-discount-list > article > div:last-child {
-  padding-top: 16px !important;
-  gap: 16px !important;
+  padding-top: 14px !important;
+  gap: 14px !important;
 }
 
 .catalog-page .promo-discount-list > article > div:last-child > div {
-  gap: 16px !important;
+  gap: 14px !important;
 }
 
 .catalog-page .promo-discount-list > article .button {
@@ -23974,8 +24588,8 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .product-admin-head,
   .catalog-page .service-row,
   .catalog-page .product-admin-row {
-    column-gap: 16px !important;
-    padding-inline: 16px !important;
+    column-gap: 14px !important;
+    padding-inline: 14px !important;
   }
 }
 
@@ -24000,7 +24614,7 @@ html:has(.manual-page .modal-overlay) {
 
 .catalog-page .product-modal > footer {
   margin: 0;
-  padding: 16px !important;
+  padding: 14px !important;
   min-height: 0;
   height: auto;
   box-sizing: border-box;
@@ -24025,7 +24639,7 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .catalog-row-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .catalog-row-actions .button {
@@ -24108,7 +24722,7 @@ html:has(.manual-page .modal-overlay) {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    row-gap: 16px !important;
+    row-gap: 14px !important;
   }
 
   .catalog-page .promo-row > .service-name {
@@ -24128,7 +24742,7 @@ html:has(.manual-page .modal-overlay) {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, auto));
     justify-content: space-between;
-    gap: 16px;
+    gap: 14px;
     padding: 0;
   }
 
@@ -24154,7 +24768,7 @@ html:has(.manual-page .modal-overlay) {
     grid-row: 3;
     justify-self: stretch;
     margin: 0;
-    padding-top: 16px;
+    padding-top: 14px;
     border-top: 1px solid var(--line);
   }
 }
@@ -24171,7 +24785,7 @@ html:has(.manual-page .modal-overlay) {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
     align-items: center;
-    row-gap: 16px !important;
+    row-gap: 14px !important;
   }
 
   .catalog-page .service-row:not(.promo-row) > .service-name,
@@ -24194,7 +24808,7 @@ html:has(.manual-page .modal-overlay) {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, auto)) !important;
     justify-content: space-between;
-    gap: 16px !important;
+    gap: 14px !important;
     padding: 0 !important;
   }
 
@@ -24239,7 +24853,7 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .product-admin-details .product-share-values {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px !important;
+    gap: 14px !important;
     width: 100%;
   }
 
@@ -24256,7 +24870,7 @@ html:has(.manual-page .modal-overlay) {
     justify-self: stretch !important;
     flex-direction: row !important;
     margin: 0 !important;
-    padding-top: 16px !important;
+    padding-top: 14px !important;
     border-top: 1px solid var(--line);
   }
 
@@ -24270,7 +24884,7 @@ html:has(.manual-page .modal-overlay) {
 @media (max-width: 760px) {
   .catalog-page .service-list-scroll .service-row > .service-details {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px 16px !important;
+    gap: 8px 14px !important;
     justify-content: stretch;
   }
 
@@ -24293,7 +24907,7 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .service-list-scroll .service-commission-values {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
   }
 
   .catalog-page .service-list-scroll .service-commission-values > span {
@@ -24308,7 +24922,7 @@ html:has(.manual-page .modal-overlay) {
 
   .catalog-page .product-admin-scroll .product-admin-row > .product-admin-details {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px 16px !important;
+    gap: 8px 14px !important;
     justify-content: stretch;
   }
 
@@ -24335,7 +24949,7 @@ html:has(.manual-page .modal-overlay) {
   .catalog-page .product-admin-scroll .product-share-values {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px !important;
+    gap: 14px !important;
     width: 100%;
   }
 
@@ -24446,7 +25060,7 @@ html:has(.manual-page .modal-overlay) {
 /* Laptop >=1280: tiga bagian sejajar dengan jarak tetap, nilai tidak boleh melewati kolom */
 @media (min-width: 1280px) {
   .catalog-page .product-share-values {
-    gap: 16px !important;
+    gap: 14px !important;
   }
 
   .catalog-page .product-share-values > span {
@@ -24491,7 +25105,7 @@ html:has(.manual-page .modal-overlay) {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 0 16px;
+  padding: 0 0 14px;
   scrollbar-width: none;
 }
 
@@ -24503,11 +25117,11 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .promo-modal-body > .modal-row-2,
 .catalog-page .promo-modal-body > .toggle-row,
 .catalog-page .promo-modal-body > div[role="alert"] {
-  margin: 16px 16px 0;
+  margin: 14px 14px 0;
 }
 
 .catalog-page .promo-modal-body > :first-child {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .catalog-page .promo-modal-body label {
@@ -24536,7 +25150,7 @@ html:has(.manual-page .modal-overlay) {
 .catalog-page .promo-modal-body > .modal-row-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .catalog-page .promo-modal-body > .modal-row-2 > label {
@@ -24634,7 +25248,7 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-card {
@@ -24643,8 +25257,8 @@ html:has(.manual-page .modal-overlay) {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--paper);
@@ -24656,7 +25270,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-card h4 {
@@ -24677,14 +25291,14 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px 0;
+  padding: 14px 0;
   border-block: 1px solid var(--line);
 }
 
 .gaji-page .gj-card dl > div {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   font-size: 14px;
 }
 
@@ -24715,7 +25329,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-card > footer span {
@@ -24737,7 +25351,7 @@ html:has(.manual-page .modal-overlay) {
 
 .gaji-page .gj-card > footer .button {
   min-height: 44px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-radius: 10px;
   font-size: 14px;
   white-space: nowrap;
@@ -24778,8 +25392,8 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-filters {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .gaji-page .gj-filters .search,
@@ -24813,7 +25427,7 @@ html:has(.manual-page .modal-overlay) {
 
 .gaji-page .gj-add {
   flex: 0 0 auto;
-  padding: 0 16px;
+  padding: 0 14px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -24871,8 +25485,8 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-row {
   display: grid;
   align-items: center;
-  gap: 16px;
-  padding: 0 16px;
+  gap: 14px;
+  padding: 0 14px;
   box-sizing: border-box;
 }
 
@@ -24990,8 +25604,8 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-detail {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   background: var(--bone);
   border-top: 1px solid var(--line);
 }
@@ -25006,7 +25620,7 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-detail dl > div {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   font-size: 14px;
 }
 
@@ -25031,7 +25645,7 @@ html:has(.manual-page .modal-overlay) {
   margin: 0;
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   color: var(--slate);
 }
 
@@ -25053,7 +25667,7 @@ html:has(.manual-page .modal-overlay) {
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
   .gaji-page .gj-item {
@@ -25066,8 +25680,8 @@ html:has(.manual-page .modal-overlay) {
   .gaji-page .gj-gaji .gj-row,
   .gaji-page .gj-kasbon .gj-row {
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px 16px;
-    padding: 16px;
+    gap: 8px 14px;
+    padding: 14px;
     min-height: 0;
   }
 
@@ -25080,7 +25694,7 @@ html:has(.manual-page .modal-overlay) {
     grid-column: 1 / -1;
     display: flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: 14px;
     text-align: right;
   }
 
@@ -25123,7 +25737,7 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .modal-overlay.modal-centered {
   align-items: center !important;
   justify-content: center !important;
-  padding: 16px !important;
+  padding: 14px !important;
 }
 
 .gaji-page .gj-modal {
@@ -25145,8 +25759,8 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -25168,8 +25782,8 @@ html:has(.manual-page .modal-overlay) {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -25182,7 +25796,7 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-modal > footer {
   flex: none;
   display: flex;
-  padding: 16px;
+  padding: 14px;
   border-top: 1px solid var(--line);
 }
 
@@ -25212,7 +25826,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-link {
@@ -25259,7 +25873,7 @@ html:has(.manual-page .modal-overlay) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--bone);
@@ -25268,7 +25882,7 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-sum > div {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   font-size: 14px;
 }
 
@@ -25443,7 +26057,7 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .gaji-page .gj-chips {
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-chips button {
@@ -25462,7 +26076,7 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .gaji-page .gj-checks {
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-table {
@@ -25483,11 +26097,11 @@ html:has(.manual-page .modal-overlay) {
 .gaji-page .gj-detail {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
-  padding: 16px 0;
+  padding: 14px 0;
 }
 
 .gaji-page .gj-detail > * {
-  padding: 0 16px;
+  padding: 0 14px;
 }
 
 .gaji-page .gj-detail > * + * {
@@ -25497,18 +26111,18 @@ html:has(.manual-page .modal-overlay) {
 @media (max-width: 760px) {
   .gaji-page .gj-row {
     height: auto;
-    padding-block: 16px;
+    padding-block: 14px;
   }
 
   .gaji-page .gj-detail {
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    gap: 14px;
   }
 
   .gaji-page .gj-detail > * + * {
     border-left: 0;
     border-top: 1px solid var(--line);
-    padding-top: 16px;
+    padding-top: 14px;
   }
 
   .gaji-page .gj-table {
@@ -25557,7 +26171,7 @@ html:has(.manual-page .modal-overlay) {
   .gaji-page .gj-row > .gj-note {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    column-gap: 16px;
+    column-gap: 14px;
     row-gap: 2px;
     align-items: start;
     text-align: right;
@@ -25637,13 +26251,13 @@ html:has(.manual-page .modal-overlay) {
   flex-direction: column;
   flex-wrap: nowrap;
   align-items: stretch;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-search-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-search-row .search {
@@ -25660,7 +26274,7 @@ html:has(.manual-page .modal-overlay) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   grid-auto-flow: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .gaji-page .gj-filter-grid > * {
@@ -25713,7 +26327,7 @@ html:has(.manual-page .modal-overlay) {
 @media (max-width: 760px) {
   .gaji-page .gj-kasbon .gj-row {
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px 16px;
+    gap: 8px 14px;
   }
 
   .gaji-page .gj-kasbon .gj-row > .gj-main {
@@ -25859,4 +26473,254 @@ html:has(.manual-page .modal-overlay) {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
+}
+
+/* Riwayat transaksi pribadi kapster mengikuti pola daftar dan detail Owner. */
+.kapster-transaction-history {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kapster-transaction-history > .page-title {
+  flex: 0 0 auto;
+}
+
+.kapster-history-content {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kapster-history-content .filters {
+  flex: 0 0 auto;
+}
+
+.kapster-history-content .master-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.kapster-history-content .transaction-list {
+  min-height: 0;
+  max-height: none;
+  padding: 0 !important;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  isolation: isolate;
+}
+
+.kapster-history-content .table-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bone);
+  border-radius: 11px 11px 0 0;
+}
+
+.kapster-history-content .transaction-row {
+  min-height: 72px;
+  font-size: 14px;
+}
+
+.kapster-history-content .tx-cell-nota {
+  font-size: 14px;
+}
+
+.kapster-history-content .tx-cell-time,
+.kapster-history-content .tx-cell-kapster,
+.kapster-history-content .tx-cell-items {
+  font-size: 14px;
+}
+
+.kapster-transaction-modal .transaction-modal-box {
+  width: min(568px, calc(100% - 28px));
+  max-height: calc(100svh - 32px);
+}
+
+.kapster-transaction-modal {
+  display: flex !important;
+}
+
+.kapster-transaction-modal .transaction-modal-header {
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.kapster-transaction-modal .modal-close-icon-btn {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  flex: 0 0 44px;
+}
+
+.kapster-transaction-modal .transaction-modal-body {
+  padding: 16px 18px 20px;
+}
+
+@media (max-width: 1024px) {
+  .kapster-history-content {
+    overflow: visible;
+  }
+
+  .kapster-history-content .master-detail {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .kapster-history-content .transaction-list {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .kapster-history-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .app-shell-kapster .kapster-transaction-history {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: stretch;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content,
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .master-detail {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .kapster-history-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell-kapster .kapster-history-content .table-head,
+  .app-shell-kapster .kapster-history-content .transaction-row {
+    grid-template-columns: minmax(120px, 1.45fr) minmax(44px, 0.55fr) minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding-inline: 10px !important;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-col-nota {
+    min-width: 0;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-nota {
+    display: block;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .transaction-list {
+    flex: 0 0 260px !important;
+    height: 260px !important;
+    max-height: 260px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .transaction-row {
+    min-height: 72px !important;
+  }
+
+  .kapster-transaction-modal .transaction-modal-box {
+    width: min(520px, calc(100% - 28px));
+  }
+}
+
+@media (max-width: 400px) {
+  .app-shell-kapster .kapster-history-content .table-head,
+  .app-shell-kapster .kapster-history-content .transaction-row {
+    grid-template-columns: minmax(124px, 1.5fr) minmax(44px, 0.55fr) minmax(0, 0.95fr) !important;
+    gap: 14px !important;
+  }
+
+  .app-shell-kapster .kapster-history-content .table-head {
+    font-size: 9px;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-nota {
+    font-size: 10px;
+  }
+
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-time,
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-kapster,
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-items {
+    font-size: 10px !important;
+    line-height: 1.25;
+  }
+
+  .app-shell-kapster .kapster-transaction-history .kapster-history-content .history-method-filter .button {
+    font-size: 11px !important;
+    font-style: normal;
+    line-height: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  .kapster-history-content .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kapster-history-content .master-detail {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* Empat kontrol Riwayat Kapster: dua kolom penuh di setiap breakpoint. */
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: 100%;
+  gap: 14px;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .search,
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .kapster-transaction-date,
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .history-method-filter {
+  grid-column: auto !important;
+  width: 100% !important;
+  min-width: 0;
+  margin: 0;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .filters > .kapster-transaction-search {
+  grid-column: 1 / -1 !important;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .kapster-transaction-date .calendar-picker-wrapper {
+  width: 100%;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .history-method-filter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: 44px;
+  min-height: 44px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.app-shell-kapster .kapster-transaction-history .kapster-history-content .history-method-filter .button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 6px;
+  border-radius: 0;
 }

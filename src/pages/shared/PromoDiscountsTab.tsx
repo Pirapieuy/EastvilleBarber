@@ -333,7 +333,7 @@ export function PromoDiscountsTab() {
                 <div
                   style={{
                     padding: "8px 12px",
-                    margin: "16px 16px 0",
+                    margin: "14px 14px 0",
                     borderRadius: 6,
                     background: "#fef2f2",
                     border: "1px solid #fecaca",

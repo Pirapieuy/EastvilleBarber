@@ -28,11 +28,14 @@ export async function listProduk() {
 export async function simpanLayanan(body: B, user: Pengguna) {
   const l = body.layanan || {}
   const nama = String(l.nama ?? "").trim()
-  const harga = toInt(l.harga)
+  const hargaMentah = Number(l.harga)
+  const harga = Math.round(hargaMentah)
   const status = l.status === "Nonaktif" ? "Nonaktif" : "Aktif"
   const kategori = KATEGORI_LAYANAN.includes(l.kategori) ? l.kategori : "Potong"
   if (!nama) return gagal("Nama layanan wajib diisi.")
-  if (harga < 0) return gagal("Harga tidak valid.")
+  if (!Number.isInteger(hargaMentah) || hargaMentah <= 0 || hargaMentah > 1_000_000_000)
+    return gagal("Harga harus angka bulat lebih dari 0.")
+  if (nama.length > 80) return gagal("Nama layanan maksimal 80 karakter.")
 
   const { data: semua } = await db.from("layanan").select("id,nama,harga,status,kategori")
   const adaId = l.id !== undefined && l.id !== ""

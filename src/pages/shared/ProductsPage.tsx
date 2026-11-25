@@ -283,7 +283,12 @@ export function ProductsPage({ embedded = false }: {
             : p.status !== "Aktif"))
       )
     })
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort(
+      (a, b) =>
+        // produk aktif di atas, nonaktif di bawah; sisanya urut nama
+        Number(a.status !== "Aktif") - Number(b.status !== "Aktif") ||
+        a.name.localeCompare(b.name),
+    )
 
   return (
     <div className={embedded ? "catalog-embedded-view" : "content"}>
