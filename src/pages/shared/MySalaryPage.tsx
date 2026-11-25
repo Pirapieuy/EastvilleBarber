@@ -67,9 +67,14 @@ function KapsterTransactionDetail({
                   {item.qty} × {rupiah(item.price)}
                 </small>
               </div>
-              <b className="detail-item-price">
-                {rupiah(item.qty * item.price)}
-              </b>
+              <div className="detail-item-right">
+                <b className="detail-item-price">
+                  {rupiah(item.qty * item.price)}
+                </b>
+                {item.comm > 0 && (
+                  <span className="detail-item-comm">+{rupiah(item.comm)}</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -106,6 +111,12 @@ function KapsterTransactionDetail({
           )}
         </strong>
       </div>
+      {transaction.komisi > 0 && (
+        <div className="detail-komisi-bar">
+          <span>Komisi Saya</span>
+          <strong>+{rupiah(transaction.komisi)}</strong>
+        </div>
+      )}
     </>
   )
 }

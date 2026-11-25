@@ -5267,6 +5267,43 @@ textarea {
   white-space: nowrap;
 }
 
+.detail-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.detail-item-comm {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2e7d32;
+  white-space: nowrap;
+}
+
+.detail-komisi-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border-radius: 8px;
+  background: #e8f5e9;
+}
+
+.detail-komisi-bar span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.detail-komisi-bar strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
 .detail-total-bar {
   display: flex;
   align-items: center;
@@ -14380,6 +14417,11 @@ summary,
 
 .desktop-only-detail .detail-total-bar strong,
 .transaction-modal-body .detail-total-bar strong {
+  font-size: 16px;
+}
+
+.desktop-only-detail .detail-komisi-bar strong,
+.transaction-modal-body .detail-komisi-bar strong {
   font-size: 16px;
 }
 
