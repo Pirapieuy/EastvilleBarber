@@ -15526,11 +15526,13 @@ label .search-select-trigger {
   box-sizing: border-box !important;
 }
 
-/* Ringkasan Riwayat Absensi: memakai pola balok od-kpi seperti di Beranda */
+/* Ringkasan Riwayat Absensi: 5 kotak balok od-kpi sejajar 1 baris */
+.attendance-summary-kpis.od-kpis,
 .attendance-summary-kpis {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px;
-  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
 }
 
 .attendance-history-panel {
@@ -15864,27 +15866,29 @@ label .search-select-trigger {
 }
 
 @media (max-width: 900px) {
+  .attendance-summary-kpis.od-kpis,
   .attendance-summary-kpis,
   .attendance-summary-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
   }
 
   .attendance-summary-kpis > .od-kpi:nth-child(-n + 3),
   .attendance-summary-card:nth-child(-n + 3) {
-    grid-column: span 2;
+    grid-column: span 2 !important;
   }
 
   .attendance-summary-kpis > .od-kpi:nth-last-child(-n + 2),
   .attendance-summary-card:nth-last-child(-n + 2) {
-    grid-column: span 3;
+    grid-column: span 3 !important;
   }
 }
 
 @media (max-width: 560px) {
+  .attendance-summary-kpis.od-kpis,
   .attendance-summary-kpis,
   .attendance-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
   }
 
   .attendance-summary-kpis > .od-kpi,
@@ -15893,7 +15897,7 @@ label .search-select-trigger {
   }
 
   .attendance-summary-kpis > .od-kpi {
-    padding: 10px 12px;
+    padding: 10px 12px !important;
   }
 
   .attendance-summary-kpis > .od-kpi:last-child,
