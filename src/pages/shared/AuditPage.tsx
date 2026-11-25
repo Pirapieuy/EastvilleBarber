@@ -358,7 +358,7 @@ export function AuditPage() {
               <LoadingState message="Memuat jejak audit dari server..." compact />
             </div>
           ) : rowsToDisplay.length === 0 ? (
-            <div style={{ padding: "24px 14px", color: "var(--slate)" }}>
+            <div style={{ padding: "14px", color: "var(--slate)" }}>
               Tidak ada jejak audit yang cocok dengan filter.
             </div>
           ) : (

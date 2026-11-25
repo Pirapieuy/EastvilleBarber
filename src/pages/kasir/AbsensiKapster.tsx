@@ -539,7 +539,7 @@ export function AbsensiKapster({
               <div
                 className="panel"
                 style={{
-                  padding: 24,
+                  padding: 14,
                   textAlign: "center",
                   color: "var(--muted)",
                 }}
