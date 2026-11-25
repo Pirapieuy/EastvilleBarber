@@ -12572,13 +12572,61 @@ textarea {
 }
 
 @media (max-width: 1024px) {
+  .workspace:has(> .mobile-content.kapster-product-commission) {
+    height: 100svh !important;
+    min-height: 100svh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .workspace > .mobile-content.kapster-product-commission {
+    flex: 1 1 auto !important;
+    height: 100svh !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 68px 14px 14px !important;
+    gap: 12px !important;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .kapster-date-toolbar,
+  .app-shell-kapster .kapster-product-commission > .my-salary-hero {
+    flex: 0 0 auto !important;
+  }
+
+  .app-shell-kapster .kapster-product-commission > .kapster-commission-cards-grid {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    overflow: hidden !important;
+  }
+
   .app-shell-kapster .kapster-commission-card {
     border-radius: 12px;
     padding: 14px;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-kapster .kapster-commission-card > .page-title {
+    flex: 0 0 auto !important;
+    margin-bottom: 4px !important;
   }
 
   .app-shell-kapster .kapster-commission-list-scroll {
-    max-height: 220px;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
   }
 }
 
