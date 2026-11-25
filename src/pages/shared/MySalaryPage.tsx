@@ -147,7 +147,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             discount: row.discount,
             status: row.status || "Lunas",
           }
-          const itemComm = row.comm ?? 0
+          const itemComm = Number(row.comm) || 0
           tx.komisi += itemComm
           tx.items.push({
             name: row.item,
@@ -306,7 +306,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
                     </small>
                   </div>
                   <span className="tx-cell-komisi">
-                    <strong>+{rupiah(tx.komisi)}</strong>
+                    <strong>+{rupiah(Number.isFinite(tx.komisi) ? tx.komisi : 0)}</strong>
                   </span>
                   <span
                     className="tx-cell-items"
