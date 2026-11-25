@@ -1,5 +1,5 @@
 import { labelPeriode, ModePeriode, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import {
   apiLaporan,
   apiPengaturan,
@@ -486,6 +486,47 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     return matchSearch
   })
 
+  const expenseTableRef = useRef<HTMLDivElement>(null)
+  const commissionTableRef = useRef<HTMLDivElement>(null)
+  const [expenseScrollable, setExpenseScrollable] = useState(
+    () => filteredExpenses.length > 6,
+  )
+  const [commissionScrollable, setCommissionScrollable] = useState(
+    () => data.perKapster.length > 6,
+  )
+
+  useEffect(() => {
+    const el = expenseTableRef.current
+    const check = () => {
+      if (!el) {
+        setExpenseScrollable(filteredExpenses.length > 6)
+        return
+      }
+      setExpenseScrollable(el.scrollHeight > 360 || filteredExpenses.length > 6)
+    }
+    check()
+    if (!el) return
+    const ro = new ResizeObserver(check)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [filteredExpenses])
+
+  useEffect(() => {
+    const el = commissionTableRef.current
+    const check = () => {
+      if (!el) {
+        setCommissionScrollable(data.perKapster.length > 6)
+        return
+      }
+      setCommissionScrollable(el.scrollHeight > 360 || data.perKapster.length > 6)
+    }
+    check()
+    if (!el) return
+    const ro = new ResizeObserver(check)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [data.perKapster])
+
   // Rincian persen terhadap pemasukan
   const persenTunai = persen(data.tunai, data.pemasukan)
   const persenQris = persen(data.qris, data.pemasukan)
@@ -639,7 +680,10 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
               </Button>
             </div>
 
-            <div className="expense-table-scroll expense-table-compact">
+            <div
+              ref={expenseTableRef}
+              className={`expense-table-scroll expense-table-compact${expenseScrollable ? " is-scrollable" : ""}`}
+            >
               <div className="expense-head">
                 <span>Tanggal</span>
                 <span>Keterangan</span>
@@ -700,7 +744,10 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
               <h3>Komisi kapster</h3>
             </div>
 
-            <div className="commission-table-scroll">
+            <div
+              ref={commissionTableRef}
+              className={`commission-table-scroll${commissionScrollable ? " is-scrollable" : ""}`}
+            >
               <div className="report-head">
                 <span>Kapster</span>
                 <span>Transaksi</span>
