@@ -20911,6 +20911,10 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
   font-weight: 650;
 }
 
+.attendance-correction-modal > .attendance-custom-reason {
+  margin: 14px 14px;
+}
+
 .attendance-correction-modal .attendance-custom-reason textarea {
   box-sizing: border-box;
   min-height: 96px;
