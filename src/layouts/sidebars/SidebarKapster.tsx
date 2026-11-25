@@ -15,18 +15,18 @@ const KAPSTER_GROUPS: SidebarNavGroup[] = [
   },
   {
     id: "komisi-jadwal",
-    title: "KOMISI & JADWAL",
+    title: "PENGHASILAN",
     items: [
       {
         page: "GajiKomisiSaya",
         alias: "my-salary",
-        label: "Pendapatan Saya",
+        label: "Pendapatan",
         icon: "wallet",
       },
       {
         page: "KomisiProdukSaya",
         alias: "product-reports",
-        label: "Komisi Produk Saya",
+        label: "Komisi Produk & Layanan",
         icon: "product",
       },
     ],
