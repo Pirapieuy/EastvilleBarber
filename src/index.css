@@ -26563,6 +26563,13 @@ html:has(.manual-page .modal-overlay) {
   z-index: 10;
   background: var(--bone);
   border-radius: 11px 11px 0 0;
+  min-height: 38px;
+  display: grid;
+  align-items: center;
+}
+
+.kapster-history-content .table-head > span {
+  text-align: left;
 }
 
 .kapster-history-content .transaction-row {
@@ -26590,7 +26597,17 @@ html:has(.manual-page .modal-overlay) {
 
 .kapster-history-content .table-head,
 .kapster-history-content .transaction-row {
-  grid-template-columns: minmax(120px, 1.3fr) minmax(60px, 0.7fr) minmax(50px, 0.6fr) minmax(0, 1fr);
+  grid-template-columns: minmax(110px, 1.4fr) minmax(72px, 0.8fr) minmax(60px, 0.7fr) minmax(0, 1fr);
+}
+
+.kapster-history-content .table-head > span:nth-child(2),
+.kapster-history-content .table-head > span:nth-child(3) {
+  text-align: right;
+}
+
+.kapster-history-content .tx-cell-komisi,
+.kapster-history-content .tx-cell-method {
+  text-align: right;
 }
 
 .kapster-history-content .tx-cell-komisi strong {
@@ -26665,8 +26682,8 @@ html:has(.manual-page .modal-overlay) {
 
   .app-shell-kapster .kapster-history-content .table-head,
   .app-shell-kapster .kapster-history-content .transaction-row {
-    grid-template-columns: minmax(110px, 1.3fr) minmax(56px, 0.65fr) minmax(44px, 0.55fr) minmax(0, 1fr) !important;
-    gap: 10px !important;
+    grid-template-columns: minmax(100px, 1.3fr) minmax(56px, 0.7fr) minmax(50px, 0.6fr) minmax(0, 1fr) !important;
+    gap: 8px !important;
     padding-inline: 10px !important;
   }
 
@@ -26704,8 +26721,13 @@ html:has(.manual-page .modal-overlay) {
 @media (max-width: 400px) {
   .app-shell-kapster .kapster-history-content .table-head,
   .app-shell-kapster .kapster-history-content .transaction-row {
-    grid-template-columns: minmax(110px, 1.3fr) minmax(50px, 0.6fr) minmax(44px, 0.5fr) minmax(0, 0.9fr) !important;
-    gap: 10px !important;
+    grid-template-columns: minmax(100px, 1.4fr) minmax(54px, 0.7fr) minmax(48px, 0.6fr) !important;
+    gap: 8px !important;
+  }
+
+  .app-shell-kapster .kapster-history-content .table-head > span:last-child,
+  .app-shell-kapster .kapster-history-content .transaction-row .tx-cell-items {
+    display: none;
   }
 
   .app-shell-kapster .kapster-history-content .table-head {
