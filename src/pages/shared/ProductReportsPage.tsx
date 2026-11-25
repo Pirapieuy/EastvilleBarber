@@ -707,20 +707,22 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       </span>
                     }
                   />
-                  {daftarProduk.map((x) => (
-                    <div key={x[0]}>
-                      <i>
-                        <Icon name="product" />
-                      </i>
-                      <strong>{x[0]}</strong>
-                      <b>+{rupiah(x[1])}</b>
-                    </div>
-                  ))}
-                  {lunas && daftarProduk.length === 0 && (
-                    <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
-                      Belum ada penjualan produk pada periode ini.
-                    </p>
-                  )}
+                  <div className="kapster-commission-list-scroll">
+                    {daftarProduk.map((x) => (
+                      <div key={x[0]}>
+                        <i>
+                          <Icon name="product" />
+                        </i>
+                        <strong>{x[0]}</strong>
+                        <b>+{rupiah(x[1])}</b>
+                      </div>
+                    ))}
+                    {lunas && daftarProduk.length === 0 && (
+                      <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                        Belum ada penjualan produk pada periode ini.
+                      </p>
+                    )}
+                  </div>
                 </section>
 
                 <section className="panel customer-list kapster-commission-card">
@@ -753,20 +755,22 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       </span>
                     }
                   />
-                  {daftarLayanan.map((x) => (
-                    <div key={x[0]}>
-                      <i className="service-icon-box">
-                        <Icon name="cashier" />
-                      </i>
-                      <strong>{x[0]}</strong>
-                      <b>+{rupiah(x[1])}</b>
-                    </div>
-                  ))}
-                  {live && daftarLayanan.length === 0 && (
-                    <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
-                      Belum ada pengerjaan layanan pada periode ini.
-                    </p>
-                  )}
+                  <div className="kapster-commission-list-scroll">
+                    {daftarLayanan.map((x) => (
+                      <div key={x[0]}>
+                        <i className="service-icon-box">
+                          <Icon name="cashier" />
+                        </i>
+                        <strong>{x[0]}</strong>
+                        <b>+{rupiah(x[1])}</b>
+                      </div>
+                    ))}
+                    {live && daftarLayanan.length === 0 && (
+                      <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                        Belum ada pengerjaan layanan pada periode ini.
+                      </p>
+                    )}
+                  </div>
                 </section>
               </div>
             </>
