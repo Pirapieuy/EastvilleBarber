@@ -1107,13 +1107,13 @@ textarea {
   min-height: 56px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 14px;
+  padding: 14px 14px 14px 11px;
   border-top: 1px solid rgb(255 255 255 / 9%);
 }
 
 .sidebar-user-card {
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
   flex: 1;
   display: flex;
@@ -1138,7 +1138,7 @@ textarea {
 
 .user-info-text {
   min-width: 0;
-  align-items: center;
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
   gap: 2px;
