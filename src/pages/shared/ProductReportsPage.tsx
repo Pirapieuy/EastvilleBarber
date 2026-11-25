@@ -677,7 +677,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
               </article>
 
               <div className="kapster-commission-cards-grid">
-                <section className="panel customer-list kapster-commission-card">
+                <section className="panel kapster-commission-card">
                   <PageTitle
                     eyebrow="Penjualan pribadi"
                     title={
@@ -709,8 +709,8 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                   />
                   <div className="kapster-commission-list-scroll">
                     {daftarProduk.map((x) => (
-                      <div key={x[0]}>
-                        <i>
+                      <div className="kapster-commission-item-row" key={x[0]}>
+                        <i className="product-icon-box">
                           <Icon name="product" />
                         </i>
                         <strong>{x[0]}</strong>
@@ -725,7 +725,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                   </div>
                 </section>
 
-                <section className="panel customer-list kapster-commission-card">
+                <section className="panel kapster-commission-card">
                   <PageTitle
                     eyebrow="Layanan pribadi"
                     title={
@@ -757,7 +757,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                   />
                   <div className="kapster-commission-list-scroll">
                     {daftarLayanan.map((x) => (
-                      <div key={x[0]}>
+                      <div className="kapster-commission-item-row" key={x[0]}>
                         <i className="service-icon-box">
                           <Icon name="cashier" />
                         </i>

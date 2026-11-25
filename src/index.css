@@ -12498,14 +12498,88 @@ textarea {
   min-width: 0;
 }
 
+.kapster-commission-card {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  background: var(--paper);
+}
+
+.kapster-commission-card > .page-title {
+  margin-bottom: 8px;
+}
+
 .kapster-commission-list-scroll {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.app-shell-kapster .customer-list > div > i.service-icon-box {
+.kapster-commission-item-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 48px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.kapster-commission-item-row:last-child {
+  border-bottom: none;
+}
+
+.kapster-commission-item-row > i {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.kapster-commission-item-row > i.product-icon-box {
+  color: var(--sage);
+  background: var(--sage-soft);
+}
+
+.kapster-commission-item-row > i.service-icon-box {
   color: var(--brass-dark) !important;
   background: var(--brass-soft) !important;
+}
+
+.kapster-commission-item-row > i .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.kapster-commission-item-row > strong {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.kapster-commission-item-row > b {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sage);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1024px) {
+  .app-shell-kapster .kapster-commission-card {
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .app-shell-kapster .kapster-commission-list-scroll {
+    max-height: 220px;
+  }
 }
 
 @media (max-width: 767px) {
@@ -17038,7 +17112,7 @@ label .search-select-trigger {
     align-items: stretch !important;
   }
 
-  .app-shell-kapster .kapster-commission-cards-grid > .customer-list {
+  .app-shell-kapster .kapster-commission-cards-grid > .kapster-commission-card {
     flex: 1 1 0 !important;
     min-height: 0 !important;
     height: 100% !important;
@@ -17048,7 +17122,7 @@ label .search-select-trigger {
     overflow: hidden !important;
   }
 
-  .app-shell-kapster .kapster-commission-cards-grid > .customer-list > .page-title {
+  .app-shell-kapster .kapster-commission-cards-grid > .kapster-commission-card > .page-title {
     flex: 0 0 auto !important;
     margin-bottom: 0 !important;
   }
