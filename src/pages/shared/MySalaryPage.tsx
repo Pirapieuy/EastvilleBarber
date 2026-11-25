@@ -232,7 +232,7 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
     <section className="panel kapster-activity-panel kapster-transaction-history">
       <PageTitle
         eyebrow="Aktivitas pribadi"
-        title="Rincian Transaksi Layanan"
+        title="Riwayat Transaksi"
       />
       <div className="history-page-content history-no-scrollbar kapster-history-content">
         <div className="filters">
