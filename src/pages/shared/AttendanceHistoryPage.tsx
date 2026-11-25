@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { CalendarPicker, Button } from "../../components/common/UI"
 import { AbsensiRow, apiAbsensi, apiKasir } from "../../api"
-import { AbsensiStatus } from "../../types"
+import { AbsensiStatus, IconName } from "../../types"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { formatTanggal, labelPeriode, ModePeriode, rentangPeriode, TANGGAL_MAKS, TANGGAL_MULAI, tanggalIsoLokal } from "../../utils/tanggal"
 
@@ -358,33 +358,52 @@ export function AttendanceHistoryPage() {
     return counts
   }, [displayRows])
 
-  const statItems: { label: string; status: AbsensiStatus; count: number }[] = [
-    { label: "Hadir", status: "Hadir", count: stats.Hadir },
-    { label: "Tidak Hadir", status: "Tidak Hadir", count: stats["Tidak Hadir"] },
-    { label: "Sakit", status: "Sakit", count: stats.Sakit },
-    { label: "Cuti", status: "Cuti", count: stats.Cuti },
-    { label: "Izin", status: "Izin", count: stats.Izin },
+  const statItems: {
+    label: string
+    status: AbsensiStatus
+    count: number
+    tone: string
+    icon: IconName
+  }[] = [
+    { label: "Hadir", status: "Hadir", count: stats.Hadir, tone: "sage", icon: "check" },
+    { label: "Tidak Hadir", status: "Tidak Hadir", count: stats["Tidak Hadir"], tone: "amber", icon: "close" },
+    { label: "Sakit", status: "Sakit", count: stats.Sakit, tone: "dark", icon: "alert" },
+    { label: "Cuti", status: "Cuti", count: stats.Cuti, tone: "brass", icon: "calendar" },
+    { label: "Izin", status: "Izin", count: stats.Izin, tone: "purple", icon: "file" },
   ]
 
   return (
     <div className="mobile-content attendance-history-page fit-page">
-      <section className="panel fit-fill attendance-history-panel" style={{ padding: 0 }}>
-        {/* Ringkasan status untuk periode yang dipilih */}
-        <div className="attendance-summary-grid">
-          {statItems.map((item) => (
+      {/* Ringkasan status untuk periode yang dipilih (memakai pola balok Beranda / od-kpi) */}
+      <div className="od-kpis attendance-summary-kpis">
+        {statItems.map((item) => {
+          const isActive = filterStatus === item.status
+          return (
             <button
               key={item.status}
-              onClick={() => setFilterStatus(filterStatus === item.status ? "" : item.status)}
-              className={`attendance-summary-card${filterStatus === item.status ? " selected" : ""}`}
+              type="button"
+              onClick={() => setFilterStatus(isActive ? "" : item.status)}
+              className={`od-kpi${isActive ? " is-active" : ""}`}
               data-status={item.status.toLowerCase().replace(" ", "-")}
-              aria-pressed={filterStatus === item.status}
+              aria-pressed={isActive}
+              aria-label={`${item.label} ${item.count} catatan, ${isActive ? "filter aktif, klik untuk lepas filter" : "klik untuk filter"}`}
             >
-              <strong>{item.count}</strong>
-              <span>{item.label}</span>
+              <span className="od-kpi-body">
+                <span className={`kpi-icon ${item.tone}`}>
+                  <Icon name={item.icon} />
+                </span>
+                <span className="od-kpi-text">
+                  <span className="od-kpi-label">{item.label}</span>
+                  <strong className="od-kpi-value">{item.count}</strong>
+                  <span className="od-kpi-detail">{item.count} catatan</span>
+                </span>
+              </span>
             </button>
-          ))}
-        </div>
+          )
+        })}
+      </div>
 
+      <section className="panel fit-fill attendance-history-panel" style={{ padding: 0 }}>
         {/* Filter */}
         <div className="filters attendance-history-filters" style={{ marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 10 }}>
           <CalendarPicker

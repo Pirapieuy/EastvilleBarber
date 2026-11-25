@@ -2440,6 +2440,11 @@ textarea {
   background: rgb(30 95 138 / 12%);
 }
 
+.kpi-icon.purple {
+  color: #765a8b;
+  background: rgb(118 90 139 / 12%);
+}
+
 .kpi > small {
   display: block;
   margin-top: 13px;
@@ -15521,12 +15526,24 @@ label .search-select-trigger {
   box-sizing: border-box !important;
 }
 
-/* Ringkasan Riwayat Absensi: lima kartu dengan kedalaman ringan dan jarak seragam. */
-.attendance-summary-grid {
-  display: grid;
+/* Ringkasan Riwayat Absensi: memakai pola balok od-kpi seperti di Beranda */
+.attendance-summary-kpis {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
-  margin: 14px 14px 14px;
+  width: 100%;
+}
+
+.attendance-history-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.attendance-history-panel > .attendance-record-list {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .attendance-history-filters {
@@ -15635,6 +15652,9 @@ label .search-select-trigger {
     box-sizing: border-box;
     overflow: hidden;
     padding: 68px 14px 14px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
 
   .mobile-content.attendance-history-page > .attendance-history-panel {
@@ -15646,6 +15666,7 @@ label .search-select-trigger {
     overflow: hidden;
   }
 
+  .attendance-summary-kpis,
   .attendance-summary-grid,
   .attendance-history-filters {
     flex: 0 0 auto;
@@ -15843,28 +15864,39 @@ label .search-select-trigger {
 }
 
 @media (max-width: 900px) {
+  .attendance-summary-kpis,
   .attendance-summary-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
+  .attendance-summary-kpis > .od-kpi:nth-child(-n + 3),
   .attendance-summary-card:nth-child(-n + 3) {
     grid-column: span 2;
   }
 
+  .attendance-summary-kpis > .od-kpi:nth-last-child(-n + 2),
   .attendance-summary-card:nth-last-child(-n + 2) {
     grid-column: span 3;
   }
 }
 
 @media (max-width: 560px) {
+  .attendance-summary-kpis,
   .attendance-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
+  .attendance-summary-kpis > .od-kpi,
   .attendance-summary-card {
     grid-column: auto !important;
   }
 
+  .attendance-summary-kpis > .od-kpi {
+    padding: 10px 12px;
+  }
+
+  .attendance-summary-kpis > .od-kpi:last-child,
   .attendance-summary-card:last-child {
     grid-column: 1 / -1 !important;
   }
@@ -21675,6 +21707,11 @@ html:has(.manual-page .modal-overlay) {
 .od-kpi .kpi-icon.dark {
   color: #1e5f8a;
   background: rgb(30 95 138 / 12%);
+}
+
+.od-kpi .kpi-icon.purple {
+  color: #765a8b;
+  background: rgb(118 90 139 / 12%);
 }
 
 .od-kpi-label {
