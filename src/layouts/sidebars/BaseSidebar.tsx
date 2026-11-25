@@ -148,9 +148,6 @@ export function BaseSidebar({
             <div className="sidebar-footer-nav">
               <div className="sidebar-account-row">
                 <div className="sidebar-user-card">
-                  <div className="user-avatar-circle">
-                    {user.name.charAt(0)}
-                  </div>
                   <div className="user-info-text">
                     <strong>{user.name}</strong>
                     {user.roleBadge && (
