@@ -148,17 +148,21 @@ export function AbsensiKapster({
     return map
   }, [absensi])
 
+  const muatKe = useRef(0)
   async function loadData() {
     if (!getToken()) return
+    const ke = ++muatKe.current
     setLoading(true)
     try {
       const [k, a] = await Promise.all([
         apiKasir.kapster(),
         apiAbsensi.list({ tanggal }),
       ])
+      if (ke !== muatKe.current) return // respons tanggal lama, abaikan
       setKapsters(k)
       setAbsensi(a)
     } catch (err) {
+      if (ke !== muatKe.current) return
       setToast({
         type: "error",
         message: err instanceof Error ? err.message : "Gagal memuat data.",

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { TANGGAL_MAKS, useTanggalTersimpan } from "../../utils/tanggal"
 import { Icon } from "../../components/common/Icon"
 import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
@@ -120,8 +120,10 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
   const [pengaturanMsg, setPengaturanMsg] = useState("")
   const [pengaturanSaving, setPengaturanSaving] = useState(false)
 
+  const muatKe = useRef(0)
   async function loadData() {
     if (!getToken()) return
+    const ke = ++muatKe.current
     setLoading(true)
     try {
       const [kaps, abs, peng] = await Promise.all([
@@ -131,6 +133,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
           .catch(() => []),
         apiPengaturan.get().catch(() => null),
       ])
+      if (ke !== muatKe.current) return // respons tanggal lama, abaikan
       if (kaps.length > 0) {
         setKapsters(kaps)
         if (!leaveKapsterId && kaps[0]) setLeaveKapsterId(kaps[0].id)

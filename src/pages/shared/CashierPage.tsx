@@ -563,6 +563,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     timer: number
   } | null>(null)
   // Id unik per percobaan bayar: kirim ulang setelah timeout tidak membuat nota ganda.
+  const sedangSimpan = useRef(false)
   const requestId = useRef(
     `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
   )
@@ -771,11 +772,13 @@ export function CashierPage({ currentUser, onNavigate }: {
 
   async function executeSaveTransaction(): Promise<boolean> {
     if (isTransactionSaved) return true
+    if (sedangSimpan.current) return false
     if (!live) {
       setSaveReceiptError("Data kasir belum selesai dimuat. Tunggu sebentar lalu coba lagi.")
       return false
     }
     setSaveReceiptError("")
+    sedangSimpan.current = true
     setSavingReceipt(true)
     try {
       const res = await apiKasir.checkout({
@@ -819,6 +822,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       )
       return false
     } finally {
+      sedangSimpan.current = false
       setSavingReceipt(false)
     }
   }

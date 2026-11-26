@@ -802,7 +802,8 @@ export function ProductsPage({ embedded = false }: {
                     qty,
                     `Restok${stockNote ? ` · ${stockNote}` : ""}`,
                   )
-                  await loadLive()
+                  // Stok sudah bertambah; gagal muat ulang tidak boleh terbaca sebagai gagal restok
+                  await loadLive().catch(() => {})
                 } catch (err) {
                   setStockError(
                     err instanceof Error ? err.message : "Gagal menambah stok.",
