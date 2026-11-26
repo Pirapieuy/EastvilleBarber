@@ -1045,14 +1045,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
                     required
                   />
                 </label>
-                <div className="lk-exp-actions">
-                  <Button
-                    type="button"
-                    className="secondary-button"
-                    onClick={() => setEditingExpense(null)}
-                  >
-                    Batal
-                  </Button>
+                <div className="lk-exp-actions is-single">
                   <Button className="primary-button" type="submit">
                     Simpan
                   </Button>
@@ -1068,7 +1061,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
           title="Hapus Pengeluaran"
           warning="Pengeluaran tidak dihapus permanen, hanya ditandai BATAL dan bisa dipulihkan."
           onClose={() => setExpenseCancelId(null)}
-          showCloseButton={false}
+          showCloseButton={true}
+          showCancelButton={false}
           onConfirm={async (alasan) => {
             await apiPengeluaran.batalkan(expenseCancelId, alasan)
             const updated = await apiPengeluaran.list()
