@@ -138,6 +138,22 @@ export function usePeriodeTersimpan(halaman: string, awal?: Partial<PeriodeTersi
     if (awal?.tanggal) return { mode: awal.mode ?? "Harian", tanggal: awal.tanggal }
     return bacaPeriode(halaman) ?? { mode: "Harian", tanggal: TANGGAL_MAKS() }
   })
+  // Halaman dibiarkan terbuka melewati tengah malam: kembali ke Harian hari ini tanpa muat ulang.
+  useEffect(() => {
+    let hari = TANGGAL_MAKS()
+    const cekHari = () => {
+      const sekarang = TANGGAL_MAKS()
+      if (sekarang === hari) return
+      hari = sekarang
+      setPeriode({ mode: "Harian", tanggal: sekarang })
+    }
+    const timer = window.setInterval(cekHari, 30_000)
+    document.addEventListener("visibilitychange", cekHari)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener("visibilitychange", cekHari)
+    }
+  }, [])
   useEffect(() => {
     try {
       sessionStorage.setItem(
