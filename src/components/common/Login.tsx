@@ -116,8 +116,8 @@ export function Login({
           >
             {loading ? "Memproses..." : "Masuk"} <Icon name="arrow" />
           </Button>
-          <p className="pin-helper login-pin-help">
-            Lupa PIN? Minta Owner mengganti PIN Anda di menu Tim.
+          <p className="login-pin-help">
+            Lupa PIN? Hubungi Owner untuk reset PIN.
           </p>
           <div className="secure-note">
             <Icon name="lock" /> PIN disimpan aman dan tidak pernah ditampilkan.

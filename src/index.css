@@ -529,6 +529,14 @@ textarea {
   margin-top: 8px;
 }
 
+.login-pin-help {
+  margin: 14px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
 .secure-note {
   display: flex;
   justify-content: center;
