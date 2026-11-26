@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react"
 import { Icon } from "./Icon"
 import { Button, BrandMark } from "./UI"
 import { AppUser, Page } from "../../types"
-import { loginBackend, apiAuth } from "../../api"
+import { loginBackend } from "../../api"
 
 export function Login({
   onLogin,
@@ -13,12 +13,6 @@ export function Login({
   const [pin, setPin] = useState("")
   const [show, setShow] = useState(false)
   const [error, setError] = useState("")
-  const [view, setView] = useState<"login" | "email" | "sent" | "reset">(
-    "login",
-  )
-  const [email, setEmail] = useState("")
-  const [newPin, setNewPin] = useState("")
-  const [resetToken, setResetToken] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function submit(event: FormEvent) {
@@ -52,188 +46,6 @@ export function Login({
     } finally {
       setLoading(false)
     }
-  }
-
-  if (view !== "login") {
-    return (
-      <main className="login-page">
-        <section className="login-brand">
-          <div className="barber-stripe" />
-          <BrandMark />
-          <div className="login-message">
-            <p className="eyebrow">Pemulihan akun</p>
-            <h1>Akses aman untuk kembali bekerja.</h1>
-            <p>
-              Atur ulang PIN melalui email yang terdaftar pada akun Eastville.
-            </p>
-          </div>
-        </section>
-        <section className="login-form-wrap">
-          <div className="login-card reset-card">
-            <div className="login-mobile-header">
-              <BrandMark />
-            </div>
-            {view === "email" && (
-              <>
-                <Button
-                  className="auth-back"
-                  onClick={() => {
-                    setError("")
-                    setView("login")
-                  }}
-                >
-                  <Icon name="back" /> Kembali
-                </Button>
-                <p className="eyebrow">Lupa PIN</p>
-                <h2>Temukan akun Anda</h2>
-                <p>Masukkan email yang terdaftar pada data karyawan.</p>
-                {error && (
-                  <div className="danger-banner" style={{ margin: "10px 0" }}>
-                    <Icon name="alert" /> {error}
-                  </div>
-                )}
-                <label>
-                  <span>Email</span>
-                  <div className="input-shell">
-                    <Icon name="mail" />
-                    <input
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="nama@eastville.id"
-                      type="email"
-                      value={email}
-                    />
-                  </div>
-                </label>
-                <Button
-                  className="primary-button"
-                  disabled={!email.includes("@") || loading}
-                  onClick={async () => {
-                    setError("")
-                    setLoading(true)
-                    try {
-                      const res = await apiAuth.forgotPin(
-                        email.trim().toLowerCase(),
-                      )
-                      setResetToken(res.resetToken)
-                      setView("sent")
-                    } catch (e) {
-                      setError(
-                        e instanceof Error
-                          ? e.message
-                          : "Gagal meminta tautan reset.",
-                      )
-                    } finally {
-                      setLoading(false)
-                    }
-                  }}
-                >
-                  {loading ? (
-                    "Mengirim..."
-                  ) : (
-                    <>
-                      Kirim tautan reset <Icon name="arrow" />
-                    </>
-                  )}
-                </Button>
-              </>
-            )}
-            {view === "sent" && (
-              <div className="auth-success">
-                <span>
-                  <Icon name="mail" />
-                </span>
-                <p className="eyebrow">Email terkirim</p>
-                <h2>Tautan reset dikirim</h2>
-                <p>
-                  Tautan reset 15 menit dibuat untuk <strong>{email}</strong>.
-                </p>
-                <Button
-                  className="primary-button"
-                  onClick={() => {
-                    setError("")
-                    setView("reset")
-                  }}
-                >
-                  Lanjut Atur PIN Baru
-                </Button>
-                <Button
-                  className="text-button"
-                  onClick={() => {
-                    setError("")
-                    setView("email")
-                  }}
-                >
-                  Gunakan email lain
-                </Button>
-              </div>
-            )}
-            {view === "reset" && (
-              <>
-                <p className="eyebrow">Buat PIN baru</p>
-                <h2>Atur ulang PIN</h2>
-                <p>
-                  Gunakan enam digit yang mudah Anda ingat tetapi sulit ditebak.
-                </p>
-                {error && (
-                  <div className="danger-banner" style={{ margin: "10px 0" }}>
-                    <Icon name="alert" /> {error}
-                  </div>
-                )}
-                <label>
-                  <span>PIN baru</span>
-                  <div className="input-shell">
-                    <Icon name="lock" />
-                    <input
-                      inputMode="numeric"
-                      maxLength={6}
-                      onChange={(event) =>
-                        setNewPin(
-                          event.target.value.replace(/\D/g, "").slice(0, 6),
-                        )
-                      }
-                      placeholder="••••••"
-                      type="password"
-                      value={newPin}
-                    />
-                  </div>
-                  <small className="pin-helper">{newPin.length}/6 digit</small>
-                </label>
-                <Button
-                  className="primary-button"
-                  disabled={newPin.length !== 6 || loading}
-                  onClick={async () => {
-                    setError("")
-                    setLoading(true)
-                    try {
-                      await apiAuth.resetPin(
-                        email.trim().toLowerCase(),
-                        resetToken,
-                        newPin,
-                      )
-                      alert(
-                        "PIN berhasil diubah! Silakan login dengan PIN baru.",
-                      )
-                      setPin("")
-                      setView("login")
-                    } catch (e) {
-                      setError(
-                        e instanceof Error
-                          ? e.message
-                          : "Gagal menyimpan PIN baru.",
-                      )
-                    } finally {
-                      setLoading(false)
-                    }
-                  }}
-                >
-                  {loading ? "Menyimpan..." : "Simpan PIN baru"}
-                </Button>
-              </>
-            )}
-          </div>
-        </section>
-      </main>
-    )
   }
 
   return (
@@ -304,13 +116,9 @@ export function Login({
           >
             {loading ? "Memproses..." : "Masuk"} <Icon name="arrow" />
           </Button>
-          <Button
-            className="text-button"
-            onClick={() => setView("email")}
-            type="button"
-          >
-            Lupa PIN?
-          </Button>
+          <p className="pin-helper login-pin-help">
+            Lupa PIN? Minta Owner mengganti PIN Anda di menu Tim.
+          </p>
           <div className="secure-note">
             <Icon name="lock" /> PIN disimpan aman dan tidak pernah ditampilkan.
           </div>
