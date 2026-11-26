@@ -27593,3 +27593,15 @@ html:has(.manual-page .modal-overlay) {
     border-color: transparent !important;
   }
 }
+
+/* Komisi Produk & Layanan (Kapster, laptop): tombol tanggal selebar konten, sejajar dengan hero dan dua panel */
+@media (min-width: 1025px) {
+  .app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-wrapper {
+    width: 100%;
+  }
+
+  .app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
