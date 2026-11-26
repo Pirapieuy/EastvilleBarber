@@ -20,8 +20,12 @@ export async function listKapster() {
   return ok(data ?? [])
 }
 
-export async function listProduk() {
-  const { data } = await db.from("produk").select("kode,nama,penjual,stok,skema,status,harga,harga_modal,persen_kapster,persen_penjual,persen_eastville,nominal_kapster,nominal_penjual,nominal_eastville").order("urut")
+const KOLOM_PRODUK_UMUM = "kode,nama,penjual,stok,skema,status,harga"
+const KOLOM_PRODUK_OWNER = KOLOM_PRODUK_UMUM + ",harga_modal,persen_kapster,persen_penjual,persen_eastville,nominal_kapster,nominal_penjual,nominal_eastville"
+
+/** Harga modal dan bagi hasil (Eastville/penjual/kapster) hanya untuk Owner; Kasir dan Kapster cukup data jual. */
+export async function listProduk(user?: Pengguna) {
+  const { data } = await db.from("produk").select(user?.role === "Owner" ? KOLOM_PRODUK_OWNER : KOLOM_PRODUK_UMUM).order("urut")
   return ok(data ?? [])
 }
 

@@ -325,6 +325,7 @@ export async function catatAbsensiKapster(body: B) {
   if (!["Hadir", "Izin", "Sakit", "Cuti"].includes(status)) return gagal("Status tidak valid. Pilih Hadir / Izin / Sakit / Cuti.")
   if (status === "Hadir" && (!/^data:image\/jpeg;base64,/.test(fotoUrl) || fotoUrl.length > 45000))
     return gagal("Foto wajah wajib diambil ulang dengan ukuran lebih kecil.")
+  if (status === "Hadir" && tanggal > tanggalIso()) return gagal("Absensi hadir tidak bisa dicatat untuk tanggal yang belum tiba.")
   if (status !== "Hadir" && !catatan) return gagal("Keterangan wajib diisi.")
   if (status !== "Hadir" && tanggal < tanggalIso())
     return gagal("Izin, sakit, atau cuti tidak bisa diajukan untuk tanggal lampau.")

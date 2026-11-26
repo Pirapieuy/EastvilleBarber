@@ -47,7 +47,7 @@ const rute: Record<string, Handler> = {
 // Aksi bisnis: hak akses per peran (salinan AKSES di Bisnis.js).
 const bisnis: Record<string, { role: Role[]; fn: HandlerUser }> = {
   "list-layanan": { role: ["Owner", "Kasir", "Kapster"], fn: () => listLayanan() },
-  "list-produk": { role: ["Owner", "Kasir", "Kapster"], fn: () => listProduk() },
+  "list-produk": { role: ["Owner", "Kasir", "Kapster"], fn: (_b, u) => listProduk(u) },
   "list-kapster": { role: ["Owner", "Kasir"], fn: () => listKapster() },
   "create-transaksi": { role: ["Kasir"], fn: createTransaksi },
   "list-transaksi": { role: ["Owner", "Kasir"], fn: listTransaksi },
