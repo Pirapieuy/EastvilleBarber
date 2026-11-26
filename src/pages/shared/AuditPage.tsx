@@ -359,15 +359,6 @@ export function AuditPage() {
             onChange={setFilterUser}
             options={["Semua pengguna", ...userList]}
           />
-          {filterDate && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setFilterDate("")}
-            >
-              Reset Tanggal
-            </button>
-          )}
         </div>
 
         <div className="audit-table-scroll">
