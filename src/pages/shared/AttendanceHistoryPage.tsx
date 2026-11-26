@@ -4,7 +4,7 @@ import { CalendarPicker, Button } from "../../components/common/UI"
 import { AbsensiRow, apiAbsensi, apiKasir } from "../../api"
 import { AbsensiStatus, IconName } from "../../types"
 import { SearchSelect } from "../../components/common/SearchSelect"
-import { formatTanggal, labelPeriode, ModePeriode, rentangPeriode, TANGGAL_MAKS, TANGGAL_MULAI, tanggalIsoLokal } from "../../utils/tanggal"
+import { formatTanggal, labelPeriode, rentangPeriode, TANGGAL_MAKS, TANGGAL_MULAI, tanggalIsoLokal, usePeriodeTersimpan } from "../../utils/tanggal"
 
 function statusChipClass(status: string): string {
   const s = status.toLowerCase()
@@ -215,8 +215,7 @@ function AttendanceDetailModal({ row, onClose }: { row: DisplayRow; onClose: () 
 
 export function AttendanceHistoryPage() {
   const today = TANGGAL_MAKS()
-  const [tanggal, setTanggal] = useState("2026-11-01")
-  const [mode, setMode] = useState<ModePeriode>("Bulanan")
+  const [{ mode, tanggal }, setMode, setTanggal] = usePeriodeTersimpan("riwayat-absensi")
   const [filterStatus, setFilterStatus] = useState<AbsensiStatus | "">("")
   const [filterKapster, setFilterKapster] = useState("")
   const [rows, setRows] = useState<AbsensiRow[]>([])

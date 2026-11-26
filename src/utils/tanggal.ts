@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 /** Data tercatat sejak aplikasi dipakai; pemilih tanggal tidak boleh sebelum ini. */
 export const TANGGAL_MULAI = "2026-10-01"
 
@@ -89,4 +91,88 @@ export function labelPeriode(mode: ModePeriode, tanggal: string): string | undef
     month: "long",
     year: "numeric",
   })
+}
+
+const KUNCI_PERIODE = "eastville_periode_"
+
+export interface PeriodeTersimpan {
+  mode: ModePeriode
+  tanggal: string
+}
+
+/** Hapus semua periode tersimpan (dipakai saat logout). */
+export function hapusPeriodeTersimpan() {
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i)
+      if (k?.startsWith(KUNCI_PERIODE)) sessionStorage.removeItem(k)
+    }
+  } catch {
+    /* tanpa penyimpanan sesi, periode kembali ke hari ini */
+  }
+}
+
+function bacaPeriode(halaman: string): PeriodeTersimpan | null {
+  try {
+    const raw = sessionStorage.getItem(KUNCI_PERIODE + halaman)
+    if (!raw) return null
+    const p = JSON.parse(raw) as { mode?: string; tanggal?: string; hari?: string }
+    // Pindah hari: kembali ke hari ini.
+    if (p.hari !== TANGGAL_MAKS()) return null
+    if (p.mode !== "Harian" && p.mode !== "Mingguan" && p.mode !== "Bulanan") return null
+    if (typeof p.tanggal !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(p.tanggal)) return null
+    if (p.tanggal < TANGGAL_MULAI || p.tanggal > TANGGAL_MAKS()) return null
+    return { mode: p.mode, tanggal: p.tanggal }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Mode dan tanggal pemilih periode satu halaman: awal Harian hari ini, bertahan saat refresh
+ * (sessionStorage per halaman), kembali ke hari ini saat hari berganti atau logout.
+ * `awal` (mis. filter kiriman Laporan Keuangan) didahulukan dari yang tersimpan.
+ */
+export function usePeriodeTersimpan(halaman: string, awal?: Partial<PeriodeTersimpan>) {
+  const [periode, setPeriode] = useState<PeriodeTersimpan>(() => {
+    if (awal?.tanggal) return { mode: awal.mode ?? "Harian", tanggal: awal.tanggal }
+    return bacaPeriode(halaman) ?? { mode: "Harian", tanggal: TANGGAL_MAKS() }
+  })
+  // Halaman dibiarkan terbuka melewati tengah malam: kembali ke Harian hari ini tanpa muat ulang.
+  useEffect(() => {
+    let hari = TANGGAL_MAKS()
+    const cekHari = () => {
+      const sekarang = TANGGAL_MAKS()
+      if (sekarang === hari) return
+      hari = sekarang
+      setPeriode({ mode: "Harian", tanggal: sekarang })
+    }
+    const timer = window.setInterval(cekHari, 30_000)
+    document.addEventListener("visibilitychange", cekHari)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener("visibilitychange", cekHari)
+    }
+  }, [])
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        KUNCI_PERIODE + halaman,
+        JSON.stringify({ ...periode, hari: TANGGAL_MAKS() }),
+      )
+    } catch {
+      /* tanpa penyimpanan sesi, periode tidak bertahan saat refresh */
+    }
+  }, [halaman, periode])
+  return [
+    periode,
+    (mode: ModePeriode) => setPeriode((p) => ({ ...p, mode })),
+    (tanggal: string) => setPeriode((p) => ({ ...p, tanggal })),
+  ] as const
+}
+
+/** Satu tanggal (tanpa mode) dengan perilaku sama: awal hari ini, bertahan saat refresh. */
+export function useTanggalTersimpan(halaman: string) {
+  const [periode, , setTanggal] = usePeriodeTersimpan(halaman)
+  return [periode.tanggal, setTanggal] as const
 }

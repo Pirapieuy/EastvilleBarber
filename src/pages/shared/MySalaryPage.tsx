@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { PeriodePicker } from "../../components/common/PeriodePicker"
 import { Icon } from "../../components/common/Icon"
 import {
   CalendarPicker,
@@ -18,7 +19,7 @@ import {
 import {
   formatTanggal,
   labelPeriode,
-  ModePeriode,
+  usePeriodeTersimpan,
   rentangPeriode,
   TANGGAL_MAKS,
   TANGGAL_MULAI,
@@ -126,8 +127,8 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
   const [transactions, setTransactions] = useState<KapsterTransaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
-  const [modePeriode, setModePeriode] = useState<ModePeriode>("Harian")
+  const [{ mode: modePeriode, tanggal: dateFilter }, setModePeriode, setDateFilter] =
+    usePeriodeTersimpan("pendapatan-kapster")
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<"Semua" | "Layanan" | "Produk">(
     "Semua",
@@ -246,34 +247,10 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             />
           </div>
           <div className="kapster-transaction-date">
-            <CalendarPicker
-              value={dateFilter}
-              label={labelPeriode(modePeriode, dateFilter)}
-              bulanSaja={modePeriode === "Bulanan"}
-              popupHeader={
-                <div
-                  className="segmented history-periode"
-                  role="group"
-                  aria-label="Periode"
-                >
-                  {(["Harian", "Mingguan", "Bulanan"] as const).map((mode) => (
-                    <Button
-                      className={modePeriode === mode ? "active" : ""}
-                      key={mode}
-                      type="button"
-                      onClick={() => setModePeriode(mode)}
-                    >
-                      {mode}
-                    </Button>
-                  ))}
-                </div>
-              }
-              onChange={setDateFilter}
-              allowClear
-              clearLabel="Semua Tanggal"
-              placeholder="Semua Tanggal"
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
+            <PeriodePicker
+              periode={{ mode: modePeriode, tanggal: dateFilter }}
+              onMode={setModePeriode}
+              onTanggal={setDateFilter}
               style={{ width: "100%" }}
             />
           </div>

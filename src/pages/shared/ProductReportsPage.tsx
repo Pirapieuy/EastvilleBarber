@@ -1,6 +1,6 @@
 import {
   labelPeriode,
-  ModePeriode,
+  usePeriodeTersimpan,
   rentangPeriode,
   TANGGAL_MAKS,
   TANGGAL_MULAI,
@@ -155,9 +155,6 @@ export function CompactDetail({
   )
 }
 
-const pad2 = (n: number) => String(n).padStart(2, "0")
-const isoLokal = (d: Date) =>
-  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 
 const persen = (bagian: number, total: number) =>
   total > 0 ? Math.round((bagian / total) * 100) : 0
@@ -277,8 +274,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
   const [txList, setTxList] = useState<ProductTransactionRecord[]>(
     INITIAL_PRODUCT_TRANSACTIONS,
   )
-  const [mode, setMode] = useState<ModePeriode>("Bulanan")
-  const [tanggal, setTanggal] = useState(() => isoLokal(new Date()))
+  const [{ mode, tanggal }, setMode, setTanggal] = usePeriodeTersimpan("laporan-produk")
   const bulan = tanggal.slice(0, 7)
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")

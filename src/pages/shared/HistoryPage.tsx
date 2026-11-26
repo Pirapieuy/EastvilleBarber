@@ -1,4 +1,5 @@
-import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode, usePeriodeTersimpan } from "../../utils/tanggal"
+import { PeriodePicker } from "../../components/common/PeriodePicker"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
@@ -904,11 +905,14 @@ export function HistoryPage({ currentUser, role }: {
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   // Laporan Keuangan membuka Riwayat dengan filter awal (metode/kapster/periode) lewat sessionStorage.
-  const [dateFilter, setDateFilter] = useState(() => bacaFilterAwal("tanggal"))
-  const [modePeriode, setModePeriode] = useState<ModePeriode>(() => {
-    const m = bacaFilterAwal("mode")
-    return m === "Mingguan" || m === "Bulanan" ? m : "Harian"
-  })
+  const [{ mode: modePeriode, tanggal: dateFilter }, setModePeriode, setDateFilter] =
+    usePeriodeTersimpan("riwayat", (() => {
+      const tanggal = bacaFilterAwal("tanggal")
+      const m = bacaFilterAwal("mode")
+      return tanggal
+        ? { tanggal, mode: m === "Mingguan" || m === "Bulanan" ? m : "Harian" as ModePeriode }
+        : undefined
+    })())
   const [cari, setCari] = useState("")
   const [barberFilter, setBarberFilter] = useState(
     () => bacaFilterAwal("kapster") || "Semua kapster",
@@ -1187,32 +1191,10 @@ export function HistoryPage({ currentUser, role }: {
             onChange={(e) => setCari(e.target.value)}
           />
         </div>
-        <CalendarPicker
-          value={dateFilter}
-          label={labelPeriode(modePeriode, dateFilter)}
-          bulanSaja={modePeriode === "Bulanan"}
-          popupHeader={
-            <div className="segmented history-periode" role="group" aria-label="Periode">
-              {(["Harian", "Mingguan", "Bulanan"] as const).map((m) => (
-                <Button
-                  className={modePeriode === m ? "active" : ""}
-                  key={m}
-                  type="button"
-                  onClick={() => setModePeriode(m)}
-                >
-                  {m}
-                </Button>
-              ))}
-            </div>
-          }
-          onChange={(d) => {
-            setDateFilter(d)
-          }}
-          allowClear
-          clearLabel="Semua Tanggal"
-          placeholder="Semua Tanggal"
-          max={TANGGAL_MAKS()}
-          min={TANGGAL_MULAI}
+        <PeriodePicker
+          periode={{ mode: modePeriode, tanggal: dateFilter }}
+          onMode={setModePeriode}
+          onTanggal={setDateFilter}
         />
         <SearchSelect
           aria-label="Filter kapster"

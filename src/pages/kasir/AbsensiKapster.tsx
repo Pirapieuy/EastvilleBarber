@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { PeriodePicker } from "../../components/common/PeriodePicker"
 import { Icon } from "../../components/common/Icon"
 import {
   Button,
@@ -24,7 +25,10 @@ import { AbsensiStatus } from "../../types"
 import {
   formatTanggal,
   TANGGAL_MAKS,
+  rentangPeriode,
   tanggalIsoLokal,
+  usePeriodeTersimpan,
+  useTanggalTersimpan,
 } from "../../utils/tanggal"
 
 type View = "list" | "photo" | "leave"
@@ -43,7 +47,7 @@ export function AbsensiKapster({
   onComplete?: (success: boolean) => void
 } = {}) {
   const todayIso = TANGGAL_MAKS()
-  const [tanggal, setTanggal] = useState(todayIso)
+  const [tanggal, setTanggal] = useTanggalTersimpan("absensi-kapster-hari")
   // Izin, sakit, dan cuti diajukan paling cepat untuk besok (H-1).
   const besokIso = (() => {
     const d = new Date()
@@ -58,7 +62,9 @@ export function AbsensiKapster({
   const [riwayatAbsensi, setRiwayatAbsensi] = useState<AbsensiRow[]>([])
   const [activeTab, setActiveTab] = useState<"absensi" | "riwayat">("absensi")
   const [loadingRiwayat, setLoadingRiwayat] = useState(false)
-  const [filterTanggalRiwayat, setFilterTanggalRiwayat] = useState("")
+  const [periodeRiwayat, setModeRiwayat, setFilterTanggalRiwayat] =
+    usePeriodeTersimpan("absensi-kapster")
+  const filterTanggalRiwayat = periodeRiwayat.tanggal
   const [cariKapster, setCariKapster] = useState("")
   const [loading, setLoading] = useState(() => Boolean(getToken()))
   const [view, setView] = useState<View>("list")
@@ -377,7 +383,11 @@ export function AbsensiKapster({
         kapsters.some((kapster) => kapster.id === row.userId),
     )
     .filter(
-      (row) => !filterTanggalRiwayat || row.tanggal === filterTanggalRiwayat,
+      (row) => {
+        if (!filterTanggalRiwayat) return true
+        const rg = rentangPeriode(periodeRiwayat.mode, filterTanggalRiwayat)
+        return row.tanggal >= rg.dari && row.tanggal <= rg.sampai
+      },
     )
     .filter((row) =>
       row.nama
@@ -670,14 +680,10 @@ export function AbsensiKapster({
                 />
               </label>
               <div className="absensi-history-date">
-                <CalendarPicker
-                  allowClear
-                  clearLabel="Semua tanggal"
-                  max={TANGGAL_MAKS()}
-                  onChange={setFilterTanggalRiwayat}
-                  placeholder="Semua tanggal"
-                  showToday={false}
-                  value={filterTanggalRiwayat}
+                <PeriodePicker
+                  periode={periodeRiwayat}
+                  onMode={setModeRiwayat}
+                  onTanggal={setFilterTanggalRiwayat}
                 />
               </div>
             </div>

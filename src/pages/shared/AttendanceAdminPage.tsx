@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
+import { useTanggalTersimpan } from "../../utils/tanggal"
 import { Icon } from "../../components/common/Icon"
 import { Button, CalendarPicker, PageTitle } from "../../components/common/UI"
 import { AppUser, Role } from "../../types"
@@ -63,7 +64,7 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
 
   const today = new Date().toISOString().slice(0, 10)
   const [tab, setTab] = useState<"Jadwal" | "Pengaturan">("Jadwal")
-  const [filterTanggal, setFilterTanggal] = useState(today)
+  const [filterTanggal, setFilterTanggal] = useTanggalTersimpan("jam-kerja")
   const [filterKapster, setFilterKapster] = useState("Semua")
   const [kapsters, setKapsters] =
     useState<{ id: string; nama: string }[]>(DEFAULT_KAPSTERS)

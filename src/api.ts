@@ -4,6 +4,8 @@
 //   GAS:      VITE_API_URL=https://script.google.com/macros/s/.../exec
 // Token session disimpan oleh halaman Login di localStorage["eastville_token"].
 
+import { hapusPeriodeTersimpan } from "./utils/tanggal"
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const API_URL = (
   SUPABASE_URL
@@ -25,6 +27,7 @@ export function clearToken() {
     localStorage.removeItem(TOKEN_KEY)
     // Draf Input Manual tidak boleh diwarisi pengguna berikutnya
     localStorage.removeItem("eastville_manual_draft")
+    hapusPeriodeTersimpan()
   } catch {
     /* abaikan */
   }

@@ -1,4 +1,4 @@
-import { labelPeriode, ModePeriode, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { labelPeriode, TANGGAL_MAKS, TANGGAL_MULAI, usePeriodeTersimpan } from "../../utils/tanggal"
 import { FormEvent, useEffect, useRef, useState } from "react"
 import {
   apiLaporan,
@@ -224,9 +224,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   onNavigate?: (page: string) => void
 } = {}) {
   const [wa, setWa] = useState(false)
-  const [mode, setMode] = useState<ModePeriode>("Bulanan")
+  const [{ mode, tanggal }, setMode, setTanggal] = usePeriodeTersimpan("laporan-keuangan")
   const [reloadKey, setReloadKey] = useState(0)
-  const [tanggal, setTanggal] = useState(() => isoDate(new Date()))
   const bulan = tanggal.slice(0, 7)
   const [data, setData] = useState<LaporanKeuangan>(
     getToken() ? laporanKosong : demoLaporan,
