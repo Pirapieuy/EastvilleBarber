@@ -14,6 +14,8 @@ export interface ConfirmModalProps {
   reasonLabel?: string
   reasonPlaceholder?: string
   minReasonLength?: number
+  /** Allow submission attempts to show the reason error instead of disabling the button. */
+  validateReasonOnSubmit?: boolean
   /** Tombol silang menggantikan Batal; tombol konfirmasi selebar popup satu baris */
   compact?: boolean
   onClose: () => void
@@ -32,6 +34,7 @@ export function ConfirmModal({
   reasonLabel = "Alasan",
   reasonPlaceholder = "Tuliskan alasan tindakan ini...",
   minReasonLength = 3,
+  validateReasonOnSubmit = false,
   compact = false,
   onClose,
   onConfirm,
@@ -39,11 +42,16 @@ export function ConfirmModal({
   const [reason, setReason] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
+  const [showReasonError, setShowReasonError] = useState(false)
 
   const canSubmit = !requireReason || reason.trim().length >= minReasonLength
 
   async function handleConfirm() {
-    if (!canSubmit || busy) return
+    if (busy) return
+    if (!canSubmit) {
+      if (validateReasonOnSubmit) setShowReasonError(true)
+      return
+    }
     setError("")
     setBusy(true)
     try {
@@ -147,29 +155,51 @@ export function ConfirmModal({
               <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>
                 {reasonLabel} <span style={{ color: "var(--oxblood)" }}>*</span>
               </span>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={reasonPlaceholder}
-                disabled={busy}
-                rows={3}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                  border: "1px solid var(--line)",
-                  background: "var(--bone)",
-                  fontSize: 13,
-                  fontFamily: "inherit",
-                  resize: "vertical",
-                  boxSizing: "border-box",
-                }}
-              />
-              {minReasonLength > 0 && reason.trim().length < minReasonLength && (
-                <small style={{ fontSize: 11, color: "var(--slate)" }}>
-                  Minimal {minReasonLength} karakter.
-                </small>
+              {validateReasonOnSubmit && showReasonError && !canSubmit && (
+                <div
+                  role="alert"
+                  style={{
+                    padding: "7px 10px",
+                    borderRadius: 7,
+                    background: "var(--oxblood-soft)",
+                    color: "var(--oxblood)",
+                    fontSize: 12,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {reason.trim().length === 0
+                    ? `${reasonLabel} wajib diisi.`
+                    : `${reasonLabel} minimal ${minReasonLength} karakter.`}
+                </div>
               )}
+                <textarea
+                  value={reason}
+                  onChange={(e) => {
+                    setReason(e.target.value)
+                    if (e.target.value.trim().length >= minReasonLength) {
+                      setShowReasonError(false)
+                    }
+                  }}
+                  placeholder={reasonPlaceholder}
+                  disabled={busy}
+                  rows={3}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--line)",
+                    background: "var(--bone)",
+                    fontSize: 13,
+                    fontFamily: "inherit",
+                    resize: "vertical",
+                    boxSizing: "border-box",
+                  }}
+                />
+                {!validateReasonOnSubmit && minReasonLength > 0 && reason.trim().length < minReasonLength && (
+                  <small style={{ fontSize: 11, color: "var(--slate)" }}>
+                    Minimal {minReasonLength} karakter.
+                  </small>
+                )}
             </label>
           )}
 
@@ -213,7 +243,7 @@ export function ConfirmModal({
           )}
           <Button
             className={confirmTone === "danger" ? "danger-button" : "primary-button"}
-            disabled={!canSubmit || busy}
+            disabled={(!canSubmit && !validateReasonOnSubmit) || busy}
             onClick={handleConfirm}
           >
             {busy ? "Memproses..." : confirmText}

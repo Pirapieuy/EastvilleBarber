@@ -297,7 +297,8 @@ export const apiPengeluaran = {
   }) => api<{ id: string }>("update-pengeluaran", { ...p }),
   batalkan: (id: string, alasan: string) =>
     api("batalkan-pengeluaran", { id, alasan }),
-  aktifkan: (id: string) => api("aktifkan-pengeluaran", { id }),
+  aktifkan: (id: string, alasan: string) =>
+    api("aktifkan-pengeluaran", { id, alasan }),
 }
 
 export const apiProduk = {
