@@ -223,6 +223,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   const [wa, setWa] = useState(false)
   const [{ mode, tanggal }, setMode, setTanggal] = usePeriodeTersimpan("laporan-keuangan")
   const [reloadKey, setReloadKey] = useState(0)
+  const simpanPengeluaran = useRef(false)
   const bulan = tanggal.slice(0, 7)
   const [data, setData] = useState<LaporanKeuangan>(
     getToken() ? laporanKosong : demoLaporan,
@@ -314,6 +315,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     if (!editingExpense) return
     const parsedAmount = Number(editAmount.replace(/\D/g, "")) || 0
     if (!parsedAmount || !editDesc.trim()) return
+    if (simpanPengeluaran.current) return
+    simpanPengeluaran.current = true
 
     const targetId = editingExpense.id
     const updatedDesc = editDesc.trim()
@@ -335,24 +338,11 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         setData(updatedKeuangan)
         setEditingExpense(null)
       } catch (err) {
-        // Fallback optimistic update jika backend sedang proses deployment
-        setExpensesList((prev) =>
-          prev.map((item) =>
-            item.id === targetId
-              ? {
-                  ...item,
-                  dateIso: editDate,
-                  date: updatedDisplayDate,
-                  description: updatedDesc,
-                  amount: parsedAmount,
-                }
-              : item,
-          ),
+        window.alert(
+          err instanceof Error ? err.message : "Gagal menyimpan perubahan.",
         )
-        setEditingExpense(null)
-        if (err instanceof Error && !err.message.includes("Aksi tidak dikenal")) {
-          window.alert(err.message)
-        }
+      } finally {
+        simpanPengeluaran.current = false
       }
       return
     }
@@ -371,6 +361,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
       ),
     )
     setEditingExpense(null)
+    simpanPengeluaran.current = false
   }
 
   useEffect(() => {
@@ -379,14 +370,12 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     setFetching(true)
     Promise.all([
       apiLaporan.keuangan(rentangLaporan(mode, tanggal, bulan)),
-      apiPengeluaran.list().catch(() => []),
+      apiPengeluaran.list().catch(() => null),
     ])
       .then(([d, exp]) => {
         if (batal) return
         setData(d)
-        if (Array.isArray(exp) && exp.length > 0) {
-          setExpensesList(exp as ExpenseRecord[])
-        }
+        if (Array.isArray(exp)) setExpensesList(exp as ExpenseRecord[])
         setLive(true)
         setLiveError("")
       })
@@ -494,6 +483,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     e.preventDefault()
     const parsedAmount = Number(expAmount.replace(/\D/g, "")) || 0
     if (!parsedAmount || !expDescription.trim()) return
+    if (simpanPengeluaran.current) return
+    simpanPengeluaran.current = true
 
     if (live) {
       try {
@@ -516,6 +507,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         window.alert(
           err instanceof Error ? err.message : "Gagal menyimpan pengeluaran.",
         )
+      } finally {
+        simpanPengeluaran.current = false
       }
       return
     }
@@ -532,6 +525,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     setExpAmount("")
     setExpDescription("")
     setExpenseFormOpen(false)
+    simpanPengeluaran.current = false
   }
 
   async function handleToggleExpenseStatus(id: string) {

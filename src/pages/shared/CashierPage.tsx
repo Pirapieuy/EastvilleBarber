@@ -799,14 +799,19 @@ export function CashierPage({ currentUser, onNavigate }: {
       setIsTransactionSaved(true)
       requestId.current = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
       // Segarkan stok produk setelah terjual
-      apiKasir.produk().then((produk) =>
-        setCatalogData((cur) =>
-          cur.map((c) => {
-            const p = produk.find((x) => x.kode === c.id)
-            return p ? { ...c, stock: p.stok } : c
-          }),
-        ),
-      )
+      apiKasir
+        .produk()
+        .then((produk) =>
+          setCatalogData((cur) =>
+            cur.map((c) => {
+              const p = produk.find((x) => x.kode === c.id)
+              return p ? { ...c, stock: p.stok } : c
+            }),
+          ),
+        )
+        .catch(() => {
+          /* transaksi sudah tersimpan; stok layar diperbarui saat muat ulang */
+        })
       return true
     } catch (e) {
       setSaveReceiptError(
