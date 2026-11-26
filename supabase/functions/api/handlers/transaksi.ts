@@ -458,3 +458,31 @@ export async function aktifkanPengeluaran(body: B, user: Pengguna) {
   await tulisAudit(user.id, user.nama, "AKTIFKAN_PENGELUARAN", r.id)
   return ok({ id: r.id })
 }
+
+export async function updatePengeluaran(body: B, user: Pengguna) {
+  const { data: r } = await db.from("pengeluaran").select("*").eq("id", body.id).maybeSingle()
+  if (!r) return gagal("Pengeluaran tidak ditemukan.")
+  const updates: Record<string, unknown> = {}
+  if (body.tanggal !== undefined) {
+    if (!tanggalValid(body.tanggal)) return gagal("Tanggal tidak valid (format yyyy-MM-dd, tanggal kalender yang nyata).")
+    if (body.tanggal > tanggalIso()) return gagal("Tanggal pengeluaran tidak boleh di masa depan.")
+    updates.tanggal = body.tanggal
+  }
+  if (body.deskripsi !== undefined) {
+    const d = String(body.deskripsi).trim()
+    if (!d) return gagal("Keterangan wajib diisi.")
+    updates.deskripsi = d
+  }
+  if (body.jumlah !== undefined) {
+    const j = toInt(body.jumlah)
+    if (j <= 0) return gagal("Harga harus lebih dari 0.")
+    updates.jumlah = j
+  }
+  if (body.kategori !== undefined && KATEGORI_PENGELUARAN.includes(body.kategori)) {
+    updates.kategori = body.kategori
+  }
+  const { error } = await db.from("pengeluaran").update(updates).eq("id", r.id)
+  if (error) throw new Error(error.message)
+  await tulisAudit(user.id, user.nama, "UPDATE_PENGELUARAN", `${r.id} ${updates.deskripsi ?? r.deskripsi} Rp ${updates.jumlah ?? r.jumlah}`)
+  return ok({ id: r.id })
+}

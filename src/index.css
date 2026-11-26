@@ -22940,6 +22940,27 @@ html:has(.manual-page .modal-overlay) {
   font-size: 12px;
 }
 
+.report-page .expense-table-compact > .expense-row > .expense-actions {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 0 !important;
+}
+
+.report-page .expense-table-compact > .expense-row .expense-actions .button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 32px;
+  padding-inline: 4px !important;
+  font-size: 12px !important;
+  border-radius: 8px;
+  white-space: nowrap;
+  justify-content: center;
+}
+
 .report-page .expense-table-compact > .expense-row .button .icon {
   width: 14px;
   height: 14px;
@@ -23154,7 +23175,7 @@ html:has(.manual-page .modal-overlay) {
 /* Kolom Aksi dan tombol Tambah berbagi satu lebar: sisi kiri "+ Tambah" lurus dengan sisi kiri Batalkan/Pulihkan
    (Batalkan menjorok 16px + 1px garis tabel dari tepi, Tambah rata ke tepi, jadi Tambah = kolom Aksi + 17px) */
 .report-page {
-  --lk-aksi: 96px;
+  --lk-aksi: 140px;
 }
 
 .report-page .expense-toolbar .expense-add-button {
@@ -23165,7 +23186,7 @@ html:has(.manual-page .modal-overlay) {
 
 @media (max-width: 620px) {
   .report-page {
-    --lk-aksi: 88px;
+    --lk-aksi: 136px;
   }
 }
 

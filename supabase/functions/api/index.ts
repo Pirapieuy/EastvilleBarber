@@ -13,7 +13,7 @@ import {
 } from "./handlers/diskon.ts"
 import {
   aktifkanPengeluaran, batalkanPengeluaran, batalkanTransaksi, createPengeluaran, createTransaksi,
-  createTransaksiManual, listKomisi, listPengeluaran, listTransaksi, pulihkanTransaksi, updateTransaksi,
+  createTransaksiManual, listKomisi, listPengeluaran, listTransaksi, pulihkanTransaksi, updatePengeluaran, updateTransaksi,
 } from "./handlers/transaksi.ts"
 import {
   aktivitasKapster, laporanKeuangan, laporanProduk, listTutupKasir, rekapKasir, tutupKasir,
@@ -58,6 +58,7 @@ const bisnis: Record<string, { role: Role[]; fn: HandlerUser }> = {
   "create-pengeluaran": { role: ["Owner"], fn: createPengeluaran },
   "batalkan-pengeluaran": { role: ["Owner"], fn: batalkanPengeluaran },
   "aktifkan-pengeluaran": { role: ["Owner"], fn: aktifkanPengeluaran },
+  "update-pengeluaran": { role: ["Owner"], fn: updatePengeluaran },
   "simpan-produk": { role: ["Owner"], fn: simpanProduk },
   "hapus-produk": { role: ["Owner"], fn: hapusProduk },
   "adjust-stok": { role: ["Owner"], fn: adjustStok },

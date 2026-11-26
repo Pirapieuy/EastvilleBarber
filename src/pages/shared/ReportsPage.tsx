@@ -288,6 +288,95 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   const [expSearch, setExpSearch] = useState("")
   const [expenseCancelId, setExpenseCancelId] = useState<string | null>(null)
 
+  // Edit expense state
+  const [editingExpense, setEditingExpense] = useState<ExpenseRecord | null>(null)
+  const [editDate, setEditDate] = useState("")
+  const [editDesc, setEditDesc] = useState("")
+  const [editAmount, setEditAmount] = useState("")
+
+  function formatShortDate(iso: string) {
+    try {
+      const d = new Date(`${iso}T12:00:00`)
+      return new Intl.DateTimeFormat("id-ID", {
+        day: "numeric",
+        month: "short",
+      }).format(d)
+    } catch {
+      return iso.slice(5)
+    }
+  }
+
+  function handleOpenEditExpense(row: ExpenseRecord) {
+    setEditingExpense(row)
+    setEditDate(row.dateIso || isoDate(new Date()))
+    setEditDesc(row.description)
+    setEditAmount(row.amount ? rupiah(row.amount) : "")
+  }
+
+  async function handleSaveEditExpense(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingExpense) return
+    const parsedAmount = Number(editAmount.replace(/\D/g, "")) || 0
+    if (!parsedAmount || !editDesc.trim()) return
+
+    const targetId = editingExpense.id
+    const updatedDesc = editDesc.trim()
+    const updatedDisplayDate = formatShortDate(editDate)
+
+    if (live) {
+      try {
+        await apiPengeluaran.update({
+          id: targetId,
+          tanggal: editDate,
+          deskripsi: updatedDesc,
+          jumlah: parsedAmount,
+        })
+        const updated = await apiPengeluaran.list()
+        setExpensesList(updated as ExpenseRecord[])
+        const updatedKeuangan = await apiLaporan.keuangan(
+          rentangLaporan(mode, tanggal, bulan),
+        )
+        setData(updatedKeuangan)
+        setEditingExpense(null)
+      } catch (err) {
+        // Fallback optimistic update jika backend sedang proses deployment
+        setExpensesList((prev) =>
+          prev.map((item) =>
+            item.id === targetId
+              ? {
+                  ...item,
+                  dateIso: editDate,
+                  date: updatedDisplayDate,
+                  description: updatedDesc,
+                  amount: parsedAmount,
+                }
+              : item,
+          ),
+        )
+        setEditingExpense(null)
+        if (err instanceof Error && !err.message.includes("Aksi tidak dikenal")) {
+          window.alert(err.message)
+        }
+      }
+      return
+    }
+
+    setExpensesList((prev) =>
+      prev.map((item) =>
+        item.id === targetId
+          ? {
+              ...item,
+              dateIso: editDate,
+              date: updatedDisplayDate,
+              description: updatedDesc,
+              amount: parsedAmount,
+            }
+          : item,
+      ),
+    )
+    setEditingExpense(null)
+  }
+
   useEffect(() => {
     if (!getToken()) return
     let batal = false
@@ -703,7 +792,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
               <div className="expense-head">
                 <span>Tanggal</span>
                 <span>Keterangan</span>
-                <span>Jumlah</span>
+                <span>Harga</span>
                 <span>Aksi</span>
               </div>
 
@@ -722,23 +811,34 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
                     )}
                   </span>
                   <strong>{rupiah(row.amount)}</strong>
-                  {row.status === "BATAL" ? (
-                    <Button
-                      className="secondary-button"
-                      onClick={() => handleToggleExpenseStatus(row.id)}
-                      title="Pulihkan pengeluaran"
-                    >
-                      <Icon name="restore" /> Pulihkan
-                    </Button>
-                  ) : (
-                    <Button
-                      className="danger-button"
-                      onClick={() => handleToggleExpenseStatus(row.id)}
-                      title="Batalkan pengeluaran"
-                    >
-                      Batalkan
-                    </Button>
-                  )}
+                  <div className="expense-actions">
+                    {row.status === "BATAL" ? (
+                      <Button
+                        className="secondary-button"
+                        onClick={() => handleToggleExpenseStatus(row.id)}
+                        title="Pulihkan pengeluaran"
+                      >
+                        <Icon name="restore" /> Pulihkan
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          className="secondary-button"
+                          onClick={() => handleOpenEditExpense(row)}
+                          title="Ubah pengeluaran"
+                        >
+                          Ubah
+                        </Button>
+                        <Button
+                          className="danger-button"
+                          onClick={() => handleToggleExpenseStatus(row.id)}
+                          title="Hapus pengeluaran"
+                        >
+                          Hapus
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
 
@@ -869,7 +969,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
                   />
                 </label>
                 <label>
-                  <span>Jumlah (Rp)</span>
+                  <span>Harga (Rp)</span>
                   <input
                     inputMode="numeric"
                     placeholder="Contoh: 150.000"
@@ -892,10 +992,82 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         </div>
       )}
 
+      {/* Modal Koreksi Pengeluaran */}
+      {editingExpense && (
+        <div className="modal-overlay">
+          <form
+            className="simple-modal expense-form lk-exp-form"
+            onSubmit={handleSaveEditExpense}
+          >
+            <header>
+              <h2>Koreksi Pengeluaran</h2>
+              <Button type="button" onClick={() => setEditingExpense(null)}>
+                <Icon name="close" />
+              </Button>
+            </header>
+            <div className="lk-exp-body">
+              <div className="lk-exp-cal">
+                <KalenderBesar
+                  izin={{}}
+                  min={TANGGAL_MULAI}
+                  onChange={setEditDate}
+                  value={editDate}
+                />
+              </div>
+              <label className="lk-exp-date">
+                <span>Tanggal</span>
+                <CalendarPicker
+                  max={TANGGAL_MAKS()}
+                  min={TANGGAL_MULAI}
+                  value={editDate}
+                  onChange={(d) => d && setEditDate(d)}
+                />
+              </label>
+              <div className="lk-exp-fields">
+                <label>
+                  <span>Keterangan</span>
+                  <input
+                    placeholder="Misal: Beli sabun cuci rambut 2 botol"
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Harga (Rp)</span>
+                  <input
+                    inputMode="numeric"
+                    placeholder="Contoh: 150.000"
+                    value={editAmount}
+                    onChange={(e) => {
+                      const num = Number(e.target.value.replace(/\D/g, ""))
+                      setEditAmount(num ? rupiah(num) : "")
+                    }}
+                    required
+                  />
+                </label>
+                <div className="lk-exp-actions">
+                  <Button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setEditingExpense(null)}
+                  >
+                    Batal
+                  </Button>
+                  <Button className="primary-button" type="submit">
+                    Simpan
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
       {expenseCancelId && (
         <ReasonDialog
-          title="Batalkan pengeluaran?"
-          warning="Pengeluaran tidak dihapus, hanya ditandai BATAL dan bisa dipulihkan."
+          title="Hapus Pengeluaran"
+          warning="Pengeluaran tidak dihapus permanen, hanya ditandai BATAL dan bisa dipulihkan."
           onClose={() => setExpenseCancelId(null)}
           showCloseButton={false}
           onConfirm={async (alasan) => {

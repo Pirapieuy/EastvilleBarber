@@ -285,6 +285,13 @@ export const apiPengeluaran = {
     deskripsi: string
     jumlah: number
   }) => api<{ id: string }>("create-pengeluaran", { ...p }),
+  update: (p: {
+    id: string
+    tanggal?: string
+    kategori?: string
+    deskripsi?: string
+    jumlah?: number
+  }) => api<{ id: string }>("update-pengeluaran", { ...p }),
   batalkan: (id: string, alasan: string) =>
     api("batalkan-pengeluaran", { id, alasan }),
   aktifkan: (id: string) => api("aktifkan-pengeluaran", { id }),
