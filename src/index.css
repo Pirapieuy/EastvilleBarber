@@ -15376,6 +15376,20 @@ label .search-select-trigger {
   text-align: center;
 }
 
+.history-page-content .transaction-list:has(> .history-empty) {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-page-content .transaction-list > .history-empty {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 14px;
+}
+
 /* Riwayat transaksi: kunci halaman pada viewport, gulir daftar saja. */
 .workspace:has(> .history-page-content) {
   height: 100svh;

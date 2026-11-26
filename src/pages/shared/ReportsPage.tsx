@@ -8,6 +8,7 @@ import {
   LaporanKeuangan,
 } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
+import { ConfirmModal } from "../../components/common/ConfirmModal"
 import { Icon } from "../../components/common/Icon"
 import {
   eksporExcel,
@@ -284,6 +285,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   const [expDate, setExpDate] = useState(() => isoDate(new Date()))
   const [expSearch, setExpSearch] = useState("")
   const [expenseCancelId, setExpenseCancelId] = useState<string | null>(null)
+  const [expenseRestoreId, setExpenseRestoreId] = useState<string | null>(null)
 
   // Edit expense state
   const [editingExpense, setEditingExpense] = useState<ExpenseRecord | null>(null)
@@ -528,25 +530,17 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     simpanPengeluaran.current = false
   }
 
-  async function handleToggleExpenseStatus(id: string) {
+  function handleToggleExpenseStatus(id: string) {
+    const item = expensesList.find((expense) => expense.id === id)
+    if (!item) return
+
+    if (item.status === "BATAL") {
+      setExpenseRestoreId(id)
+      return
+    }
+
     if (live) {
-      const item = expensesList.find((r) => r.id === id)
-      if (!item) return
-      try {
-        if (item.status === "Aktif") {
-          setExpenseCancelId(id)
-          return
-        }
-        await apiPengeluaran.aktifkan(id)
-        const updated = await apiPengeluaran.list()
-        setExpensesList(updated as ExpenseRecord[])
-        const updatedKeuangan = await apiLaporan.keuangan(
-          rentangLaporan(mode, tanggal, bulan),
-        )
-        setData(updatedKeuangan)
-      } catch (err) {
-        window.alert(err instanceof Error ? err.message : "Aksi gagal.")
-      }
+      setExpenseCancelId(id)
       return
     }
 
@@ -580,6 +574,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
       }
       return 0
     })
+  const expenseToRestore =
+    expensesList.find((expense) => expense.id === expenseRestoreId) ?? null
 
   const expenseTableRef = useRef<HTMLDivElement>(null)
   const commissionTableRef = useRef<HTMLDivElement>(null)
@@ -1061,6 +1057,42 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
               rentangLaporan(mode, tanggal, bulan),
             )
             setData(updatedKeuangan)
+          }}
+        />
+      )}
+
+      {expenseRestoreId && expenseToRestore && (
+        <ConfirmModal
+          title="Pulihkan pengeluaran?"
+          eyebrow="Pulihkan Pengeluaran"
+          requireReason
+          reasonLabel="Alasan pemulihan"
+          reasonPlaceholder="Contoh: pengeluaran sebelumnya dibatalkan karena salah input..."
+          minReasonLength={3}
+          validateReasonOnSubmit
+          confirmText="Pulihkan Pengeluaran"
+          confirmTone="primary"
+          compact
+          onClose={() => setExpenseRestoreId(null)}
+          onConfirm={async (alasan) => {
+            if (live) {
+              await apiPengeluaran.aktifkan(expenseToRestore.id, alasan)
+              const updated = await apiPengeluaran.list()
+              setExpensesList(updated as ExpenseRecord[])
+              const updatedKeuangan = await apiLaporan.keuangan(
+                rentangLaporan(mode, tanggal, bulan),
+              )
+              setData(updatedKeuangan)
+            } else {
+              setExpensesList((prev) =>
+                prev.map((expense) =>
+                  expense.id === expenseToRestore.id
+                    ? { ...expense, status: "Aktif", cancelReason: undefined }
+                    : expense,
+                ),
+              )
+            }
+            setExpenseRestoreId(null)
           }}
         />
       )}

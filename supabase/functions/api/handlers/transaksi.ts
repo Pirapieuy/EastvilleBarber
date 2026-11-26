@@ -451,11 +451,13 @@ export async function batalkanPengeluaran(body: B, user: Pengguna) {
 }
 
 export async function aktifkanPengeluaran(body: B, user: Pengguna) {
+  const alasan = String(body.alasan ?? "").trim()
+  if (alasan.length < 3) return gagal("Alasan pemulihan minimal 3 karakter.")
   const { data: r } = await db.from("pengeluaran").select("id,status").eq("id", body.id).maybeSingle()
   if (!r) return gagal("Pengeluaran tidak ditemukan.")
   if (r.status !== "BATAL") return gagal("Pengeluaran ini sudah aktif.")
   await db.from("pengeluaran").update({ status: "Aktif", alasan_batal: "" }).eq("id", r.id)
-  await tulisAudit(user.id, user.nama, "AKTIFKAN_PENGELUARAN", r.id)
+  await tulisAudit(user.id, user.nama, "AKTIFKAN_PENGELUARAN", `${r.id} — ${alasan}`)
   return ok({ id: r.id })
 }
 
