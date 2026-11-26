@@ -18,7 +18,6 @@ import {
 import {
   formatTanggal,
   labelPeriode,
-  ModePeriode,
   usePeriodeTersimpan,
   rentangPeriode,
   TANGGAL_MAKS,

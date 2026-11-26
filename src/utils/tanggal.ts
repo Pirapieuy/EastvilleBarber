@@ -120,7 +120,8 @@ function bacaPeriode(halaman: string): PeriodeTersimpan | null {
     // Pindah hari: kembali ke hari ini.
     if (p.hari !== TANGGAL_MAKS()) return null
     if (p.mode !== "Harian" && p.mode !== "Mingguan" && p.mode !== "Bulanan") return null
-    if (typeof p.tanggal !== "string") return null
+    if (typeof p.tanggal !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(p.tanggal)) return null
+    if (p.tanggal < TANGGAL_MULAI || p.tanggal > TANGGAL_MAKS()) return null
     return { mode: p.mode, tanggal: p.tanggal }
   } catch {
     return null
