@@ -479,12 +479,20 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     )
   }
 
-  const filteredExpenses = expensesList.filter((r) => {
-    const matchSearch =
-      r.description.toLowerCase().includes(expSearch.toLowerCase()) ||
-      r.category.toLowerCase().includes(expSearch.toLowerCase())
-    return matchSearch
-  })
+  const filteredExpenses = expensesList
+    .filter((r) => {
+      const matchSearch =
+        r.description.toLowerCase().includes(expSearch.toLowerCase()) ||
+        r.category.toLowerCase().includes(expSearch.toLowerCase())
+      return matchSearch
+    })
+    .sort((a, b) => {
+      // Yang belum dibatalkan (Aktif) selalu berada di atas yang sudah dibatalkan (BATAL)
+      if (a.status !== b.status) {
+        return a.status === "Aktif" ? -1 : 1
+      }
+      return 0
+    })
 
   const expenseTableRef = useRef<HTMLDivElement>(null)
   const commissionTableRef = useRef<HTMLDivElement>(null)
