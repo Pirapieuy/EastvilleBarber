@@ -440,38 +440,44 @@ export function TeamPage({ currentUser, role, title }: {
                 </label>
               </div>
 
-              <span className="form-label">Pilih peran</span>
-              <div className="role-options">
-                {(["Kasir", "Kapster"] as Role[]).map((r) => (
-                  <Button
-                    className={selectedRole === r ? "active" : ""}
-                    key={r}
-                    type="button"
-                    onClick={() => setSelectedRole(r)}
-                  >
-                    <i>{selectedRole === r && <Icon name="check" />}</i>
-                    {r}
-                  </Button>
-                ))}
-              </div>
+              {selectedRole !== "Owner" && (
+                <>
+                  <span className="form-label">Pilih peran</span>
+                  <div className="role-options">
+                    {(["Kasir", "Kapster"] as Role[]).map((r) => (
+                      <Button
+                        className={selectedRole === r ? "active" : ""}
+                        key={r}
+                        type="button"
+                        onClick={() => setSelectedRole(r)}
+                      >
+                        <i>{selectedRole === r && <Icon name="check" />}</i>
+                        {r}
+                      </Button>
+                    ))}
+                  </div>
+                </>
+              )}
 
-              <div
-                className="toggle-row"
-                style={{ cursor: "pointer" }}
-                onClick={() =>
-                  setStatus((s) => (s === "Aktif" ? "Nonaktif" : "Aktif"))
-                }
-              >
-                <span>
-                  <strong>Status akun: {status}</strong>
-                  <small>
-                    Pengguna dapat masuk ke sistem bila status aktif
-                  </small>
-                </span>
-                <i className={`toggle ${status === "Aktif" ? "on" : ""}`}>
-                  <b />
-                </i>
-              </div>
+              {selectedRole !== "Owner" && (
+                <div
+                  className="toggle-row"
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    setStatus((s) => (s === "Aktif" ? "Nonaktif" : "Aktif"))
+                  }
+                >
+                  <span>
+                    <strong>Status akun: {status}</strong>
+                    <small>
+                      Pengguna dapat masuk ke sistem bila status aktif
+                    </small>
+                  </span>
+                  <i className={`toggle ${status === "Aktif" ? "on" : ""}`}>
+                    <b />
+                  </i>
+                </div>
+              )}
             </div>
             {formError && (
               <div
