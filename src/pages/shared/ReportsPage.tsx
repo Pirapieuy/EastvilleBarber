@@ -981,7 +981,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
                     required
                   />
                 </label>
-                <div className="lk-exp-actions">
+                <div className="lk-exp-actions is-single">
                   <Button className="primary-button" type="submit">
                     Simpan
                   </Button>

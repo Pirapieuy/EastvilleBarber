@@ -22312,14 +22312,16 @@ html:has(.manual-page .modal-overlay) {
 
 .lk-exp-actions {
   display: flex;
+  flex-direction: column;
   gap: 14px;
-  margin-top: auto;
+  margin-top: 0;
 }
 
 .lk-exp-actions .button {
-  flex: 1 1 0;
+  width: 100%;
   min-height: 44px;
   border-radius: 10px;
+  margin: 0;
 }
 
 .simple-modal.lk-exp-form > header {
@@ -22693,11 +22695,20 @@ html:has(.manual-page .modal-overlay) {
 }
 
 .lk-exp-form .lk-exp-actions {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 0;
 }
 
 .lk-exp-form .lk-exp-actions .button {
   width: 100%;
+  min-height: 44px;
+  margin: 0;
+}
+
+.lk-exp-form .lk-exp-actions.is-single {
+  margin-top: auto;
 }
 
 @media (max-width: 760px) {
