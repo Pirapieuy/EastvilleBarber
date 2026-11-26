@@ -412,6 +412,9 @@ export function EditTransactionModal({
             <p className="eyebrow">Koreksi Transaksi</p>
             <h2>Ubah Nota {transaction.id}</h2>
           </div>
+          <Button type="button" aria-label="Tutup" onClick={onClose} disabled={saving}>
+            <Icon name="close" />
+          </Button>
         </header>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -698,9 +701,6 @@ export function EditTransactionModal({
           </div>
 
           <footer>
-            <Button className="secondary-button" onClick={onClose} disabled={saving}>
-              Kembali
-            </Button>
             <Button
               className="primary-button"
               type="submit"
@@ -1410,6 +1410,8 @@ export function HistoryPage({ currentUser, role }: {
               ? "Laporan periode lama akan berubah."
               : "Data tetap tersimpan dalam riwayat."
           }
+          showCloseButton={true}
+          showCancelButton={false}
           onClose={() => {
             setAction(null)
             if (returnToMobileDetail) {
