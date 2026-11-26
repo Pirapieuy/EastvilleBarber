@@ -27526,3 +27526,18 @@ html:has(.manual-page .modal-overlay) {
     white-space: nowrap;
   }
 }
+
+/* Popup: tombol aksi tunggal selebar popup, satu baris (berlaku di semua halaman) */
+.modal-overlay .simple-modal > footer,
+.modal-overlay .simple-modal form > footer,
+.modal-overlay .reason-dialog > footer {
+  display: flex;
+}
+
+.modal-overlay .simple-modal > footer .button,
+.modal-overlay .simple-modal form > footer .button,
+.modal-overlay .reason-dialog > footer .button {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 44px;
+}

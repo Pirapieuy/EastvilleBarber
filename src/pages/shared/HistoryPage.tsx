@@ -138,14 +138,12 @@ export function ReasonDialog({
   onClose,
   onConfirm,
   showCloseButton = true,
-  showCancelButton = true,
 }: {
   title: string
   warning: string
   onClose: () => void
   onConfirm?: (reason: string) => void | Promise<void>
   showCloseButton?: boolean
-  showCancelButton?: boolean
 }) {
   const [reason, setReason] = useState("")
   const [busy, setBusy] = useState(false)
@@ -179,11 +177,6 @@ export function ReasonDialog({
           />
         </label>
         <footer>
-          {showCancelButton && (
-            <Button className="secondary-button" onClick={onClose}>
-              Kembali
-            </Button>
-          )}
           <Button
             className="danger-button"
             disabled={reason.trim().length < 5 || busy}
@@ -412,6 +405,9 @@ export function EditTransactionModal({
             <p className="eyebrow">Koreksi Transaksi</p>
             <h2>Ubah Nota {transaction.id}</h2>
           </div>
+          <Button type="button" aria-label="Tutup" onClick={onClose} disabled={saving}>
+            <Icon name="close" />
+          </Button>
         </header>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -698,9 +694,6 @@ export function EditTransactionModal({
           </div>
 
           <footer>
-            <Button className="secondary-button" onClick={onClose} disabled={saving}>
-              Kembali
-            </Button>
             <Button
               className="primary-button"
               type="submit"

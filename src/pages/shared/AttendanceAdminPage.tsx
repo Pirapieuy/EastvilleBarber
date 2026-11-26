@@ -818,13 +818,6 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
               />
             </label>
             <footer>
-              <Button
-                className="secondary-button"
-                type="button"
-                onClick={() => setLeaveModalOpen(false)}
-              >
-                Batal
-              </Button>
               <Button className="primary-button" type="submit">
                 Ajukan Libur
               </Button>

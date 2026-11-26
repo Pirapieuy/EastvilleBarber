@@ -274,13 +274,6 @@ export function AttendancePage() {
               />
             </label>
             <footer>
-              <Button
-                className="secondary-button"
-                type="button"
-                onClick={() => setIssueOpen(false)}
-              >
-                Batal
-              </Button>
               <Button className="primary-button" type="submit">
                 Kirim Laporan
               </Button>

@@ -53,7 +53,7 @@ export function WhatsAppDialog({
       <section className="simple-modal whatsapp-modal">
         <header>
           <h2>{title}</h2>
-          <Button onClick={onClose}>
+          <Button aria-label="Tutup" onClick={onClose}>
             <Icon name="close" />
           </Button>
         </header>
@@ -63,9 +63,6 @@ export function WhatsAppDialog({
           {"\n\n"}Penjualan batal tidak dihitung.
         </pre>
         <footer>
-          <Button className="secondary-button" onClick={onClose}>
-            Kembali
-          </Button>
           <Button
             className="whatsapp-button"
             onClick={() => {
@@ -1062,7 +1059,6 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
           warning="Pengeluaran tidak dihapus permanen, hanya ditandai BATAL dan bisa dipulihkan."
           onClose={() => setExpenseCancelId(null)}
           showCloseButton={true}
-          showCancelButton={false}
           onConfirm={async (alasan) => {
             await apiPengeluaran.batalkan(expenseCancelId, alasan)
             const updated = await apiPengeluaran.list()
