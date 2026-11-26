@@ -1,4 +1,4 @@
-import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode } from "../../utils/tanggal"
+import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode, usePeriodeTersimpan } from "../../utils/tanggal"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
@@ -904,11 +904,14 @@ export function HistoryPage({ currentUser, role }: {
   const [live, setLive] = useState(false)
   const [liveError, setLiveError] = useState("")
   // Laporan Keuangan membuka Riwayat dengan filter awal (metode/kapster/periode) lewat sessionStorage.
-  const [dateFilter, setDateFilter] = useState(() => bacaFilterAwal("tanggal"))
-  const [modePeriode, setModePeriode] = useState<ModePeriode>(() => {
-    const m = bacaFilterAwal("mode")
-    return m === "Mingguan" || m === "Bulanan" ? m : "Harian"
-  })
+  const [{ mode: modePeriode, tanggal: dateFilter }, setModePeriode, setDateFilter] =
+    usePeriodeTersimpan("riwayat", (() => {
+      const tanggal = bacaFilterAwal("tanggal")
+      const m = bacaFilterAwal("mode")
+      return tanggal
+        ? { tanggal, mode: m === "Mingguan" || m === "Bulanan" ? m : "Harian" as ModePeriode }
+        : undefined
+    })())
   const [cari, setCari] = useState("")
   const [barberFilter, setBarberFilter] = useState(
     () => bacaFilterAwal("kapster") || "Semua kapster",

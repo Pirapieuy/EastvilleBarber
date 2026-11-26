@@ -19,6 +19,7 @@ import {
   formatTanggal,
   labelPeriode,
   ModePeriode,
+  usePeriodeTersimpan,
   rentangPeriode,
   TANGGAL_MAKS,
   TANGGAL_MULAI,
@@ -126,8 +127,8 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
   const [transactions, setTransactions] = useState<KapsterTransaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [dateFilter, setDateFilter] = useState("")
-  const [modePeriode, setModePeriode] = useState<ModePeriode>("Harian")
+  const [{ mode: modePeriode, tanggal: dateFilter }, setModePeriode, setDateFilter] =
+    usePeriodeTersimpan("pendapatan-kapster")
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<"Semua" | "Layanan" | "Produk">(
     "Semua",
