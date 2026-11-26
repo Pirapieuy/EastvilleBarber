@@ -746,13 +746,22 @@ export function AbsensiKapster({
               <span className="absensi-modal-icon">
                 <Icon name="camera" />
               </span>
-              <div className="absensi-modal-heading">
+              <div className="absensi-modal-heading" style={{ flex: 1, minWidth: 0 }}>
                 <div className="absensi-modal-title">Absensi Kapster</div>
                 <div className="absensi-modal-subtitle">
                   {selectedKapster.nama} <span aria-hidden="true">·</span>{" "}
                   {view === "leave" ? tanggalIzin : tanggal}
                 </div>
               </div>
+              <Button
+                type="button"
+                aria-label="Tutup"
+                onClick={closeModal}
+                disabled={submitting}
+                style={{ width: 34, height: 34, minWidth: 34, padding: 0 }}
+              >
+                <Icon name="close" />
+              </Button>
             </div>
             {view === "leave" && (
               <>
@@ -886,13 +895,6 @@ export function AbsensiKapster({
                     Ambil Ulang
                   </Button>
                 )}
-                <Button
-                  className="secondary-button"
-                  onClick={closeModal}
-                  disabled={submitting}
-                >
-                  Batal
-                </Button>
               </div>
             </div>
           </div>

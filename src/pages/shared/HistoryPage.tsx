@@ -1403,6 +1403,7 @@ export function HistoryPage({ currentUser, role }: {
               ? "Laporan periode lama akan berubah."
               : "Data tetap tersimpan dalam riwayat."
           }
+          showCloseButton={true}
           onClose={() => {
             setAction(null)
             if (returnToMobileDetail) {

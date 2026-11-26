@@ -823,14 +823,14 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
                           onClick={() => handleOpenEditExpense(row)}
                           title="Ubah pengeluaran"
                         >
-                          Ubah
+                          <Icon name="pencil" /> Ubah
                         </Button>
                         <Button
                           className="danger-button"
                           onClick={() => handleToggleExpenseStatus(row.id)}
                           title="Hapus pengeluaran"
                         >
-                          Hapus
+                          <Icon name="trash" /> Hapus
                         </Button>
                       </>
                     )}
