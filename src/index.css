@@ -27543,16 +27543,14 @@ html:has(.manual-page .modal-overlay) {
   min-height: 44px;
 }
 
-/* Komisi Produk & Layanan (Kapster, laptop): tombol tanggal selebar konten, sejajar dengan hero dan dua panel */
-@media (min-width: 1025px) {
-  .app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-wrapper {
-    width: 100%;
-  }
+/* Komisi Produk & Layanan (Kapster): tombol tanggal selebar konten di semua lebar layar */
+.app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-wrapper {
+  width: 100%;
+}
 
-  .app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-btn {
-    width: 100%;
-    justify-content: center;
-  }
+.app-shell-kapster .kapster-product-commission .kapster-date-toolbar .calendar-picker-btn {
+  width: 100%;
+  justify-content: center;
 }
 
 /* Final responsive layout for Owner attendance history. */
