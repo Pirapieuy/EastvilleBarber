@@ -3,6 +3,9 @@ import {
   buatToken, db, gagal, hashPin, ok, penggunaDariToken, tulisAudit, verifyPin,
 } from "../util.ts"
 
+// Owner 8 jam (akun paling berkuasa); Kasir dan Kapster 30 hari supaya HP kerja tidak minta login tiap hari.
+const masaSesi = (role: string) => (role === "Owner" ? 8 * 3600_000 : 30 * 86_400_000)
+
 const PESAN_KUNCI =
   "Akun terkunci sementara karena 5 kali salah PIN. Silakan coba lagi dalam 5 menit."
 
@@ -54,7 +57,7 @@ export async function login(body: Record<string, string>) {
   await db.from("sessions").delete().lt("expire_time", new Date(Date.now() - 86_400_000).toISOString())
   const token = buatToken()
   await db.from("sessions").insert({
-    token, user_id: user!.id, expire_time: new Date(Date.now() + 8 * 3600_000).toISOString(),
+    token, user_id: user!.id, expire_time: new Date(Date.now() + masaSesi(user!.role)).toISOString(),
   })
   await tulisAudit(user!.id, user!.nama, "LOGIN", "Login berhasil dari role: " + user!.role)
   return ok({ token, user: profil(user!) }, "Login berhasil!")

@@ -32,3 +32,20 @@ Deno.test("AU2 absensi Hadir untuk tanggal yang belum tiba ditolak", async () =>
   assert.match(r.error ?? "", /belum tiba/)
   assert.equal(Number((await pg.query<{ n: number }>(`select count(*)::int n from absensi`)).rows[0].n), 0)
 })
+
+Deno.test("AU3 masa sesi: Owner 8 jam, Kasir dan Kapster 30 hari", async () => {
+  await reset()
+  const aut = await import("../functions/api/handlers/auth.ts")
+  const { hashPin } = await import("../functions/api/util.ts")
+  await pg.exec(`update users set pin_hash='${await hashPin("123456")}' where id in ('u-owner','u-kasir','u-kap1')`)
+  const jam = async (username: string) => {
+    const r = await aut.login({ username, pin: "123456" }) as { success: boolean; data: { token: string }; error?: string }
+    assert.equal(r.success, true, r.error)
+    const { rows } = await pg.query<{ jam: number }>(`select extract(epoch from (expire_time - now()))/3600 as jam from sessions where token='${r.data.token}'`)
+    return Number(rows[0].jam)
+  }
+  const o = await jam("owner"), k = await jam("kasir"), p = await jam("kap1")
+  assert.ok(o > 7.9 && o <= 8, `owner ${o} jam`)
+  assert.ok(k > 719 && k <= 720, `kasir ${k} jam`)
+  assert.ok(p > 719 && p <= 720, `kapster ${p} jam`)
+})
