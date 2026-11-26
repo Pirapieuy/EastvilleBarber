@@ -4,7 +4,7 @@ import {
   LoadingState,
 } from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
-import { formatTanggal, formatTanggalWaktu } from "../../utils/tanggal"
+import { formatTanggal, formatTanggalWaktu, useTanggalTersimpan } from "../../utils/tanggal"
 
 const DEMO_LOGS: string[][] = [
   [
@@ -244,7 +244,7 @@ const PAGE_SIZE = 50
 export function AuditPage() {
   const [realLogs, setRealLogs] = useState<AuditLogRow[] | null>(null)
   const [loading, setLoading] = useState(false)
-  const [filterDate, setFilterDate] = useState("")
+  const [filterDate, setFilterDate] = useTanggalTersimpan("audit")
   const [filterAksi, setFilterAksi] = useState("Semua jenis aksi")
   const [filterUser, setFilterUser] = useState("Semua pengguna")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)

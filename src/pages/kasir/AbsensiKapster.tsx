@@ -25,6 +25,7 @@ import {
   formatTanggal,
   TANGGAL_MAKS,
   tanggalIsoLokal,
+  useTanggalTersimpan,
 } from "../../utils/tanggal"
 
 type View = "list" | "photo" | "leave"
@@ -58,7 +59,7 @@ export function AbsensiKapster({
   const [riwayatAbsensi, setRiwayatAbsensi] = useState<AbsensiRow[]>([])
   const [activeTab, setActiveTab] = useState<"absensi" | "riwayat">("absensi")
   const [loadingRiwayat, setLoadingRiwayat] = useState(false)
-  const [filterTanggalRiwayat, setFilterTanggalRiwayat] = useState("")
+  const [filterTanggalRiwayat, setFilterTanggalRiwayat] = useTanggalTersimpan("absensi-kapster")
   const [cariKapster, setCariKapster] = useState("")
   const [loading, setLoading] = useState(() => Boolean(getToken()))
   const [view, setView] = useState<View>("list")

@@ -17,7 +17,7 @@ import {
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { CalendarPicker } from "../../components/common/CalendarPicker"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
-import { formatTanggal, labelRentang, TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
+import { formatTanggal, labelRentang, TANGGAL_MAKS, TANGGAL_MULAI, useTanggalTersimpan } from "../../utils/tanggal"
 
 type Kapster = { id: string; nama: string }
 type Data = {
@@ -100,7 +100,7 @@ export function PayrollPage() {
   const [gCari, setGCari] = useState("")
   const [gKapster, setGKapster] = useState("")
   const [gUrut, setGUrut] = useState("terbaru")
-  const [gTanggal, setGTanggal] = useState("")
+  const [gTanggal, setGTanggal] = useTanggalTersimpan("gaji")
   const [gBuka, setGBuka] = useState<string | null>(null)
 
   // Riwayat Kasbon
@@ -108,7 +108,7 @@ export function PayrollPage() {
   const [kKapster, setKKapster] = useState("")
   const [kStatus, setKStatus] = useState("")
   const [kUrut, setKUrut] = useState("status")
-  const [kTanggal, setKTanggal] = useState("")
+  const [kTanggal, setKTanggal] = useTanggalTersimpan("kasbon")
 
   // Popup bayar gaji
   const [bayarKapster, setBayarKapster] = useState<Kapster | null>(null)
