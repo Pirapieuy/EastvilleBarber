@@ -6322,9 +6322,14 @@ textarea {
   background: #faf7f2;
 }
 
-.expense-row.voided > *:not(.chip, .button) {
+.expense-row.voided > *:not(.chip, .button, .expense-actions) {
   opacity: 0.65;
   text-decoration: line-through;
+}
+
+.expense-row.voided .expense-actions,
+.expense-row.voided .button {
+  text-decoration: none !important;
 }
 
 .expense-row .secondary-button,
