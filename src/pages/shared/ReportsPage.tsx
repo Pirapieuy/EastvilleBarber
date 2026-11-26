@@ -419,6 +419,10 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         })
         const updated = await apiPengeluaran.list()
         setExpensesList(updated as ExpenseRecord[])
+        const updatedKeuangan = await apiLaporan.keuangan(
+          rentangLaporan(mode, tanggal, bulan),
+        )
+        setData(updatedKeuangan)
         setExpAmount("")
         setExpDescription("")
         setExpenseFormOpen(false)
@@ -456,6 +460,10 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
         await apiPengeluaran.aktifkan(id)
         const updated = await apiPengeluaran.list()
         setExpensesList(updated as ExpenseRecord[])
+        const updatedKeuangan = await apiLaporan.keuangan(
+          rentangLaporan(mode, tanggal, bulan),
+        )
+        setData(updatedKeuangan)
       } catch (err) {
         window.alert(err instanceof Error ? err.message : "Aksi gagal.")
       }
@@ -893,6 +901,10 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
             await apiPengeluaran.batalkan(expenseCancelId, alasan)
             const updated = await apiPengeluaran.list()
             setExpensesList(updated as ExpenseRecord[])
+            const updatedKeuangan = await apiLaporan.keuangan(
+              rentangLaporan(mode, tanggal, bulan),
+            )
+            setData(updatedKeuangan)
           }}
         />
       )}
