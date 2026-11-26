@@ -15,9 +15,9 @@ import {
   HitungGajiResult,
 } from "../../api"
 import { SearchSelect } from "../../components/common/SearchSelect"
-import { CalendarPicker } from "../../components/common/CalendarPicker"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
-import { formatTanggal, labelRentang, TANGGAL_MAKS, TANGGAL_MULAI, useTanggalTersimpan } from "../../utils/tanggal"
+import { formatTanggal, labelRentang, rentangPeriode, usePeriodeTersimpan } from "../../utils/tanggal"
+import { PeriodePicker } from "../../components/common/PeriodePicker"
 
 type Kapster = { id: string; nama: string }
 type Data = {
@@ -100,7 +100,7 @@ export function PayrollPage() {
   const [gCari, setGCari] = useState("")
   const [gKapster, setGKapster] = useState("")
   const [gUrut, setGUrut] = useState("terbaru")
-  const [gTanggal, setGTanggal] = useTanggalTersimpan("gaji")
+  const [gPeriode, setGMode, setGTanggal] = usePeriodeTersimpan("gaji")
   const [gBuka, setGBuka] = useState<string | null>(null)
 
   // Riwayat Kasbon
@@ -108,7 +108,7 @@ export function PayrollPage() {
   const [kKapster, setKKapster] = useState("")
   const [kStatus, setKStatus] = useState("")
   const [kUrut, setKUrut] = useState("status")
-  const [kTanggal, setKTanggal] = useTanggalTersimpan("kasbon")
+  const [kPeriode, setKMode, setKTanggal] = usePeriodeTersimpan("kasbon")
 
   // Popup bayar gaji
   const [bayarKapster, setBayarKapster] = useState<Kapster | null>(null)
@@ -221,7 +221,11 @@ export function PayrollPage() {
   const riwayatGaji = urutkan(
     gaji.filter((g) => {
       if (gKapster && g.userId !== gKapster) return false
-      if (gTanggal && tanggalGaji(g) !== gTanggal) return false
+      if (gPeriode.tanggal) {
+        const r = rentangPeriode(gPeriode.mode, gPeriode.tanggal)
+        const t = tanggalGaji(g)
+        if (t < r.dari || t > r.sampai) return false
+      }
       const q = gCari.trim().toLowerCase()
       if (!q) return true
       return `${g.nama} ${g.catatan} ${periodeGaji[g.id] ?? ""}`.toLowerCase().includes(q)
@@ -285,7 +289,10 @@ export function PayrollPage() {
     kasbon.filter((k) => {
       if (kKapster && k.userId !== kKapster) return false
       if (kStatus && k.status !== kStatus) return false
-      if (kTanggal && k.tanggal !== kTanggal) return false
+      if (kPeriode.tanggal) {
+        const r = rentangPeriode(kPeriode.mode, kPeriode.tanggal)
+        if (k.tanggal < r.dari || k.tanggal > r.sampai) return false
+      }
       const q = kCari.trim().toLowerCase()
       if (!q) return true
       return `${k.nama} ${k.catatan}`.toLowerCase().includes(q)
@@ -486,15 +493,7 @@ export function PayrollPage() {
                   <option value="terbesar">Gaji terbesar</option>
                   <option value="terkecil">Gaji terkecil</option>
                 </SearchSelect>
-                <CalendarPicker
-                  value={gTanggal}
-                  onChange={setGTanggal}
-                  allowClear
-                  clearLabel="Semua tanggal"
-                  placeholder="Semua tanggal"
-                  max={TANGGAL_MAKS()}
-                  min={TANGGAL_MULAI}
-                />
+                <PeriodePicker periode={gPeriode} onMode={setGMode} onTanggal={setGTanggal} />
               </div>
             </div>
             <div className="gj-table gj-gaji">
@@ -634,15 +633,7 @@ export function PayrollPage() {
                   <option value="terbesar">Jumlah terbesar</option>
                   <option value="terkecil">Jumlah terkecil</option>
                 </SearchSelect>
-                <CalendarPicker
-                  value={kTanggal}
-                  onChange={setKTanggal}
-                  allowClear
-                  clearLabel="Semua tanggal"
-                  placeholder="Semua tanggal"
-                  max={TANGGAL_MAKS()}
-                  min={TANGGAL_MULAI}
-                />
+                <PeriodePicker periode={kPeriode} onMode={setKMode} onTanggal={setKTanggal} />
               </div>
             </div>
             <div className="gj-table gj-kasbon">

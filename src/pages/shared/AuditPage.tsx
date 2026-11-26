@@ -4,7 +4,8 @@ import {
   LoadingState,
 } from "../../components/common/UI"
 import { apiAudit, AuditLogRow, getToken } from "../../api"
-import { formatTanggal, formatTanggalWaktu, useTanggalTersimpan } from "../../utils/tanggal"
+import { formatTanggal, formatTanggalWaktu, rentangPeriode, usePeriodeTersimpan } from "../../utils/tanggal"
+import { PeriodePicker } from "../../components/common/PeriodePicker"
 
 const DEMO_LOGS: string[][] = [
   [
@@ -244,7 +245,8 @@ const PAGE_SIZE = 50
 export function AuditPage() {
   const [realLogs, setRealLogs] = useState<AuditLogRow[] | null>(null)
   const [loading, setLoading] = useState(false)
-  const [filterDate, setFilterDate] = useTanggalTersimpan("audit")
+  const [periodeAudit, setModeAudit, setFilterDate] = usePeriodeTersimpan("audit")
+  const filterDate = periodeAudit.tanggal
   const [filterAksi, setFilterAksi] = useState("Semua jenis aksi")
   const [filterUser, setFilterUser] = useState("Semua pengguna")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -284,7 +286,10 @@ export function AuditPage() {
 
     return realLogs
       .filter((r) => {
-        if (filterDate && r.tanggal !== filterDate) return false
+        if (filterDate) {
+          const rg = rentangPeriode(periodeAudit.mode, filterDate)
+          if (r.tanggal < rg.dari || r.tanggal > rg.sampai) return false
+        }
         if (filterAksi !== "Semua jenis aksi") {
           const label = AKSI_MAP[r.aksi] || r.aksi
           if (
@@ -301,7 +306,7 @@ export function AuditPage() {
         return true
       })
       .map(parseAuditRow)
-  }, [realLogs, filterDate, filterAksi, filterUser])
+  }, [realLogs, filterDate, periodeAudit.mode, filterAksi, filterUser])
 
   const visibleRows = rowsToDisplay.slice(0, visibleCount)
   const hasMore = visibleCount < rowsToDisplay.length
@@ -309,7 +314,7 @@ export function AuditPage() {
   // Reset ke halaman pertama saat filter berubah
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
-  }, [filterDate, filterAksi, filterUser])
+  }, [filterDate, periodeAudit.mode, filterAksi, filterUser])
 
   // Lazy load: tambah baris saat sentinel terlihat
   useEffect(() => {
@@ -331,13 +336,7 @@ export function AuditPage() {
     <div className="content audit-page-content fit-page">
       <section className="panel audit-list fit-fill">
         <div className="filters">
-          <CalendarPicker
-            value={filterDate}
-            onChange={setFilterDate}
-            allowClear
-            clearLabel="Semua Tanggal"
-            placeholder="Semua Tanggal"
-          />
+          <PeriodePicker periode={periodeAudit} onMode={setModeAudit} onTanggal={setFilterDate} />
           <AuditFilterSelect
             value={filterAksi}
             onChange={setFilterAksi}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { PeriodePicker } from "../../components/common/PeriodePicker"
 import { Icon } from "../../components/common/Icon"
 import {
   CalendarPicker,
@@ -246,34 +247,10 @@ function KapsterTransactionHistory({ namaKapster }: { namaKapster: string }) {
             />
           </div>
           <div className="kapster-transaction-date">
-            <CalendarPicker
-              value={dateFilter}
-              label={labelPeriode(modePeriode, dateFilter)}
-              bulanSaja={modePeriode === "Bulanan"}
-              popupHeader={
-                <div
-                  className="segmented history-periode"
-                  role="group"
-                  aria-label="Periode"
-                >
-                  {(["Harian", "Mingguan", "Bulanan"] as const).map((mode) => (
-                    <Button
-                      className={modePeriode === mode ? "active" : ""}
-                      key={mode}
-                      type="button"
-                      onClick={() => setModePeriode(mode)}
-                    >
-                      {mode}
-                    </Button>
-                  ))}
-                </div>
-              }
-              onChange={setDateFilter}
-              allowClear
-              clearLabel="Semua Tanggal"
-              placeholder="Semua Tanggal"
-              max={TANGGAL_MAKS()}
-              min={TANGGAL_MULAI}
+            <PeriodePicker
+              periode={{ mode: modePeriode, tanggal: dateFilter }}
+              onMode={setModePeriode}
+              onTanggal={setDateFilter}
               style={{ width: "100%" }}
             />
           </div>
