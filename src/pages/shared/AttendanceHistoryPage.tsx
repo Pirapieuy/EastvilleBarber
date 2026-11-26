@@ -462,13 +462,21 @@ export function AttendanceHistoryPage() {
                 data-status={row.status.toLowerCase().replace(" ", "-")}
                 style={{ display: "flex", alignItems: "center" }}
                 onClick={(event) => {
-                  if (
-                    window.matchMedia("(max-width: 560px)").matches &&
-                    !(event.target as HTMLElement).closest("button")
-                  ) {
+                  if (!(event.target as HTMLElement).closest("button")) {
                     setDetailRow(row)
                   }
                 }}
+                onKeyDown={(event) => {
+                  if (
+                    event.target === event.currentTarget &&
+                    (event.key === "Enter" || event.key === " ")
+                  ) {
+                    event.preventDefault()
+                    setDetailRow(row)
+                  }
+                }}
+                tabIndex={0}
+                role="group"
                 aria-label={`Lihat detail absensi ${row.nama}`}
               >
                 {row.fotoUrl ? (
