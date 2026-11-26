@@ -44,7 +44,7 @@ export function AbsensiKapster({
   onComplete?: (success: boolean) => void
 } = {}) {
   const todayIso = TANGGAL_MAKS()
-  const [tanggal, setTanggal] = useState(todayIso)
+  const [tanggal, setTanggal] = useTanggalTersimpan("absensi-kapster-hari")
   // Izin, sakit, dan cuti diajukan paling cepat untuk besok (H-1).
   const besokIso = (() => {
     const d = new Date()
