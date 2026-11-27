@@ -2011,7 +2011,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                   </div>
 
                   {tunaiTerpakai > 0 && (
-                    <div style={{ marginTop: 10 }}>
+                    <div style={{ display: "grid", gap: 14 }}>
                       <label className="pay-field">
                         <span>Uang tunai diterima</span>
                         <div className="input-shell">
@@ -2080,7 +2080,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 </>
               )}
 
-              <label className="pay-field" style={{ marginTop: 14 }}>
+              <label className="pay-field">
                 <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
                   <Icon name="pencil" /> Catatan Transaksi (Opsional)
                 </span>

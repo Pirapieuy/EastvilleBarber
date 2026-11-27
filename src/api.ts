@@ -178,6 +178,8 @@ export const apiLayanan = {
     harga: number
     status: "Aktif" | "Nonaktif"
     kategori: string
+    customPrice?: boolean
+    custom_price?: boolean
   }) => api<{ id: number }>("simpan-layanan", { layanan }),
   hapus: (id: number, alasan: string) =>
     api<{ id: number }>("hapus-layanan", { id, alasan }),
