@@ -190,10 +190,6 @@ export function ServicesPage({ embedded = false }: {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
-  const [confirmSync, setConfirmSync] = useState(false)
-  const [syncing, setSyncing] = useState(false)
-  const [syncProgress, setSyncProgress] = useState("")
-  const [syncSuccess, setSyncSuccess] = useState("")
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
@@ -205,67 +201,6 @@ export function ServicesPage({ embedded = false }: {
       if (peng) setPengaturan(peng)
       setLive(true)
     })
-  }
-
-  async function handleSyncPricelist() {
-    setSyncing(true)
-    setSyncProgress("Menyiapkan sinkronisasi...")
-    try {
-      if (live) {
-        const current = await apiLayanan.list()
-        const resmiNames = new Set(
-          EASTVILLE_PRICELIST.map((p) => p.nama.toLowerCase()),
-        )
-        // 1. Bersihkan / nonaktifkan layanan lama yang bukan pricelist resmi
-        for (const old of current) {
-          if (!resmiNames.has(old.nama.toLowerCase())) {
-            setSyncProgress(`Membersihkan layanan lama: ${old.nama}...`)
-            try {
-              await apiLayanan.hapus(old.id, "Penyelarasan pricelist resmi Eastville")
-            } catch {
-              await apiLayanan.simpan({
-                id: old.id,
-                nama: old.nama,
-                harga: old.harga,
-                kategori: old.kategori || "Potong",
-                status: "Nonaktif",
-              })
-            }
-          }
-        }
-        // 2. Tambah / perbarui 15 layanan resmi
-        for (let i = 0; i < EASTVILLE_PRICELIST.length; i++) {
-          const p = EASTVILLE_PRICELIST[i]
-          setSyncProgress(`Menyimpan ${p.nama} (${i + 1}/${EASTVILLE_PRICELIST.length})...`)
-          const match = current.find(
-            (c) => c.nama.toLowerCase() === p.nama.toLowerCase(),
-          )
-          try {
-            await apiLayanan.simpan({
-              id: match?.id,
-              nama: p.nama,
-              harga: p.harga,
-              kategori: p.kategori,
-              status: "Aktif",
-            })
-          } catch (e) {
-            console.warn(`Gagal simpan ${p.nama}:`, e)
-          }
-        }
-        await loadLive()
-      } else {
-        // Mode demo / tanpa backend: langsung set rows ke 15 layanan resmi
-        setRows(serviceRows)
-      }
-      setSyncSuccess("Pricelist berhasil disinkronkan dengan 15 layanan resmi Eastville!")
-      setTimeout(() => setSyncSuccess(""), 4000)
-    } catch (err) {
-      alert("Gagal sinkronisasi: " + (err instanceof Error ? err.message : String(err)))
-    } finally {
-      setSyncing(false)
-      setSyncProgress("")
-      setConfirmSync(false)
-    }
   }
 
   useEffect(() => {
@@ -354,15 +289,6 @@ export function ServicesPage({ embedded = false }: {
   }
 
   const aktifCount = rows.filter((r) => r.status === "Aktif").length
-  const isOldPricelist =
-    live &&
-    rows.length > 0 &&
-    !rows.some(
-      (r) =>
-        r.nama.toLowerCase().includes("gold service") ||
-        r.nama.toLowerCase().includes("platinum service") ||
-        r.nama.toLowerCase().includes("keratin treatment"),
-    )
   function getPricelistIndex(nama: string) {
     const clean = nama.toLowerCase()
     const idx = EASTVILLE_PRICELIST.findIndex(
@@ -440,69 +366,6 @@ export function ServicesPage({ embedded = false }: {
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
       {!embedded && <PageTitle eyebrow="Data master" title="Layanan & Harga" />}
-      {syncSuccess && (
-        <div
-          style={{
-            padding: "10px 16px",
-            background: "#ecfdf5",
-            border: "1px solid #a7f3d0",
-            color: "#065f46",
-            borderRadius: 8,
-            marginBottom: 12,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 13,
-            fontWeight: 500,
-          }}
-        >
-          <Icon name="check" /> {syncSuccess}
-        </div>
-      )}
-      {isOldPricelist && (
-        <div
-          style={{
-            padding: "12px 18px",
-            background: "#fffbeb",
-            border: "1px solid #fde68a",
-            borderRadius: 10,
-            marginBottom: 14,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ color: "#b45309", display: "flex", fontSize: 20 }}>
-              <Icon name="alert" />
-            </span>
-            <div>
-              <strong style={{ color: "#92400e", display: "block", fontSize: 14 }}>
-                Pricelist Database Belum Disinkronkan
-              </strong>
-              <span style={{ color: "#b45309", fontSize: 13 }}>
-                Database masih menampilkan 5 layanan sampel lama. Tekan tombol di samping untuk menyinkronkan 15 layanan resmi Eastville ke database.
-              </span>
-            </div>
-          </div>
-          <Button
-            className="primary-button"
-            style={{
-              background: "#b45309",
-              borderColor: "#b45309",
-              color: "#fff",
-              padding: "8px 16px",
-              whiteSpace: "nowrap",
-            }}
-            onClick={() => setConfirmSync(true)}
-            disabled={syncing}
-          >
-            <Icon name="restore" /> {syncing ? syncProgress || "Menyinkronkan..." : "Singkronkan Pricelist Sekarang"}
-          </Button>
-        </div>
-      )}
       <section className="panel service-list fit-fill">
         <div className="filters">
           <div className="master-summary filters-summary">
@@ -539,15 +402,6 @@ export function ServicesPage({ embedded = false }: {
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </SearchSelect>
-          <Button
-            className="secondary-button"
-            style={{ whiteSpace: "nowrap" }}
-            onClick={() => setConfirmSync(true)}
-            disabled={syncing}
-            title="Singkronkan dengan 15 pricelist asli Eastville"
-          >
-            <Icon name="restore" /> {syncing ? syncProgress || "Menyinkronkan..." : "Singkronkan Pricelist"}
-          </Button>
           <Button
             className="primary-button filters-add"
             onClick={() => openForm(null)}
@@ -610,14 +464,7 @@ export function ServicesPage({ embedded = false }: {
                         <Icon name="cashier" />
                       </i>
                       <span className="service-name-content">
-                        <span className="service-name-title-row">
-                          <strong>{itemTitle}</strong>
-                          {isStartFrom && (
-                            <span className="catalog-badge-startfrom">
-                              Start From
-                            </span>
-                          )}
-                        </span>
+                        <strong>{itemTitle}</strong>
                         {itemDesc && (
                           <small
                             className="service-name-desc"
@@ -772,18 +619,6 @@ export function ServicesPage({ embedded = false }: {
           confirmTone="danger"
           onClose={() => setDeletingService(null)}
           onConfirm={(alasan) => handleDeleteConfirm(deletingService, alasan)}
-        />
-      )}
-      {confirmSync && (
-        <ConfirmModal
-          title="Singkronkan Pricelist Asli Eastville?"
-          eyebrow="Pricelist Resmi Eastville"
-          message="Tindakan ini akan menyelaraskan 15 layanan aktif sesuai pricelist resmi Eastville Barbershop (Haircut, Treatment, Hair Color, Hair Styling Service). Layanan lama yang berbeda akan dinonaktifkan."
-          confirmText={syncing ? syncProgress || "Menyinkronkan..." : "Ya, Singkronkan"}
-          confirmTone="primary"
-          compact
-          onClose={() => !syncing && setConfirmSync(false)}
-          onConfirm={handleSyncPricelist}
         />
       )}
     </div>
