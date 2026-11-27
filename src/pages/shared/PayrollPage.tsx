@@ -418,7 +418,7 @@ export function PayrollPage() {
             <div className="lk-head">
               <h3>Gaji periode berjalan</h3>
             </div>
-            <div className="gj-cards">
+            <div className={`gj-cards ${kartuGaji.length === 0 ? "is-empty" : ""}`}>
               {kartuGaji.map(({ k, c, potongan, sisaKasbon, bersih, terakhir }) => {
                 const adaKomisi = c.totalKomisi > 0
                 return (
@@ -502,7 +502,7 @@ export function PayrollPage() {
                 <PeriodePicker periode={gPeriode} onMode={setGMode} onTanggal={setGTanggal} />
               </div>
             </div>
-            <div className="gj-table gj-gaji">
+            <div className={`gj-table gj-gaji ${riwayatGaji.length === 0 ? "is-empty" : ""}`}>
               <div className="gj-head">
                 <span>Kapster</span>
                 <span>Periode komisi</span>
@@ -578,7 +578,7 @@ export function PayrollPage() {
             <div className="lk-head">
               <h3>Kasbon belum lunas per kapster</h3>
             </div>
-            <div className="gj-cards">
+            <div className={`gj-cards ${kasbonAktif.length === 0 ? "is-empty" : ""}`}>
               {kapsters.filter((k) => kasbonAktif.some((x) => x.userId === k.id)).map((k) => {
                 const list = kasbonAktif.filter((x) => x.userId === k.id)
                 const total = sum(list)
@@ -642,7 +642,7 @@ export function PayrollPage() {
                 <PeriodePicker periode={kPeriode} onMode={setKMode} onTanggal={setKTanggal} />
               </div>
             </div>
-            <div className="gj-table gj-kasbon">
+            <div className={`gj-table gj-kasbon ${riwayatKasbon.length === 0 ? "is-empty" : ""}`}>
               <div className="gj-head">
                 <span>Kapster</span>
                 <span>Tanggal</span>

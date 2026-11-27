@@ -233,7 +233,9 @@ export function BackupPage() {
             </span>
           </div>
         </div>
-        <div className="backup-table-scroll">
+        <div
+          className={`backup-table-scroll ${backups.length === 0 ? "is-empty" : ""}`}
+        >
           <div className="backup-head">
             <span>Nama backup</span>
             <span className="desktop-col">Dibuat</span>
@@ -291,13 +293,7 @@ export function BackupPage() {
             </article>
           ))}
           {backups.length === 0 && (
-            <div
-              style={{
-                padding: "14px",
-                textAlign: "center",
-                color: "var(--slate)",
-              }}
-            >
+            <div className="backup-empty-state">
               Belum ada backup.
             </div>
           )}

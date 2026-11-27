@@ -409,7 +409,11 @@ export function ServicesPage({ embedded = false }: {
             <Icon name="plus" /> Tambah
           </Button>
         </div>
-        <div className="service-list-scroll">
+        <div
+          className={`service-list-scroll ${
+            groupedCategories.length === 0 ? "is-empty" : ""
+          }`}
+        >
         <div className="service-head">
           <span>Layanan</span>
           <span>Kategori</span>
@@ -419,14 +423,10 @@ export function ServicesPage({ embedded = false }: {
           <span>Aksi</span>
         </div>
         {groupedCategories.length === 0 ? (
-          <div
-            style={{
-              padding: "36px 14px",
-              textAlign: "center",
-              color: "var(--slate)",
-            }}
-          >
-            Tidak ada layanan yang cocok dengan pencarian atau filter.
+          <div className="service-empty-state">
+            {rows.length === 0
+              ? "Belum ada layanan yang ditambahkan."
+              : "Tidak ada layanan yang cocok dengan pencarian atau filter."}
           </div>
         ) : (
           groupedCategories.map((group) => (

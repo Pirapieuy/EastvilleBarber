@@ -239,7 +239,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
               </div>
             </div>
           )}
-          <div className="recent-list">
+          <div className={`recent-list${rows && rows.length === 0 ? " is-empty" : ""}`}>
             {(
               rows ?? [
                 {
@@ -302,7 +302,7 @@ export function KapsterDashboard({ user, onNavigate, navigate }: {
               </div>
             ))}
             {rows && rows.length === 0 && (
-              <p style={{ color: "var(--slate)", margin: "14px 0 0" }}>
+              <p className="recent-empty-state">
                 Belum ada pengerjaan hari ini.
               </p>
             )}

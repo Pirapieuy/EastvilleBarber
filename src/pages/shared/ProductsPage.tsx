@@ -335,7 +335,11 @@ export function ProductsPage({ embedded = false }: {
               <Icon name="plus" /> Tambah
             </Button>
           </div>
-          <div className="product-admin-scroll">
+          <div
+            className={`product-admin-scroll ${
+              daftar.length === 0 ? "is-empty" : ""
+            }`}
+          >
           <div className="product-admin-head">
             <span>Produk</span>
             <span>Pemasok</span>
@@ -344,7 +348,14 @@ export function ProductsPage({ embedded = false }: {
             <span>Status</span>
             <span>Aksi</span>
           </div>
-          {daftar.map((product) => (
+          {daftar.length === 0 ? (
+            <div className="product-empty-state">
+              {productsList.length === 0
+                ? "Belum ada produk yang ditambahkan."
+                : "Tidak ada produk yang cocok dengan pencarian atau filter."}
+            </div>
+          ) : (
+            daftar.map((product) => (
             <article className="product-admin-row" key={product.code}>
               <span>
                 <i>
@@ -417,7 +428,8 @@ export function ProductsPage({ embedded = false }: {
                 </Button>
               </div>
             </article>
-          ))}
+            ))
+          )}
           </div>
       </section>
       {formOpen && (

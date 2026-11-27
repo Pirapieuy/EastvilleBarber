@@ -335,7 +335,7 @@ export function TeamPage({ currentUser, role, title }: {
               <i>{x.role}</i>
               {isOwner && x.role === "Kapster" && (
                 <i className="role-komisi">
-                  Komisi {komisiMap[x.id] ?? 40}%
+                  Komisi 40% atau 50%
                 </i>
               )}
             </div>
@@ -343,7 +343,7 @@ export function TeamPage({ currentUser, role, title }: {
               {x.role === "Kapster" && !isOwner && (
                 <div>
                   <Icon name="chart" />
-                  <span>Komisi {komisiMap[x.id] ?? 40}%</span>
+                  <span>Komisi 40% atau 50%</span>
                 </div>
               )}
             </dl>
@@ -399,7 +399,7 @@ export function TeamPage({ currentUser, role, title }: {
                     required
                   />
                 </label>
-                <label>
+                <label className="team-pin-field">
                   <span>
                     {editingId
                       ? "Ganti PIN 6 digit (opsional)"

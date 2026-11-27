@@ -9634,6 +9634,21 @@ textarea {
   -ms-overflow-style: none;
 }
 
+.backup-table-scroll.is-empty {
+  display: flex;
+  flex-direction: column;
+}
+
+.backup-empty-state {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 220px;
+  padding: 14px;
+  place-items: center;
+  color: var(--slate);
+  text-align: center;
+}
+
 .backup-table-scroll::-webkit-scrollbar,
 .backup-list::-webkit-scrollbar {
   display: none !important;
@@ -12525,6 +12540,17 @@ textarea {
   flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.kapster-commission-list-scroll.is-empty {
+  display: grid;
+  place-items: center;
+}
+
+.kapster-commission-empty-state {
+  margin: 0;
+  color: var(--slate);
+  text-align: center;
 }
 
 .kapster-commission-item-row {
@@ -15607,6 +15633,17 @@ label .search-select-trigger {
   overscroll-behavior: contain;
 }
 
+.attendance-history-panel > .attendance-empty-state {
+  display: grid;
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 0 14px 14px;
+  padding: 30px;
+  place-items: center;
+  color: var(--muted);
+  text-align: center;
+}
+
 .attendance-history-filters {
   display: grid !important;
   grid-template-columns: max-content minmax(0, 1fr);
@@ -16119,6 +16156,10 @@ label .search-select-trigger {
 
 .team-page .staff-form .form-grid > label {
   min-width: 0;
+}
+
+.team-page .staff-form .form-grid > .team-pin-field {
+  grid-column: 1 / -1;
 }
 
 .team-page .staff-form label > span,
@@ -17280,6 +17321,18 @@ label .search-select-trigger {
     overflow-y: auto;
     overscroll-behavior: none;
   }
+
+  .kapster-dashboard .kapster-activity-panel .recent-list.is-empty {
+    display: grid;
+    place-items: center;
+  }
+}
+
+.kapster-dashboard .kapster-activity-panel .recent-empty-state {
+  width: 100%;
+  margin: 0;
+  color: var(--slate);
+  text-align: center;
 }
 
 @media (min-width: 1025px) {
@@ -17522,6 +17575,11 @@ label .search-select-trigger {
     overflow-y: auto !important;
     overscroll-behavior: contain !important;
     padding-right: 4px;
+  }
+
+  .app-shell-kapster .kapster-commission-list-scroll.is-empty {
+    display: grid !important;
+    place-items: center !important;
   }
 }
 
@@ -18259,6 +18317,7 @@ label .search-select-trigger {
   }
 
   .fit-fill > .service-list-scroll,
+  .fit-fill > .product-admin-scroll,
   .fit-fill > .product-list-scroll,
   .fit-fill > [class*="-list-scroll"] {
     flex: 1 1 0;
@@ -19163,6 +19222,28 @@ label .search-select-trigger {
 .cashier-page .catalog-grid {
   margin-top: 0;
   gap: 10px;
+}
+
+.cashier-page .catalog {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.cashier-page .catalog-grid.is-empty {
+  flex: 1 1 0;
+  min-height: 220px;
+  align-content: center;
+  place-items: center;
+}
+
+.cashier-page .catalog-empty-state {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  padding: 14px;
+  color: var(--slate);
+  text-align: center;
 }
 
 .cashier-page .catalog-locked-card {
@@ -21518,6 +21599,22 @@ html:has(.kapster-product-commission)::-webkit-scrollbar,
   .izin-kapster-page .kasbon-kapster-history .kasbon-kapster-list {
     max-height: 226px;
   }
+}
+
+.kasbon-kapster-page .kasbon-kapster-history:has(> .history-empty),
+.izin-kapster-page .kasbon-kapster-history:has(> .history-empty) {
+  display: flex;
+  flex-direction: column;
+}
+
+.kasbon-kapster-page .kasbon-kapster-history > .history-empty,
+.izin-kapster-page .kasbon-kapster-history > .history-empty {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 160px;
+  margin: 0;
+  padding: 14px;
+  place-items: center;
 }
 
 .workspace > .content.izin-kapster-page {
@@ -23973,6 +24070,48 @@ html:has(.manual-page .modal-overlay) {
   padding: 0;
 }
 
+.catalog-page .service-list-scroll.is-empty {
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-page .service-empty-state {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 220px;
+  place-items: center;
+  padding: 36px 14px;
+  color: var(--slate);
+  text-align: center;
+}
+
+.catalog-page .product-admin-scroll.is-empty {
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-page .product-empty-state {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 220px;
+  place-items: center;
+  padding: 36px 14px;
+  color: var(--slate);
+  text-align: center;
+}
+
+.catalog-page .service-list-scroll.is-empty:has(> .promo-discount-empty) {
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-page .promo-discount-empty {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  place-items: center;
+}
+
 /* Daftar kartu Diskon Event: tanpa batang scroll dan tanpa celah di kanan */
 .catalog-page .promo-discounts-tab {
   gap: 14px !important;
@@ -25821,6 +25960,18 @@ html:has(.manual-page .modal-overlay) {
   gap: 14px;
 }
 
+.gaji-page .gj-cards.is-empty {
+  display: grid;
+  place-items: center;
+}
+
+.gaji-page .gj-cards.is-empty > .lk-empty {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  place-items: center;
+}
+
 .gaji-page .gj-card {
   flex: 1 1 calc((100% - 32px) / 3);
   min-width: 260px;
@@ -26045,6 +26196,20 @@ html:has(.manual-page .modal-overlay) {
   border-radius: 12px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.gaji-page .gj-table.is-empty {
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+
+.gaji-page .gj-table.is-empty > .lk-empty {
+  display: grid;
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 0;
+  place-items: center;
 }
 
 .gaji-page .gj-table::-webkit-scrollbar {

@@ -236,7 +236,11 @@ export function PromoDiscountsTab() {
             <Icon name="plus" /> Tambah
           </Button>
         </div>
-        <div className="service-list-scroll">
+        <div
+          className={`service-list-scroll ${
+            !memuat && !gagalMuat && filtered.length === 0 ? "is-empty" : ""
+          }`}
+        >
           <div className="service-head promo-head">
             <span>Diskon</span>
             <span>Potongan</span>

@@ -1341,15 +1341,13 @@ export function CashierPage({ currentUser, onNavigate }: {
             </div>
           </div>
         )}
-        <div className={`catalog-grid ${!selectedBarber ? "catalog-locked" : ""}`}>
+        <div
+          className={`catalog-grid ${!selectedBarber ? "catalog-locked" : ""} ${
+            items.length === 0 ? "is-empty" : ""
+          }`}
+        >
           {items.length === 0 && (
-            <p
-              style={{
-                color: "var(--slate)",
-                gridColumn: "1 / -1",
-                padding: "14px 0",
-              }}
-            >
+            <p className="catalog-empty-state">
               Tidak ada {tab.toLowerCase()} yang cocok.
             </p>
           )}

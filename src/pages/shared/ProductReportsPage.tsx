@@ -671,7 +671,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       </span>
                     }
                   />
-                  <div className="kapster-commission-list-scroll">
+                  <div className={`kapster-commission-list-scroll${lunas && daftarProduk.length === 0 ? " is-empty" : ""}`}>
                     {daftarProduk.map((x) => (
                       <div className="kapster-commission-item-row" key={x[0]}>
                         <i className="product-icon-box">
@@ -682,7 +682,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       </div>
                     ))}
                     {lunas && daftarProduk.length === 0 && (
-                      <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                      <p className="kapster-commission-empty-state">
                         Belum ada penjualan produk pada periode ini.
                       </p>
                     )}
@@ -719,7 +719,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       </span>
                     }
                   />
-                  <div className="kapster-commission-list-scroll">
+                  <div className={`kapster-commission-list-scroll${live && daftarLayanan.length === 0 ? " is-empty" : ""}`}>
                     {daftarLayanan.map((x) => (
                       <div className="kapster-commission-item-row" key={x[0]}>
                         <i className="service-icon-box">
@@ -730,7 +730,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
                       </div>
                     ))}
                     {live && daftarLayanan.length === 0 && (
-                      <p style={{ color: "var(--slate)", margin: "16px 0 0" }}>
+                      <p className="kapster-commission-empty-state">
                         Belum ada pengerjaan layanan pada periode ini.
                       </p>
                     )}

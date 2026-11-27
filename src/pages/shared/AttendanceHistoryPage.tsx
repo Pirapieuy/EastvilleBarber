@@ -448,7 +448,7 @@ export function AttendanceHistoryPage() {
           </p>
         ) : null}
         {!loading && !error && filteredRows.length === 0 ? (
-          <div style={{ padding: 30, textAlign: "center", color: "var(--muted)" }}>
+          <div className="attendance-empty-state">
             {filterStatus
               ? `Tidak ada data dengan status "${filterStatus}" untuk periode ini.`
               : "Tidak ada riwayat absensi untuk filter ini."}
