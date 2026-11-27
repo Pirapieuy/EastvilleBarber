@@ -25743,20 +25743,20 @@ html:has(.manual-page .modal-overlay) {
   border-top: 1px solid var(--line);
 }
 
-/* Tablet & laptop kecil: skema komisi ditumpuk (label kiri, nilai kanan) agar nilai Rp tidak saling menimpa */
+/* Tablet & laptop kecil: skema komisi ditumpuk (label kiri, nilai kiri sejajar) agar rapi dan tidak timpang */
 @media (min-width: 761px) and (max-width: 1279px) {
   .catalog-page .product-admin-scroll .product-share-values {
     display: flex !important;
     flex-direction: column !important;
-    gap: 2px !important;
+    gap: 3px !important;
     width: 100%;
     min-width: 0;
   }
 
   .catalog-page .product-admin-scroll .product-share-values > span {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between;
+    display: grid !important;
+    grid-template-columns: 58px auto !important;
+    justify-content: start !important;
     align-items: baseline;
     gap: 8px;
     min-width: 0;
@@ -25766,12 +25766,13 @@ html:has(.manual-page .modal-overlay) {
     display: inline !important;
     font-size: 11px !important;
     white-space: nowrap;
+    color: var(--muted);
   }
 
   .catalog-page .product-admin-scroll .product-share-values > span > strong {
     font-size: 12px !important;
     white-space: nowrap;
-    text-align: right;
+    text-align: left !important;
   }
 
   .catalog-page .product-admin-scroll .product-admin-row {
