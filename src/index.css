@@ -16695,7 +16695,7 @@ label .search-select-trigger {
   gap: 12px;
   padding: 6px 14px;
   min-height: 38px;
-  margin-top: 8px;
+  margin-top: 0;
   margin-bottom: 0;
   background: var(--paper, #fff);
   border: 1px solid var(--line, #e2d9cc);
@@ -16714,10 +16714,6 @@ label .search-select-trigger {
 .catalog-page .service-category-header + .service-row,
 .service-category-header + .service-row {
   border-top: none !important;
-}
-
-.service-row.service-row-last {
-  border-bottom: 1px solid var(--line);
 }
 
 .service-category-info {
