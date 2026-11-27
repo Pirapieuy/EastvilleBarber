@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, Fragment, useEffect, useState } from "react"
 import {
   apiLayanan,
   apiPengaturan,
@@ -18,46 +18,145 @@ import {
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
 
-export const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
+export const KATEGORI_LAYANAN = ["Potong", "Perawatan", "Coloring", "Styling", "Grooming"]
 
-export const serviceRows: LayananRow[] = [
-  { id: 1, nama: "Haircut", kategori: "Potong", harga: 40000, status: "Aktif" },
+export function parseItemName(rawName: string): { title: string; desc: string | null } {
+  if (!rawName) return { title: "", desc: null }
+  const parenMatch = rawName.match(/^(.+?)\s*\((.+)\)$/)
+  if (parenMatch) {
+    return { title: parenMatch[1].trim(), desc: parenMatch[2].trim() }
+  }
+  const colonMatch = rawName.match(/^([^:]+):\s*(.+)$/)
+  if (colonMatch) {
+    return { title: colonMatch[1].trim(), desc: colonMatch[2].trim() }
+  }
+  return { title: rawName.trim(), desc: null }
+}
+
+export function normalizeServiceCategory(item: { nama?: string; name?: string; kategori?: string }): string {
+  const n = (item.nama || item.name || "").toLowerCase()
+  if (
+    n.includes("perming") ||
+    n.includes("downperm") ||
+    n.includes("design perm") ||
+    n.includes("conrow") ||
+    n.includes("cornrow")
+  ) {
+    return "Styling"
+  }
+  if (n.includes("color") || n.includes("highlight")) {
+    return "Coloring"
+  }
+  if (
+    n.includes("treatment") ||
+    n.includes("creambath") ||
+    n.includes("shaving") ||
+    n.includes("dandruff") ||
+    n.includes("keratin")
+  ) {
+    return "Perawatan"
+  }
+  if (
+    n.includes("gold service") ||
+    n.includes("platinum service") ||
+    n.includes("silver service") ||
+    n.includes("haircut")
+  ) {
+    return "Potong"
+  }
+  return item.kategori || "Potong"
+}
+
+export const SERVICE_CATEGORIES = [
   {
-    id: 2,
-    nama: "Haircut + Cuci",
-    kategori: "Potong",
-    harga: 50000,
-    status: "Aktif",
+    key: "Potong",
+    label: "HAIRCUT (POTONG)",
+    desc: "Layanan potong rambut & styling standar/premium",
+    badge: "Haircut",
+    badgeBg: "#eff6ff",
+    badgeColor: "#1d4ed8",
+    badgeBorder: "#bfdbfe",
   },
   {
-    id: 3,
-    nama: "Shaving",
-    kategori: "Grooming",
-    harga: 25000,
-    status: "Aktif",
+    key: "Perawatan",
+    label: "TREATMENT (PERAWATAN)",
+    desc: "Perawatan rambut, relaksasi creambath & shaving",
+    badge: "Treatment",
+    badgeBg: "#ecfdf5",
+    badgeColor: "#047857",
+    badgeBorder: "#a7f3d0",
   },
   {
-    id: 4,
-    nama: "Hair Coloring",
-    kategori: "Coloring",
-    harga: 120000,
-    status: "Aktif",
+    key: "Coloring",
+    label: "HAIR COLOR (COLORING)",
+    desc: "Pewarnaan rambut & highlights (Start From)",
+    badge: "Coloring",
+    badgeBg: "#fef3c7",
+    badgeColor: "#b45309",
+    badgeBorder: "#fde68a",
   },
   {
-    id: 5,
-    nama: "Treatment",
-    kategori: "Perawatan",
-    harga: 60000,
-    status: "Aktif",
-  },
-  {
-    id: 6,
-    nama: "Creambath",
-    kategori: "Perawatan",
-    harga: 75000,
-    status: "Nonaktif",
+    key: "Styling",
+    label: "HAIR STYLING SERVICE (STYLING)",
+    desc: "Perming, downperm, styling desain & conrow",
+    badge: "Styling",
+    badgeBg: "#f5f3ff",
+    badgeColor: "#6d28d9",
+    badgeBorder: "#ddd6fe",
   },
 ]
+
+export interface EastvilleServiceDef {
+  nama: string
+  kategori: string
+  harga: number
+  startFrom?: boolean
+}
+
+export const EASTVILLE_PRICELIST: EastvilleServiceDef[] = [
+  // HAIRCUT (Potong)
+  { nama: "Gold Service (Special Service)", kategori: "Potong", harga: 50000 },
+  { nama: "Platinum Service (Cut, Wash & Hot Towel)", kategori: "Potong", harga: 35000 },
+  { nama: "Silver Service (Haircut & Styling)", kategori: "Potong", harga: 30000 },
+  { nama: "Haircut by Krish", kategori: "Potong", harga: 50000 },
+
+  // TREATMENT (Perawatan)
+  { nama: "Keratin Treatment", kategori: "Perawatan", harga: 180000 },
+  { nama: "Creambath Express (Massage, Creambath & Styling)", kategori: "Perawatan", harga: 20000 },
+  { nama: "Anti Dandruff Treatment (Dandruff Medium Till High Condition)", kategori: "Perawatan", harga: 200000 },
+  { nama: "Shaving Service", kategori: "Perawatan", harga: 30000 },
+
+  // HAIR COLOR (Coloring - Start From)
+  { nama: "Basic Color: Black, Brown, Blue Black, etc.", kategori: "Coloring", harga: 100000, startFrom: true },
+  { nama: "Fashion Color: Silver, White, Pink, Green, etc.", kategori: "Coloring", harga: 200000, startFrom: true },
+  { nama: "Highlights Color: Grey, Silver, Blue, etc.", kategori: "Coloring", harga: 150000, startFrom: true },
+
+  // HAIR STYLING SERVICE (Styling)
+  { nama: "Korean Perming (Curly/Wavy)", kategori: "Styling", harga: 150000 },
+  { nama: "Korean Downperm (Side, Back or Top)", kategori: "Styling", harga: 70000 },
+  { nama: "Design Perm (Comma Hair, Quiff, etc.)", kategori: "Styling", harga: 150000 },
+  { nama: "Conrow", kategori: "Styling", harga: 150000, startFrom: true },
+]
+
+export function isStartFromService(item: { name?: string; nama?: string; customPrice?: boolean | number }): boolean {
+  if (Boolean(item.customPrice)) return true
+  const n = (item.name || item.nama || "").toLowerCase()
+  if (n.includes("start from") || n.includes("mulai dari")) return true
+  if (n.includes("basic color")) return true
+  if (n.includes("fashion color")) return true
+  if (n.includes("highlights color") || n.includes("highlight color") || n.includes("highlight")) return true
+  if (n.includes("conrow") || n.includes("cornrow")) return true
+  return false
+}
+
+export const serviceRows: LayananRow[] = EASTVILLE_PRICELIST.map((p, idx) => ({
+  id: idx + 1,
+  nama: p.nama,
+  kategori: p.kategori,
+  harga: p.harga,
+  status: "Aktif",
+  customPrice: p.startFrom,
+}))
 
 const defaultPengaturan: PengaturanKomisi = {
   jamMulai: "10:00",
@@ -91,6 +190,10 @@ export function ServicesPage({ embedded = false }: {
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
+  const [confirmSync, setConfirmSync] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncProgress, setSyncProgress] = useState("")
+  const [syncSuccess, setSyncSuccess] = useState("")
 
   // Dengan token login, data dari backend; tanpa token tetap data demo.
   function loadLive() {
@@ -103,6 +206,68 @@ export function ServicesPage({ embedded = false }: {
       setLive(true)
     })
   }
+
+  async function handleSyncPricelist() {
+    setSyncing(true)
+    setSyncProgress("Menyiapkan sinkronisasi...")
+    try {
+      if (live) {
+        const current = await apiLayanan.list()
+        const resmiNames = new Set(
+          EASTVILLE_PRICELIST.map((p) => p.nama.toLowerCase()),
+        )
+        // 1. Bersihkan / nonaktifkan layanan lama yang bukan pricelist resmi
+        for (const old of current) {
+          if (!resmiNames.has(old.nama.toLowerCase())) {
+            setSyncProgress(`Membersihkan layanan lama: ${old.nama}...`)
+            try {
+              await apiLayanan.hapus(old.id, "Penyelarasan pricelist resmi Eastville")
+            } catch {
+              await apiLayanan.simpan({
+                id: old.id,
+                nama: old.nama,
+                harga: old.harga,
+                kategori: old.kategori || "Potong",
+                status: "Nonaktif",
+              })
+            }
+          }
+        }
+        // 2. Tambah / perbarui 15 layanan resmi
+        for (let i = 0; i < EASTVILLE_PRICELIST.length; i++) {
+          const p = EASTVILLE_PRICELIST[i]
+          setSyncProgress(`Menyimpan ${p.nama} (${i + 1}/${EASTVILLE_PRICELIST.length})...`)
+          const match = current.find(
+            (c) => c.nama.toLowerCase() === p.nama.toLowerCase(),
+          )
+          try {
+            await apiLayanan.simpan({
+              id: match?.id,
+              nama: p.nama,
+              harga: p.harga,
+              kategori: p.kategori,
+              status: "Aktif",
+            })
+          } catch (e) {
+            console.warn(`Gagal simpan ${p.nama}:`, e)
+          }
+        }
+        await loadLive()
+      } else {
+        // Mode demo / tanpa backend: langsung set rows ke 15 layanan resmi
+        setRows(serviceRows)
+      }
+      setSyncSuccess("Pricelist berhasil disinkronkan dengan 15 layanan resmi Eastville!")
+      setTimeout(() => setSyncSuccess(""), 4000)
+    } catch (err) {
+      alert("Gagal sinkronisasi: " + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      setSyncing(false)
+      setSyncProgress("")
+      setConfirmSync(false)
+    }
+  }
+
   useEffect(() => {
     if (!getToken()) {
       setLiveError("belum login ke server (token tidak ada)")
@@ -119,7 +284,7 @@ export function ServicesPage({ embedded = false }: {
     setEditing(service)
     setNama(service?.nama ?? "")
     setHarga(String(service?.harga ?? 40000))
-    setKategori(service?.kategori || "Potong")
+    setKategori(service ? normalizeServiceCategory(service) : "Potong")
     setAktif(service ? service.status === "Aktif" : true)
     setFormError("")
     setFormOpen(true)
@@ -189,14 +354,63 @@ export function ServicesPage({ embedded = false }: {
   }
 
   const aktifCount = rows.filter((r) => r.status === "Aktif").length
-  const filtered = rows
-    .filter(
+  const isOldPricelist =
+    live &&
+    rows.length > 0 &&
+    !rows.some(
       (r) =>
-        r.nama.toLowerCase().includes(search.toLowerCase()) &&
-        (statusFilter === "Semua" || r.status === statusFilter) &&
-        (kategoriFilter === "Semua" || r.kategori === kategoriFilter),
+        r.nama.toLowerCase().includes("gold service") ||
+        r.nama.toLowerCase().includes("platinum service") ||
+        r.nama.toLowerCase().includes("keratin treatment"),
     )
-    .sort((a, b) => a.nama.localeCompare(b.nama))
+  function getPricelistIndex(nama: string) {
+    const clean = nama.toLowerCase()
+    const idx = EASTVILLE_PRICELIST.findIndex(
+      (p) =>
+        clean.includes(p.nama.toLowerCase()) ||
+        p.nama.toLowerCase().includes(clean),
+    )
+    return idx >= 0 ? idx : 999
+  }
+
+  const filtered = rows.filter((r) => {
+    const normCat = normalizeServiceCategory(r)
+    return (
+      r.nama.toLowerCase().includes(search.toLowerCase()) &&
+      (statusFilter === "Semua" || r.status === statusFilter) &&
+      (kategoriFilter === "Semua" || normCat === kategoriFilter)
+    )
+  })
+
+  const allCategoryKeys = Array.from(
+    new Set([
+      ...SERVICE_CATEGORIES.map((c) => c.key),
+      ...filtered.map((r) => normalizeServiceCategory(r)),
+    ]),
+  )
+
+  const groupedCategories = allCategoryKeys
+    .map((catKey) => {
+      const meta = SERVICE_CATEGORIES.find((c) => c.key === catKey) || {
+        key: catKey,
+        label: `${catKey.toUpperCase()} (${catKey})`,
+        desc: `Layanan kategori ${catKey}`,
+        badge: catKey,
+        badgeBg: "var(--bone)",
+        badgeColor: "var(--ink)",
+        badgeBorder: "var(--line)",
+      }
+      const items = filtered
+        .filter((r) => normalizeServiceCategory(r) === catKey)
+        .sort((a, b) => {
+          const idxA = getPricelistIndex(a.nama)
+          const idxB = getPricelistIndex(b.nama)
+          if (idxA !== idxB) return idxA - idxB
+          return a.nama.localeCompare(b.nama)
+        })
+      return { meta, items }
+    })
+    .filter((g) => g.items.length > 0)
   const kapsterPribadi = pengaturan.kapster.filter(
     (k) => k.persen !== null,
   ).length
@@ -226,6 +440,69 @@ export function ServicesPage({ embedded = false }: {
     <div className={embedded ? "catalog-embedded-view" : "content"}>
       <DemoNotice live={live} error={liveError} />
       {!embedded && <PageTitle eyebrow="Data master" title="Layanan & Harga" />}
+      {syncSuccess && (
+        <div
+          style={{
+            padding: "10px 16px",
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            color: "#065f46",
+            borderRadius: 8,
+            marginBottom: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            fontWeight: 500,
+          }}
+        >
+          <Icon name="check" /> {syncSuccess}
+        </div>
+      )}
+      {isOldPricelist && (
+        <div
+          style={{
+            padding: "12px 18px",
+            background: "#fffbeb",
+            border: "1px solid #fde68a",
+            borderRadius: 10,
+            marginBottom: 14,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ color: "#b45309", display: "flex", fontSize: 20 }}>
+              <Icon name="alert" />
+            </span>
+            <div>
+              <strong style={{ color: "#92400e", display: "block", fontSize: 14 }}>
+                Pricelist Database Belum Disinkronkan
+              </strong>
+              <span style={{ color: "#b45309", fontSize: 13 }}>
+                Database masih menampilkan 5 layanan sampel lama. Tekan tombol di samping untuk menyinkronkan 15 layanan resmi Eastville ke database.
+              </span>
+            </div>
+          </div>
+          <Button
+            className="primary-button"
+            style={{
+              background: "#b45309",
+              borderColor: "#b45309",
+              color: "#fff",
+              padding: "8px 16px",
+              whiteSpace: "nowrap",
+            }}
+            onClick={() => setConfirmSync(true)}
+            disabled={syncing}
+          >
+            <Icon name="restore" /> {syncing ? syncProgress || "Menyinkronkan..." : "Singkronkan Pricelist Sekarang"}
+          </Button>
+        </div>
+      )}
       <section className="panel service-list fit-fill">
         <div className="filters">
           <div className="master-summary filters-summary">
@@ -263,6 +540,15 @@ export function ServicesPage({ embedded = false }: {
             <option value="Nonaktif">Nonaktif</option>
           </SearchSelect>
           <Button
+            className="secondary-button"
+            style={{ whiteSpace: "nowrap" }}
+            onClick={() => setConfirmSync(true)}
+            disabled={syncing}
+            title="Singkronkan dengan 15 pricelist asli Eastville"
+          >
+            <Icon name="restore" /> {syncing ? syncProgress || "Menyinkronkan..." : "Singkronkan Pricelist"}
+          </Button>
+          <Button
             className="primary-button filters-add"
             onClick={() => openForm(null)}
           >
@@ -278,74 +564,122 @@ export function ServicesPage({ embedded = false }: {
           <span>Status</span>
           <span>Aksi</span>
         </div>
-        {filtered.map((service) => (
-          <article
-            className={`service-row ${
-              service.status === "Aktif" ? "" : "inactive"
-            }`}
-            key={service.id}
-          >
-            <span className="service-name">
-              <i>
-                <Icon name="cashier" />
-              </i>
-              <strong>{service.nama}</strong>
-            </span>
-            <div className="service-details">
-              <span className="service-category-detail">
-                <small>Kategori</small>
-                <strong>{service.kategori || "-"}</strong>
-              </span>
-              <span className="service-commission-detail">
-                <span className="service-commission-values">
-                  <span>
-                    <small>Komisi kapster</small>
-                    <strong>{pengaturan.komisiDefault}%</strong>
-                  </span>
-                  <span>
-                    <small>Komisi lembur</small>
-                    <strong>{pengaturan.komisiLembur}%</strong>
-                  </span>
-                </span>
-              </span>
-              <span className="service-price-detail">
-                <small>Harga layanan</small>
-                <strong>{rupiah(service.harga)}</strong>
-              </span>
-            </div>
-            <i
-              className={`chip ${
-                service.status === "Aktif" ? "lunas" : "manual"
-              }`}
-            >
-              {service.status}
-            </i>
-            <div className="catalog-row-actions">
-              <Button
-                className="secondary-button"
-                onClick={() => openForm(service)}
-              >
-                <Icon name="pencil" /> Ubah
-              </Button>
-              <Button
-                className="danger-button"
-                onClick={() => setDeletingService(service)}
-              >
-                <Icon name="trash" /> Hapus
-              </Button>
-            </div>
-          </article>
-        ))}
-        {filtered.length === 0 && (
+        {groupedCategories.length === 0 ? (
           <div
             style={{
-              padding: "32px 14px",
+              padding: "36px 14px",
               textAlign: "center",
               color: "var(--slate)",
             }}
           >
-            Tidak ada layanan yang cocok.
+            Tidak ada layanan yang cocok dengan pencarian atau filter.
           </div>
+        ) : (
+          groupedCategories.map((group) => (
+            <Fragment key={`cat-grp-${group.meta.key}`}>
+              <div className="service-category-header">
+                <div className="service-category-info">
+                  <strong className="service-category-title">
+                    {group.meta.label}
+                  </strong>
+                  <span className="service-category-desc">
+                    {group.meta.desc}
+                  </span>
+                </div>
+                <span className="service-category-count">
+                  {group.items.length} layanan
+                </span>
+              </div>
+
+              {group.items.map((service) => {
+                const { title: itemTitle, desc: itemDesc } = parseItemName(
+                  service.nama,
+                )
+                const isStartFrom = isStartFromService(service)
+                const normCat = normalizeServiceCategory(service)
+
+                return (
+                  <article
+                    className={`service-row ${
+                      service.status === "Aktif" ? "" : "inactive"
+                    }`}
+                    key={service.id}
+                  >
+                    <span className="service-name">
+                      <i>
+                        <Icon name="cashier" />
+                      </i>
+                      <span className="service-name-content">
+                        <span className="service-name-title-row">
+                          <strong>{itemTitle}</strong>
+                          {isStartFrom && (
+                            <span className="catalog-badge-startfrom">
+                              Start From
+                            </span>
+                          )}
+                        </span>
+                        {itemDesc && (
+                          <small
+                            className="service-name-desc"
+                            title={itemDesc}
+                          >
+                            {itemDesc}
+                          </small>
+                        )}
+                      </span>
+                    </span>
+                    <div className="service-details">
+                      <span className="service-category-detail">
+                        <small>Kategori</small>
+                        <strong>{normCat}</strong>
+                      </span>
+                      <span className="service-commission-detail">
+                        <span className="service-commission-values">
+                          <span>
+                            <small>Komisi kapster</small>
+                            <strong>{pengaturan.komisiDefault}%</strong>
+                          </span>
+                          <span>
+                            <small>Komisi lembur</small>
+                            <strong>{pengaturan.komisiLembur}%</strong>
+                          </span>
+                        </span>
+                      </span>
+                      <span className="service-price-detail">
+                        <small>Harga layanan</small>
+                        <strong>
+                          {isStartFrom
+                            ? `Mulai ${rupiah(service.harga)}`
+                            : rupiah(service.harga)}
+                        </strong>
+                      </span>
+                    </div>
+                    <i
+                      className={`chip ${
+                        service.status === "Aktif" ? "lunas" : "manual"
+                      }`}
+                    >
+                      {service.status}
+                    </i>
+                    <div className="catalog-row-actions">
+                      <Button
+                        className="secondary-button"
+                        onClick={() => openForm(service)}
+                      >
+                        <Icon name="pencil" /> Ubah
+                      </Button>
+                      <Button
+                        className="danger-button"
+                        onClick={() => setDeletingService(service)}
+                      >
+                        <Icon name="trash" /> Hapus
+                      </Button>
+                    </div>
+                  </article>
+                )
+              })}
+            </Fragment>
+          ))
         )}
         </div>
       </section>
@@ -438,6 +772,18 @@ export function ServicesPage({ embedded = false }: {
           confirmTone="danger"
           onClose={() => setDeletingService(null)}
           onConfirm={(alasan) => handleDeleteConfirm(deletingService, alasan)}
+        />
+      )}
+      {confirmSync && (
+        <ConfirmModal
+          title="Singkronkan Pricelist Asli Eastville?"
+          eyebrow="Pricelist Resmi Eastville"
+          message="Tindakan ini akan menyelaraskan 15 layanan aktif sesuai pricelist resmi Eastville Barbershop (Haircut, Treatment, Hair Color, Hair Styling Service). Layanan lama yang berbeda akan dinonaktifkan."
+          confirmText={syncing ? syncProgress || "Menyinkronkan..." : "Ya, Singkronkan"}
+          confirmTone="primary"
+          compact
+          onClose={() => !syncing && setConfirmSync(false)}
+          onConfirm={handleSyncPricelist}
         />
       )}
     </div>

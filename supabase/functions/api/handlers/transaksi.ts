@@ -101,14 +101,18 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
     if (it.tipe === "Layanan") {
       const l = layananMap.get(String(it.refId))
       if (!l || l.status !== "Aktif") return gagal("Layanan tidak tersedia.")
-      const hargaL = Number(l.harga) * qty
+      const customHarga = it.harga !== undefined && it.harga !== null ? Number(it.harga) : null
+      const hargaSatuan = (customHarga !== null && !isNaN(customHarga) && customHarga > 0)
+        ? Math.round(customHarga)
+        : Number(l.harga)
+      const hargaL = hargaSatuan * qty
       // Pilihan eksplisit kasir mengikuti angka di tombolnya (Normal 40% / OT 50%); tanpa pilihan: jam kerja + pengaturan Owner.
       const persenL = pilihan ? (pilihan === "OT" ? 50 : 40)
         : lembur ? peng.komisi_lembur
         : override[it.kapsterId] !== undefined ? override[it.kapsterId] : peng.komisi_default
       const kom = Math.round((hargaL * persenL) / 100)
       subtotal += hargaL; komisiTotal += kom
-      lines.push({ tipe: "Layanan", ref_id: String(l.id), nama: l.nama, qty, harga: Number(l.harga),
+      lines.push({ tipe: "Layanan", ref_id: String(l.id), nama: l.nama, qty, harga: hargaSatuan,
         kapster_id: it.kapsterId, kapster: namaKapster, komisi: kom, komisi_persen: persenL })
     } else if (it.tipe === "Produk") {
       const p = produkMap.get(String(it.refId))
@@ -160,6 +164,7 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
   // Nomor invoice: ulangi bila bentrok dengan transaksi lain yang masuk bersamaan.
   // Transaksi + item + stok ditulis dalam SATU transaksi database (fungsi simpan_transaksi): gagal di tengah = tidak ada yang tersimpan.
   let id = manual ? notaBuku : ""
+  const catatan = String(body.catatan ?? "").trim()
   const stokPerubahan = Object.keys(stokBaru).map((kode) => ({
     kode, delta: stokBaru[kode] - Number(produkMap.get(kode)!.stok), alasan: "Penjualan" }))
   for (let coba = 0; coba < 6; coba++) {
@@ -170,6 +175,7 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
         subtotal, diskon, total, bayar_tunai: tunai, bayar_qris: qris, komisi_total: komisiTotal, status: "Lunas",
         dibuat_oleh_id: user.id, dibuat_oleh: oleh(user), lembur: lembur ? "Ya" : "Tidak",
         manual: manual ? "Ya" : "", nota_buku: notaBuku, gratis: gratis ? alasanGratis : "", req_id: reqKey || null,
+        catatan,
       },
       p_items: lines, p_stok: stokPerubahan, p_oleh: oleh(user),
     })
@@ -182,7 +188,7 @@ async function buatTransaksi(body: B, user: Pengguna, manual: boolean) {
   }
 
   await tulisAudit(user.id, user.nama, manual ? "REKAP_MANUAL" : "TRANSAKSI",
-    `${id} total ${total}${gratis ? " GRATIS: " + alasanGratis : ""}`)
+    `${id} total ${total}${gratis ? " GRATIS: " + alasanGratis : ""}${catatan ? " · Catatan: " + catatan : ""}`)
   await catatPemakaianKode(kodeDipakai)
   return ok({ id, total, kembalian: tunai + qris - total, lembur })
 }
@@ -211,6 +217,7 @@ function bentukTransaksi(t: B, items: B[]) {
     subtotal: Number(t.subtotal), discount: Number(t.diskon), total: Number(t.total),
     bayarTunai: Number(t.bayar_tunai) || 0, bayarQris: Number(t.bayar_qris) || 0,
     gratis: t.gratis || undefined,
+    catatan: t.catatan || undefined,
     status: t.status === "Lunas" && t.manual === "Ya" ? "Manual" : t.status,
     createdTime: fmtTglJam(w), createdBy: t.dibuat_oleh,
     voidReason: t.void_alasan || undefined, voidBy: t.void_oleh || undefined,
