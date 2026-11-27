@@ -120,8 +120,9 @@ export interface LayananRow {
   nama: string
   harga: number
   status: "Aktif" | "Nonaktif"
-  /** Potong | Grooming | Coloring | Perawatan; kosong untuk layanan lama tanpa kategori */
+  /** Potong | Perawatan | Coloring | Styling | Grooming; kosong untuk layanan lama tanpa kategori */
   kategori?: string
+  customPrice?: boolean
 }
 
 export interface ProdukRow {
@@ -146,6 +147,7 @@ export interface CheckoutItem {
   refId: number | string
   qty: number
   kapsterId: string
+  harga?: number
 }
 
 export interface CheckoutPayload {
@@ -154,6 +156,7 @@ export interface CheckoutPayload {
   bayarTunai: number
   bayarQris: number
   items: CheckoutItem[]
+  catatan?: string
   /** Transaksi gratis (promo/traktiran): total Rp0 hanya diterima server bila true + alasan */
   gratis?: boolean
   alasan?: string

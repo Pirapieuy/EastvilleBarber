@@ -8,6 +8,7 @@ import { AppUser } from "../../types"
 import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
 import { formatTanggalWaktu, TANGGAL_MAKS } from "../../utils/tanggal"
+import { isStartFromService, normalizeServiceCategory, parseItemName, serviceRows } from "./ServicesPage"
 
 export type CatalogItem = {
   id: number | string
@@ -16,12 +17,15 @@ export type CatalogItem = {
   type: "Layanan" | "Produk"
   stock?: number
   consignment?: boolean
+  startFrom?: boolean
 }
 
 export type CartLine = CatalogItem & {
   lineId: string
   qty: number
   barber: string
+  customPrice?: number
+  isCustom?: boolean
 }
 
 type CashierDraft = {
@@ -44,6 +48,7 @@ type CashierDraft = {
   receipt: boolean
   invoice?: string
   isTransactionSaved: boolean
+  catatan?: string
 }
 
 function readCashierDraft(key: string): CashierDraft | null {
@@ -102,6 +107,7 @@ export function ReceiptView({
   saveError,
   popup = false,
   tersimpan = false,
+  catatan,
   /** Teks tanggal transaksi; kosong = waktu sekarang (struk baru) */
   /** Struk dari data demo (tidak tersimpan di server) */
 }: {
@@ -129,6 +135,7 @@ export function ReceiptView({
   popup?: boolean
   /** Hanya untuk popup: nota sudah tercatat di server */
   tersimpan?: boolean
+  catatan?: string
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
@@ -231,6 +238,17 @@ export function ReceiptView({
                 </div>
               )}
             </dl>
+            {catatan && (
+              <>
+                <hr />
+                <dl>
+                  <div>
+                    <dt>Catatan</dt>
+                    <dd style={{ wordBreak: "break-word" }}>{catatan}</dd>
+                  </div>
+                </dl>
+              </>
+            )}
             <hr />
             <footer>
               <strong>TERIMA KASIH</strong>
@@ -462,6 +480,17 @@ export function ReceiptView({
                 </div>
               )}
             </dl>
+            {catatan && (
+              <>
+                <hr />
+                <dl>
+                  <div>
+                    <dt>Catatan</dt>
+                    <dd style={{ wordBreak: "break-word" }}>{catatan}</dd>
+                  </div>
+                </dl>
+              </>
+            )}
             <hr />
             <footer>
               <strong>TERIMA KASIH</strong>
@@ -495,6 +524,25 @@ export function ReceiptView({
   )
 }
 
+const DEMO_CATALOG: CatalogItem[] = [
+  ...serviceRows.map((s) => ({
+    id: s.id,
+    name: s.nama,
+    price: s.harga,
+    type: "Layanan" as const,
+    startFrom: isStartFromService(s),
+  })),
+  { id: "HP-FSD-01", name: "Free Style Dust", price: 70000, type: "Produk" as const, stock: 3 },
+  { id: "HP-HPP-02", name: "Hair Paste Pomade", price: 70000, type: "Produk" as const, stock: 8 },
+  { id: "HP-WBP-03", name: "Water Based Pomade", price: 65000, type: "Produk" as const, stock: 5 },
+]
+
+const DEMO_BARBERS = [
+  { id: "1", name: "Seva" },
+  { id: "2", name: "Rian" },
+  { id: "3", name: "Krish" },
+]
+
 export function CashierPage({ currentUser, onNavigate }: {
   currentUser?: AppUser
   onNavigate?: (page: string) => void
@@ -505,6 +553,15 @@ export function CashierPage({ currentUser, onNavigate }: {
   const [cari, setCari] = useState("")
   const [selectedBarber, setSelectedBarber] = useState(draft?.selectedBarber ?? "")
   const [cart, setCart] = useState<CartLine[]>(draft?.cart ?? [])
+  const [catatan, setCatatan] = useState(draft?.catatan ?? "")
+  const [priceModal, setPriceModal] = useState<{
+    item?: CatalogItem
+    lineId?: string
+    name: string
+    basePrice: number
+    price: number
+  } | null>(null)
+  const [priceInput, setPriceInput] = useState("")
   const [method, setMethod] = useState<"Tunai" | "QRIS" | "Gabungan">(draft?.method ?? "Tunai")
   const [komisiLayanan, setKomisiLayanan] = useState<"Normal" | "OT">(draft?.komisiLayanan ?? "Normal")
   const [cash, setCash] = useState(draft?.cash ?? 0)
@@ -537,11 +594,13 @@ export function CashierPage({ currentUser, onNavigate }: {
   // Mode live: katalog & kapster dari backend (butuh token login). Tanpa token
   // halaman tetap memakai data demo.
   const [live, setLive] = useState(false)
-  const [catalogData, setCatalogData] = useState<CatalogItem[]>([])
+  const [catalogData, setCatalogData] = useState<CatalogItem[]>(() => DEMO_CATALOG)
   const [barberList, setBarberList] = useState<{ id?: string; name: string }[]>(
-    [],
+    () => DEMO_BARBERS,
   )
-  const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(new Set())
+  const [attendedBarbers, setAttendedBarbers] = useState<Set<string>>(
+    () => new Set(["1", "2", "3", "Seva", "Rian", "Krish"]),
+  )
   const [attendanceTarget, setAttendanceTarget] = useState("")
   const [invoice, setInvoice] = useState<string | undefined>(draft?.invoice)
   const [paying, setPaying] = useState(false)
@@ -600,6 +659,7 @@ export function CashierPage({ currentUser, onNavigate }: {
       receipt,
       invoice,
       isTransactionSaved,
+      catatan,
     }
     localStorage.setItem(draftKey, JSON.stringify(value))
   }, [
@@ -621,6 +681,7 @@ export function CashierPage({ currentUser, onNavigate }: {
     receipt,
     invoice,
     isTransactionSaved,
+    catatan,
   ])
 
   // Bila seluruh item di keranjang dihapus sampai habis, reset kapster yang dipilih
@@ -667,6 +728,7 @@ export function CashierPage({ currentUser, onNavigate }: {
                 name: l.nama,
                 price: l.harga,
                 type: "Layanan",
+                startFrom: isStartFromService(l),
               }),
             ),
           ...produk
@@ -791,11 +853,13 @@ export function CashierPage({ currentUser, onNavigate }: {
         komisiLayanan,
         bayarTunai: tunaiTerpakai,
         bayarQris: qris,
+        catatan: catatan.trim() || undefined,
         items: cart.map((l) => ({
           tipe: l.type,
           refId: l.id,
           qty: l.qty,
           kapsterId: barberList.find((b) => b.name === l.barber)?.id ?? "",
+          harga: l.price,
         })),
       })
       setInvoice(res.id)
@@ -1056,6 +1120,80 @@ export function CashierPage({ currentUser, onNavigate }: {
     setKodeTerpakai("")
     setKodeDiskon("")
     setKodeError("")
+    setCatatan("")
+  }
+
+  function openPriceModalForCatalog(item: CatalogItem) {
+    if (!selectedBarber) {
+      alert("Pilih kapster terlebih dahulu sebelum memilih layanan.")
+      return
+    }
+    setPriceModal({
+      item,
+      name: item.name,
+      basePrice: item.price,
+      price: item.price,
+    })
+    setPriceInput(String(item.price))
+  }
+
+  function openPriceModalForCart(line: CartLine) {
+    setPriceModal({
+      lineId: line.lineId,
+      name: line.name,
+      basePrice: line.price,
+      price: line.price,
+    })
+    setPriceInput(String(line.price))
+  }
+
+  function handleSaveCustomPrice() {
+    if (!priceModal) return
+    const num = Number(priceInput.replace(/\D/g, "")) || 0
+    if (num <= 0) {
+      alert("Harga harus lebih dari Rp 0.")
+      return
+    }
+    if (priceModal.lineId) {
+      setCart((c) =>
+        c.map((x) =>
+          x.lineId === priceModal.lineId
+            ? { ...x, price: num, customPrice: num, isCustom: true }
+            : x,
+        ),
+      )
+    } else if (priceModal.item) {
+      const item = priceModal.item
+      setLastAdded({
+        id: String(item.id),
+        type: item.type,
+        timestamp: Date.now(),
+      })
+      if (lastAddedTimer.current) window.clearTimeout(lastAddedTimer.current)
+      lastAddedTimer.current = window.setTimeout(() => {
+        setLastAdded((cur) =>
+          cur?.id === String(item.id) && cur?.type === item.type ? null : cur,
+        )
+      }, 600)
+
+      setCart((c) => {
+        const newLineId = `${item.id}-${selectedBarber}-${Date.now()}`
+        const updated: CartLine[] = [
+          ...c,
+          {
+            ...item,
+            price: num,
+            customPrice: num,
+            isCustom: true,
+            lineId: newLineId,
+            qty: 1,
+            barber: selectedBarber,
+          },
+        ]
+        return groupCartByBarber(updated)
+      })
+    }
+    setPriceModal(null)
   }
 
   /** Atur jumlah item langsung (ketik); produk dibatasi sisa stok. */
@@ -1216,6 +1354,9 @@ export function CashierPage({ currentUser, onNavigate }: {
             </p>
           )}
           {items.map((item) => {
+            const isStartFrom =
+              item.type === "Layanan" &&
+              (item.startFrom || isStartFromService(item))
             const tidakBisa =
               item.stock === 0 ||
               stokHabis(item.id, item.stock) ||
@@ -1226,6 +1367,10 @@ export function CashierPage({ currentUser, onNavigate }: {
                 ? "Stok habis di keranjang"
                 : undefined
             const tambah = () => {
+              if (isStartFrom) {
+                openPriceModalForCatalog(item)
+                return
+              }
               setLastAdded({
                 id: String(item.id),
                 type: item.type,
@@ -1262,6 +1407,8 @@ export function CashierPage({ currentUser, onNavigate }: {
               lastAdded !== null &&
               lastAdded.id === String(item.id) &&
               lastAdded.type === item.type
+            const { title: itemTitle, desc: itemDesc } = parseItemName(item.name)
+
             return (
               <button
                 type="button"
@@ -1288,21 +1435,35 @@ export function CashierPage({ currentUser, onNavigate }: {
                     </span>
                   </>
                 )}
-                <span className="item-icon">
-                  <Icon name={item.type === "Produk" ? "product" : "cashier"} />
-                </span>
-                <strong>{item.name}</strong>
-                <b>{rupiah(item.price)}</b>
-                {item.type === "Produk" && (
-                  <small>
-                    <i>
-                      {(item.stock ?? 0) - qtyDiKeranjang(item.id) <= 0
-                        ? "Stok habis"
-                        : `Stok ${(item.stock ?? 0) - qtyDiKeranjang(item.id)}`}
-                    </i>
-                    {item.consignment && <em>Titipan</em>}
-                  </small>
-                )}
+                <div className="catalog-item-header">
+                  <span className="item-icon">
+                    <Icon name={item.type === "Produk" ? "product" : "cashier"} />
+                  </span>
+                </div>
+                <div className="catalog-item-body">
+                  <strong className="catalog-item-title">{itemTitle}</strong>
+                  {itemDesc && (
+                    <span className="catalog-item-desc" title={itemDesc}>
+                      {itemDesc}
+                    </span>
+                  )}
+                </div>
+                <div className="catalog-item-footer">
+                  <div className="catalog-item-price">
+                    {isStartFrom && <small className="price-start-label">Mulai</small>}
+                    <b>{rupiah(item.price)}</b>
+                  </div>
+                  {item.type === "Produk" && (
+                    <small className="catalog-item-stock">
+                      <i>
+                        {(item.stock ?? 0) - qtyDiKeranjang(item.id) <= 0
+                          ? "Stok habis"
+                          : `Stok ${(item.stock ?? 0) - qtyDiKeranjang(item.id)}`}
+                      </i>
+                      {item.consignment && <em>Titipan</em>}
+                    </small>
+                  )}
+                </div>
                 <span
                   key={isJustAdded && lastAdded ? `add-${lastAdded.timestamp}` : "add-idle"}
                   aria-hidden="true"
@@ -1413,6 +1574,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               cart.map((line, idx) => {
                 const isFirstOfBarber =
                   idx === 0 || cart[idx - 1].barber !== line.barber
+                const { title: itemTitle, desc: itemDesc } = parseItemName(line.name)
 
                 return (
                   <Fragment key={line.lineId}>
@@ -1427,7 +1589,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                     <article
                       className="cart-line-swipe"
                       key={line.lineId}
-                      title="Geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -1520,8 +1681,34 @@ export function CashierPage({ currentUser, onNavigate }: {
                     }}
                   >
                     <span className="cart-line-title">
-                      <strong>{line.name}</strong>
-                      <small>{rupiah(line.price)}</small>
+                      <strong className="cart-line-item-title">{itemTitle}</strong>
+                      {itemDesc && (
+                        <span className="cart-line-item-desc">
+                          {itemDesc}
+                        </span>
+                      )}
+                      <div className="cart-line-meta">
+                        <small>{rupiah(line.price)}</small>
+                        {(isStartFromService(line) || line.isCustom) && (
+                          <>
+                            <span className="cart-line-custom-badge">
+                              Custom
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openPriceModalForCart(line)
+                              }}
+                              className="cart-line-edit-btn"
+                              title="Ubah harga layanan ini"
+                            >
+                              <Icon name="pencil" />
+                              <span>Ubah</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </span>
                     <div className="stepper">
                       <Button
@@ -1894,6 +2081,22 @@ export function CashierPage({ currentUser, onNavigate }: {
                   )}
                 </>
               )}
+
+              <label className="pay-field" style={{ marginTop: 14 }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                  <Icon name="pencil" /> Catatan Transaksi (Opsional)
+                </span>
+                <div className="input-shell">
+                  <input
+                    type="text"
+                    placeholder="Contoh: Model comma hair, customer minta tipis..."
+                    value={catatan}
+                    onChange={(e) => setCatatan(e.target.value)}
+                    maxLength={200}
+                  />
+                </div>
+              </label>
+
               {payDisabledReason && (
                 <div
                   style={{
@@ -1958,6 +2161,7 @@ export function CashierPage({ currentUser, onNavigate }: {
           discount={effectiveDiscount}
           total={payableTotal}
           method={method}
+          catatan={catatan.trim() || undefined}
           cash={
             method === "Tunai"
               ? cash
@@ -1996,6 +2200,167 @@ export function CashierPage({ currentUser, onNavigate }: {
             }
           }}
         />
+      )}
+
+      {priceModal && (
+        <div
+          className="modal-overlay modal-centered"
+          onClick={() => setPriceModal(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <section
+            className="simple-modal price-custom-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header>
+              <div>
+                <p className="eyebrow" style={{ color: "var(--brass-dark, #92400e)", fontWeight: 600 }}>
+                  Start From · Harga Custom
+                </p>
+                <h2>{priceModal.name}</h2>
+              </div>
+              <Button
+                type="button"
+                aria-label="Tutup"
+                onClick={() => setPriceModal(null)}
+              >
+                <Icon name="close" />
+              </Button>
+            </header>
+
+            <div style={{ padding: "16px 14px" }}>
+              <div
+                style={{
+                  padding: "10px 14px",
+                  background: "var(--brass-soft, #fef3c7)",
+                  border: "1px solid rgba(200, 150, 62, 0.3)",
+                  borderRadius: 8,
+                  fontSize: 12.5,
+                  lineHeight: 1.4,
+                  color: "var(--brass-dark, #92400e)",
+                  marginBottom: 16,
+                }}
+              >
+                Layanan ini memiliki harga mulai dari{" "}
+                <strong>{rupiah(priceModal.basePrice)}</strong>. Tentukan harga
+                kesepakatan untuk pelanggan ini.
+              </div>
+
+              <label style={{ display: "block", marginBottom: 12 }}>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    marginBottom: 6,
+                    color: "var(--ink)",
+                  }}
+                >
+                  Harga Layanan (Rp)
+                </span>
+                <div className="input-shell" style={{ fontSize: 16 }}>
+                  <b>Rp</b>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoFocus
+                    value={
+                      priceInput
+                        ? new Intl.NumberFormat("id-ID").format(
+                            Number(priceInput.replace(/\D/g, "")) || 0,
+                          )
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, "")
+                      setPriceInput(digits)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        handleSaveCustomPrice()
+                      }
+                    }}
+                    placeholder="Masukkan harga"
+                    style={{ fontSize: 16, fontWeight: 700 }}
+                  />
+                </div>
+              </label>
+
+              {/* Quick Preset Buttons */}
+              <div>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--slate)",
+                    marginBottom: 6,
+                  }}
+                >
+                  Pilihan cepat nominal:
+                </span>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setPriceInput(String(priceModal.basePrice))}
+                    style={{
+                      padding: "6px 12px",
+                      fontSize: 12,
+                      borderRadius: 6,
+                      border: "1px solid var(--line)",
+                      background: "var(--bone)",
+                      cursor: "pointer",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Mulai dari ({rupiah(priceModal.basePrice)})
+                  </button>
+                  {[25000, 50000, 100000].map((add) => (
+                    <button
+                      key={add}
+                      type="button"
+                      onClick={() => {
+                        const cur = Number(priceInput.replace(/\D/g, "")) || priceModal.basePrice
+                        setPriceInput(String(cur + add))
+                      }}
+                      style={{
+                        padding: "6px 12px",
+                        fontSize: 12,
+                        borderRadius: 6,
+                        border: "1px solid var(--line)",
+                        background: "var(--bone)",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        color: "var(--ink)",
+                      }}
+                    >
+                      +{rupiah(add)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <footer>
+              <Button
+                type="button"
+                className="primary-button"
+                style={{ width: "100%", justifyContent: "center" }}
+                onClick={handleSaveCustomPrice}
+              >
+                {priceModal.lineId ? "Perbarui Harga" : "Terapkan & Tambah"}
+              </Button>
+            </footer>
+          </section>
+        </div>
       )}
     </div>
   )

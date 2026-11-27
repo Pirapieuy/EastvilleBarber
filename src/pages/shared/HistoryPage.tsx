@@ -47,6 +47,7 @@ export interface HistoryTransactionRecord {
   voidReason?: string
   voidBy?: string
   voidTime?: string
+  catatan?: string
 }
 
 export const INITIAL_HISTORY_TRANSACTIONS: HistoryTransactionRecord[] = [
@@ -833,6 +834,15 @@ function TransactionDetailBody({
           </div>
         </div>
 
+        {selected.catatan && (
+          <div className="detail-section" style={{ marginTop: 12 }}>
+            <h3>Catatan Transaksi</h3>
+            <div style={{ padding: "10px 14px", background: "var(--paper)", border: "1px solid var(--line)", borderRadius: 8, fontSize: 13, color: "var(--ink)" }}>
+              {selected.catatan}
+            </div>
+          </div>
+        )}
+
         <div className="detail-actions-group">
           <div className="detail-actions-row">
             <Button className="secondary-button" onClick={onPrintReceipt}>
@@ -1165,6 +1175,7 @@ export function HistoryPage({ currentUser, role }: {
         discount={selected.discount ?? 0}
         total={selected.total}
         method={selected.method}
+        catatan={selected.catatan}
         cash={tunai}
         qris={qrisBayar}
         change={Math.max(0, tunai + qrisBayar - selected.total)}

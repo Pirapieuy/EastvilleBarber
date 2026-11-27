@@ -121,7 +121,8 @@ create table if not exists transaksi (
   lembur text default 'Tidak',      -- 'Ya' / 'Tidak' seperti di Sheet
   manual text default '',           -- 'Ya' bila rekap manual
   nota_buku text default '',
-  gratis text default ''            -- alasan bila transaksi gratis
+  gratis text default '',           -- alasan bila transaksi gratis
+  catatan text default ''           -- catatan transaksi dari kasir
 );
 create index if not exists transaksi_tanggal_idx on transaksi(tanggal);
 
@@ -414,9 +415,9 @@ declare r transaksi; s jsonb;
 begin
   r := jsonb_populate_record(null::transaksi, p_trx);
   insert into transaksi(id, waktu, tanggal, jam, metode, subtotal, diskon, total, bayar_tunai, bayar_qris, komisi_total,
-    status, dibuat_oleh_id, dibuat_oleh, lembur, manual, nota_buku, gratis, req_id)
+    status, dibuat_oleh_id, dibuat_oleh, lembur, manual, nota_buku, gratis, req_id, catatan)
   values (r.id, r.waktu, r.tanggal, r.jam, r.metode, r.subtotal, r.diskon, r.total, r.bayar_tunai, r.bayar_qris, r.komisi_total,
-    r.status, r.dibuat_oleh_id, r.dibuat_oleh, r.lembur, r.manual, r.nota_buku, r.gratis, r.req_id);
+    r.status, r.dibuat_oleh_id, r.dibuat_oleh, r.lembur, r.manual, r.nota_buku, r.gratis, r.req_id, coalesce(r.catatan, ''));
   insert into transaksi_item(trx_id, tipe, ref_id, nama, qty, harga, kapster_id, kapster, komisi, komisi_persen)
     select r.id, i.tipe, i.ref_id, i.nama, i.qty, i.harga, i.kapster_id, i.kapster, i.komisi, i.komisi_persen
     from jsonb_populate_recordset(null::transaksi_item, p_items) i;
@@ -438,7 +439,8 @@ begin
     from jsonb_populate_recordset(null::transaksi_item, p_items) i;
   update transaksi set subtotal = (p_trx->>'subtotal')::numeric, diskon = (p_trx->>'diskon')::numeric,
     total = (p_trx->>'total')::numeric, bayar_tunai = (p_trx->>'bayar_tunai')::numeric, bayar_qris = (p_trx->>'bayar_qris')::numeric,
-    komisi_total = (p_trx->>'komisi_total')::numeric, metode = p_trx->>'metode' where id = p_id;
+    komisi_total = (p_trx->>'komisi_total')::numeric, metode = p_trx->>'metode',
+    catatan = coalesce(p_trx->>'catatan', catatan) where id = p_id;
   for s in select * from jsonb_array_elements(p_stok) loop
     perform mutasi_stok(s->>'kode', (s->>'delta')::integer, s->>'alasan', p_id, p_oleh);
   end loop;
@@ -490,3 +492,7 @@ revoke all on function simpan_transaksi(jsonb,jsonb,jsonb,text), ubah_transaksi(
   batal_transaksi(text,text,text), pulihkan_transaksi(text,text), bayar_gaji_atomik(jsonb,jsonb,jsonb) from public, anon, authenticated;
 grant execute on function simpan_transaksi(jsonb,jsonb,jsonb,text), ubah_transaksi(text,jsonb,jsonb,jsonb,text),
   batal_transaksi(text,text,text), pulihkan_transaksi(text,text), bayar_gaji_atomik(jsonb,jsonb,jsonb) to service_role;
+
+-- Migrasi tambahan: catatan transaksi dan harga custom
+alter table transaksi add column if not exists catatan text default '';
+alter table layanan add column if not exists custom_price boolean default false;

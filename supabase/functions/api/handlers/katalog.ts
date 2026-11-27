@@ -3,7 +3,7 @@
 import { db, gagal, ok, tulisAudit, type Pengguna } from "../util.ts"
 import { bentukPengaturan, getPengaturan, parseHhmm } from "../pengaturan.ts"
 
-const KATEGORI_LAYANAN = ["Potong", "Grooming", "Coloring", "Perawatan"]
+const KATEGORI_LAYANAN = ["Potong", "Perawatan", "Coloring", "Styling", "Grooming"]
 const toInt = (v: unknown) => {
   const n = Math.round(Number(v))
   return isNaN(n) ? 0 : n
