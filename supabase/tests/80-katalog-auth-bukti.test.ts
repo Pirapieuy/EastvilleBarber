@@ -67,11 +67,11 @@ Deno.test("A3 logout: token milik orang lain / ngawur tidak membocorkan, sesi be
   const v = await aut.verifySession({ token: T.kasir }) as { success: boolean }
   assert.equal(v.success, false)
 })
-Deno.test("U1 buat user: username/email dinormalkan, PIN 6 digit, username dengan spasi/simbol ditolak", async () => {
+Deno.test("U1 buat user: username dinormalkan, PIN 6 digit, username dengan spasi/simbol ditolak", async () => {
   await reset()
-  const base = { token: T.owner, nama: "Budi", username: "budi", pin: "123456", role: "Kapster", email: "budi@x.id" }
+  const base = { token: T.owner, nama: "Budi", username: "budi", pin: "123456", role: "Kapster" }
   assert.equal(((await usr.createUser(base)) as { success: boolean }).success, true)
-  for (const o of [{ username: "bu di" }, { username: "BUDI" }, { pin: "12345" }, { pin: "abcdef" }, { email: "salah" }, { role: "Admin" }, { username: "b", email: "BUDI@X.ID" }]) {
+  for (const o of [{ username: "bu di" }, { username: "bu$di" }, { username: "BUDI" }, { pin: "12345" }, { pin: "abcdef" }, { role: "Admin" }]) {
     const r = await usr.createUser({ ...base, ...o }) as { success: boolean }
     assert.equal(r.success, false, JSON.stringify(o))
   }

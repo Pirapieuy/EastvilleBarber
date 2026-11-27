@@ -42,6 +42,7 @@ export async function createUser(body: Record<string, string>) {
   const cabang = (body.cabang || "Patihan").trim()
   if (!nama) return gagal("Nama lengkap wajib diisi.")
   if (!username) return gagal("Username wajib diisi.")
+  if (!/^[a-z0-9._-]+$/.test(username)) return gagal("Username hanya boleh huruf, angka, titik, garis bawah, dan strip (tanpa spasi).")
   if (!enam(pin)) return gagal("PIN awal harus 6 digit angka.")
   if (!ROLE_VALID.includes(role)) return gagal("Peran tidak valid. Pilih Owner, Kasir, atau Kapster.")
 
