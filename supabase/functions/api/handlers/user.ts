@@ -25,7 +25,7 @@ export async function resetPin(_body: Record<string, string>) {
 
 export async function listUsers(body: Record<string, string>) {
   await wajibRole(body.token, ["Owner"])
-  const { data } = await db.from("users").select("id,nama,username,role,cabang,email,status,dibuat").order("dibuat")
+  const { data } = await db.from("users").select("id,nama,username,role,cabang,status,dibuat").order("dibuat")
   return ok(
     (data ?? [])
       .filter((u) => u.status !== "Dihapus")
@@ -40,17 +40,14 @@ export async function createUser(body: Record<string, string>) {
   const pin = (body.pin || "").trim()
   const role = (body.role || "").trim()
   const cabang = (body.cabang || "Patihan").trim()
-  const email = (body.email || "").trim().toLowerCase()
   if (!nama) return gagal("Nama lengkap wajib diisi.")
   if (!username) return gagal("Username wajib diisi.")
   if (!enam(pin)) return gagal("PIN awal harus 6 digit angka.")
   if (!ROLE_VALID.includes(role)) return gagal("Peran tidak valid. Pilih Owner, Kasir, atau Kapster.")
-  if (!email || !email.includes("@")) return gagal("Email reset PIN tidak valid.")
 
-  const { data: semua } = await db.from("users").select("id,username,email")
+  const { data: semua } = await db.from("users").select("id,username")
   for (const r of semua ?? []) {
     if (r.username.toLowerCase() === username) return gagal(`Username '${username}' sudah digunakan.`)
-    if ((r.email || "").toLowerCase() === email) return gagal(`Email '${email}' sudah dipakai akun lain.`)
   }
   const dipakai = new Set((semua ?? []).map((r) => r.id.toLowerCase()))
   const dasar = "u-" + username.replace(/[^a-z0-9]/g, "-").slice(0, 15)
@@ -58,11 +55,11 @@ export async function createUser(body: Record<string, string>) {
   while (dipakai.has(id.toLowerCase())) id = dasar + n++
 
   const { data: baru, error } = await db.from("users").insert({
-    id, nama, username, pin_hash: await hashPin(pin), role, cabang, email, status: "Aktif",
+    id, nama, username, pin_hash: await hashPin(pin), role, cabang, status: "Aktif",
   }).select("dibuat").single()
   if (error) throw new ApiError(error.message)
   await tulisAudit(admin.id, admin.nama, "TAMBAH_USER", `Menambah anggota tim baru: ${nama} (${role})`)
-  return ok({ id, nama, username, role, cabang, email, status: "Aktif", dibuat: tanggalIso(new Date(baru.dibuat)) },
+  return ok({ id, nama, username, role, cabang, status: "Aktif", dibuat: tanggalIso(new Date(baru.dibuat)) },
     "Anggota tim berhasil ditambahkan.")
 }
 
@@ -73,28 +70,25 @@ export async function updateUser(body: Record<string, string>) {
   const username = (body.username || "").trim().toLowerCase()
   const role = (body.role || "").trim()
   const cabang = (body.cabang || "Patihan").trim()
-  const email = (body.email || "").trim().toLowerCase()
   const newPin = (body.newPin || "").trim()
   if (!id) return gagal("ID user wajib diisi.")
   if (!nama) return gagal("Nama lengkap wajib diisi.")
   if (!username) return gagal("Username wajib diisi.")
   if (!ROLE_VALID.includes(role)) return gagal("Peran tidak valid.")
-  if (!email || !email.includes("@")) return gagal("Email reset PIN tidak valid.")
   if (newPin && !enam(newPin)) return gagal("PIN baru harus 6 digit angka.")
 
-  const { data: semua } = await db.from("users").select("id,username,email")
+  const { data: semua } = await db.from("users").select("id,username")
   let ada = false
   for (const r of semua ?? []) {
     if (r.id === id) { ada = true; continue }
     if (r.username.toLowerCase() === username) return gagal(`Username '${username}' sudah digunakan oleh akun lain.`)
-    if ((r.email || "").toLowerCase() === email) return gagal(`Email '${email}' sudah dipakai akun lain.`)
   }
   if (!ada) return gagal("User tidak ditemukan.")
   const { data: lama } = await db.from("users").select("role").eq("id", id).maybeSingle()
   if (lama?.role === "Owner" && role !== "Owner" && !(await adaOwnerLain(id)))
     return gagal("Tidak bisa mengubah peran: ini satu-satunya Owner aktif.")
   if (id === admin.id && role !== lama?.role) return gagal("Anda tidak dapat mengubah peran akun Anda sendiri.")
-  const ubah: Record<string, string> = { nama, username, role, cabang, email }
+  const ubah: Record<string, string> = { nama, username, role, cabang }
   if (newPin) ubah.pin_hash = await hashPin(newPin)
   await db.from("users").update(ubah).eq("id", id)
   await tulisAudit(admin.id, admin.nama, "UPDATE_USER", `Mengubah data user: ${nama} (${id})`)

@@ -18,7 +18,6 @@ export const demoTeamData: UserRow[] = [
     username: "owner",
     role: "Owner",
     cabang: "Semua cabang",
-    email: "ardi@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -28,7 +27,6 @@ export const demoTeamData: UserRow[] = [
     username: "kasir",
     role: "Kasir",
     cabang: "Patihan",
-    email: "siti@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -38,7 +36,6 @@ export const demoTeamData: UserRow[] = [
     username: "ferdi",
     role: "Kapster",
     cabang: "Patihan",
-    email: "ferdi@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -48,7 +45,6 @@ export const demoTeamData: UserRow[] = [
     username: "seva",
     role: "Kapster",
     cabang: "Patihan",
-    email: "seva@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -58,7 +54,6 @@ export const demoTeamData: UserRow[] = [
     username: "tatas",
     role: "Kapster",
     cabang: "Patihan",
-    email: "tatas@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -68,7 +63,6 @@ export const demoTeamData: UserRow[] = [
     username: "faisal",
     role: "Kapster",
     cabang: "Patihan",
-    email: "faisal@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -78,7 +72,6 @@ export const demoTeamData: UserRow[] = [
     username: "fadhil",
     role: "Kapster",
     cabang: "Patihan",
-    email: "fadhil@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -88,7 +81,6 @@ export const demoTeamData: UserRow[] = [
     username: "kris",
     role: "Kapster",
     cabang: "Patihan",
-    email: "kris@eastville.id",
     status: "Aktif",
     dibuat: "2026-11-01",
   },
@@ -111,7 +103,6 @@ export function TeamPage({ currentUser, role, title }: {
   const [statusModalUser, setStatusModalUser] = useState<UserRow | null>(null)
   const [nama, setNama] = useState("")
   const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
   const [pin, setPin] = useState("")
   const [selectedRole, setSelectedRole] = useState<Role>("Kapster")
   const [status, setStatus] = useState<"Aktif" | "Nonaktif">("Aktif")
@@ -156,7 +147,6 @@ export function TeamPage({ currentUser, role, title }: {
     setEditingId(null)
     setNama("")
     setUsername("")
-    setEmail("")
     setPin("")
     setSelectedRole("Kapster")
     setStatus("Aktif")
@@ -170,7 +160,6 @@ export function TeamPage({ currentUser, role, title }: {
     setEditingId(u.id)
     setNama(u.nama)
     setUsername(u.username)
-    setEmail(u.email)
     setPin("")
     setSelectedRole(u.role)
     setStatus(u.status)
@@ -182,8 +171,8 @@ export function TeamPage({ currentUser, role, title }: {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!nama.trim() || !username.trim() || !email.trim()) {
-      alert("Mohon lengkapi nama, username, dan email.")
+    if (!nama.trim() || !username.trim()) {
+      alert("Mohon lengkapi nama dan username.")
       return
     }
 
@@ -193,7 +182,6 @@ export function TeamPage({ currentUser, role, title }: {
           id: editingId,
           nama: nama.trim(),
           username: username.trim(),
-          email: email.trim(),
           role: selectedRole,
           newPin: pin.trim() ? pin.trim() : undefined,
         })
@@ -213,7 +201,6 @@ export function TeamPage({ currentUser, role, title }: {
           nama: nama.trim(),
           username: username.trim(),
           pin: pin.trim(),
-          email: email.trim(),
           role: selectedRole,
         })
         if (
@@ -409,16 +396,6 @@ export function TeamPage({ currentUser, role, title }: {
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase())}
                     placeholder="Contoh: owner"
-                    required
-                  />
-                </label>
-                <label>
-                  <span>Email reset PIN</span>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="nama@eastville.id"
                     required
                   />
                 </label>

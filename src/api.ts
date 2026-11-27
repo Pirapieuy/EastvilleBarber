@@ -502,7 +502,6 @@ export interface UserRow {
   username: string
   role: "Owner" | "Kasir" | "Kapster"
   cabang: string
-  email: string
   status: "Aktif" | "Nonaktif"
   dibuat: string
 }
@@ -515,7 +514,6 @@ export const apiTim = {
     pin: string
     role: string
     cabang?: string
-    email: string
   }) => api<UserRow>("create-user", { ...p }),
   update: (p: {
     id: string
@@ -523,7 +521,6 @@ export const apiTim = {
     username: string
     role: string
     cabang?: string
-    email: string
     newPin?: string
   }) => api<{ success: boolean }>("update-user", { ...p }),
   toggleStatus: (id: string, status: "Aktif" | "Nonaktif") =>
