@@ -4,6 +4,8 @@ import {
   apiLaporan,
   apiPengeluaran,
   apiTransaksi,
+  GajiRow,
+  KasbonRow,
   LaporanLayanan,
 } from "../api"
 import type { OpsiEkspor } from "../components/common/ExportModal"
@@ -335,6 +337,140 @@ export async function dokumenRiwayatTransaksi(o: OpsiEkspor): Promise<DokumenEks
           t.status,
         ]),
         total: ["Total", "", "", "", "", "", sah.reduce((a, t) => a + (t.discount ?? 0), 0), total, ""],
+      },
+    ],
+  }
+}
+
+const dalamRentang = (tgl: string | undefined, o: OpsiEkspor) => Boolean(tgl) && tgl! >= o.dari && tgl! <= o.sampai
+const jumlahKolom = (baris: Sel[][], i: number) => baris.reduce((a, r) => a + (Number(r[i]) || 0), 0)
+const periodeSaja = (o: OpsiEkspor) => periodeTeks(o).replace(/ · .*$/, "")
+
+/** Pembayaran gaji yang tanggal bayarnya jatuh di rentang (data sudah dimuat halaman Gaji & Kasbon). */
+export function dokumenGaji(gaji: GajiRow[], o: OpsiEkspor): DokumenEkspor {
+  const daftar = gaji
+    .filter((g) => dalamRentang(g.tanggalBayar.slice(0, 10), o))
+    .sort((a, b) => a.tanggalBayar.localeCompare(b.tanggalBayar))
+  const baris: Sel[][] = daftar.map((g) => [
+    formatTanggal(g.tanggalBayar.slice(0, 10)), g.nama, g.status, g.totalKomisi, g.totalKasbon, g.gajiBersih, g.dibayarOleh || "-",
+  ])
+  const sah = daftar.filter((g) => g.status === "Dibayar")
+  const perKapster = new Map<string, { n: number; komisi: number; kasbon: number; bersih: number }>()
+  for (const g of sah) {
+    const k = perKapster.get(g.nama) ?? { n: 0, komisi: 0, kasbon: 0, bersih: 0 }
+    perKapster.set(g.nama, k)
+    k.n++; k.komisi += g.totalKomisi; k.kasbon += g.totalKasbon; k.bersih += g.gajiBersih
+  }
+  const komisi = sah.reduce((a, g) => a + g.totalKomisi, 0)
+  const kasbon = sah.reduce((a, g) => a + g.totalKasbon, 0)
+  const bersih = sah.reduce((a, g) => a + g.gajiBersih, 0)
+  return {
+    berkas: `gaji-${o.dari}${o.dari === o.sampai ? "" : `_${o.sampai}`}`,
+    judul: "Gaji Kapster",
+    keterangan: periodeSaja(o),
+    ringkasan: [
+      { label: "Pembayaran gaji", nilai: sah.length, jenis: "angka" },
+      { label: "Total komisi", nilai: komisi, jenis: "rupiah" },
+      { label: "Potongan kasbon", nilai: kasbon, jenis: "rupiah" },
+      { label: "Gaji bersih dibayarkan", nilai: bersih, jenis: "rupiah" },
+    ],
+    bagian: [
+      {
+        judul: "Daftar pembayaran gaji",
+        catatan: "Gaji bersih = komisi dikurangi potongan kasbon. Total hanya menghitung pembayaran berstatus Dibayar.",
+        kolom: [
+          { judul: "Tanggal bayar" }, { judul: "Kapster" }, { judul: "Status" },
+          { judul: "Komisi", jenis: "rupiah" }, { judul: "Potongan kasbon", jenis: "rupiah" },
+          { judul: "Gaji bersih", jenis: "rupiah" }, { judul: "Dibayar oleh" },
+        ],
+        baris,
+        total: ["Total", "", "", jumlahKolom(baris, 3), jumlahKolom(baris, 4), jumlahKolom(baris, 5), ""],
+      },
+      {
+        judul: "Ringkasan per kapster",
+        kolom: [
+          { judul: "Kapster" }, { judul: "Pembayaran", jenis: "angka" }, { judul: "Komisi", jenis: "rupiah" },
+          { judul: "Potongan kasbon", jenis: "rupiah" }, { judul: "Gaji bersih", jenis: "rupiah" },
+        ],
+        baris: [...perKapster.entries()].sort((a, b) => b[1].bersih - a[1].bersih).map(([n, k]) => [n, k.n, k.komisi, k.kasbon, k.bersih]),
+        total: ["Total", sah.length, komisi, kasbon, bersih],
+      },
+    ],
+  }
+}
+
+/** Kasbon yang tanggalnya jatuh di rentang; total hanya kasbon Aktif/Lunas (bukan Menunggu atau Ditolak). */
+export function dokumenKasbon(kasbon: KasbonRow[], o: OpsiEkspor): DokumenEkspor {
+  const daftar = kasbon.filter((k) => dalamRentang(k.tanggal.slice(0, 10), o)).sort((a, b) => a.tanggal.localeCompare(b.tanggal))
+  const hitung = daftar.filter((k) => k.status === "Aktif" || k.status === "Lunas")
+  const per = (st: KasbonRow["status"]) => daftar.filter((k) => k.status === st)
+  const nilai = (l: KasbonRow[]) => l.reduce((a, k) => a + k.jumlah, 0)
+  const baris: Sel[][] = daftar.map((k) => [
+    formatTanggal(k.tanggal.slice(0, 10)), k.nama, k.status, k.jumlah, k.catatan || "-", k.lunasWaktu ? formatTanggal(k.lunasWaktu.slice(0, 10)) : "-",
+  ])
+  return {
+    berkas: `kasbon-${o.dari}${o.dari === o.sampai ? "" : `_${o.sampai}`}`,
+    judul: "Kasbon Kapster",
+    keterangan: periodeSaja(o),
+    ringkasan: [
+      { label: "Kasbon masih aktif", nilai: nilai(per("Aktif")), jenis: "rupiah" },
+      { label: "Kasbon lunas", nilai: nilai(per("Lunas")), jenis: "rupiah" },
+      { label: "Pengajuan menunggu", nilai: per("Menunggu").length, jenis: "angka" },
+      { label: "Pengajuan ditolak", nilai: per("Ditolak").length, jenis: "angka" },
+    ],
+    bagian: [
+      {
+        judul: "Daftar kasbon",
+        catatan: "Total hanya menghitung kasbon berstatus Aktif dan Lunas.",
+        kolom: [
+          { judul: "Tanggal" }, { judul: "Kapster" }, { judul: "Status" },
+          { judul: "Jumlah", jenis: "rupiah" }, { judul: "Catatan" }, { judul: "Tanggal lunas" },
+        ],
+        baris,
+        total: ["Total", "", "", nilai(hitung), "", ""],
+      },
+    ],
+  }
+}
+
+/** Pengeluaran per tanggal dan per kategori; yang dibatalkan ditampilkan tetapi tidak dihitung. */
+export async function dokumenPengeluaran(o: OpsiEkspor): Promise<DokumenEkspor> {
+  const semua = (await apiPengeluaran.list()) as {
+    dateIso?: string; category: string; description: string; amount: number; status: string; cancelReason?: string
+  }[]
+  const daftar = semua.filter((e) => dalamRentang(e.dateIso, o)).sort((a, b) => (a.dateIso ?? "").localeCompare(b.dateIso ?? ""))
+  const sah = daftar.filter((e) => e.status === "Aktif")
+  const total = sah.reduce((a, e) => a + e.amount, 0)
+  const per = new Map<string, { n: number; jumlah: number }>()
+  for (const e of sah) {
+    const k = per.get(e.category) ?? { n: 0, jumlah: 0 }
+    per.set(e.category, k)
+    k.n++; k.jumlah += e.amount
+  }
+  return {
+    berkas: `pengeluaran-${o.dari}${o.dari === o.sampai ? "" : `_${o.sampai}`}`,
+    judul: "Pengeluaran",
+    keterangan: periodeSaja(o),
+    ringkasan: [
+      { label: "Jumlah pengeluaran", nilai: sah.length, jenis: "angka" },
+      { label: "Total pengeluaran", nilai: total, jenis: "rupiah" },
+      { label: "Dibatalkan (tidak dihitung)", nilai: daftar.length - sah.length, jenis: "angka" },
+    ],
+    bagian: [
+      {
+        judul: "Ringkasan per kategori",
+        kolom: [{ judul: "Kategori" }, { judul: "Jumlah", jenis: "angka" }, { judul: "Total", jenis: "rupiah" }],
+        baris: [...per.entries()].sort((a, b) => b[1].jumlah - a[1].jumlah).map(([k, v]) => [k, v.n, v.jumlah]),
+        total: ["Total", sah.length, total],
+      },
+      {
+        judul: "Daftar pengeluaran",
+        catatan: "Pengeluaran berstatus BATAL tetap ditampilkan, tetapi tidak masuk total.",
+        kolom: [
+          { judul: "Tanggal" }, { judul: "Kategori" }, { judul: "Keterangan" }, { judul: "Jumlah", jenis: "rupiah" }, { judul: "Status" },
+        ],
+        baris: daftar.map((e) => [formatTanggal(e.dateIso!), e.category, e.description, e.amount, e.status === "Aktif" ? "Aktif" : `BATAL${e.cancelReason ? `: ${e.cancelReason}` : ""}`]),
+        total: ["Total", "", "", total, ""],
       },
     ],
   }

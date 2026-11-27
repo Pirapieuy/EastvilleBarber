@@ -27968,3 +27968,30 @@ html:has(.manual-page .modal-overlay) {
     max-width: none;
   }
 }
+
+/* Tombol Ekspor di Gaji & Kasbon (sebaris dengan tab) dan di panel Pengeluaran (sebaris dengan judul) */
+.gaji-page .gj-top {
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.gaji-page .gj-ekspor,
+.report-page .lk-head-ekspor {
+  height: 44px;
+  min-height: 0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+  .gaji-page .gj-top {
+    flex-wrap: wrap;
+  }
+
+  .gaji-page .gj-ekspor {
+    width: 100%;
+  }
+}

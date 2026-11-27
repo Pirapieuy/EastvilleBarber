@@ -11,7 +11,7 @@ import { DemoNotice } from "../../components/common/DemoNotice"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
 import { Icon } from "../../components/common/Icon"
 import { ExportModal } from "../../components/common/ExportModal"
-import { dokumenLaporanKeuangan } from "../../utils/dokumenEkspor"
+import { dokumenLaporanKeuangan, dokumenPengeluaran } from "../../utils/dokumenEkspor"
 import {
   Button,
   CalendarPicker,
@@ -220,6 +220,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
 } = {}) {
   const [wa, setWa] = useState(false)
   const [eksporBuka, setEksporBuka] = useState(false)
+  const [eksporPengeluaran, setEksporPengeluaran] = useState(false)
   const [{ mode, tanggal }, setMode, setTanggal] = usePeriodeTersimpan("laporan-keuangan")
   const [reloadKey, setReloadKey] = useState(0)
   const simpanPengeluaran = useRef(false)
@@ -715,6 +716,9 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
           <section className="panel lk-panel report-pengeluaran">
             <div className="lk-head">
               <h3>Pengeluaran</h3>
+              <Button className="secondary-button lk-head-ekspor" onClick={() => setEksporPengeluaran(true)}>
+                <Icon name="download" /> Ekspor
+              </Button>
             </div>
 
             <div className="expense-toolbar filters">
@@ -1058,6 +1062,15 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
             }
             setExpenseRestoreId(null)
           }}
+        />
+      )}
+
+      {eksporPengeluaran && (
+        <ExportModal
+          judul="Ekspor Pengeluaran"
+          awal={rentang}
+          onBuat={dokumenPengeluaran}
+          onClose={() => setEksporPengeluaran(false)}
         />
       )}
 
