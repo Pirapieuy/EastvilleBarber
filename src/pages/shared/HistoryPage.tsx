@@ -15,6 +15,7 @@ import { AppUser, Role } from "../../types"
 import { apiKasir, apiTransaksi, getToken } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { CartLine, ReceiptView } from "./CashierPage"
+import { isStartFromService } from "./ServicesPage"
 
 export interface HistoryItemDetail {
   name: string
@@ -539,6 +540,11 @@ export function EditTransactionModal({
                                 <div className="nota-item-info">
                                   <strong>{item.name}</strong>
                                   <span>
+                                    {item.type === "Layanan" && isStartFromService(item) && (
+                                      <small style={{ color: "var(--brass-dark, #92400e)", fontWeight: 700, marginRight: 4 }}>
+                                        Mulai
+                                      </small>
+                                    )}
                                     {rupiah(item.price)}
                                     {item.stock != null && (
                                       <i className="nota-stock">

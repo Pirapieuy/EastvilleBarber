@@ -187,6 +187,7 @@ export function ServicesPage({ embedded = false }: {
   const [harga, setHarga] = useState("")
   const [kategori, setKategori] = useState("Potong")
   const [aktif, setAktif] = useState(true)
+  const [customPrice, setCustomPrice] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState("")
   const [reloadKey, setReloadKey] = useState(0)
@@ -221,6 +222,7 @@ export function ServicesPage({ embedded = false }: {
     setHarga(String(service?.harga ?? 40000))
     setKategori(service ? normalizeServiceCategory(service) : "Potong")
     setAktif(service ? service.status === "Aktif" : true)
+    setCustomPrice(service ? isStartFromService(service) : false)
     setFormError("")
     setFormOpen(true)
   }
@@ -248,6 +250,7 @@ export function ServicesPage({ embedded = false }: {
           harga: hargaAngka,
           status,
           kategori,
+          customPrice,
         })
       } catch (err) {
         setFormError(err instanceof Error ? err.message : "Gagal menyimpan.")
@@ -270,6 +273,7 @@ export function ServicesPage({ embedded = false }: {
       harga: hargaAngka,
       status,
       kategori,
+      customPrice,
     }
     setRows((prev) =>
       editing
@@ -566,7 +570,7 @@ export function ServicesPage({ embedded = false }: {
                 </SearchSelect>
               </label>
               <label>
-                <span>Harga</span>
+                <span>Harga {customPrice ? "awal (Mulai dari)" : ""}</span>
                 <div className="input-shell">
                   <b>Rp</b>
                   <input
@@ -581,6 +585,21 @@ export function ServicesPage({ embedded = false }: {
             <div
               className="toggle-row"
               style={{ cursor: "pointer" }}
+              onClick={() => setCustomPrice(!customPrice)}
+            >
+              <span>
+                <strong>Tipe harga: {customPrice ? "Mulai dari (Start From)" : "Harga tetap"}</strong>
+                <small>
+                  {customPrice
+                    ? "Kasir dapat menyesuaikan nominal harga saat melayani pelanggan."
+                    : "Layanan memakai nominal harga tetap standar."}
+                </small>
+              </span>
+              <i className={`toggle ${customPrice ? "on" : ""}`}><b /></i>
+            </div>
+            <div
+              className="toggle-row"
+              style={{ cursor: "pointer" }}
               onClick={() => setAktif(!aktif)}
             >
               <span>
@@ -589,6 +608,18 @@ export function ServicesPage({ embedded = false }: {
               </span>
               <i className={`toggle ${aktif ? "on" : ""}`}><b /></i>
             </div>
+            {customPrice && (
+              <div
+                className="info-banner"
+                style={{
+                  background: "var(--brass-soft, #fef3c7)",
+                  borderColor: "rgba(200, 150, 62, 0.4)",
+                  color: "var(--brass-dark, #92400e)",
+                }}
+              >
+                <Icon name="cashier" /> Layanan ini akan berlabel &quot;Mulai {rupiah(Number(harga) || 0)}&quot; di kasir dan kasir dapat mengubah harganya sesuai pesanan.
+              </div>
+            )}
             <div className="info-banner">
               <Icon name="history" /> Harga baru hanya berlaku untuk transaksi
               setelahnya.

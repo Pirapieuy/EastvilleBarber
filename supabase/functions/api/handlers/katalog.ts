@@ -11,8 +11,15 @@ const toInt = (v: unknown) => {
 type B = Record<string, any> // deno-lint-ignore-line no-explicit-any
 
 export async function listLayanan() {
-  const { data } = await db.from("layanan").select("id,nama,harga,status,kategori").order("id")
-  return ok(data ?? [])
+  const { data } = await db.from("layanan").select("id,nama,harga,status,kategori,custom_price").order("id")
+  return ok((data ?? []).map((x: any) => ({
+    id: x.id,
+    nama: x.nama,
+    harga: x.harga,
+    status: x.status,
+    kategori: x.kategori,
+    customPrice: Boolean(x.custom_price),
+  })))
 }
 
 export async function listKapster() {
@@ -36,12 +43,13 @@ export async function simpanLayanan(body: B, user: Pengguna) {
   const harga = Math.round(hargaMentah)
   const status = l.status === "Nonaktif" ? "Nonaktif" : "Aktif"
   const kategori = KATEGORI_LAYANAN.includes(l.kategori) ? l.kategori : "Potong"
+  const custom_price = Boolean(l.customPrice ?? l.custom_price)
   if (!nama) return gagal("Nama layanan wajib diisi.")
   if (!Number.isInteger(hargaMentah) || hargaMentah <= 0 || hargaMentah > 1_000_000_000)
     return gagal("Harga harus angka bulat lebih dari 0.")
   if (nama.length > 80) return gagal("Nama layanan maksimal 80 karakter.")
 
-  const { data: semua } = await db.from("layanan").select("id,nama,harga,status,kategori")
+  const { data: semua } = await db.from("layanan").select("id,nama,harga,status,kategori,custom_price")
   const adaId = l.id !== undefined && l.id !== ""
   if ((semua ?? []).some((x) => x.nama.toLowerCase() === nama.toLowerCase() && String(x.id) !== String(l.id)))
     return gagal("Layanan dengan nama itu sudah ada.")
@@ -49,14 +57,14 @@ export async function simpanLayanan(body: B, user: Pengguna) {
   if (adaId) {
     const lama = (semua ?? []).find((x) => String(x.id) === String(l.id))
     if (!lama) return gagal("Layanan tidak ditemukan.")
-    await db.from("layanan").update({ nama, harga, status, kategori }).eq("id", lama.id)
+    await db.from("layanan").update({ nama, harga, status, kategori, custom_price }).eq("id", lama.id)
     await tulisAudit(user.id, user.nama, "UBAH_LAYANAN",
-      `${lama.nama} Rp ${lama.harga} ${lama.status} ${lama.kategori} → ${nama} Rp ${harga} ${status} ${kategori}`)
+      `${lama.nama} Rp ${lama.harga} ${lama.status} ${lama.kategori} ${lama.custom_price ? "(Start From)" : ""} → ${nama} Rp ${harga} ${status} ${kategori} ${custom_price ? "(Start From)" : ""}`)
     return ok({ id: lama.id })
   }
-  const { data, error } = await db.from("layanan").insert({ nama, harga, status, kategori }).select("id").single()
+  const { data, error } = await db.from("layanan").insert({ nama, harga, status, kategori, custom_price }).select("id").single()
   if (error) throw new Error(error.message)
-  await tulisAudit(user.id, user.nama, "TAMBAH_LAYANAN", `${nama} Rp ${harga} ${kategori}`)
+  await tulisAudit(user.id, user.nama, "TAMBAH_LAYANAN", `${nama} Rp ${harga} ${kategori} ${custom_price ? "(Start From)" : ""}`)
   return ok({ id: data.id })
 }
 
