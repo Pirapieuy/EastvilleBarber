@@ -1,6 +1,6 @@
 // Service worker Eastville: menyimpan cangkang aplikasi (HTML/JS/CSS/ikon) agar bisa dipasang dan terbuka cepat.
 // Panggilan API TIDAK pernah disimpan: data selalu dari server, supaya angka kasir tidak basi.
-const VERSI = "eastville-v1"
+const VERSI = "eastville-v2"
 const CANGKANG = new URL("./", self.location).href // alamat halaman utama (mengikuti subfolder tempat aplikasi di-host)
 
 self.addEventListener("install", (e) => {

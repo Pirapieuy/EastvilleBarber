@@ -382,7 +382,6 @@ textarea {
 }
 
 .brand-mark.clickable:hover .monogram {
-  border-color: var(--brass);
   box-shadow: 0 0 14px rgb(200 150 62 / 30%);
   transform: scale(1.04);
 }
@@ -404,17 +403,13 @@ textarea {
 }
 
 .monogram {
-  flex: 0 0 42px;
-  width: 42px;
+  flex: 0 0 auto;
+  width: 64px;
   height: 42px;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgb(200 150 62 / 55%);
-  border-radius: 10px;
-  color: var(--brass);
-  background: rgb(200 150 62 / 8%);
-  font: 700 23px/1 var(--heading);
+  object-fit: contain;
+  border-radius: 8px;
+  background: #000;
+  padding: 3px 4px;
 }
 
 .brand-name {
@@ -9860,9 +9855,7 @@ textarea {
   }
 
   .login-mobile-header .monogram {
-    border-color: rgb(200 150 62 / 55%);
-    color: var(--brass);
-    background: var(--charcoal);
+    background: #000;
   }
 
   /* Tata Letak: Di bawah logo, tampilkan tulisan LOGIN diikuti oleh field input Username, PIN, dan tombol Masuk secara center-aligned (rata tengah) */

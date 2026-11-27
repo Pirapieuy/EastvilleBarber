@@ -1,6 +1,7 @@
 import { CSSProperties, ReactNode } from "react"
 import { Icon } from "./Icon"
 import { IconName } from "../../types"
+import logo from "../../assets/logo-eastville.png"
 
 export const rupiah = (value: number) =>
   `Rp ${new Intl.NumberFormat("id-ID").format(value)}`
@@ -54,10 +55,10 @@ export function BrandMark({
       tabIndex={onClick ? 0 : undefined}
       title={title}
     >
-      <div className="monogram">B</div>
+      <img alt="" className="monogram" src={logo} />
       <div className="brand-text">
-        <div className="brand-name">BarberBoss</div>
-        <div className="brand-caption">Eastville Barbershop</div>
+        <div className="brand-name">Eastville</div>
+        <div className="brand-caption">Barbershop</div>
       </div>
     </div>
   )
