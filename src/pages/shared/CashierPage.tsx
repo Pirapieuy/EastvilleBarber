@@ -1439,11 +1439,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                   <span className="item-icon">
                     <Icon name={item.type === "Produk" ? "product" : "cashier"} />
                   </span>
-                  {isStartFrom && (
-                    <span className="catalog-badge-startfrom">
-                      Start From
-                    </span>
-                  )}
                 </div>
                 <div className="catalog-item-body">
                   <strong className="catalog-item-title">{itemTitle}</strong>
