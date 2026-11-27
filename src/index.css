@@ -25135,11 +25135,11 @@ html:has(.manual-page .modal-overlay) {
 
   .catalog-page .product-admin-head,
   .catalog-page .product-admin-row {
-    grid-template-columns: minmax(88px, 1.1fr) minmax(56px, 0.9fr) 56px minmax(176px, 1.4fr) 72px 200px !important;
+    grid-template-columns: minmax(88px, 1.1fr) minmax(56px, 0.9fr) 56px minmax(220px, 1.4fr) 72px 200px !important;
   }
 
   .catalog-page .product-share-values {
-    gap: 8px !important;
+    gap: 16px !important;
   }
 
   .catalog-page .product-share-values strong {
@@ -25151,11 +25151,11 @@ html:has(.manual-page .modal-overlay) {
 @media (min-width: 761px) and (max-width: 860px) {
   .catalog-page .product-admin-head,
   .catalog-page .product-admin-row {
-    grid-template-columns: minmax(72px, 1fr) minmax(48px, 0.8fr) 48px minmax(132px, 1.3fr) 64px 200px !important;
+    grid-template-columns: minmax(72px, 1fr) minmax(48px, 0.8fr) 48px minmax(200px, 1.3fr) 64px 200px !important;
   }
 
   .catalog-page .product-share-values {
-    gap: 4px !important;
+    gap: 12px !important;
   }
 
   .catalog-page .product-share-values strong {
@@ -25743,52 +25743,57 @@ html:has(.manual-page .modal-overlay) {
   border-top: 1px solid var(--line);
 }
 
-/* Tablet & laptop kecil: skema komisi ditumpuk (label kiri, nilai kiri sejajar) agar rapi dan tidak timpang */
-@media (min-width: 761px) and (max-width: 1279px) {
-  .catalog-page .product-admin-scroll .product-share-values {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .catalog-page .product-admin-scroll .product-share-values > span {
-    display: grid !important;
-    grid-template-columns: 58px auto !important;
-    justify-content: start !important;
-    align-items: baseline;
-    gap: 8px;
-    min-width: 0;
-  }
-
-  .catalog-page .product-admin-scroll .product-share-values > span > small {
-    display: inline !important;
-    font-size: 11px !important;
-    white-space: nowrap;
-    color: var(--muted);
-  }
-
-  .catalog-page .product-admin-scroll .product-share-values > span > strong {
-    font-size: 12px !important;
-    white-space: nowrap;
-    text-align: left !important;
-  }
-
-  .catalog-page .product-admin-scroll .product-admin-row {
-    padding-block: 8px !important;
-  }
+/* Di semua tampilan (HP, Tablet, Laptop): susunan 3 kolom sejajar Kapster, Pemasok, Eastville dan font tidak abu-abu */
+.catalog-page .product-share-values,
+.catalog-page .product-admin-scroll .product-share-values,
+.catalog-page .product-admin-details .product-share-values {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  width: auto !important;
+  min-width: 0 !important;
 }
 
-/* Laptop >=1280: tiga bagian sejajar dengan jarak tetap, nilai tidak boleh melewati kolom */
-@media (min-width: 1280px) {
-  .catalog-page .product-share-values {
-    gap: 14px !important;
-  }
+.catalog-page .product-share-values > span,
+.catalog-page .product-admin-scroll .product-share-values > span,
+.catalog-page .product-admin-details .product-share-values > span {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
 
-  .catalog-page .product-share-values > span {
-    min-width: 0;
-  }
+.catalog-page .product-share-values small,
+.catalog-page .product-share-values > span > small,
+.catalog-page .product-admin-scroll .product-share-values small,
+.catalog-page .product-admin-scroll .product-share-values > span > small {
+  display: block !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--ink, #1f2937) !important; /* Tidak abu-abu */
+  white-space: nowrap !important;
+  opacity: 1 !important;
+}
+
+.catalog-page .product-share-values small::before,
+.catalog-page .product-share-values > span > small::before,
+.catalog-page .product-admin-scroll .product-share-values small::before,
+.catalog-page .product-admin-scroll .product-share-values > span > small::before {
+  content: none !important;
+}
+
+.catalog-page .product-share-values strong,
+.catalog-page .product-share-values > span > strong,
+.catalog-page .product-admin-scroll .product-share-values strong,
+.catalog-page .product-admin-scroll .product-share-values > span > strong {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--ink, #1f2937) !important; /* Tidak abu-abu */
+  white-space: nowrap !important;
+  text-align: left !important;
 }
 
 /* HP: Stok lurus dengan kolom Eastville (grid 3 kolom sama dengan baris skema) */
