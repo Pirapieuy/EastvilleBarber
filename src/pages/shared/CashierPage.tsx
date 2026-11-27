@@ -1589,7 +1589,6 @@ export function CashierPage({ currentUser, onNavigate }: {
                     <article
                       className="cart-line-swipe"
                       key={line.lineId}
-                      title="Geser ke kiri untuk menghapus item"
                   onWheel={(event) => {
                     if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
                     const swipe = cartWheelSwipe.current
@@ -1684,9 +1683,9 @@ export function CashierPage({ currentUser, onNavigate }: {
                     <span className="cart-line-title">
                       <strong className="cart-line-item-title">{itemTitle}</strong>
                       {itemDesc && (
-                        <small className="cart-line-item-desc" title={itemDesc}>
+                        <span className="cart-line-item-desc">
                           {itemDesc}
-                        </small>
+                        </span>
                       )}
                       <div className="cart-line-meta">
                         <small>{rupiah(line.price)}</small>
