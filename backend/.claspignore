@@ -1,0 +1,4 @@
+SETUP.md
+test-login.html
+node_modules/**
+service-account.json

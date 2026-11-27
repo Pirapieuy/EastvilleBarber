@@ -1,0 +1,63 @@
+# figma-make-app
+
+React + Vite + Tailwind CSS project running inside Figma Make.
+
+## Development Server
+
+A Vite development server is **already running** on `$PORT` (default 8443). You don't need to start it manually.
+
+- Preview URL: The user can access the running app through the preview panel
+- Hot reload: Changes to source files are reflected immediately
+
+## Project Structure
+
+This is the canonical project structure. Start with task-relevant files below. Only follow imports or inspect other files when required, when a documented path is missing, or when the repository contradicts this guide.
+
+- `src/main.tsx` - React entrypoint; imports `src/index.css` and mounts `src/App.tsx` into the `#root` element
+- `src/App.tsx` - Primary application component and the usual starting point for UI work
+- `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
+- `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
+- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
+- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
+- `.mise.toml` - Toolchain versions for Node.js and pnpm
+
+## Dependencies
+
+- Runtime: React 19 and React DOM 19
+- Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
+- Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
+- Formatting: oxfmt
+
+## Styling
+
+This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
+
+`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
+
+Tailwind emits utility classes in `@layer utilities`, and CSS outside any cascade layer overrides every layer regardless of specificity. Put global element styles, such as resets and defaults for `body`, headings, `button`, or `input`, inside `@layer base { ... }` so utility classes on those elements still apply. Tailwind's Preflight already applies `box-sizing: border-box`, removes default margins, and sets `font: inherit` on form controls, so do not repeat those rules.
+
+## Backend (Supabase)
+
+Backend aktif ada di `supabase/`, BUKAN di `backend/` (Google Apps Script lama, hanya cadangan; jangan diubah untuk fitur baru).
+
+- Frontend memanggil satu endpoint lewat `src/api.ts`: `POST {action, token, ...}`. Alamat dari `VITE_SUPABASE_URL` di `.env` (`https://zejaqgqpyrjvlarnxyaq.supabase.co`).
+- Logika server: `supabase/functions/api/` (TypeScript/Deno). `index.ts` = router + hak akses per peran; `handlers/` = logika per kelompok.
+- Struktur database: `supabase/schema.sql`. Baca `supabase/README.md` sebelum mengubah backend.
+- Mengubah frontend saja (halaman, CSS) tidak perlu menyentuh `supabase/`.
+- Mengubah backend: edit file di `supabase/functions/api/` (dan `schema.sql` bila tabel berubah), commit, lalu minta Rania men-deploy. Jangan menjalankan perubahan database ke project produksi tanpa izin.
+- Tabel dikunci RLS; browser tidak boleh membaca tabel langsung. Jangan menaruh `service_role` key di kode, `.env`, atau git.
+
+## Skill & aturan tampilan
+
+**Skill** ada di `.claude/skills/<nama>/SKILL.md` (Claude Code membacanya otomatis). Agent lain (Codex, Cursor, Copilot, Gemini): buka file `SKILL.md` yang sesuai sebelum mengerjakan, jangan baca semuanya sekaligus.
+- UI/tampilan: `frontend-design`, `ui-ux-pro-max`
+- Bug: `systematic-debugging`, `diagnosing-bugs`
+- Sebelum bilang selesai: `verification-before-completion` (jalankan `npx tsc --noEmit -p .` dan `npx vite build`, lihat hasilnya di browser)
+- Uji browser: `webapp-testing`; tinjau kode: `code-review`; cari skill baru: `find-skills`
+
+**Aturan tampilan (laptop ≥1025px)**
+- Judul halaman = nama menu di sidebar (diatur di `PAGE_TITLE_MAP`, `src/layouts/AppLayout.tsx`). Halaman tidak membuat judul sendiri.
+- Contoh pola yang benar: Riwayat Transaksi. Halaman setinggi layar, hanya daftar/panel yang scroll sendiri, panel terakhir meregang ke bawah, jarak 26px 27px.
+- Saat memuat atau gagal memuat: hanya spinner/pesan di tengah (`LoadingState`, `ErrorState`), tanpa judul/tab.
+- Popup di HP/tablet: kartu di tengah, bukan menempel di bawah.
+- Tombol minimal 44px dan teks minimal 14px di laptop; HP tidak diubah.
