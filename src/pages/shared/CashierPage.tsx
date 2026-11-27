@@ -1574,6 +1574,7 @@ export function CashierPage({ currentUser, onNavigate }: {
               cart.map((line, idx) => {
                 const isFirstOfBarber =
                   idx === 0 || cart[idx - 1].barber !== line.barber
+                const { title: itemTitle, desc: itemDesc } = parseItemName(line.name)
 
                 return (
                   <Fragment key={line.lineId}>
@@ -1681,7 +1682,12 @@ export function CashierPage({ currentUser, onNavigate }: {
                     }}
                   >
                     <span className="cart-line-title">
-                      <strong>{line.name}</strong>
+                      <strong className="cart-line-item-title">{itemTitle}</strong>
+                      {itemDesc && (
+                        <small className="cart-line-item-desc" title={itemDesc}>
+                          {itemDesc}
+                        </small>
+                      )}
                       <div className="cart-line-meta">
                         <small>{rupiah(line.price)}</small>
                         {(isStartFromService(line) || line.isCustom) && (
