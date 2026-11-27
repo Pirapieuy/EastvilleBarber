@@ -26,8 +26,11 @@ Deno.test("laporan-layanan: per layanan dan kapster, hanya Lunas dalam rentang, 
   assert.equal(r.data.totalJumlah, 4)
   assert.equal(r.data.totalOmzet, 150000)
   assert.equal(r.data.totalKomisi, 61000)
+  // A1: subtotal 100000, diskon 10000 -> Potong 80000 kena 8000, Cukur 20000 kena 2000 (sebanding harga)
+  assert.equal(r.data.totalDiskon, 10000)
+  assert.equal(r.data.totalBersih, 140000)
   const potong = r.data.layanan.find((l: any) => l.nama === "Potong") // deno-lint-ignore-line no-explicit-any
-  assert.deepEqual([potong.jumlah, potong.omzet, potong.komisi], [3, 130000, 57000])
+  assert.deepEqual([potong.jumlah, potong.omzet, potong.diskon, potong.bersih, potong.komisi], [3, 130000, 8000, 122000, 57000])
   assert.equal(potong.kapster.length, 2)
   assert.equal(r.data.layanan[0].nama, "Potong", "urut omzet terbesar dulu")
   assert.equal(r.data.layanan.some((l: any) => l.nama === "Pomade"), false) // deno-lint-ignore-line no-explicit-any
@@ -46,4 +49,26 @@ Deno.test("laporan-keuangan: diskon dijumlahkan hanya dari transaksi Lunas", asy
   const r = await lap.laporanKeuangan({ dari: "2026-11-01", sampai: "2026-11-30" }) as Hasil
   assert.equal(r.data.diskon, 10000)
   assert.equal(r.data.pemasukan, 140000)
+})
+
+Deno.test("laporan-layanan: filter satu kapster hanya menghitung item miliknya", async () => {
+  await reset(); await seed()
+  const r = await lap.laporanLayanan({ dari: "2026-11-01", sampai: "2026-11-30", kapsterId: "u-kap2" }) as Hasil
+  assert.equal(r.data.totalJumlah, 2)
+  assert.equal(r.data.totalOmzet, 70000)
+  assert.equal(r.data.totalDiskon, 2000)
+  assert.equal(r.data.perKapster.length, 1)
+  assert.equal(r.data.perKapster[0].kapsterId, "u-kap2")
+})
+
+Deno.test("laporan-keuangan: penjualan sebelum diskon, per hari, dan pemisahan layanan/produk", async () => {
+  await reset(); await seed()
+  const r = await lap.laporanKeuangan({ dari: "2026-11-01", sampai: "2026-11-30" }) as Hasil
+  assert.equal(r.data.kotor, 150000)
+  assert.equal(r.data.diskon, 10000)
+  assert.equal(r.data.pemasukan, 140000)
+  assert.equal(r.data.omzetLayanan, 150000)
+  assert.equal(r.data.omzetProduk, 0)
+  const h = r.data.perHari.find((x: any) => x.tanggal === "2026-11-10") // deno-lint-ignore-line no-explicit-any
+  assert.deepEqual([h.jumlah, h.kotor, h.diskon, h.total], [1, 100000, 10000, 90000])
 })

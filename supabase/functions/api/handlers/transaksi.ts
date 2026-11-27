@@ -204,7 +204,7 @@ function bentukTransaksi(t: B, items: B[]) {
     id: t.id, date: fmtTglPanjang(w), time: fmtJamTitik(w),
     items: items.map((i) => ({
       name: i.nama, qty: i.qty, price: Number(i.harga), type: i.tipe,
-      refId: i.ref_id, kapsterId: i.kapster_id, kapster: i.kapster,
+      refId: i.ref_id, kapsterId: i.kapster_id, kapster: i.kapster, komisi: Number(i.komisi) || 0,
     })),
     barber: [...kapsters].join(", "), method: t.metode, commission: Number(t.komisi_total),
     commissionNote: catatan, overtime: t.lembur === "Ya",

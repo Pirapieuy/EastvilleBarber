@@ -27995,3 +27995,16 @@ html:has(.manual-page .modal-overlay) {
     width: 100%;
   }
 }
+
+/* Popup Ekspor: pilihan kapster selebar kolom, setinggi tombol lain */
+.export-modal .export-kapster,
+.export-modal .export-kapster .search-select-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.export-modal .export-kapster .search-select-trigger {
+  height: 44px;
+  min-height: 0;
+  font-size: 14px;
+}

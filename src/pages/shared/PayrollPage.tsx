@@ -16,7 +16,7 @@ import {
 } from "../../api"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
-import { formatTanggal, labelRentang, rentangPeriode, TANGGAL_MAKS, usePeriodeTersimpan } from "../../utils/tanggal"
+import { formatTanggal, labelRentang, rentangPeriode, usePeriodeTersimpan } from "../../utils/tanggal"
 import { PeriodePicker } from "../../components/common/PeriodePicker"
 import { ExportModal } from "../../components/common/ExportModal"
 import { dokumenGaji, dokumenKasbon } from "../../utils/dokumenEkspor"
@@ -920,7 +920,6 @@ export function PayrollPage() {
       {eksporBuka && data && (
         <ExportModal
           judul={tab === "Gaji" ? "Ekspor Gaji" : "Ekspor Kasbon"}
-          awal={rentangPeriode("Bulanan", TANGGAL_MAKS())}
           onBuat={async (o) => (tab === "Gaji" ? dokumenGaji(data.gaji, o) : dokumenKasbon(data.kasbon, o))}
           onClose={() => setEksporBuka(false)}
         />

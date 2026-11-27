@@ -391,10 +391,24 @@ export interface LaporanKeuangan {
   komisi: number
   /** Total potongan diskon transaksi Lunas (kosong bila server belum diperbarui). */
   diskon?: number
+  /** Penjualan sebelum diskon (jumlah subtotal nota Lunas). */
+  kotor?: number
+  /** Omzet item sebelum diskon, dipisah layanan dan produk. */
+  omzetLayanan?: number
+  omzetProduk?: number
   /** pemasukan - pengeluaran - komisi kapster */
   sisa: number
   jumlahTransaksi: number
-  perHari: { tanggal: string; total: number; tunai: number; qris: number }[]
+  perHari: {
+    tanggal: string
+    total: number
+    tunai: number
+    qris: number
+    jumlah?: number
+    kotor?: number
+    diskon?: number
+    komisi?: number
+  }[]
   perKapster: {
     kapsterId: string
     kapster: string
@@ -405,19 +419,26 @@ export interface LaporanKeuangan {
   stokMenipis: { kode: string; nama: string; stok: number }[]
 }
 
+interface BarisLayanan {
+  jumlah: number
+  omzet: number
+  diskon: number
+  bersih: number
+  komisi: number
+}
+
 export interface LaporanLayanan {
   jumlahTransaksi: number
   totalJumlah: number
   totalOmzet: number
+  totalDiskon: number
+  totalBersih: number
   totalKomisi: number
-  layanan: {
+  layanan: (BarisLayanan & {
     nama: string
-    jumlah: number
-    omzet: number
-    komisi: number
-    kapster: { kapsterId: string; kapster: string; jumlah: number; omzet: number; komisi: number }[]
-  }[]
-  perKapster: { kapsterId: string; kapster: string; jumlah: number; omzet: number; komisi: number }[]
+    kapster: (BarisLayanan & { kapsterId: string; kapster: string })[]
+  })[]
+  perKapster: (BarisLayanan & { kapsterId: string; kapster: string })[]
 }
 
 export const apiLaporan = {
@@ -429,7 +450,7 @@ export const apiLaporan = {
   produk: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("laporan-produk", range),
   /** Rincian layanan saja (per layanan dan kapster) untuk ekspor. */
-  layanan: (range: { dari?: string; sampai?: string } = {}) =>
+  layanan: (range: { dari?: string; sampai?: string; kapsterId?: string } = {}) =>
     api<LaporanLayanan>("laporan-layanan", range).catch((e) => {
       if (e instanceof Error && /Aksi tidak dikenal/.test(e.message))
         throw new Error("Server belum diperbarui untuk laporan layanan. Hubungi pengembang untuk deploy.")

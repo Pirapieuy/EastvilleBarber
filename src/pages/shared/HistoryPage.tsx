@@ -1431,12 +1431,8 @@ export function HistoryPage({ currentUser, role }: {
       {eksporBuka && (
         <ExportModal
           judul="Ekspor Riwayat Transaksi"
-          awal={
-            dateFilter
-              ? rentangPeriode(modePeriode, dateFilter)
-              : { dari: TANGGAL_MULAI, sampai: TANGGAL_MAKS() }
-          }
-          denganKategori
+          kategori={["Layanan", "Produk", "Semua"]}
+          denganKapster
           onBuat={dokumenRiwayatTransaksi}
           onClose={() => setEksporBuka(false)}
         />

@@ -1,7 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "./UI"
 import { Icon } from "./Icon"
 import { CalendarPicker } from "./CalendarPicker"
+import { SearchSelect } from "./SearchSelect"
+import { apiKasir } from "../../api"
 import { TANGGAL_MAKS, TANGGAL_MULAI } from "../../utils/tanggal"
 import { DokumenEkspor, eksporDokumen, FormatEkspor } from "../../utils/ekspor"
 
@@ -11,37 +13,55 @@ export interface OpsiEkspor {
   format: FormatEkspor
   dari: string
   sampai: string
+  /** "Semua" bila popup tidak menawarkan pilihan kategori */
   kategori: KategoriEkspor
+  /** Kosong = semua kapster */
+  kapsterId: string
+  kapsterNama: string
 }
 
 export interface ExportModalProps {
   /** Judul popup, mis. "Ekspor Laporan Keuangan" */
   judul: string
-  /** Rentang tanggal awal, biasanya periode yang sedang tampil di halaman */
-  awal: { dari: string; sampai: string }
-  /** Tampilkan pilihan kategori Layanan / Produk / Semua */
-  denganKategori?: boolean
+  /** Pilihan kategori yang ditawarkan; kosongkan bila halaman tidak membedakan layanan/produk */
+  kategori?: KategoriEkspor[]
+  /** Tampilkan pilihan Semua kapster / satu kapster */
+  denganKapster?: boolean
   /** Mengambil data dan menyusunnya menjadi dokumen; error yang dilempar tampil di popup */
   onBuat: (opsi: OpsiEkspor) => Promise<DokumenEkspor>
   onClose: () => void
 }
 
 const FORMAT: FormatEkspor[] = ["PDF", "Excel"]
-const KATEGORI: KategoriEkspor[] = ["Layanan", "Produk", "Semua"]
 
 export function ExportModal({
   judul,
-  awal,
-  denganKategori = false,
+  kategori: pilihanKategori,
+  denganKapster = false,
   onBuat,
   onClose,
 }: ExportModalProps) {
+  // Rentang awal selalu hari ini, apa pun periode yang sedang tampil di halaman.
+  const [dari, setDari] = useState(TANGGAL_MAKS)
+  const [sampai, setSampai] = useState(TANGGAL_MAKS)
   const [format, setFormat] = useState<FormatEkspor>("PDF")
-  const [dari, setDari] = useState(awal.dari)
-  const [sampai, setSampai] = useState(awal.sampai)
   const [kategori, setKategori] = useState<KategoriEkspor>("Semua")
+  const [kapsterId, setKapsterId] = useState("")
+  const [daftarKapster, setDaftarKapster] = useState<{ id: string; nama: string }[]>([])
   const [sibuk, setSibuk] = useState(false)
   const [galat, setGalat] = useState("")
+
+  useEffect(() => {
+    if (!denganKapster) return
+    let batal = false
+    apiKasir
+      .kapster()
+      .then((k) => !batal && setDaftarKapster(k))
+      .catch(() => {})
+    return () => {
+      batal = true
+    }
+  }, [denganKapster])
 
   const urutSalah = Boolean(dari && sampai && dari > sampai)
   const bisa = Boolean(dari && sampai) && !urutSalah && !sibuk
@@ -51,7 +71,14 @@ export function ExportModal({
     setGalat("")
     setSibuk(true)
     try {
-      const dok = await onBuat({ format, dari, sampai, kategori })
+      const dok = await onBuat({
+        format,
+        dari,
+        sampai,
+        kategori: pilihanKategori ? kategori : "Semua",
+        kapsterId,
+        kapsterNama: daftarKapster.find((k) => k.id === kapsterId)?.nama ?? "",
+      })
       await eksporDokumen(dok, format)
       onClose()
     } catch (e) {
@@ -118,11 +145,30 @@ export function ExportModal({
             )}
           </div>
 
-          {denganKategori && (
+          {denganKapster && (
+            <div className="export-field">
+              <span>Kapster</span>
+              <SearchSelect
+                aria-label="Pilih kapster"
+                className="export-kapster"
+                value={kapsterId}
+                onChange={(e) => setKapsterId(e.target.value)}
+              >
+                <option value="">Semua kapster</option>
+                {daftarKapster.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.nama}
+                  </option>
+                ))}
+              </SearchSelect>
+            </div>
+          )}
+
+          {pilihanKategori && (
             <div className="export-field">
               <span>Kategori</span>
               <div className="segmented full" role="group" aria-label="Kategori data">
-                {KATEGORI.map((k) => (
+                {pilihanKategori.map((k) => (
                   <Button
                     className={kategori === k ? "active" : ""}
                     key={k}
@@ -134,7 +180,7 @@ export function ExportModal({
               </div>
               {kategori === "Layanan" && (
                 <small className="export-hint">
-                  Laporan rinci per layanan: jumlah, omzet, komisi, dan kapster.
+                  Laporan rinci per layanan: jumlah, omzet, diskon, komisi, dan kapster.
                 </small>
               )}
             </div>

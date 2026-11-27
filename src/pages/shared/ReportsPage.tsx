@@ -1068,7 +1068,6 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
       {eksporPengeluaran && (
         <ExportModal
           judul="Ekspor Pengeluaran"
-          awal={rentang}
           onBuat={dokumenPengeluaran}
           onClose={() => setEksporPengeluaran(false)}
         />
@@ -1077,8 +1076,6 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
       {eksporBuka && (
         <ExportModal
           judul="Ekspor Laporan Keuangan"
-          awal={rentang}
-          denganKategori
           onBuat={dokumenLaporanKeuangan}
           onClose={() => setEksporBuka(false)}
         />

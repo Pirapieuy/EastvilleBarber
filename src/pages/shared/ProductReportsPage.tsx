@@ -19,11 +19,8 @@ import {
   ErrorState,
 } from "../../components/common/UI"
 import { AppUser, IconName, Role } from "../../types"
-import {
-  eksporExcel,
-  eksporPdf,
-  TabelEkspor,
-} from "../../components/common/exportTable"
+import { ExportModal } from "../../components/common/ExportModal"
+import { dokumenLaporanProduk } from "../../utils/dokumenEkspor"
 import { WhatsAppDialog } from "./ReportsPage"
 import { SearchSelect } from "../../components/common/SearchSelect"
 
@@ -246,6 +243,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
       : "Owner",
   )
   const [wa, setWa] = useState(false)
+  const [eksporBuka, setEksporBuka] = useState(false)
   const [cari, setCari] = useState("")
   const [subTab, setSubTab] =
     useState<"omzet" | "komisi" | "pemasok" | "eastville">("omzet")
@@ -385,36 +383,6 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
         ),
     )
   }, [txList, cari])
-
-  const tabelEkspor = (): TabelEkspor => ({
-    berkas: `laporan-produk-${rentang.dari}_${rentang.sampai}`,
-    judul: "Laporan Produk",
-    keterangan: `Periode ${rentang.dari} s/d ${rentang.sampai} · transaksi lunas ${validTransactions.length} · batal tidak dihitung dalam total`,
-    kolom: [
-      "Nota",
-      "Waktu",
-      "Produk",
-      "Qty",
-      "Kapster",
-      "Pemasok",
-      "Total Omzet",
-      "Bagian Kapster",
-      "Bagian Pemasok",
-      "Bagian Eastville",
-    ],
-    baris: filteredTransactions.map((tx) => [
-      tx.id,
-      tx.time,
-      tx.product,
-      tx.qty,
-      tx.barber,
-      tx.seller,
-      tx.totalOmzet,
-      tx.barberShare,
-      tx.sellerShare,
-      tx.eastvilleShare,
-    ]),
-  })
 
   const totalOmzet = useMemo(
     () => validTransactions.reduce((acc, tx) => acc + tx.totalOmzet, 0),
@@ -791,7 +759,7 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
     <div className="content report-page lp-page">
       <DemoNotice live={live} error={liveError} />
 
-      <div className="report-toolbar">
+      <div className="report-toolbar report-toolbar-ekspor">
         <CalendarPicker
           max={TANGGAL_MAKS()}
           min={TANGGAL_MULAI}
@@ -815,11 +783,8 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
           onChange={(d) => d && setTanggal(d)}
         />
         <div className="report-export-buttons">
-          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
-            Excel
-          </Button>
-          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>
-            PDF
+          <Button className="secondary-button" onClick={() => setEksporBuka(true)}>
+            <Icon name="download" /> Ekspor
           </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
@@ -1066,6 +1031,15 @@ export function ProductReportsPage({ currentUser, role: forcedRole, onNavigate }
           kosong="Belum ada data bagi hasil produk pada periode ini."
         />
       </div>
+      {eksporBuka && (
+        <ExportModal
+          judul="Ekspor Laporan Produk"
+          denganKapster
+          onBuat={dokumenLaporanProduk}
+          onClose={() => setEksporBuka(false)}
+        />
+      )}
+
       {wa && (
         <WhatsAppDialog
           onClose={() => setWa(false)}
