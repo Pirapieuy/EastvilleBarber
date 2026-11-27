@@ -445,18 +445,19 @@ export function ServicesPage({ embedded = false }: {
                 </span>
               </div>
 
-              {group.items.map((service) => {
+              {group.items.map((service, itemIdx) => {
                 const { title: itemTitle, desc: itemDesc } = parseItemName(
                   service.nama,
                 )
                 const isStartFrom = isStartFromService(service)
                 const normCat = normalizeServiceCategory(service)
+                const isLastInGroup = itemIdx === group.items.length - 1
 
                 return (
                   <article
                     className={`service-row ${
                       service.status === "Aktif" ? "" : "inactive"
-                    }`}
+                    } ${isLastInGroup ? "service-row-last" : ""}`}
                     key={service.id}
                   >
                     <span className="service-name">

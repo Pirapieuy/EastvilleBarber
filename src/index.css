@@ -16693,8 +16693,9 @@ label .search-select-trigger {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
-  margin-top: 14px;
+  padding: 6px 14px;
+  min-height: 38px;
+  margin-top: 8px;
   margin-bottom: 0;
   background: var(--paper, #fff);
   border: 1px solid var(--line, #e2d9cc);
@@ -16703,9 +16704,20 @@ label .search-select-trigger {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.catalog-page .service-head + .service-category-header,
+.catalog-page .service-category-header:first-of-type,
+.service-head + .service-category-header,
+.service-category-header:first-of-type {
+  margin-top: 0 !important;
+}
+
 .catalog-page .service-category-header + .service-row,
 .service-category-header + .service-row {
   border-top: none !important;
+}
+
+.service-row.service-row-last {
+  border-bottom: 1px solid var(--line);
 }
 
 .service-category-info {
@@ -21851,10 +21863,11 @@ html:has(.manual-page .modal-overlay) {
 .cashier-page .cart-lines { padding: 8px 14px 6px !important; }
 .cashier-page .cart-total { padding: 14px !important; gap: 14px !important; }
 .cashier-page .cart-discount-panel { padding: 16px !important; }
-.cashier-page .cart-payment { padding-top: 0 !important; gap: 16px !important; }
-.cashier-page .cart-payment .method-grid { gap: 16px !important; }
-.cashier-page .cart-payment .quick-cash { gap: 16px !important; }
-.cashier-page .cart-payment .quick-cash button { flex: 1 1 calc((100% - 32px) / 3) !important; }
+.cashier-page .cart-payment { padding-top: 0 !important; gap: 14px !important; }
+.cashier-page .cart-payment .method-grid { gap: 14px !important; }
+.cashier-page .cart-payment .quick-cash { gap: 14px !important; }
+.cashier-page .cart-payment .quick-cash button { flex: 1 1 calc((100% - 28px) / 3) !important; }
+.cashier-page .cart-payment .pay-field { margin: 0 !important; }
 
 /* Kasir POS: scroll popup keranjang sama seperti popup Riwayat (tidak menular ke halaman, batang scroll tersembunyi) */
 .cashier-page .cart-sheet-center,
