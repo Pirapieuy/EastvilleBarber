@@ -23,7 +23,7 @@ async function itemDari(ids: string[], saring?: (q: any) => any) { // deno-lint-
 export async function laporanKeuangan(body: B) {
   const [trx, peng, prod] = await Promise.all([
     ambilSemua(() => {
-      let qt = db.from("transaksi").select("id,tanggal,total,bayar_qris,komisi_total").eq("status", "Lunas").order("id")
+      let qt = db.from("transaksi").select("id,tanggal,total,diskon,bayar_qris,komisi_total").eq("status", "Lunas").order("id")
       if (body.dari) qt = qt.gte("tanggal", body.dari)
       if (body.sampai) qt = qt.lte("tanggal", body.sampai)
       return qt
@@ -31,11 +31,11 @@ export async function laporanKeuangan(body: B) {
     ambilSemua(() => db.from("pengeluaran").select("tanggal,jumlah").eq("status", "Aktif").order("id")),
     ambilSemua(() => db.from("produk").select("kode,nama,stok,status").order("kode")),
   ])
-  let tunai = 0, qris = 0, pemasukan = 0, komisi = 0
+  let tunai = 0, qris = 0, pemasukan = 0, komisi = 0, diskon = 0
   const perHari: Record<string, B> = {}
   for (const t of trx) {
     const total = Number(t.total) || 0, q = Math.min(Number(t.bayar_qris) || 0, total)
-    pemasukan += total; qris += q; tunai += total - q; komisi += Number(t.komisi_total) || 0
+    pemasukan += total; qris += q; tunai += total - q; komisi += Number(t.komisi_total) || 0; diskon += Number(t.diskon) || 0
     const h = (perHari[t.tanggal] ??= { tanggal: t.tanggal, total: 0, tunai: 0, qris: 0 })
     h.total += total; h.qris += q; h.tunai += total - q
   }
@@ -51,12 +51,43 @@ export async function laporanKeuangan(body: B) {
     .map((k) => ({ kapsterId: k.kapsterId, kapster: k.kapster, pelanggan: k.trx.size, omzet: k.omzet, komisi: k.komisi }))
     .sort((a, b) => b.omzet - a.omzet)
   return ok({
-    pemasukan, tunai, qris, pengeluaran, komisi, sisa: pemasukan - pengeluaran - komisi,
+    pemasukan, tunai, qris, pengeluaran, komisi, diskon, sisa: pemasukan - pengeluaran - komisi,
     jumlahTransaksi: trx.length,
     perHari: Object.keys(perHari).sort().map((k) => perHari[k]),
     perKapster,
     stokMenipis: prod.filter((p) => p.status === "Aktif" && Number(p.stok) <= STOK_MENIPIS)
       .map((p) => ({ kode: p.kode, nama: p.nama, stok: Number(p.stok) })),
+  })
+}
+
+/** Rincian layanan saja (untuk ekspor): per layanan dan per kapster, hanya transaksi Lunas. */
+export async function laporanLayanan(body: B) {
+  const trx = await ambilSemua(() => {
+    let qt = db.from("transaksi").select("id,tanggal").eq("status", "Lunas").order("id")
+    if (body.dari) qt = qt.gte("tanggal", body.dari)
+    if (body.sampai) qt = qt.lte("tanggal", body.sampai)
+    return qt
+  })
+  const layanan = new Map<string, B>(), kapsterTotal = new Map<string, B>(), nota = new Set<string>()
+  let totalJumlah = 0, totalOmzet = 0, totalKomisi = 0
+  for (const i of await itemDari(trx.map((t) => t.id), (q) => q.eq("tipe", "Layanan"))) {
+    const qty = toInt(i.qty), omzet = Number(i.harga) * qty, komisi = Number(i.komisi) || 0
+    nota.add(i.trx_id); totalJumlah += qty; totalOmzet += omzet; totalKomisi += komisi
+    const l = layanan.get(i.nama) ?? { nama: i.nama, jumlah: 0, omzet: 0, komisi: 0, kapster: new Map<string, B>() }
+    layanan.set(i.nama, l)
+    l.jumlah += qty; l.omzet += omzet; l.komisi += komisi
+    const lk = l.kapster.get(i.kapster_id) ?? { kapsterId: i.kapster_id, kapster: i.kapster, jumlah: 0, omzet: 0, komisi: 0 }
+    l.kapster.set(i.kapster_id, lk)
+    lk.jumlah += qty; lk.omzet += omzet; lk.komisi += komisi
+    const k = kapsterTotal.get(i.kapster_id) ?? { kapsterId: i.kapster_id, kapster: i.kapster, jumlah: 0, omzet: 0, komisi: 0 }
+    kapsterTotal.set(i.kapster_id, k)
+    k.jumlah += qty; k.omzet += omzet; k.komisi += komisi
+  }
+  const urut = (a: B, b: B) => b.omzet - a.omzet
+  return ok({
+    jumlahTransaksi: nota.size, totalJumlah, totalOmzet, totalKomisi,
+    layanan: [...layanan.values()].map((l) => ({ ...l, kapster: [...l.kapster.values()].sort(urut) })).sort(urut),
+    perKapster: [...kapsterTotal.values()].sort(urut),
   })
 }
 

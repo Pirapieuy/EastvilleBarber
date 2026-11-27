@@ -10,11 +10,8 @@ import {
 import { DemoNotice } from "../../components/common/DemoNotice"
 import { ConfirmModal } from "../../components/common/ConfirmModal"
 import { Icon } from "../../components/common/Icon"
-import {
-  eksporExcel,
-  eksporPdf,
-  TabelEkspor,
-} from "../../components/common/exportTable"
+import { ExportModal } from "../../components/common/ExportModal"
+import { dokumenLaporanKeuangan } from "../../utils/dokumenEkspor"
 import {
   Button,
   CalendarPicker,
@@ -222,6 +219,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
   onNavigate?: (page: string) => void
 } = {}) {
   const [wa, setWa] = useState(false)
+  const [eksporBuka, setEksporBuka] = useState(false)
   const [{ mode, tanggal }, setMode, setTanggal] = usePeriodeTersimpan("laporan-keuangan")
   const [reloadKey, setReloadKey] = useState(0)
   const simpanPengeluaran = useRef(false)
@@ -449,37 +447,6 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     "Sisa Owner"
   }: ${juta(data.sisa)}`
 
-  const tabelEkspor = (): TabelEkspor => ({
-    berkas: `laporan-keuangan-${periode}`,
-    judul: "Laporan Keuangan",
-    keterangan: `Periode ${periode} · ${data.jumlahTransaksi} transaksi · Pemasukan ${data.pemasukan} · Pengeluaran ${data.pengeluaran} · Komisi ${data.komisi} · ${
-      "Sisa Owner"
-    } ${data.sisa}`,
-    kolom: ["Kapster", "Transaksi", "Omzet", "Komisi"],
-    baris: [
-      ...data.perKapster.map((k): (string | number)[] => [
-        k.kapster,
-        k.pelanggan,
-        k.omzet,
-        k.komisi,
-      ]),
-      ["", "", "", ""],
-      ["Ringkasan", "Tunai", "QRIS", "Total"],
-      ["Pemasukan", data.tunai, data.qris, data.pemasukan],
-      ["Pengeluaran", "", "", data.pengeluaran],
-      ["Komisi", "", "", data.komisi],
-      ["Sisa Owner", "", "", data.sisa],
-      ["", "", "", ""],
-      ["Tanggal", "Pemasukan", "", ""],
-      ...data.perHari.map((h): (string | number)[] => [
-        h.tanggal,
-        h.total,
-        "",
-        "",
-      ]),
-    ],
-  })
-
   // Expense Handlers
   async function handleCreateExpense(e: FormEvent) {
     e.preventDefault()
@@ -649,7 +616,7 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
     <div className="content report-page">
       <DemoNotice live={live} error={liveError} />
 
-      <div className="report-toolbar">
+      <div className="report-toolbar report-toolbar-ekspor">
         <CalendarPicker
           max={TANGGAL_MAKS()}
           min={TANGGAL_MULAI}
@@ -673,11 +640,8 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
           onChange={(d) => d && setTanggal(d)}
         />
         <div className="report-export-buttons">
-          <Button className="secondary-button" onClick={() => eksporExcel(tabelEkspor())}>
-            Excel
-          </Button>
-          <Button className="secondary-button" onClick={() => eksporPdf(tabelEkspor())}>
-            PDF
+          <Button className="secondary-button" onClick={() => setEksporBuka(true)}>
+            <Icon name="download" /> Ekspor
           </Button>
           <Button className="whatsapp-button" onClick={() => setWa(true)}>
             <Icon name="whatsapp" /> WhatsApp
@@ -1094,6 +1058,16 @@ export function ReportsPage({ currentUser, role, onNavigate }: {
             }
             setExpenseRestoreId(null)
           }}
+        />
+      )}
+
+      {eksporBuka && (
+        <ExportModal
+          judul="Ekspor Laporan Keuangan"
+          awal={rentang}
+          denganKategori
+          onBuat={dokumenLaporanKeuangan}
+          onClose={() => setEksporBuka(false)}
         />
       )}
 

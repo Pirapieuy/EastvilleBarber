@@ -389,6 +389,8 @@ export interface LaporanKeuangan {
   qris: number
   pengeluaran: number
   komisi: number
+  /** Total potongan diskon transaksi Lunas (kosong bila server belum diperbarui). */
+  diskon?: number
   /** pemasukan - pengeluaran - komisi kapster */
   sisa: number
   jumlahTransaksi: number
@@ -403,6 +405,21 @@ export interface LaporanKeuangan {
   stokMenipis: { kode: string; nama: string; stok: number }[]
 }
 
+export interface LaporanLayanan {
+  jumlahTransaksi: number
+  totalJumlah: number
+  totalOmzet: number
+  totalKomisi: number
+  layanan: {
+    nama: string
+    jumlah: number
+    omzet: number
+    komisi: number
+    kapster: { kapsterId: string; kapster: string; jumlah: number; omzet: number; komisi: number }[]
+  }[]
+  perKapster: { kapsterId: string; kapster: string; jumlah: number; omzet: number; komisi: number }[]
+}
+
 export const apiLaporan = {
   /** Ringkasan versi Tim B (ringkasan-laporan, Kode.js) */
   ringkasan: (filter: { dari?: string; sampai?: string } = {}) =>
@@ -411,6 +428,13 @@ export const apiLaporan = {
     api<LaporanKeuangan>("laporan-keuangan", range),
   produk: (range: { dari?: string; sampai?: string } = {}) =>
     api<unknown[]>("laporan-produk", range),
+  /** Rincian layanan saja (per layanan dan kapster) untuk ekspor. */
+  layanan: (range: { dari?: string; sampai?: string } = {}) =>
+    api<LaporanLayanan>("laporan-layanan", range).catch((e) => {
+      if (e instanceof Error && /Aksi tidak dikenal/.test(e.message))
+        throw new Error("Server belum diperbarui untuk laporan layanan. Hubungi pengembang untuk deploy.")
+      throw e
+    }),
 }
 
 export const apiBackup = {

@@ -1,4 +1,6 @@
 import { formatTanggal, TANGGAL_MAKS, TANGGAL_MULAI, labelPeriode, rentangPeriode, ModePeriode, usePeriodeTersimpan } from "../../utils/tanggal"
+import { ExportModal } from "../../components/common/ExportModal"
+import { dokumenRiwayatTransaksi } from "../../utils/dokumenEkspor"
 import { PeriodePicker } from "../../components/common/PeriodePicker"
 import { useEffect, useState } from "react"
 import { Icon } from "../../components/common/Icon"
@@ -881,6 +883,7 @@ export function HistoryPage({ currentUser, role }: {
   const [editingTx, setEditingTx] = useState<HistoryTransactionRecord | null>(null)
   const [returnToMobileDetail, setReturnToMobileDetail] = useState(false)
   const [showReceipt, setShowReceipt] = useState(false)
+  const [eksporBuka, setEksporBuka] = useState(false)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
 
   const [catalog, setCatalog] = useState<{ id: string; name: string; price: number; type: "Layanan" | "Produk"; stock?: number }[]>([
@@ -1178,7 +1181,7 @@ export function HistoryPage({ currentUser, role }: {
   return (
     <div className="content history-page-content history-no-scrollbar">
       <DemoNotice live={live} error={liveError} />
-      <div className="filters">
+      <div className={`filters${userRole === "Owner" ? " has-export" : ""}`}>
         <div className="search">
           <Icon name="search" />
           <input
@@ -1217,6 +1220,14 @@ export function HistoryPage({ currentUser, role }: {
             </Button>
           ))}
         </div>
+        {userRole === "Owner" && (
+          <Button
+            className="secondary-button history-export-btn"
+            onClick={() => setEksporBuka(true)}
+          >
+            <Icon name="download" /> Ekspor
+          </Button>
+        )}
       </div>
       <div className="master-detail">
         <section className="panel transaction-list">
@@ -1415,6 +1426,19 @@ export function HistoryPage({ currentUser, role }: {
             setReturnToMobileDetail(false)
             await handleConfirmAction(reason)
           }}
+        />
+      )}
+      {eksporBuka && (
+        <ExportModal
+          judul="Ekspor Riwayat Transaksi"
+          awal={
+            dateFilter
+              ? rentangPeriode(modePeriode, dateFilter)
+              : { dari: TANGGAL_MULAI, sampai: TANGGAL_MAKS() }
+          }
+          denganKategori
+          onBuat={dokumenRiwayatTransaksi}
+          onClose={() => setEksporBuka(false)}
         />
       )}
     </div>
