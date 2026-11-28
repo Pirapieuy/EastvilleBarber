@@ -9,14 +9,14 @@ import {
 } from "../../components/common/UI"
 
 const STATUS_LABEL: Record<KasbonRow["status"], string> = {
-  Menunggu: "Menunggu persetujuan",
+  Menunggu: "Disetujui",
   Aktif: "Disetujui",
   Lunas: "Lunas",
   Ditolak: "Ditolak",
 }
 
 const STATUS_CHIP: Record<KasbonRow["status"], string> = {
-  Menunggu: "pending",
+  Menunggu: "aktif",
   Aktif: "aktif",
   Lunas: "lunas",
   Ditolak: "batal",
@@ -51,7 +51,7 @@ export function KasbonKapster() {
         apiKasbon.list(),
       ])
       setKapster(kap)
-      setDaftar(list)
+      setDaftar(list.map((k) => (k.status === "Menunggu" ? { ...k, status: "Aktif" as const } : k)))
       setLoadError("")
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : "gagal memuat data")

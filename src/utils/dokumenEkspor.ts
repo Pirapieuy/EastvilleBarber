@@ -503,9 +503,8 @@ export function dokumenKasbon(kasbon: KasbonRow[], o: OpsiEkspor): DokumenEkspor
     judul: "Kasbon Kapster",
     keterangan: periodeSaja(o),
     ringkasan: [
-      { label: "Kasbon masih aktif", nilai: nilai(per("Aktif")), jenis: "rupiah" },
+      { label: "Kasbon masih aktif", nilai: nilai([...per("Aktif"), ...per("Menunggu")]), jenis: "rupiah" },
       { label: "Kasbon lunas", nilai: nilai(per("Lunas")), jenis: "rupiah" },
-      { label: "Pengajuan menunggu", nilai: per("Menunggu").length, jenis: "angka" },
       { label: "Pengajuan ditolak", nilai: per("Ditolak").length, jenis: "angka" },
     ],
     bagian: [

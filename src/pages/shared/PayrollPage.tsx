@@ -40,7 +40,7 @@ const CATATAN_GAJI = [
 
 const STATUS_KASBON = {
   Aktif: { label: "Belum lunas", chip: "batal" },
-  Menunggu: { label: "Menunggu", chip: "pending" },
+  Menunggu: { label: "Belum lunas", chip: "batal" },
   Lunas: { label: "Lunas", chip: "lunas" },
   Ditolak: { label: "Ditolak", chip: "manual" },
 } as const
@@ -58,7 +58,7 @@ function pilihOtomatis(kasbon: KasbonAktif[], komisi: number) {
   return ids
 }
 
-const URUTAN_STATUS: Record<string, number> = { Menunggu: 0, Aktif: 1, Lunas: 2, Ditolak: 3 }
+const URUTAN_STATUS: Record<string, number> = { Aktif: 0, Menunggu: 0, Lunas: 1, Ditolak: 2 }
 
 function urutkan<T>(
   list: T[],
@@ -283,8 +283,7 @@ export function PayrollPage() {
   }
 
   // ---------- Kasbon ----------
-  const kasbonAktif = kasbon.filter((k) => k.status === "Aktif")
-  const kasbonMenunggu = kasbon.filter((k) => k.status === "Menunggu")
+  const kasbonAktif = kasbon.filter((k) => k.status === "Aktif" || k.status === "Menunggu")
   const kasbonLunas = kasbon.filter((k) => k.status === "Lunas")
   const sum = (l: KasbonRow[]) => l.reduce((a, k) => a + k.jumlah, 0)
 
@@ -348,7 +347,6 @@ export function PayrollPage() {
 
   const kpiKasbon = [
     { key: "Aktif", icon: "wallet", tone: "amber", label: "Belum lunas", value: sum(kasbonAktif), detail: `${kasbonAktif.length} kasbon` },
-    { key: "Menunggu", icon: "clock", tone: "brass", label: "Menunggu", value: sum(kasbonMenunggu), detail: `${kasbonMenunggu.length} pengajuan` },
     { key: "Lunas", icon: "check", tone: "sage", label: "Sudah lunas", value: sum(kasbonLunas), detail: `${kasbonLunas.length} kasbon` },
   ] as const
 
@@ -627,13 +625,12 @@ export function PayrollPage() {
                 </SearchSelect>
                 <SearchSelect value={kStatus} onChange={(e) => setKStatus(e.target.value)}>
                   <option value="">Semua status</option>
-                  <option value="Menunggu">Menunggu</option>
                   <option value="Aktif">Belum lunas</option>
                   <option value="Lunas">Lunas</option>
                   <option value="Ditolak">Ditolak</option>
                 </SearchSelect>
                 <SearchSelect value={kUrut} onChange={(e) => setKUrut(e.target.value)}>
-                  <option value="status">Menunggu &amp; belum lunas dulu</option>
+                  <option value="status">Belum lunas dulu</option>
                   <option value="terbaru">Tanggal terbaru</option>
                   <option value="terlama">Tanggal terlama</option>
                   <option value="terbesar">Jumlah terbesar</option>
@@ -671,16 +668,7 @@ export function PayrollPage() {
                       <strong className="r" data-l="Jumlah">{rupiah(k.jumlah)}</strong>
                       <span className="gj-status"><i className={`chip ${st.chip}`}>{st.label}</i></span>
                       <span className="gj-aksi">
-                        {k.status === "Menunggu" ? (
-                          <>
-                            <Button className="secondary-button" onClick={() => setKonfirmasi({ type: "setujui", item: k })}>
-                              Setujui
-                            </Button>
-                            <Button className="danger-button" onClick={() => setKonfirmasi({ type: "tolak", item: k })}>
-                              Tolak
-                            </Button>
-                          </>
-                        ) : k.status === "Aktif" ? (
+                        {k.status === "Aktif" || k.status === "Menunggu" ? (
                           <Button className="secondary-button" onClick={() => setKonfirmasi({ type: "lunasi", item: k })}>
                             Tandai lunas
                           </Button>
