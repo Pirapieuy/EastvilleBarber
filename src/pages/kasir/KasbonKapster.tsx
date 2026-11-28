@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react"
 import { apiKasbon, apiKasir, getToken, KasbonRow } from "../../api"
 import { DemoNotice } from "../../components/common/DemoNotice"
+import { Icon } from "../../components/common/Icon"
 import { SearchSelect } from "../../components/common/SearchSelect"
 import {
   Button,
@@ -172,9 +173,20 @@ export function KasbonKapster() {
       </form>
 
       <section className="panel form-panel kasbon-kapster-history">
-          <div className="section-title">
-            <h3>Riwayat kasbon</h3>
-            <span className="nota-count">{daftar.length} catatan</span>
+          <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h3>Riwayat kasbon</h3>
+              <span className="nota-count">{daftar.length} catatan</span>
+            </div>
+            <Button
+              className="secondary-button"
+              onClick={muat}
+              style={{ minHeight: 32, height: 32, padding: "0 10px", fontSize: 12 }}
+              title="Segarkan data"
+              type="button"
+            >
+              <Icon name="restore" /> Segarkan
+            </Button>
           </div>
           {daftar.length === 0 ? (
             <p className="history-empty">Belum ada catatan kasbon.</p>
