@@ -9,6 +9,7 @@ import { apiAbsensi, apiKasir, getToken } from "../../api"
 import { AbsensiKapster } from "../kasir/AbsensiKapster"
 import { formatTanggalWaktu, TANGGAL_MAKS } from "../../utils/tanggal"
 import { isStartFromService, normalizeServiceCategory, parseItemName, serviceRows } from "./ServicesPage"
+import { printThermal, setupPrinter, getPrinterStatus, type ReceiptData } from "../../utils/thermalPrinter"
 
 export type CatalogItem = {
   id: number | string
@@ -127,7 +128,7 @@ export function ReceiptView({
   backLabel?: string
   onClose?: () => void
   onEdit?: () => void
-  onPrint?: () => void | Promise<void>
+  onPrint?: () => void | Promise<boolean | void>
   onComplete?: () => void | Promise<void>
   saving?: boolean
   saveError?: string
@@ -139,6 +140,36 @@ export function ReceiptView({
 }) {
   const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n)
   const [size, setSize] = useState<"58" | "80">("58")
+  const [printerStatus, setPrinterStatus] = useState(getPrinterStatus())
+  const [printMsg, setPrintMsg] = useState("")
+
+  useEffect(() => {
+    setupPrinter().then(() => setPrinterStatus(getPrinterStatus()))
+  }, [])
+
+  async function cetakThermal() {
+    setPrintMsg("")
+    const data: ReceiptData = {
+      cart,
+      subtotal,
+      discount,
+      total,
+      method,
+      cash,
+      qris,
+      change,
+      barber,
+      invoice,
+      tanggal,
+      catatan,
+      contoh,
+    }
+    const result = await printThermal(data, size)
+    if (result.fallback) {
+      setPrintMsg(result.error || "Menggunakan browser print")
+    }
+  }
+
   const barberName =
     barber ||
     Array.from(new Set(cart.map((l) => l.barber).filter(Boolean))).join(", ") ||
@@ -271,6 +302,14 @@ export function ReceiptView({
               </span>
             </div>
           )}
+          <div
+            className={`receipt-status ${printerStatus.connected ? "ok" : "warn"}`}
+            role="status"
+            style={{ marginTop: 4 }}
+          >
+            <Icon name="print" />
+            <span>{printMsg || printerStatus.label}</span>
+          </div>
           <div className="flow-toolbar">
             {onEdit ? (
               <Button className="secondary-button" onClick={onEdit}>
@@ -306,10 +345,10 @@ export function ReceiptView({
                 disabled={saving}
                 onClick={async () => {
                   if (onPrint) {
-                    await onPrint()
-                  } else {
-                    window.print()
+                    const ok = await onPrint()
+                    if (ok === false) return
                   }
+                  await cetakThermal()
                 }}
               >
                 <Icon name="print" /> {saving ? "Menyimpan..." : "Cetak"}
@@ -368,10 +407,10 @@ export function ReceiptView({
               disabled={saving}
               onClick={async () => {
                 if (onPrint) {
-                  await onPrint()
-                } else {
-                  window.print()
+                  const ok = await onPrint()
+                  if (ok === false) return
                 }
+                await cetakThermal()
               }}
             >
               <Icon name="print" /> {saving ? "Menyimpan..." : "Cetak"}
@@ -891,11 +930,8 @@ export function CashierPage({ currentUser, onNavigate }: {
     }
   }
 
-  async function handlePrintReceipt() {
-    const success = await executeSaveTransaction()
-    if (success) {
-      window.print()
-    }
+  async function handlePrintReceipt(): Promise<boolean> {
+    return await executeSaveTransaction()
   }
 
   async function handleCompleteReceipt() {

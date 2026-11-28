@@ -50,14 +50,13 @@ export async function createKasbon(body: B) {
   const { data: k } = await db.from("users").select("nama,role,status").eq("id", userId).maybeSingle()
   if (!k || k.role !== "Kapster" || k.status !== "Aktif") return gagal("Kapster tidak ditemukan atau tidak aktif.")
   nama = k.nama; role = "Kapster"
-  let status = "Aktif"
-  if (user.role === "Kasir") status = "Menunggu"
+  const status = "Aktif"
   const id = ID("ksb")
   const { error } = await db.from("kasbon").insert({
     id, tanggal, user_id: userId, nama, role, jumlah, status, catatan, dibuat_oleh: user.nama,
   })
   if (error) throw new Error(error.message)
-  await tulisAudit(user.id, user.nama, status === "Menunggu" ? "AJUKAN_KASBON" : "TAMBAH_KASBON",
+  await tulisAudit(user.id, user.nama, "TAMBAH_KASBON",
     `Kasbon baru untuk ${nama} sebesar Rp ${jumlah}`)
   return ok({ id, tanggal, userId, nama, role, jumlah, status, catatan }, "Kasbon berhasil dicatat.")
 }

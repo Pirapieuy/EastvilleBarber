@@ -22,8 +22,8 @@ const STATUS_CHIP: Record<KasbonRow["status"], string> = {
   Ditolak: "batal",
 }
 
-// Kasir mencatat pengajuan kasbon atas nama kapster; kasbon baru berlaku setelah
-// Owner menyetujuinya di halaman Gaji & Kasbon.
+// Kasir mencatat kasbon atas nama kapster; kasbon langsung berstatus Aktif
+// dan ikut dipotong saat gaji dibayar.
 export function KasbonKapster() {
   const [kapster, setKapster] = useState<{ id: string; nama: string }[]>([])
   const [daftar, setDaftar] = useState<KasbonRow[]>([])
@@ -81,7 +81,7 @@ export function KasbonKapster() {
         catatan: catatan.trim(),
       })
       setSuccess(
-        `Pengajuan kasbon ${target.nama} sebesar ${rupiah(jumlahNum)} tercatat. Menunggu persetujuan Owner.`,
+        `Kasbon ${target.nama} sebesar ${rupiah(jumlahNum)} tercatat dan langsung aktif.`,
       )
       setKapsterId("")
       setJumlah("")
@@ -109,8 +109,8 @@ export function KasbonKapster() {
       <form className="panel form-panel" onSubmit={kirim}>
         <h3>Ajukan kasbon</h3>
         <p className="kasbon-kapster-hint">
-          Catat permintaan kasbon kapster di sini. Kasbon baru dipotong dari
-          gaji setelah disetujui Owner.
+          Catat kasbon kapster di sini. Kasbon langsung aktif dan akan
+          dipotong dari gaji saat dibayar.
         </p>
         <div className="form-grid manual-info-grid kasbon-kapster-grid">
           <div className="form-grid-field">

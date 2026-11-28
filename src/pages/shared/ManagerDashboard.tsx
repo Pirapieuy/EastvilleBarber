@@ -116,12 +116,9 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
   const kapsterList = kapsterAll.map((k) => {
     const rows = (liveAbsensi ?? []).filter((r) => r.userId === k.id)
     const masuk = rows.find((r) => r.tipe === "Masuk")
-    let statusText: "Tepat Waktu" | "Terlambat" | "Tidak Hadir" = "Tidak Hadir"
+    let statusText: "Hadir" | "Tidak Hadir" = "Tidak Hadir"
     if (masuk) {
-      const isLate =
-        masuk.status?.toLowerCase().includes("terlambat") ||
-        (masuk.jam && (masuk.jam > "10.00" || masuk.jam > "10:00"))
-      statusText = isLate ? "Terlambat" : "Tepat Waktu"
+      statusText = "Hadir"
     }
     return {
       id: k.id,
@@ -260,17 +257,13 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
                           height: 36,
                           borderRadius: "50%",
                           background:
-                            k.status === "Tepat Waktu"
+                            k.status === "Hadir"
                               ? "rgba(34, 197, 94, 0.15)"
-                              : k.status === "Terlambat"
-                                ? "rgba(234, 179, 8, 0.15)"
-                                : "var(--line)",
+                              : "var(--line)",
                           color:
-                            k.status === "Tepat Waktu"
+                            k.status === "Hadir"
                               ? "#15803d"
-                              : k.status === "Terlambat"
-                                ? "#b45309"
-                                : "var(--muted)",
+                              : "var(--muted)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -311,11 +304,9 @@ export function ManagerDashboard({ user, onNavigate, navigate }: {
                       )}
                       <i
                         className={`chip ${
-                          k.status === "Tepat Waktu"
+                          k.status === "Hadir"
                             ? "lunas"
-                            : k.status === "Terlambat"
-                              ? "pending"
-                              : ""
+                            : ""
                         }`}
                         style={k.status === "Tidak Hadir" ? { background: "var(--line)", color: "var(--muted)" } : undefined}
                       >

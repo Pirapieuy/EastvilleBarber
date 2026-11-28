@@ -276,27 +276,12 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
 
       const shift =
         idx % 2 === 0 ? "09:00 - 18:00 (Pagi)" : "12:00 - 21:00 (Siang)"
-      let statusText: "Tepat Waktu" | "Terlambat" | "Tidak Hadir" =
-        "Tidak Hadir"
-      let statusType: "tepat_waktu" | "terlambat" | "tidak_hadir" =
-        "tidak_hadir"
+      let statusText: "Hadir" | "Tidak Hadir" = "Tidak Hadir"
+      let statusType: "hadir" | "tidak_hadir" = "tidak_hadir"
 
       if (abs) {
-        const isLate =
-          (abs.status && abs.status.toLowerCase().includes("terlambat")) ||
-          (abs.jam &&
-            ((idx % 2 === 0 && (abs.jam > "09.00" || abs.jam > "09:00")) ||
-              (idx % 2 !== 0 && (abs.jam > "12.00" || abs.jam > "12:00"))))
-        if (isLate) {
-          statusText = "Terlambat"
-          statusType = "terlambat"
-        } else {
-          statusText = "Tepat Waktu"
-          statusType = "tepat_waktu"
-        }
-      } else {
-        statusText = "Tidak Hadir"
-        statusType = "tidak_hadir"
+        statusText = "Hadir"
+        statusType = "hadir"
       }
 
       return {
@@ -414,17 +399,13 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                         height: 38,
                         borderRadius: "50%",
                         background:
-                          row.statusType === "tepat_waktu"
+                          row.statusType === "hadir"
                             ? "rgba(34, 197, 94, 0.15)"
-                            : row.statusType === "terlambat"
-                              ? "rgba(234, 179, 8, 0.15)"
-                              : "var(--line)",
+                            : "var(--line)",
                         color:
-                          row.statusType === "tepat_waktu"
+                          row.statusType === "hadir"
                             ? "#15803d"
-                            : row.statusType === "terlambat"
-                              ? "#b45309"
-                              : "var(--muted)",
+                            : "var(--muted)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -475,11 +456,9 @@ export function AttendanceAdminPage({ currentUser, role, title }: {
                     </Button>
                     <i
                       className={`chip ${
-                        row.statusType === "tepat_waktu"
+                        row.statusType === "hadir"
                           ? "lunas"
-                          : row.statusType === "terlambat"
-                            ? "pending"
-                            : "batal"
+                          : "batal"
                       }`}
                     >
                       {row.statusText}

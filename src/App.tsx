@@ -12,6 +12,7 @@ import { RekapManual as RekapManualKasir } from "./pages/kasir/RekapManual"
 import { AbsensiKapster } from "./pages/kasir/AbsensiKapster"
 import { KasbonKapster } from "./pages/kasir/KasbonKapster"
 import { IzinKapster } from "./pages/kasir/IzinKapster"
+import { PengeluaranKasir } from "./pages/kasir/PengeluaranKasir"
 
 import { CatalogPage } from "./pages/shared/CatalogPage"
 
@@ -133,6 +134,9 @@ export function App() {
       }
       if (activePage === "IzinKapster" || activePage === "izin-kapster") {
         return <IzinKapster />
+      }
+      if (activePage === "Pengeluaran" || activePage === "expenses") {
+        return <PengeluaranKasir />
       }
       return <KasirPOS currentUser={currentUser} onNavigate={setActivePage} />
     }

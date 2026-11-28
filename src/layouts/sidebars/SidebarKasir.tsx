@@ -29,6 +29,12 @@ const KASIR_GROUPS: SidebarNavGroup[] = [
         label: "Input Manual",
         icon: "pencil",
       },
+      {
+        page: "Pengeluaran",
+        alias: "expenses",
+        label: "Pengeluaran",
+        icon: "expense",
+      },
     ],
   },
   {

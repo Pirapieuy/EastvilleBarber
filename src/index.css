@@ -292,7 +292,6 @@ textarea {
   background: var(--oxblood-soft);
 }
 
-.chip.terlambat,
 .chip.warning,
 .chip.pending {
   color: #8c6014;

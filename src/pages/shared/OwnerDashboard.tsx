@@ -30,7 +30,6 @@ const keMenit = (jam: string) => {
 const persen = (bagian: number, total: number) =>
   total > 0 ? Math.round((bagian / total) * 100) : 0
 
-const BATAS_TERLAMBAT = 10 * 60
 const MAKS_TRANSAKSI = 8
 
 interface DailyServiceItem {
@@ -43,7 +42,7 @@ interface DailyServiceItem {
   batal: boolean
 }
 
-type StatusKapster = "Tepat Waktu" | "Terlambat" | "Tidak Hadir" | "Sakit"
+type StatusKapster = "Hadir" | "Tidak Hadir" | "Sakit"
 
 export function OwnerDashboard({ onNavigate, navigate }: {
   onNavigate?: (page: string) => void
@@ -135,10 +134,7 @@ export function OwnerDashboard({ onNavigate, navigate }: {
       if (sakit) {
         status = "Sakit"
       } else if (masuk) {
-        const terlambat =
-          masuk.status?.toLowerCase().includes("terlambat") ||
-          keMenit(masuk.jam ?? "") > BATAS_TERLAMBAT
-        status = terlambat ? "Terlambat" : "Tepat Waktu"
+        status = "Hadir"
       }
       return {
         id: k.id,
@@ -332,11 +328,9 @@ export function OwnerDashboard({ onNavigate, navigate }: {
                 const tone =
                   k.status === "Sakit"
                     ? "sick"
-                    : k.status === "Tepat Waktu"
+                    : k.status === "Hadir"
                       ? "ok"
-                      : k.status === "Terlambat"
-                        ? "late"
-                        : "off"
+                      : "off"
                 return (
                   <li key={k.id}>
                     <div className="od-row od-row-tim">

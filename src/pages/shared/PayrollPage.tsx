@@ -867,7 +867,7 @@ export function PayrollPage() {
                   required
                 />
               </label>
-              <div className="gj-hint">Kasbon dari Owner langsung berstatus belum lunas dan ikut dipotong saat gaji dibayar.</div>
+              <div className="gj-hint">Kasbon langsung berstatus belum lunas dan ikut dipotong saat gaji dibayar.</div>
               {tambahError && (
                 <div className="gj-alert" role="alert">
                   <Icon name="alert" />
