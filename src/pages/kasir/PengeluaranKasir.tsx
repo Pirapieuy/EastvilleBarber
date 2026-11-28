@@ -285,7 +285,7 @@ export function PengeluaranKasir() {
             </SearchSelect>
           </div>
 
-          <label className="kasbon-kapster-note">
+          <label>
             <span>
               Keterangan <b className="req-mark">*</b>
             </span>

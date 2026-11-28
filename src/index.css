@@ -15392,7 +15392,16 @@ summary,
 .staff-form .search-select,
 .product-modal .search-select,
 label > .search-select,
-label > .calendar-picker-wrapper {
+label > .calendar-picker-wrapper,
+.form-grid-field > .calendar-picker-wrapper {
+  width: 100%;
+}
+
+.form-grid-field > .calendar-picker-wrapper {
+  display: block;
+}
+
+.form-grid-field > .calendar-picker-wrapper > .calendar-picker-btn {
   width: 100%;
 }
 
