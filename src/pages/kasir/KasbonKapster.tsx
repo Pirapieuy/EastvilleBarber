@@ -107,9 +107,9 @@ export function KasbonKapster() {
       <DemoNotice live={!loadError} error={loadError} />
 
       <form className="panel form-panel" onSubmit={kirim}>
-        <h3>Ajukan kasbon</h3>
+        <h3>Catat kasbon</h3>
         <p className="kasbon-kapster-hint">
-          Catat kasbon kapster di sini. Kasbon langsung aktif dan akan
+          Catat kasbon kapster di sini. Kasbon langsung aktif (disetujui) dan akan
           dipotong dari gaji saat dibayar.
         </p>
         <div className="form-grid manual-info-grid kasbon-kapster-grid">
@@ -166,18 +166,18 @@ export function KasbonKapster() {
         )}
         <div className="kasbon-kapster-actions">
           <Button className="primary-button" disabled={!bisaKirim} type="submit">
-            {saving ? "Menyimpan…" : "Ajukan kasbon"}
+            {saving ? "Menyimpan…" : "Catat kasbon"}
           </Button>
         </div>
       </form>
 
       <section className="panel form-panel kasbon-kapster-history">
           <div className="section-title">
-            <h3>Pengajuan tim</h3>
-            <span className="nota-count">{daftar.length} pengajuan</span>
+            <h3>Riwayat kasbon</h3>
+            <span className="nota-count">{daftar.length} catatan</span>
           </div>
           {daftar.length === 0 ? (
-            <p className="history-empty">Belum ada pengajuan kasbon.</p>
+            <p className="history-empty">Belum ada catatan kasbon.</p>
           ) : (
             <div className="kasbon-kapster-list">
               {daftar.map((k) => (
